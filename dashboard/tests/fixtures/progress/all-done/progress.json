@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "profile": {
+    "name": "Sam",
+    "experience": "some technical",
+    "goal": "build things with AI",
+    "language": "en"
+  },
+  "current": null,
+  "lessons": {
+    "ai-foundations/01-what-is-ai": {
+      "status": "done",
+      "startedAt": "2026-10-04",
+      "completedAt": "2026-10-04",
+      "score": 0.9,
+      "notes": "Gave clear everyday examples of AI straight away."
+    },
+    "ai-foundations/02-how-machines-learn": {
+      "status": "skipped",
+      "startedAt": "2026-10-05",
+      "completedAt": "2026-10-05",
+      "notes": "Already knew training data and models; answered both checks well."
+    },
+    "ai-foundations/03-what-is-an-llm": {
+      "status": "done",
+      "startedAt": "2026-10-06",
+      "completedAt": "2026-10-06",
+      "score": 0.7,
+      "notes": "Needed a second analogy for predicting the next word."
+    }
+  }
+}
