@@ -20,11 +20,28 @@ export const indexSchema = z.strictObject({
 });
 export type IndexFile = z.infer<typeof indexSchema>;
 
+export const themeIdSchema = z.string().regex(kebab, 'must be a kebab-case theme id');
+
+/** `courses/<lang>/themes.yaml` */
+export const themesSchema = z.strictObject({
+  themes: z
+    .array(
+      z.strictObject({
+        id: themeIdSchema,
+        title: z.string().min(1),
+        description: z.string().min(1),
+      }),
+    )
+    .min(1),
+});
+export type ThemesFile = z.infer<typeof themesSchema>;
+
 /** `courses/<lang>/<course>/course.yaml` */
 export const courseFileSchema = z.strictObject({
   id: courseIdSchema,
   title: z.string().min(1),
   level: levelSchema,
+  theme: themeIdSchema,
   description: z.string().min(1),
   estimatedHours: z.number().positive(),
   prerequisites: z.array(courseIdSchema).default([]),

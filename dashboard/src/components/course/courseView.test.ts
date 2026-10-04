@@ -19,6 +19,7 @@ const course = (id: string, lessonIds: string[], prerequisites: string[] = []): 
   title: `Title ${id}`,
   level: 'beginner',
   description: 'd',
+  theme: 't',
   estimatedHours: 1,
   prerequisites,
   lessons: lessonIds.map((l) => lesson(`${id}/${l}`)),

@@ -1,4 +1,12 @@
-import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  cpSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -10,6 +18,7 @@ import {
   listLanguages,
   loadCatalog,
   loadCourse,
+  loadThemes,
   validateAllCourses,
 } from './courses';
 import { getPaths } from './paths';
@@ -59,7 +68,16 @@ describe('loadCatalog (real courses)', () => {
   it('validates every language in the repo', () => {
     expect(listLanguages()).toContain('en');
     expect(validateAllCourses()).toEqual([]);
-    expect(inspectAllCourses().warnings).toEqual([]);
+    // Seeded themes may wait for their first course; nothing else should warn.
+    const warnings = inspectAllCourses().warnings.map((w) => w.message);
+    expect(warnings.filter((m) => !/^theme "[a-z-]+" has no course yet$/.test(m))).toEqual([]);
+  });
+
+  it('assigns AI Foundations to a theme and groups themes in themes.yaml order', () => {
+    expect(loadCourse('ai-foundations')?.theme).toBe('understanding-ai');
+    const themes = loadThemes();
+    expect(themes[0]).toMatchObject({ id: 'understanding-ai', title: 'Understanding AI' });
+    expect(themes[0].courses.map((c) => c.id)).toContain('ai-foundations');
   });
 
   it('throws a clear error for an unknown language', () => {
@@ -130,6 +148,88 @@ describe('loadCatalog (invalid fixture)', () => {
     const { catalog } = inspectCatalog('en', invalidDir);
     expect(catalog.courses.map((c) => c.id)).toEqual(['broken-refs', 'broken-sections']);
     expect(catalog.courses[0].prerequisites).toEqual([]);
+  });
+});
+
+describe('themes', () => {
+  /** Copy of the real courses with `themes.yaml` replaced (or removed when `undefined`). */
+  function withThemes(themesYaml: string | undefined, extraCourses: string[] = []) {
+    const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
+    cpSync(realDir, dir, { recursive: true });
+    const themesFile = join(dir, 'en', 'themes.yaml');
+    if (themesYaml === undefined) rmSync(themesFile);
+    else writeFileSync(themesFile, themesYaml);
+    for (const id of extraCourses) {
+      cpSync(join(dir, 'en', 'ai-foundations'), join(dir, 'en', id), { recursive: true });
+      const courseFile = join(dir, 'en', id, 'course.yaml');
+      writeFileSync(
+        courseFile,
+        readFileSync(courseFile, 'utf8')
+          .replace('id: ai-foundations', `id: ${id}`)
+          .replace('theme: understanding-ai', 'theme: second')
+          .replaceAll('ai-foundations/', `${id}/`),
+      );
+      for (const name of readdirSync(join(dir, 'en', id)).filter((n) => n.endsWith('.md'))) {
+        const file = join(dir, 'en', id, name);
+        writeFileSync(file, readFileSync(file, 'utf8').replaceAll('ai-foundations/', `${id}/`));
+      }
+      appendFileSync(join(dir, 'en', 'index.yaml'), `  - ${id}\n`);
+    }
+    return dir;
+  }
+  const theme = (id: string) => `  - id: ${id}\n    title: T ${id}\n    description: D.\n`;
+
+  it('reports an unknown theme id', () => {
+    expect(issuesFor(invalidDir)).toContainEqual({
+      file: 'en/broken-refs/course.yaml',
+      message: 'theme "ghost-theme" is not listed in themes.yaml',
+    });
+  });
+
+  it('reports a missing theme field', () => {
+    expect(issuesFor(invalidDir)).toContainEqual({
+      file: 'en/missing-field/course.yaml',
+      message: 'theme: missing required field (expected string)',
+    });
+  });
+
+  it('reports a missing themes.yaml', () => {
+    expect(issuesFor(withThemes(undefined))).toEqual([
+      { file: 'en/themes.yaml', message: 'themes.yaml not found' },
+    ]);
+  });
+
+  it('reports an invalid themes.yaml', () => {
+    const issues = issuesFor(withThemes('themes:\n  - id: Not Kebab\n    title: T\n'));
+    expect(issues.map((i) => i.message).sort()).toEqual([
+      'themes.0.description: missing required field (expected string)',
+      'themes.0.id: must be a kebab-case theme id',
+    ]);
+  });
+
+  it('reports duplicate theme ids', () => {
+    const dir = withThemes(`themes:\n${theme('understanding-ai')}${theme('understanding-ai')}`);
+    expect(issuesFor(dir)).toEqual([
+      { file: 'en/themes.yaml', message: 'theme "understanding-ai" is listed more than once' },
+    ]);
+  });
+
+  it('warns on a theme with no course', () => {
+    const dir = withThemes(`themes:\n${theme('understanding-ai')}${theme('empty')}`);
+    const { issues, warnings } = inspectCatalog('en', dir);
+    expect(issues).toEqual([]);
+    expect(warnings.map((w) => w.message)).toEqual(['theme "empty" has no course yet']);
+  });
+
+  it('returns themes in themes.yaml order with courses in index.yaml order', () => {
+    const dir = withThemes(
+      `themes:\n${theme('second')}${theme('understanding-ai')}`,
+      ['course-b', 'course-a'],
+    );
+    expect(loadThemes('en', dir).map((t) => [t.id, t.courses.map((c) => c.id)])).toEqual([
+      ['second', ['course-b', 'course-a']],
+      ['understanding-ai', ['ai-foundations']],
+    ]);
   });
 });
 

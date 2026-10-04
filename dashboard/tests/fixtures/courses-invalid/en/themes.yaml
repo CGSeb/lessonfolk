@@ -1,0 +1,5 @@
+# Valid; broken-refs uses an unknown theme and missing-field has no theme.
+themes:
+  - id: basics
+    title: Basics
+    description: Fixture theme.

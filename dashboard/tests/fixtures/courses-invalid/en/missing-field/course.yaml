@@ -1,4 +1,4 @@
-# "title" is missing.
+# "title" and "theme" are missing.
 id: missing-field
 level: beginner
 description: A course whose course.yaml lacks a required field.

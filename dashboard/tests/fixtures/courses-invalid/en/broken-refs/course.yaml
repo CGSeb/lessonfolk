@@ -1,6 +1,7 @@
 id: broken-refs
 title: Broken references
 level: beginner
+theme: ghost-theme
 description: Lists a missing lesson, a lesson with the wrong id, and uses broken prerequisites.
 estimatedHours: 1
 lessons:

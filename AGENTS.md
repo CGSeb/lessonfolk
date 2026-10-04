@@ -11,6 +11,7 @@ Courses live in `courses/` (versioned). The learner's progress lives in `.progre
 | Path | Purpose |
 |---|---|
 | `courses/<lang>/index.yaml` | Ordered catalog of courses for a language (the recommended learning path) |
+| `courses/<lang>/themes.yaml` | Ordered themes that group courses; each course names one in `course.yaml` |
 | `courses/<lang>/<course>/course.yaml` | Course metadata and ordered list of lessons |
 | `courses/<lang>/<course>/<lesson>.md` | A lesson: content + teaching notes + checks |
 | `docs/course-format.md` | Specification of the course and lesson format |
@@ -111,10 +112,12 @@ If the user asks to create or edit courses, follow `docs/course-format.md` exact
 
 ### Create a course
 This is contributing mode: the tutoring rule "never modify `courses/`" does not apply, but
-only write the new course's folder and `courses/<lang>/index.yaml`. Never touch `.progress/`
+only write the new course's folder and `courses/<lang>/index.yaml` (plus
+`courses/<lang>/themes.yaml` if the author approves a new theme). Never touch `.progress/`
 and never edit other courses.
 
-1. **Prepare.** Read `docs/course-format.md`, `courses/<lang>/index.yaml` and every listed
+1. **Prepare.** Read `docs/course-format.md`, `courses/<lang>/index.yaml`,
+   `courses/<lang>/themes.yaml` and every listed
    `course.yaml`, so you know which courses exist and at what level. Read one or two lessons
    of `ai-foundations` in full: they are the quality bar.
 2. **Interview**, one question at a time, skipping anything the author already said:
@@ -123,10 +126,12 @@ and never edit other courses.
    3. Prerequisites: suggest existing courses that fit
    4. Length: number of lessons or total time
    5. Position in the learning path (after which course in `index.yaml`)
+   6. Theme: suggest the theme from `themes.yaml` that fits best. Propose a new theme (id,
+      title, one-sentence description) only if none fits
 
    Write in `en` unless the author asks otherwise; translations are a separate task.
 3. **Outline.** Propose: course id (kebab-case, not already used), title, level, a one- or
-   two-sentence description, `estimatedHours`, prerequisites, and 3–8 lessons, each with its
+   two-sentence description, theme, `estimatedHours`, prerequisites, and 3–8 lessons, each with its
    file name (`NN-slug`), title, a one-line objective and `estimatedMinutes` (10–25).
    Point out any overlap with existing courses. **Write no file until the author approves
    the outline**; revise it as often as they want.
@@ -150,7 +155,8 @@ and never edit other courses.
 5. **Register** the course id in `courses/<lang>/index.yaml` at the agreed position.
 6. **Validate.** Run `npm run check:courses` (run `npm install` first if dependencies are
    missing). Fix every error and run it again until it passes. Fix warnings too, or tell the
-   author why one is kept.
+   author why one is kept ("theme … has no course yet" is expected for themes still waiting
+   for their first course).
 7. **Hand back**: list the files created, any facts the author should double-check, and a
    commit message in the format below (`feat: :sparkles: Add <title> course`). Suggest
    previewing it with `npm run dashboard`. Do not commit unless the author asks.

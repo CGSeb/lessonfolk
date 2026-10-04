@@ -9,6 +9,7 @@ import {
   formatIssues,
   indexSchema,
   lessonFrontmatterSchema,
+  themesSchema,
   type Level,
 } from './schemas.ts';
 
@@ -32,6 +33,8 @@ export interface Course {
   title: string;
   level: Level;
   description: string;
+  /** Theme id from `themes.yaml`. */
+  theme: string;
   estimatedHours: number;
   /** Course ids; `[]` when absent. */
   prerequisites: string[];
@@ -39,10 +42,20 @@ export interface Course {
   lessons: Lesson[];
 }
 
+export interface Theme {
+  id: string;
+  title: string;
+  description: string;
+  /** Courses of this theme in `index.yaml` order; may be empty. */
+  courses: Course[];
+}
+
 export interface Catalog {
   lang: string;
   /** Courses in `index.yaml` order. */
   courses: Course[];
+  /** Themes in `themes.yaml` order, each with its courses. */
+  themes: Theme[];
 }
 
 export interface CourseIssue {
@@ -132,7 +145,7 @@ export function inspectCatalog(
 ): { catalog: Catalog; issues: CourseIssue[]; warnings: CourseIssue[] } {
   const issues: CourseIssue[] = [];
   const warnings: CourseIssue[] = [];
-  const catalog: Catalog = { lang, courses: [] };
+  const catalog: Catalog = { lang, courses: [], themes: [] };
   const langDir = join(coursesDir, lang);
   const indexFile = join(langDir, 'index.yaml');
 
@@ -179,7 +192,50 @@ export function inspectCatalog(
     }
   }
 
+  readThemes(langDir, catalog, issues, warnings);
   return { catalog, issues, warnings };
+}
+
+/** Read `themes.yaml`, check each course's theme and group the courses by theme. */
+function readThemes(
+  langDir: string,
+  catalog: Catalog,
+  issues: CourseIssue[],
+  warnings: CourseIssue[],
+): void {
+  const themesFile = join(langDir, 'themes.yaml');
+  if (!existsSync(themesFile)) {
+    issues.push({ file: themesFile, message: 'themes.yaml not found' });
+    return;
+  }
+  const file = validate(themesSchema, readYaml(themesFile, issues), themesFile, issues);
+  // Without a valid themes.yaml every course would be reported; the file error is enough.
+  if (!file) return;
+
+  const themes = new Map<string, Theme>();
+  for (const { id, title, description } of file.themes) {
+    if (themes.has(id)) {
+      issues.push({ file: themesFile, message: `theme "${id}" is listed more than once` });
+      continue;
+    }
+    themes.set(id, { id, title, description, courses: [] });
+  }
+  for (const course of catalog.courses) {
+    const theme = themes.get(course.theme);
+    if (theme) theme.courses.push(course);
+    else {
+      issues.push({
+        file: join(langDir, course.id, 'course.yaml'),
+        message: `theme "${course.theme}" is not listed in themes.yaml`,
+      });
+    }
+  }
+  for (const theme of themes.values()) {
+    if (!theme.courses.length) {
+      warnings.push({ file: themesFile, message: `theme "${theme.id}" has no course yet` });
+    }
+  }
+  catalog.themes = [...themes.values()];
 }
 
 function loadCourseDir(
@@ -262,6 +318,7 @@ function loadCourseDir(
     title: meta.title,
     level: meta.level,
     description: meta.description,
+    theme: meta.theme,
     estimatedHours: meta.estimatedHours,
     prerequisites: meta.prerequisites,
     lessons,
@@ -277,6 +334,16 @@ export function loadCatalog(lang = 'en', coursesDir: string = getPaths().courses
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.courses;
+}
+
+/**
+ * Load the themes of a language in `themes.yaml` order, each with its courses in
+ * `index.yaml` order. Empty themes are included. Throws like `loadCatalog`.
+ */
+export function loadThemes(lang = 'en', coursesDir: string = getPaths().courses): Theme[] {
+  const { catalog, issues } = inspectCatalog(lang, coursesDir);
+  if (issues.length) throw new CourseValidationError(issues, coursesDir);
+  return catalog.themes;
 }
 
 /** Load one course by id, or `undefined` if it is not in the catalog. */
