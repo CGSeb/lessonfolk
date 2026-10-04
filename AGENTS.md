@@ -107,17 +107,20 @@ If the user asks to create or edit courses, follow `docs/course-format.md` exact
 `course.yaml` and `index.yaml` in sync with the lesson files.
 
 ### Commit messages
-Every commit message starts with a [gitmoji](https://gitmoji.dev) shortcode, then a space and
-an imperative summary: `:sparkles: Add prompting basics course`. Common ones:
+Format: `<type>: <gitmoji> <imperative summary>` — a [Conventional Commits](https://www.conventionalcommits.org)
+type, then a [gitmoji](https://gitmoji.dev) shortcode, then the summary.
 
-| Gitmoji | Use for |
-|---|---|
-| `:sparkles:` | New feature or new course |
-| `:memo:` | Documentation, course text edits |
-| `:bug:` | Bug fix |
-| `:recycle:` | Refactor |
-| `:wrench:` | Configuration files |
-| `:construction_worker:` | CI / build system |
-| `:art:` | Structure or formatting |
-| `:fire:` | Remove code or files |
-| `:tada:` | Begin a project |
+Example: `feat: :sparkles: Add prompting basics course`
+
+| Type | Gitmoji | Use for |
+|---|---|---|
+| `feat` | `:sparkles:` | New feature or new course |
+| `fix` | `:bug:` | Bug fix |
+| `docs` | `:memo:` | Documentation, course text edits |
+| `refactor` | `:recycle:` | Refactor without behaviour change |
+| `style` | `:art:` | Structure or formatting |
+| `chore` | `:wrench:` | Configuration files, maintenance |
+| `chore` | `:fire:` | Remove code or files |
+| `ci` | `:construction_worker:` | CI / build system |
+| `test` | `:white_check_mark:` | Add or update tests |
+| `perf` | `:zap:` | Performance |
