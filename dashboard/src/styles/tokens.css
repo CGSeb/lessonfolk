@@ -1,48 +1,135 @@
 /*
- * Design tokens. Use these custom properties instead of raw values.
- * Light palette on :root, dark palette follows the system setting.
- * All text colors meet WCAG AA (>= 4.5:1) on --color-bg, --color-surface
- * and --color-surface-sunken in both themes.
+ * Design tokens, derived from the Spark A logo (see docs/brand.md).
+ * Use these custom properties instead of raw values: colour literals live
+ * only in this file.
+ *
+ * Three layers:
+ *   1. Brand colours: the fixed logo colours.
+ *   2. Ramps: indigo (primary), amber (spark), cool neutrals, plus green
+ *      for success. Shared by both themes.
+ *   3. Semantic tokens (--color-*): what components use. Each one is
+ *      light-dark(<light>, <dark>), mapped onto the ramps.
+ *
+ * Every text colour meets WCAG AA (>= 4.5:1) on --color-bg, --color-surface
+ * and --color-surface-sunken in both themes, and meaningful UI colours
+ * (focus ring, progress fill, strong borders) reach >= 3:1. Amber is never
+ * used as text on a light background.
  */
 :root {
   color-scheme: light dark;
 
-  /* Colors (light) */
-  --color-bg: #fbf8f3;
-  --color-surface: #ffffff;
-  --color-surface-sunken: #f3ede4;
-  --color-text: #2a2420;
-  --color-text-muted: #5f554c;
-  --color-border: #ddd3c6;
-  --color-border-strong: #8c8073;
-  --color-accent: #a8471f;
-  --color-accent-strong: #8a3a18;
-  --color-on-accent: #ffffff;
-  --color-success: #2f6b3a;
-  --color-success-bg: #e4f1e5;
-  --color-info: #2d5f86;
-  --color-info-bg: #e3eef7;
-  --color-warning: #7a5410;
-  --color-warning-bg: #f8ecd2;
-  --color-focus: #2d5f86;
-  --shadow-card: 0 1px 2px rgb(42 36 32 / 0.06), 0 2px 8px rgb(42 36 32 / 0.05);
+  /* 1. Brand: the logo colours. Fixed, never themed. */
+  --brand-indigo: #4f46e5;
+  --brand-amber: #fbbf24;
+  --brand-white: #ffffff;
 
-  /* Typography */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* 2. Ramps */
+  --indigo-50: #eef2ff;
+  --indigo-100: #e0e7ff;
+  --indigo-200: #c7d2fe;
+  --indigo-300: #a5b4fc;
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5; /* = --brand-indigo */
+  --indigo-700: #4338ca;
+  --indigo-800: #3730a3;
+  --indigo-900: #312e81;
+  --indigo-950: #1e1b4b;
+
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24; /* = --brand-amber */
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  --amber-950: #3b2508;
+
+  /* Cool neutrals with a hint of indigo. */
+  --neutral-0: #ffffff;
+  --neutral-25: #f8f8fc;
+  --neutral-50: #f1f1f8;
+  --neutral-100: #e6e7f1;
+  --neutral-200: #d8d9e6;
+  --neutral-300: #bdbfd3;
+  --neutral-400: #9496b0;
+  --neutral-500: #6e7192;
+  --neutral-600: #50536e;
+  --neutral-700: #3b3d57;
+  --neutral-800: #2a2c45;
+  --neutral-850: #22243b;
+  --neutral-900: #1a1c33;
+  --neutral-925: #131528;
+  --neutral-950: #0c0e1f;
+
+  --green-50: #ecfdf3;
+  --green-100: #d3f5e0;
+  --green-300: #86efac;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #123d26;
+
+  /* 3. Semantic colours: light-dark(<light theme>, <dark theme>) */
+  --color-bg: light-dark(var(--neutral-25), var(--neutral-925));
+  --color-surface: light-dark(var(--neutral-0), var(--neutral-900));
+  --color-surface-sunken: light-dark(var(--neutral-50), var(--neutral-950));
+  --color-text: light-dark(var(--neutral-900), var(--neutral-50));
+  --color-text-muted: light-dark(var(--neutral-600), var(--neutral-300));
+  --color-border: light-dark(var(--neutral-200), var(--neutral-800));
+  --color-border-strong: light-dark(var(--neutral-500), var(--neutral-500));
+  --color-accent: light-dark(var(--indigo-600), var(--indigo-300)); /* links, active states, primary fills */
+  --color-accent-strong: light-dark(var(--indigo-800), var(--indigo-200)); /* hover */
+  --color-accent-subtle: light-dark(var(--indigo-50), var(--indigo-950)); /* tinted backgrounds */
+  --color-accent-border: light-dark(var(--indigo-200), var(--indigo-800));
+  --color-on-accent: light-dark(var(--neutral-0), var(--indigo-950));
+  --color-spark: light-dark(var(--brand-amber), var(--brand-amber)); /* highlight: next lesson, achievements. Never text on light. */
+  --color-spark-subtle: light-dark(var(--amber-50), var(--amber-950));
+  --color-progress-track: light-dark(var(--neutral-100), var(--neutral-800));
+  --color-progress-fill: light-dark(var(--indigo-600), var(--indigo-400));
+  --color-success: light-dark(var(--green-800), var(--green-300));
+  --color-success-bg: light-dark(var(--green-100), var(--green-900));
+  --color-info: light-dark(var(--indigo-700), var(--indigo-200));
+  --color-info-bg: light-dark(var(--indigo-100), var(--indigo-900));
+  --color-warning: light-dark(var(--amber-900), var(--amber-300));
+  --color-warning-bg: light-dark(var(--amber-100), var(--amber-950));
+  --color-warning-border: light-dark(var(--amber-700), var(--amber-600));
+  --color-focus: light-dark(var(--indigo-600), var(--brand-amber));
+  --color-focus-halo: light-dark(var(--amber-300), var(--indigo-800));
+  --color-glow: light-dark(rgb(79 70 229 / 0.07), rgb(99 102 241 / 0.12));
+
+  --shadow-color: light-dark(rgb(26 28 51 / 0.06), rgb(0 0 0 / 0.4));
+  --shadow-color-soft: light-dark(rgb(26 28 51 / 0.05), rgb(0 0 0 / 0.35));
+  --shadow-color-ambient: light-dark(rgb(26 28 51 / 0.05), rgb(0 0 0 / 0));
+  --shadow-color-raised: light-dark(rgb(79 70 229 / 0.12), rgb(0 0 0 / 0.35));
+  --shadow-sm: 0 1px 2px var(--shadow-color);
+  --shadow-card: 0 1px 2px var(--shadow-color-soft), 0 4px 16px var(--shadow-color-ambient);
+  --shadow-raised: 0 2px 4px var(--shadow-color), 0 12px 32px var(--shadow-color-raised);
+
+  /* Typography: Inter (self-hosted, imported in global.css) with system fallbacks. */
+  --font-sans: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
-  --text-3xl: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
-  --leading-tight: 1.25;
+  --text-xs: 0.75rem; /* overlines, tiny captions */
+  --text-sm: 0.875rem; /* captions, meta, badges */
+  --text-base: 1rem; /* body */
+  --text-lg: 1.125rem; /* lead paragraphs, card titles */
+  --text-xl: 1.3125rem; /* h3, emphasised numbers */
+  --text-2xl: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem); /* h2 */
+  --text-3xl: clamp(2rem, 1.6rem + 1.6vw, 2.75rem); /* h1 */
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
   --leading-normal: 1.6;
   --weight-normal: 400;
   --weight-medium: 500;
-  --weight-bold: 650;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
 
-  /* Spacing scale */
+  /* Spacing scale (4px base) */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -52,34 +139,30 @@
   --space-7: 3rem;
   --space-8: 4rem;
 
-  /* Shape and layout */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-pill: 999px;
+  /* Shape: the mark's corner is 25% of its size (rx 16 on 64). */
+  --radius-sm: 8px; /* code, small chips */
+  --radius-md: 12px; /* notices, inner panels */
+  --radius-lg: 20px; /* cards */
+  --radius-pill: 999px; /* badges, nav, phrase chips, progress bars */
+  --border-accent: 4px; /* highlight stripes */
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --focus-halo-width: 2px;
+
+  /* Layout */
   --content-width: 64rem;
   --gutter: clamp(1rem, 4vw, 2rem);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #1b1916;
-    --color-surface: #25221e;
-    --color-surface-sunken: #151310;
-    --color-text: #f2ece4;
-    --color-text-muted: #bdb2a5;
-    --color-border: #3d3832;
-    --color-border-strong: #7d7368;
-    --color-accent: #f2a27e;
-    --color-accent-strong: #f7bb9e;
-    --color-on-accent: #1b1916;
-    --color-success: #8fd19a;
-    --color-success-bg: #1f3324;
-    --color-info: #9cc8ec;
-    --color-info-bg: #1d2d3b;
-    --color-warning: #efc66e;
-    --color-warning-bg: #382c14;
-    --color-focus: #9cc8ec;
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
-  }
+/*
+ * Theme selection. Semantic colours use light-dark(), so they follow the
+ * used color-scheme: the system setting by default, or the learner's choice
+ * from the header theme switch (data-theme on <html>, saved in localStorage).
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }

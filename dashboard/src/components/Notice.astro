@@ -21,17 +21,19 @@ const { title, tone = 'info' } = Astro.props;
 <style>
   .notice {
     padding: var(--space-4) var(--space-5);
-    border: 1px solid currentColor;
-    border-left-width: 4px;
+    border: 1px solid;
+    border-left-width: var(--border-accent);
     border-radius: var(--radius-md);
   }
 
   .notice--warning {
+    border-color: var(--color-warning-border);
     background: var(--color-warning-bg);
     color: var(--color-warning);
   }
 
   .notice--info {
+    border-color: var(--color-accent);
     background: var(--color-info-bg);
     color: var(--color-info);
   }
