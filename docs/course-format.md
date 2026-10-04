@@ -84,3 +84,15 @@ Links or topics for curious learners.
 - Keep lessons short: 3–6 key ideas, 10–25 minutes.
 - Prefer everyday examples. Avoid fast-aging claims ("the best model today is…").
 - No secrets, no paid-only requirements for mandatory exercises.
+
+## Validation
+
+Run `npm run check:courses` before opening a pull request. It fails on:
+- invalid `index.yaml`, `course.yaml` or lesson frontmatter, ids that do not match file
+  paths, and broken prerequisites;
+- lesson sections that are missing, misspelled, duplicated or out of order (only the `##`
+  headings above are allowed; `###` sub-headings are free);
+- a question under `## Check your understanding` without a `Good answer:` line.
+
+It only warns (without failing) when a lesson strays from the writing guidelines: fewer than
+3 or more than 6 numbered key ideas, or `estimatedMinutes` outside 10–25.

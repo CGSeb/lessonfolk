@@ -1,15 +1,13 @@
 ---
-id: broken-refs/01-start
-title: Start
+id: broken-sections/02-misspelled-section
+title: Misspelled section
 level: beginner
 estimatedMinutes: 10
 objectives:
-  - Exist
-prerequisites:
-  - broken-refs/00-nope
+  - Misspell a heading
 ---
 
-## Key ideas
+## Key Idea
 1. Placeholder.
 2. Placeholder.
 3. Placeholder.

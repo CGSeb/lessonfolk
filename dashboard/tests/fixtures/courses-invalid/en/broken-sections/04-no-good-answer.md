@@ -1,12 +1,10 @@
 ---
-id: broken-refs/01-start
-title: Start
+id: broken-sections/04-no-good-answer
+title: No good answer
 level: beginner
 estimatedMinutes: 10
 objectives:
-  - Exist
-prerequisites:
-  - broken-refs/00-nope
+  - Forget a good answer
 ---
 
 ## Key ideas
@@ -20,6 +18,7 @@ Placeholder.
 ## Check your understanding
 1. Placeholder?
    Good answer: placeholder.
+2. Question without a hint?
 
 ## Completion criteria
 Placeholder.
