@@ -2,6 +2,11 @@
 .progress/*
 !.progress/progress.example.json
 
+# Node / Astro
+node_modules/
+dist/
+.astro/
+
 # OS / editor
 .DS_Store
 Thumbs.db

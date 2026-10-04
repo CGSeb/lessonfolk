@@ -35,6 +35,28 @@ Useful things to say: *"continue"*, *"show my progress"*, *"what can I learn?"*,
 | Courses | `courses/<lang>/<course>/` | yes |
 | Your progress | `.progress/progress.json` | **no**, local only |
 
+## Dashboard (optional)
+
+A local web dashboard shows your courses and progress. Requires [Node.js](https://nodejs.org) 22 or later.
+
+```bash
+npm install
+npm run dashboard
+```
+
+Then open http://127.0.0.1:4321. It only listens on your machine and never modifies your progress —
+the AI tutor is the only thing that writes it.
+
+| Script | Purpose |
+|---|---|
+| `npm run dashboard` | Start the dashboard in development mode |
+| `npm run dashboard:build` | Build the production server |
+| `npm run dashboard:start` | Run the built server |
+| `npm test` | Run the dashboard tests |
+
+Set `APPRENTICE_COURSES_DIR` or `APPRENTICE_PROGRESS_DIR` to point the dashboard at other folders
+(useful for testing with sample progress files).
+
 ## Courses
 
 | Course | Level |
