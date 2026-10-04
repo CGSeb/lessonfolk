@@ -1,0 +1,289 @@
+---
+import { join, relative } from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LevelBadge from '../../components/LevelBadge.astro';
+import Notice from '../../components/Notice.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import SayPhrase from '../../components/home/SayPhrase.astro';
+import { getCourseView, issuesForCourse } from '../../components/course/courseView';
+import { t } from '../../i18n/en';
+import { inspectCatalog } from '../../lib/courses';
+import { getPaths } from '../../lib/paths';
+import { progressOrEmpty, readProgress } from '../../lib/progress';
+
+// Read on every request so the page reflects the tutor's latest writes.
+const id = Astro.params.id ?? '';
+const lang = 'en';
+const { catalog, issues } = inspectCatalog(lang);
+const progressResult = readProgress();
+const view = getCourseView(catalog.courses, id, progressOrEmpty(progressResult));
+
+if (!view) Astro.response.status = 404;
+
+const MAX_ISSUES = 5;
+const { root, courses: coursesDir } = getPaths();
+const courseIssues = issuesForCourse(issues, join(coursesDir, lang, id));
+const shownIssues = courseIssues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
+  file: (relative(root, file) || file).replaceAll('\\', '/'),
+  message,
+}));
+
+const course = view?.course;
+const total = view?.stats.total ?? 0;
+const progressText = t('courses.lessonsProgress', { done: view?.finished ?? 0, total });
+const hoursText = course
+  ? t(course.estimatedHours === 1 ? 'courses.hoursOne' : 'courses.hoursOther', { hours: course.estimatedHours })
+  : '';
+const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.lessonCountOther', { count: total });
+---
+
+<BaseLayout title={course ? course.title : t('course.notFoundTitle')} description={course?.description}>
+  <div class="stack" style="--stack-space: var(--space-5)">
+    <nav aria-label={t('course.breadcrumbLabel')}>
+      <ol class="breadcrumb" role="list">
+        <li><a href="/courses">{t('nav.courses')}</a></li>
+        {course && <li aria-current="page">{course.title}</li>}
+      </ol>
+    </nav>
+
+    {
+      view && progressResult.state === 'invalid' && (
+        <Notice tone="warning" title={t('course.invalidProgressTitle')}>
+          <p>{t('course.invalidProgressBody')}</p>
+          <details>
+            <summary>{t('course.technicalDetails')}</summary>
+            <pre class="course-error">{progressResult.error}</pre>
+          </details>
+        </Notice>
+      )
+    }
+    {
+      courseIssues.length > 0 && (
+        <Notice tone="warning" title={t('course.issuesTitle')}>
+          <p>{t('course.issuesBody')}</p>
+          <pre><code>{t('course.issuesCommand')}</code></pre>
+          <ul class="course-issues">
+            {shownIssues.map((issue) => (
+              <li>
+                <code>{issue.file}</code> {issue.message}
+              </li>
+            ))}
+            {courseIssues.length > MAX_ISSUES && (
+              <li>{t('course.issuesMore', { count: courseIssues.length - MAX_ISSUES })}</li>
+            )}
+          </ul>
+        </Notice>
+      )
+    }
+
+    {
+      !view || !course ? (
+        <section class="card stack" aria-labelledby="not-found-heading">
+          <h1 id="not-found-heading">{t('course.notFoundHeading')}</h1>
+          <p>{t('course.notFoundBody', { id })}</p>
+          <p>
+            <a href="/courses">{t('course.backToCourses')}</a>
+          </p>
+        </section>
+      ) : (
+        <>
+          <header class="stack" style="--stack-space: var(--space-3)">
+            <h1>{course.title}</h1>
+            <div class="cluster" style="--cluster-space: var(--space-2)">
+              <LevelBadge level={course.level} />
+              <StatusBadge status={view.status} />
+            </div>
+            <p class="course-lead">{course.description}</p>
+            <p class="muted course-meta">
+              {hoursText} <span aria-hidden="true">·</span> {lessonCountText}
+            </p>
+          </header>
+
+          <div class="course-columns">
+            <section class="card stack" aria-labelledby="progress-heading" style="--stack-space: var(--space-3)">
+              <h2 class="course-card-title" id="progress-heading">{t('course.progressTitle')}</h2>
+              <progress class="progress-bar" value={view.finished} max={Math.max(total, 1)} aria-labelledby="progress-heading">
+                {progressText}
+              </progress>
+              <p>{progressText}</p>
+              {view.status === 'completed' && <p class="course-done">{t('course.completedMessage')}</p>}
+            </section>
+
+            <section class="card stack" aria-labelledby="prereq-heading" style="--stack-space: var(--space-3)">
+              <h2 class="course-card-title" id="prereq-heading">{t('course.prerequisitesTitle')}</h2>
+              {
+                view.prerequisites.length === 0 ? (
+                  <p class="muted">{t('course.prerequisitesNone')}</p>
+                ) : (
+                  <>
+                    <p>{t('course.prerequisitesIntro')}</p>
+                    <ul>
+                      {view.prerequisites.map((prereq) => (
+                        <li>
+                          {prereq.course ? (
+                            <a href={`/courses/${encodeURIComponent(prereq.id)}`}>{prereq.course.title}</a>
+                          ) : (
+                            <code>{prereq.id}</code>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )
+              }
+            </section>
+          </div>
+
+          <section class="stack" aria-labelledby="lessons-heading" style="--stack-space: var(--space-4)">
+            <h2 id="lessons-heading">{t('course.lessonsHeading')}</h2>
+            <ol class="lesson-list stack" role="list" style="--stack-space: var(--space-3)">
+              {view.lessons.map((row) => (
+                <li
+                  class:list={['card', 'stack', 'lesson', row.isNext && 'lesson--next']}
+                  style="--stack-space: var(--space-3)"
+                  aria-current={row.isNext ? 'step' : undefined}
+                >
+                  {row.isNext && <p class="lesson__next-label">{t('course.nextUp')}</p>}
+                  <div class="lesson__head">
+                    <h3 class="lesson__title">{row.lesson.title}</h3>
+                    <StatusBadge status={row.status} />
+                  </div>
+                  <p class="cluster muted lesson__meta" style="--cluster-space: var(--space-1) var(--space-3)">
+                    <span>{t('course.minutes', { minutes: row.lesson.estimatedMinutes })}</span>
+                    {row.scorePercent !== null && <span>{t('course.score', { score: row.scorePercent })}</span>}
+                    {row.completedOn && (
+                      <span>
+                        {t(row.status === 'skipped' ? 'course.skippedOn' : 'course.completedOn', { date: row.completedOn })}
+                      </span>
+                    )}
+                  </p>
+                  {row.notes && (
+                    <div class="lesson__notes stack" style="--stack-space: var(--space-1)">
+                      <p class="lesson__notes-label">{t('course.tutorNotes')}</p>
+                      <p>{row.notes}</p>
+                    </div>
+                  )}
+                  {row.isNext && <SayPhrase instruction={t('course.continueHint')} phrase={t('course.continuePhrase')} />}
+                </li>
+              ))}
+            </ol>
+          </section>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .breadcrumb li + li::before {
+    content: '/';
+    margin-right: var(--space-2);
+    color: var(--color-text-muted);
+  }
+
+  .course-lead {
+    font-size: var(--text-lg);
+  }
+
+  .course-meta {
+    font-size: var(--text-sm);
+  }
+
+  .course-columns {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  @media (min-width: 48rem) {
+    .course-columns {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .course-card-title {
+    font-size: var(--text-lg);
+  }
+
+  .course-done {
+    color: var(--color-success);
+    font-weight: var(--weight-medium);
+  }
+
+  .lesson-list {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: lesson;
+  }
+
+  .lesson {
+    max-width: none;
+    counter-increment: lesson;
+  }
+
+  .lesson--next {
+    border-top: 4px solid var(--color-accent);
+  }
+
+  .lesson__next-label {
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .lesson__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .lesson__title {
+    font-size: var(--text-lg);
+  }
+
+  .lesson__title::before {
+    content: counter(lesson) '. ';
+    color: var(--color-text-muted);
+  }
+
+  .lesson__meta {
+    font-size: var(--text-sm);
+  }
+
+  .lesson__notes {
+    padding: var(--space-3) var(--space-4);
+    border-left: 3px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-sunken);
+  }
+
+  .lesson__notes-label {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .course-issues {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .course-error {
+    margin-top: var(--space-2);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+</style>
