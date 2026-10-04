@@ -1,0 +1,125 @@
+---
+/**
+ * Keeps the page in sync with the learner's files: listens to /api/events and,
+ * when progress or courses change on disk, re-fetches the page and swaps the
+ * <main> content in place. Progressive enhancement: without JavaScript the page
+ * simply stays as rendered.
+ */
+import { t } from '../i18n/en';
+---
+
+<div
+  class="visually-hidden"
+  role="status"
+  aria-live="polite"
+  data-live-refresh
+  data-msg-progress={t('live.progressUpdated')}
+  data-msg-courses={t('live.coursesUpdated')}
+>
+</div>
+
+<script>
+  const MAIN_SELECTOR = 'main#main';
+  const RELOAD_GUARD_KEY = 'apprentice:live-reload';
+  const RELOAD_GUARD_MS = 10_000;
+
+  const status = document.querySelector<HTMLElement>('[data-live-refresh]');
+  let refreshing = false;
+  let pendingArea: string | null = null;
+
+  /** Fall back to a full reload, at most once per guard window to avoid loops. */
+  function reloadOnce() {
+    try {
+      const last = Number(sessionStorage.getItem(RELOAD_GUARD_KEY) ?? 0);
+      if (Date.now() - last < RELOAD_GUARD_MS) return;
+      sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
+    } catch {
+      // Storage unavailable: reload anyway, the server only sends events on real changes.
+    }
+    location.reload();
+  }
+
+  /** Add any stylesheet the new page needs that this one does not have yet. */
+  function syncStyles(next: Document) {
+    const key = (el: Element) =>
+      el.getAttribute('href') ?? el.getAttribute('data-vite-dev-id') ?? el.textContent ?? '';
+    const selector = 'link[rel="stylesheet"], style';
+    const present = new Set([...document.head.querySelectorAll(selector)].map(key));
+    for (const el of next.head.querySelectorAll(selector)) {
+      if (!present.has(key(el))) document.head.append(document.importNode(el, true));
+    }
+  }
+
+  /** Re-open <details> the learner had open, matched by their summary text. */
+  function openDetails(main: HTMLElement): Set<string> {
+    return new Set(
+      [...main.querySelectorAll('details[open] > summary')].map((s) => s.textContent?.trim() ?? ''),
+    );
+  }
+
+  function announce(area: string) {
+    if (!status || (area !== 'progress' && area !== 'courses')) return;
+    const message = area === 'courses' ? status.dataset.msgCourses : status.dataset.msgProgress;
+    status.textContent = '';
+    // A fresh text node makes screen readers announce repeated messages.
+    setTimeout(() => (status.textContent = message ?? ''), 50);
+  }
+
+  async function refresh(area: string) {
+    if (refreshing) {
+      pendingArea = area;
+      return;
+    }
+    refreshing = true;
+    try {
+      const response = await fetch(location.href, {
+        cache: 'no-store',
+        headers: { Accept: 'text/html' },
+      });
+      if (!response.ok) return; // Try again on the next change.
+      const html = await response.text();
+      const next = new DOMParser().parseFromString(html, 'text/html');
+      const nextMain = next.querySelector<HTMLElement>(MAIN_SELECTOR);
+      const main = document.querySelector<HTMLElement>(MAIN_SELECTOR);
+      if (!nextMain || !main || nextMain.querySelector('script')) {
+        reloadOnce();
+        return;
+      }
+
+      syncStyles(next);
+      const opened = openDetails(main);
+      const { scrollX, scrollY } = window;
+      main.replaceChildren(...[...nextMain.childNodes].map((node) => document.importNode(node, true)));
+      for (const summary of main.querySelectorAll('details > summary')) {
+        if (opened.has(summary.textContent?.trim() ?? '')) summary.parentElement?.setAttribute('open', '');
+      }
+      if (next.title) document.title = next.title;
+      window.scrollTo(scrollX, scrollY);
+      announce(area);
+    } catch {
+      // Network hiccup (server restarting…): the next event or reconnect will refresh.
+    } finally {
+      refreshing = false;
+      if (pendingArea) {
+        const nextArea = pendingArea;
+        pendingArea = null;
+        void refresh(nextArea);
+      }
+    }
+  }
+
+  if ('EventSource' in window) {
+    const events = new EventSource('/api/events');
+    let lostConnection = false;
+    events.addEventListener('change', (event) => void refresh((event as MessageEvent).data));
+    // The browser reconnects by itself; changes made while disconnected (server
+    // restarted, laptop asleep) are caught by refreshing once on reconnect.
+    events.addEventListener('error', () => (lostConnection = true));
+    events.addEventListener('open', () => {
+      if (lostConnection) {
+        lostConnection = false;
+        void refresh('reconnect');
+      }
+    });
+  }
+</script>

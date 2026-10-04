@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { t } from '../i18n/en';
+import LiveRefresh from '../components/LiveRefresh.astro';
 
 interface Props {
   /** Page name shown before the site name in the tab title. Omit for the site title alone. */
@@ -62,6 +63,7 @@ const navItems = [
         <p>{t('footer.privacy')}</p>
       </div>
     </footer>
+    <LiveRefresh />
   </body>
 </html>
 
