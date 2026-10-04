@@ -1,0 +1,86 @@
+# Course format
+
+Apprentice courses are plain files, versioned in git and taught by an AI agent
+(Claude Code, Codex, …) in chat. A lesson is a **script for a tutor**, not a page to read:
+it gives the content, how to teach it, and how to check understanding.
+
+## Layout
+
+```
+courses/
+  en/                         # language code (ISO 639-1)
+    index.yaml                # ordered learning path for this language
+    ai-foundations/           # course id (kebab-case)
+      course.yaml
+      01-what-is-ai.md        # lesson file: NN-lesson-slug.md
+      02-how-machines-learn.md
+  fr/                         # optional translation, same ids and file names
+```
+
+Translations reuse the same course and lesson ids, so progress is shared across languages.
+
+## `index.yaml`
+
+```yaml
+courses:
+  - ai-foundations        # in recommended order
+  - prompting-basics
+```
+
+## `course.yaml`
+
+```yaml
+id: ai-foundations
+title: AI Foundations
+level: beginner           # beginner | intermediate | advanced
+description: One or two sentences shown in the course list.
+estimatedHours: 2
+prerequisites: []         # course ids
+lessons:                  # ordered; ids are <course-id>/<file name without .md>
+  - ai-foundations/01-what-is-ai
+  - ai-foundations/02-how-machines-learn
+```
+
+## Lesson file
+
+Frontmatter, then these sections in this order. Section headings are fixed — the tutor
+relies on them.
+
+```markdown
+---
+id: ai-foundations/01-what-is-ai
+title: What is AI?
+level: beginner
+estimatedMinutes: 15
+objectives:
+  - Explain in plain words what AI is
+prerequisites: []        # lesson ids
+---
+
+## Key ideas
+Numbered list of the ideas to teach, in order. Each idea: a short explanation
+the tutor can rephrase. This is the content.
+
+## Teaching notes
+For the tutor only: analogies that work, common misconceptions, how to adapt for
+beginners vs experienced learners, pacing hints.
+
+## Check your understanding
+Numbered questions. Under each, a "Good answer:" line describing what a correct
+answer contains (not a word-for-word answer).
+
+## Exercise            (optional)
+A hands-on activity. Say whether it needs a computer, code, or nothing at all.
+
+## Completion criteria
+When the tutor may mark the lesson as done.
+
+## Going further       (optional)
+Links or topics for curious learners.
+```
+
+## Writing guidelines
+- Write for the level stated. Beginner lessons define every term and avoid math.
+- Keep lessons short: 3–6 key ideas, 10–25 minutes.
+- Prefer everyday examples. Avoid fast-aging claims ("the best model today is…").
+- No secrets, no paid-only requirements for mandatory exercises.

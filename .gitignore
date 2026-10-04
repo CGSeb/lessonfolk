@@ -1,0 +1,12 @@
+# Learner progress is personal and stays local
+.progress/*
+!.progress/progress.example.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Claude Code local settings
+.claude/settings.local.json
