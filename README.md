@@ -55,7 +55,8 @@ the AI tutor is the only thing that writes it.
 | `npm test` | Run the dashboard tests |
 
 Set `APPRENTICE_COURSES_DIR` or `APPRENTICE_PROGRESS_DIR` to point the dashboard at other folders
-(useful for testing with sample progress files).
+(useful for testing with sample progress files). See [`docs/testing.md`](docs/testing.md) for the
+automated tests and the manual end-to-end checklist with a real tutor.
 
 ## Courses
 

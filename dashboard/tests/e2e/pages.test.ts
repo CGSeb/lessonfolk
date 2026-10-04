@@ -1,0 +1,173 @@
+/**
+ * End-to-end page checks: the built dashboard, served over HTTP, against the real
+ * AI Foundations course and one progress fixture per learner state.
+ */
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { getPage, PROGRESS_FIXTURES, startDashboard, type DashboardServer } from './server';
+
+const LESSONS = ['What is AI?', 'How do machines learn?', 'What is a large language model?'];
+
+interface Expectations {
+  /** Folder passed as APPRENTICE_PROGRESS_DIR. */
+  progressDir: string;
+  home: { include: string[]; exclude: string[] };
+  catalog: { include: string[]; exclude: string[] };
+  course: { include: string[]; exclude: string[] };
+}
+
+const INVALID_HOME = 'Your progress file could not be read';
+const INVALID_CATALOG = 'Your progress file could not be read, so every course is shown as not started.';
+const COURSE_ISSUES = ['Some course files have problems', 'Some files of this course have problems'];
+
+const fixtures: Record<string, Expectations> = {
+  'new learner (no progress file)': {
+    // Never created: the tutor writes progress.json during onboarding.
+    progressDir: join(PROGRESS_FIXTURES, 'new-learner-does-not-exist'),
+    home: {
+      include: ['Welcome to Apprentice', 'How to start', "Let's start learning AI", 'Your first lesson', LESSONS[0]],
+      exclude: ['Welcome back', INVALID_HOME],
+    },
+    catalog: { include: ['AI Foundations', 'Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG] },
+    course: {
+      include: ['Not started', '0 of 3 lessons', 'Next up', ...LESSONS],
+      exclude: ['Status: Done', 'Notes from your tutor', INVALID_HOME],
+    },
+  },
+  'onboarded, no lesson yet (minimal)': {
+    progressDir: join(PROGRESS_FIXTURES, 'minimal'),
+    home: {
+      include: ['Welcome back!', 'Next up', LESSONS[0], '0 of 3 lessons finished', 'Courses completed: 0 of 1'],
+      exclude: ['Welcome to Apprentice', INVALID_HOME],
+    },
+    catalog: { include: ['Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG] },
+    course: { include: ['Not started', '0 of 3 lessons', 'Next up', ...LESSONS], exclude: ['Status: Done', INVALID_HOME] },
+  },
+  'mid-course': {
+    progressDir: join(PROGRESS_FIXTURES, 'mid-course'),
+    home: {
+      include: [
+        'Welcome back, Alex!',
+        'Pick up where you left off',
+        LESSONS[1],
+        '1 of 3 lessons finished',
+        'Courses completed: 0 of 1',
+      ],
+      exclude: ['Welcome to Apprentice', INVALID_HOME],
+    },
+    catalog: { include: ['In progress', '1 of 3 lessons'], exclude: [INVALID_CATALOG] },
+    course: {
+      include: [
+        'In progress',
+        '1 of 3 lessons',
+        'Status: Done',
+        'Score: 80%',
+        'Finished on Oct 4, 2026',
+        'Notes from your tutor',
+        'confused AI with robots at first',
+        "Stopped after the 'training data' key idea.",
+        'Next up',
+        ...LESSONS,
+      ],
+      exclude: ['You finished this course', INVALID_HOME],
+    },
+  },
+  'all done (done and skipped)': {
+    progressDir: join(PROGRESS_FIXTURES, 'all-done'),
+    home: {
+      include: [
+        'Welcome back, Sam!',
+        'You finished every lesson. Congratulations!',
+        'quiz me',
+        '3 of 3 lessons finished',
+        'Courses completed: 1 of 1',
+      ],
+      exclude: ['Next up', 'Pick up where you left off', INVALID_HOME],
+    },
+    catalog: { include: ['Completed', '3 of 3 lessons'], exclude: [INVALID_CATALOG, 'Not started'] },
+    course: {
+      include: [
+        'Completed',
+        '3 of 3 lessons',
+        'You finished this course. Well done!',
+        'Status: Done',
+        'Status: Skipped',
+        'Score: 90%',
+        'Score: 70%',
+        'Skipped on Oct 5, 2026',
+        'Finished on Oct 6, 2026',
+        'Needed a second analogy',
+        ...LESSONS,
+      ],
+      exclude: ['Next up', 'Not started', INVALID_HOME],
+    },
+  },
+  'invalid JSON': {
+    progressDir: join(PROGRESS_FIXTURES, 'invalid-json'),
+    home: {
+      // Shown as a first visit, with a warning and the parse error.
+      include: [INVALID_HOME, 'Invalid JSON in', 'Welcome to Apprentice', 'Your first lesson', LESSONS[0]],
+      exclude: ['Welcome back'],
+    },
+    catalog: { include: [INVALID_CATALOG, 'Not started', '0 of 3 lessons'], exclude: [] },
+    course: { include: [INVALID_HOME, 'Invalid JSON in', 'Not started', '0 of 3 lessons', ...LESSONS], exclude: ['Status: Done'] },
+  },
+  'invalid shape': {
+    progressDir: join(PROGRESS_FIXTURES, 'invalid-shape'),
+    home: { include: [INVALID_HOME, 'Unexpected shape in', 'Welcome to Apprentice'], exclude: ['Welcome back'] },
+    catalog: { include: [INVALID_CATALOG, 'Not started', '0 of 3 lessons'], exclude: [] },
+    course: { include: [INVALID_HOME, 'Unexpected shape in', '0 of 3 lessons'], exclude: ['Status: Done'] },
+  },
+};
+
+it('the new-learner fixture folder does not exist', () => {
+  expect(existsSync(fixtures['new learner (no progress file)'].progressDir)).toBe(false);
+});
+
+describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) => {
+  let server: DashboardServer;
+
+  beforeAll(async () => {
+    server = await startDashboard(fixture.progressDir);
+  });
+  afterAll(async () => {
+    await server?.stop();
+  });
+
+  function expectText(text: string, { include, exclude }: { include: string[]; exclude: string[] }) {
+    for (const expected of include) expect(text).toContain(expected);
+    for (const unexpected of exclude) expect(text).not.toContain(unexpected);
+    // The real course content is valid: no page reports course file problems.
+    for (const issue of COURSE_ISSUES) expect(text).not.toContain(issue);
+  }
+
+  it('renders the home page', async () => {
+    const page = await getPage(server, '/');
+    expect(page.status).toBe(200);
+    expectText(page.text, fixture.home);
+  });
+
+  it('renders the course catalog', async () => {
+    const page = await getPage(server, '/courses');
+    expect(page.status).toBe(200);
+    expect(page.html).toContain('href="/courses/ai-foundations"');
+    expectText(page.text, fixture.catalog);
+  });
+
+  it('renders the AI Foundations course page', async () => {
+    const page = await getPage(server, '/courses/ai-foundations');
+    expect(page.status).toBe(200);
+    expect(page.text).toContain('AI Foundations');
+    expectText(page.text, fixture.course);
+  });
+
+  it('answers 404 for an unknown course', async () => {
+    const page = await getPage(server, '/courses/no-such-course');
+    expect(page.status).toBe(404);
+    expect(page.text).toContain('We could not find this course');
+    expect(page.text).toContain('no-such-course');
+    // The progress warning belongs to real course pages only.
+    expect(page.text).not.toContain(INVALID_HOME);
+  });
+});
