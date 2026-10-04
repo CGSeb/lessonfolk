@@ -98,6 +98,10 @@ export const en = {
     courseIssuesCommand: 'npm run check:courses',
     courseIssuesMore: '…and {count} more',
   },
+  live: {
+    progressUpdated: 'Your progress was updated.',
+    coursesUpdated: 'The courses were updated.',
+  },
 } as const;
 
 /** Shape every UI translation must follow (same keys, any string values). */
