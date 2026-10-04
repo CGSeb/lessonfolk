@@ -152,6 +152,11 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     const page = await getPage(server, '/courses');
     expect(page.status).toBe(200);
     expect(page.html).toContain('href="/courses/ai-foundations"');
+    // Courses are grouped by theme; themes with no course yet are hidden.
+    expect(page.html).toMatch(/<h2 id="theme-understanding-ai-title"[^>]*>Understanding AI<\/h2>/);
+    expect(page.html).not.toContain('id="theme-ai-and-society"');
+    // Themes are folded by default.
+    expect(page.html).toMatch(/<details class="theme-details"(?![^>]*\bopen\b)[^>]*>/);
     expectText(page.text, fixture.catalog);
   });
 
