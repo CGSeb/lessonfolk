@@ -1,0 +1,102 @@
+---
+import { t } from '../i18n/en';
+import type { Course } from '../lib/courses';
+import type { CourseStats } from '../lib/progress';
+import LevelBadge from './LevelBadge.astro';
+import { courseStatusDisplay, finishedLessons, getCourseStatus } from './course-status';
+
+interface Props {
+  /** One entry of `getStats(courses, progress).courses`. */
+  stats: CourseStats<Course>;
+  /** Heading level of the course title, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { stats, headingLevel = 2 } = Astro.props;
+const { course, total } = stats;
+const finished = finishedLessons(stats);
+const status = courseStatusDisplay(getCourseStatus(stats));
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const hours = course.estimatedHours;
+const progressText = t('courses.lessonsProgress', { done: finished, total });
+const hoursText = t(hours === 1 ? 'courses.hoursOne' : 'courses.hoursOther', { hours });
+const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.lessonCountOther', {
+  count: total,
+});
+const progressId = `course-progress-${course.id}`;
+---
+
+<article class="card stack course-card" style="--stack-space: var(--space-3)">
+  <Heading class="course-card__title">
+    <a href={`/courses/${course.id}`}>{course.title}</a>
+  </Heading>
+
+  <div class="cluster" style="--cluster-space: var(--space-2)">
+    <LevelBadge level={course.level} />
+    <span class:list={['badge', status.variant && `badge--${status.variant}`]}>
+      <span class="visually-hidden">{t('status.label')}:</span> {t(status.key)}
+    </span>
+  </div>
+
+  <p>{course.description}</p>
+
+  <p class="muted course-card__meta">
+    {hoursText} <span aria-hidden="true">·</span> {lessonCountText}
+  </p>
+
+  <div class="stack course-card__progress" style="--stack-space: var(--space-1)">
+    <progress class="progress-bar" value={finished} max={Math.max(total, 1)} aria-labelledby={progressId}>
+      {progressText}
+    </progress>
+    <p class="muted course-card__meta" id={progressId}>{progressText}</p>
+  </div>
+</article>
+
+<style>
+  .course-card {
+    position: relative;
+  }
+
+  .course-card:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .course-card__title {
+    font-size: var(--text-xl);
+  }
+
+  .course-card__title a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .course-card__title a:hover {
+    color: var(--color-accent-strong);
+    text-decoration: underline;
+  }
+
+  /* The whole card is clickable through the title link. */
+  .course-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+  }
+
+  .course-card__title a:focus-visible {
+    outline: none;
+  }
+
+  .course-card__title a:focus-visible::after {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .course-card__meta {
+    font-size: var(--text-sm);
+  }
+
+  .course-card__progress {
+    margin-top: auto;
+  }
+</style>
