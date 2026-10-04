@@ -100,3 +100,11 @@ npm run check:courses
 It fails on structural errors (missing or misspelled sections, broken ids or prerequisites)
 and warns about guideline drift. The full specification is in
 [`docs/course-format.md`](docs/course-format.md).
+
+## License
+
+Apprentice is developed by CG Seb.
+
+- **Code** (dashboard, tooling, tutor instructions): [MIT](LICENSE)
+- **Course content** (`courses/`): [CC BY 4.0](courses/LICENSE). You may share and adapt the
+  courses, including commercially, as long as you give appropriate credit.

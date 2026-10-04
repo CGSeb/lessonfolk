@@ -83,8 +83,9 @@ export const en = {
     backToCourses: 'See all courses',
   },
   footer: {
-    about: 'Apprentice is an open-source project that teaches AI to anyone, through a conversation with an AI tutor.',
+    about: 'Apprentice is an open-source app developed by CG Seb. It teaches AI to anyone, through a conversation with an AI tutor.',
     privacy: 'Your progress is saved only on this computer.',
+    license: 'Code under the MIT license, courses under CC BY 4.0.',
   },
   home: {
     title: 'Home',

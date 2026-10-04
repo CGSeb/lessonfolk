@@ -2,6 +2,7 @@
   "name": "apprentice",
   "private": true,
   "description": "Learn AI from zero to advanced, with an AI coding agent as your tutor.",
+  "license": "MIT",
   "workspaces": [
     "dashboard"
   ],
