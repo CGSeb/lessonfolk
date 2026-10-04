@@ -1,0 +1,47 @@
+---
+/**
+ * Banner for something the learner should know about the page itself
+ * (a problem with their files, a hint). Content goes in the default slot.
+ */
+interface Props {
+  title: string;
+  tone?: 'warning' | 'info';
+}
+
+const { title, tone = 'info' } = Astro.props;
+---
+
+<aside class:list={['notice', `notice--${tone}`]} aria-label={title}>
+  <p class="notice__title">{title}</p>
+  <div class="notice__body stack" style="--stack-space: var(--space-2)">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .notice {
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid currentColor;
+    border-left-width: 4px;
+    border-radius: var(--radius-md);
+  }
+
+  .notice--warning {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+  }
+
+  .notice--info {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+  }
+
+  .notice__title {
+    font-weight: var(--weight-bold);
+  }
+
+  .notice__body {
+    margin-top: var(--space-2);
+    color: var(--color-text);
+  }
+</style>

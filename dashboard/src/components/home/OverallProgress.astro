@@ -1,0 +1,37 @@
+---
+import { t } from '../../i18n/en';
+
+/** Overall progress: lessons finished (with a bar) and courses completed. */
+interface Props {
+  lessons: { finished: number; total: number };
+  courses: { completed: number; total: number };
+}
+
+const { lessons, courses } = Astro.props;
+const lessonsText = t('home.progressLessons', lessons);
+---
+
+<section class="card stack" aria-labelledby="overall-progress-heading" style="--stack-space: var(--space-3)">
+  <h2 class="overall-progress__heading" id="overall-progress-heading">{t('home.progressTitle')}</h2>
+  <p class="overall-progress__lessons">{lessonsText}</p>
+  <progress
+    class="progress-bar"
+    value={lessons.finished}
+    max={Math.max(lessons.total, 1)}
+    aria-labelledby="overall-progress-heading"
+  >
+    {lessonsText}
+  </progress>
+  <p class="muted">{t('home.progressCourses', courses)}</p>
+</section>
+
+<style>
+  .overall-progress__heading {
+    font-size: var(--text-lg);
+  }
+
+  .overall-progress__lessons {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+  }
+</style>

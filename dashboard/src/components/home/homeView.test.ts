@@ -1,0 +1,77 @@
+import { describe, expect, it } from 'vitest';
+import type { CourseRef, LessonStatus, Progress, ProgressResult } from '../../lib/progress';
+import { getHomeView } from './homeView';
+
+const courses: CourseRef[] = [
+  {
+    id: 'basics',
+    lessons: [
+      { id: 'basics/01', prerequisites: [] },
+      { id: 'basics/02', prerequisites: ['basics/01'] },
+    ],
+  },
+  { id: 'more', lessons: [{ id: 'more/01', prerequisites: ['basics/02'] }] },
+];
+
+function ok(lessons: Record<string, LessonStatus>, extra: Partial<Progress> = {}): ProgressResult {
+  return {
+    state: 'ok',
+    progress: {
+      version: 1,
+      profile: {},
+      current: null,
+      lessons: Object.fromEntries(Object.entries(lessons).map(([id, status]) => [id, { status }])),
+      ...extra,
+    },
+  };
+}
+
+describe('getHomeView', () => {
+  it('shows a new learner the first lesson when there is no progress file', () => {
+    const home = getHomeView(courses, { state: 'missing' });
+    expect(home.view).toMatchObject({ state: 'new', first: { kind: 'next', lesson: { id: 'basics/01' } } });
+    expect(home.lessons).toEqual({ finished: 0, total: 3 });
+    expect(home.courses).toEqual({ completed: 0, total: 2 });
+    expect(home.progressError).toBeUndefined();
+  });
+
+  it('treats an invalid progress file as a new learner and keeps the error', () => {
+    const home = getHomeView(courses, { state: 'invalid', error: 'Invalid JSON' });
+    expect(home.view.state).toBe('new');
+    expect(home.progressError).toBe('Invalid JSON');
+  });
+
+  it('resumes the current lesson and counts finished lessons and courses', () => {
+    const home = getHomeView(
+      courses,
+      ok(
+        { 'basics/01': 'done', 'basics/02': 'skipped', 'more/01': 'in_progress' },
+        { current: 'more/01', profile: { name: '  Alex ' } },
+      ),
+    );
+    expect(home.view).toMatchObject({ state: 'in_progress', next: { kind: 'resume', course: { id: 'more' } } });
+    expect(home.name).toBe('Alex');
+    expect(home.lessons).toEqual({ finished: 2, total: 3 });
+    expect(home.courses).toEqual({ completed: 1, total: 2 });
+  });
+
+  it('treats a blank name as absent', () => {
+    expect(getHomeView(courses, ok({}, { profile: { name: ' ' } })).name).toBeUndefined();
+  });
+
+  it('is done when every lesson is done or skipped', () => {
+    const home = getHomeView(courses, ok({ 'basics/01': 'done', 'basics/02': 'done', 'more/01': 'skipped' }));
+    expect(home.view.state).toBe('done');
+    expect(home.courses).toEqual({ completed: 2, total: 2 });
+  });
+
+  it('is blocked when lessons remain but none has its prerequisites met', () => {
+    const blocked: CourseRef[] = [{ id: 'x', lessons: [{ id: 'x/01', prerequisites: ['x/missing'] }] }];
+    expect(getHomeView(blocked, ok({})).view.state).toBe('blocked');
+  });
+
+  it('is empty when no course could be loaded', () => {
+    expect(getHomeView([], ok({})).view.state).toBe('empty');
+    expect(getHomeView([], { state: 'missing' }).view).toEqual({ state: 'new', first: null });
+  });
+});

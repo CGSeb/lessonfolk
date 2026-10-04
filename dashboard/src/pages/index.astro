@@ -1,23 +1,159 @@
 ---
-import { existsSync } from 'node:fs';
+import { relative } from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import NextLessonCard from '../components/NextLessonCard.astro';
+import Notice from '../components/Notice.astro';
+import OverallProgress from '../components/home/OverallProgress.astro';
+import SayPhrase from '../components/home/SayPhrase.astro';
+import { getHomeView } from '../components/home/homeView';
 import { t } from '../i18n/en';
+import { inspectCatalog } from '../lib/courses';
 import { getPaths } from '../lib/paths';
+import { readProgress } from '../lib/progress';
 
-const paths = getPaths();
-const hasProgress = existsSync(paths.progressFile);
+// Read on every request so the page reflects the tutor's latest writes.
+const { catalog, issues } = inspectCatalog('en');
+const { view, name, lessons, courses, progressError } = getHomeView(catalog.courses, readProgress());
+
+const MAX_ISSUES = 5;
+const { root } = getPaths();
+const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
+  file: (relative(root, file) || file).replaceAll('\\', '/'),
+  message,
+}));
 ---
 
 <BaseLayout>
-  <div class="stack">
-    <h1>{t('home.heading')}</h1>
-    <p>{t('home.placeholder')}</p>
-    <ul>
-      <li>{t('home.coursesPath')} <code>{paths.courses}</code></li>
-      <li>
-        {t('home.progressPath')} <code>{paths.progressFile}</code>
-        ({hasProgress ? t('home.progressFound') : t('home.progressMissing')})
-      </li>
-    </ul>
+  <div class="stack" style="--stack-space: var(--space-6)">
+    {
+      progressError && (
+        <Notice tone="warning" title={t('home.invalidProgressTitle')}>
+          <p>{t('home.invalidProgressBody')}</p>
+          <details>
+            <summary>{t('home.technicalDetails')}</summary>
+            <pre class="home-error">{progressError}</pre>
+          </details>
+        </Notice>
+      )
+    }
+    {
+      issues.length > 0 && (
+        <Notice tone="warning" title={t('home.courseIssuesTitle')}>
+          <p>{t('home.courseIssuesBody')}</p>
+          <pre><code>{t('home.courseIssuesCommand')}</code></pre>
+          <ul class="home-issues">
+            {shownIssues.map((issue) => (
+              <li>
+                <code>{issue.file}</code> {issue.message}
+              </li>
+            ))}
+            {issues.length > MAX_ISSUES && <li>{t('home.courseIssuesMore', { count: issues.length - MAX_ISSUES })}</li>}
+          </ul>
+        </Notice>
+      )
+    }
+
+    {
+      view.state === 'new' ? (
+        <>
+          <header class="stack" style="--stack-space: var(--space-2)">
+            <h1>{t('home.heading')}</h1>
+            <p class="home-lead">{t('home.intro')}</p>
+          </header>
+          <div class="home-columns">
+            <section class="card stack" aria-labelledby="start-heading">
+              <h2 id="start-heading">{t('home.startTitle')}</h2>
+              <ol class="home-steps">
+                <li>{t('home.startStepOpen')}</li>
+                <li>
+                  <SayPhrase instruction={t('home.startStepSay')} phrase={t('home.startPhrase')} />
+                </li>
+                <li>{t('home.startStepTutor')}</li>
+              </ol>
+            </section>
+            {view.first && (
+              <NextLessonCard label={t('home.firstLesson')} course={view.first.course} lesson={view.first.lesson} />
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <header class="stack" style="--stack-space: var(--space-2)">
+            <h1>{name ? t('home.greeting', { name }) : t('home.greetingAnonymous')}</h1>
+            <p class="home-lead">{t('home.greetingIntro')}</p>
+          </header>
+          <div class="home-columns">
+            {view.state === 'in_progress' && (
+              <NextLessonCard
+                label={view.next.kind === 'resume' ? t('home.resume') : t('home.nextUp')}
+                course={view.next.course}
+                lesson={view.next.lesson}
+              >
+                <SayPhrase instruction={t('home.continueHint')} phrase={t('home.continuePhrase')} />
+              </NextLessonCard>
+            )}
+            {view.state === 'done' && (
+              <section class="card stack home-done" aria-labelledby="done-heading">
+                <h2 id="done-heading">{t('home.doneTitle')}</h2>
+                <p>{t('home.doneBody')}</p>
+                <SayPhrase instruction={t('home.doneReview')} phrase={t('home.reviewPhrase')} />
+              </section>
+            )}
+            {view.state === 'blocked' && (
+              <section class="card stack" aria-labelledby="blocked-heading">
+                <h2 id="blocked-heading">{t('home.blockedTitle')}</h2>
+                <SayPhrase instruction={t('home.blockedBody')} phrase={t('home.continuePhrase')} />
+              </section>
+            )}
+            {view.state === 'empty' && (
+              <section class="card stack" aria-labelledby="empty-heading">
+                <h2 id="empty-heading">{t('home.emptyTitle')}</h2>
+                <p>{t('home.emptyBody')}</p>
+              </section>
+            )}
+            <OverallProgress lessons={lessons} courses={courses} />
+          </div>
+        </>
+      )
+    }
   </div>
 </BaseLayout>
+
+<style>
+  .home-lead {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .home-columns {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  @media (min-width: 48rem) {
+    .home-columns {
+      grid-template-columns: 3fr 2fr;
+    }
+  }
+
+  .home-steps {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .home-done {
+    border-top: 4px solid var(--color-success);
+  }
+
+  .home-issues {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .home-error {
+    margin-top: var(--space-2);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+</style>
