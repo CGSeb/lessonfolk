@@ -105,3 +105,19 @@ Ask 1–2 questions from the lesson's checks. If the learner answers well, mark 
 ## Contributing (when the user is editing the project, not learning)
 If the user asks to create or edit courses, follow `docs/course-format.md` exactly and keep
 `course.yaml` and `index.yaml` in sync with the lesson files.
+
+### Commit messages
+Every commit message starts with a [gitmoji](https://gitmoji.dev) shortcode, then a space and
+an imperative summary: `:sparkles: Add prompting basics course`. Common ones:
+
+| Gitmoji | Use for |
+|---|---|
+| `:sparkles:` | New feature or new course |
+| `:memo:` | Documentation, course text edits |
+| `:bug:` | Bug fix |
+| `:recycle:` | Refactor |
+| `:wrench:` | Configuration files |
+| `:construction_worker:` | CI / build system |
+| `:art:` | Structure or formatting |
+| `:fire:` | Remove code or files |
+| `:tada:` | Begin a project |
