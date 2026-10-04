@@ -1,0 +1,17 @@
+{
+  "name": "apprentice",
+  "private": true,
+  "description": "Learn AI from zero to advanced, with an AI coding agent as your tutor.",
+  "workspaces": [
+    "dashboard"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dashboard": "npm run dev --workspace dashboard",
+    "dashboard:build": "npm run build --workspace dashboard",
+    "dashboard:start": "npm run start --workspace dashboard",
+    "test": "npm run test --workspace dashboard"
+  }
+}

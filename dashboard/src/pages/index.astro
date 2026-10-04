@@ -1,0 +1,23 @@
+---
+import { existsSync } from 'node:fs';
+import { getPaths } from '../lib/paths';
+
+const paths = getPaths();
+const hasProgress = existsSync(paths.progressFile);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Apprentice</title>
+  </head>
+  <body>
+    <h1>Apprentice</h1>
+    <p>Dashboard is running. Pages are coming in the next tickets.</p>
+    <ul>
+      <li>Courses: <code>{paths.courses}</code></li>
+      <li>Progress: <code>{paths.progressFile}</code> ({hasProgress ? 'found' : 'not created yet'})</li>
+    </ul>
+  </body>
+</html>
