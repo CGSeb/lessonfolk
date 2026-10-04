@@ -11,6 +11,7 @@ import { progressOrEmpty, readProgress } from '../../lib/progress';
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
 const progressResult = readProgress();
+const themesById = new Map(catalog.themes.map((theme) => [theme.id, theme]));
 const sections = getCatalogSections(catalog.courses, catalog.themes, progressOrEmpty(progressResult)).map(
   (section) => ({
     ...section,
@@ -90,13 +91,20 @@ const hiddenIssues = issues.length - shownIssues.length;
 
     {
       sections.length > 0 ? (
-        sections.map(({ anchor, title, description, courses, coursesText, lessonsText, lessons }) => (
+        sections.map(({ anchor, title, description, courses, coursesText, lessonsText, lessons, completed }) => (
           <section class="theme-section" id={anchor} aria-labelledby={`${anchor}-title`}>
             {/* Folded by default; the summary keeps the theme's title and progress visible. */}
             <details class="theme-details" data-details-key={anchor}>
               <summary class="theme-summary">
                 <span class="stack theme-header" style="--stack-space: var(--space-2)">
-                  <h2 id={`${anchor}-title`}>{title}</h2>
+                  <span class="theme-title-row">
+                    <h2 id={`${anchor}-title`}>{title}</h2>
+                    {completed && (
+                      <span class="badge badge--success">
+                        <span class="visually-hidden">{t('status.label')}:</span> {t('status.completed')}
+                      </span>
+                    )}
+                  </span>
                   <span class="muted theme-description">{description}</span>
                   <span class="theme-progress">
                     <span>{coursesText}</span>
@@ -112,7 +120,7 @@ const hiddenIssues = issues.length - shownIssues.length;
               <ol class="grid course-list" role="list" aria-label={t('courses.themeListLabel', { theme: title })}>
                 {courses.map((stats) => (
                   <li>
-                    <CourseCard stats={stats} headingLevel={3} />
+                    <CourseCard stats={stats} headingLevel={3} theme={themesById.get(stats.course.theme)} />
                   </li>
                 ))}
               </ol>
@@ -208,6 +216,13 @@ const hiddenIssues = issues.length - shownIssues.length;
   .theme-header {
     flex: 1;
     max-width: 40rem;
+  }
+
+  .theme-title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
   }
 
   .theme-description {

@@ -6,6 +6,7 @@ import {
   type NextLesson,
   type ProgressResult,
 } from '../../lib/progress';
+import { getCatalogSections, type ThemeRef } from '../catalog/catalogView';
 
 /**
  * What the home page shows:
@@ -29,12 +30,29 @@ export interface HomeView<C extends CourseRef> {
   /** Done or skipped lessons, out of all lessons in the catalog. */
   lessons: { finished: number; total: number };
   courses: { completed: number; total: number };
+  /** Non-empty themes in `themes.yaml` order, with finished lessons out of the theme's lessons. */
+  themes: ThemeProgress[];
   /** Error message when the progress file exists but cannot be used. */
   progressError: string | undefined;
 }
 
+export interface ThemeProgress {
+  id: string;
+  title: string;
+  /** Anchor of the theme's section in the catalog. */
+  anchor: string;
+  finished: number;
+  total: number;
+  /** Every course of the theme is completed. */
+  completed: boolean;
+}
+
 /** Pure computation of the home page content from the catalog and the progress read result. */
-export function getHomeView<C extends CourseRef>(courses: C[], result: ProgressResult): HomeView<C> {
+export function getHomeView<C extends CourseRef>(
+  courses: C[],
+  result: ProgressResult,
+  themes: ThemeRef<C>[] = [],
+): HomeView<C> {
   const progress = progressOrEmpty(result);
   const stats = getStats(courses, progress);
   const next = getNextLesson(courses, progress);
@@ -57,6 +75,10 @@ export function getHomeView<C extends CourseRef>(courses: C[], result: ProgressR
       completed: stats.courses.filter((c) => c.completed).length,
       total: stats.courses.length,
     },
+    // Courses with an unknown theme are reported as content issues, not shown here.
+    themes: getCatalogSections(courses, themes, progress).flatMap(({ theme, anchor, lessons, completed }) =>
+      theme ? [{ id: theme.id, title: theme.title, anchor, ...lessons, completed }] : [],
+    ),
     progressError: result.state === 'invalid' ? result.error : undefined,
   };
 }

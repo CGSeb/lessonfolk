@@ -3,6 +3,7 @@ import { t } from '../i18n/en';
 import type { Course } from '../lib/courses';
 import type { CourseStats } from '../lib/progress';
 import LevelBadge from './LevelBadge.astro';
+import ThemeBadge from './ThemeBadge.astro';
 import { courseStatusDisplay, finishedLessons, getCourseStatus } from './course-status';
 
 interface Props {
@@ -10,9 +11,11 @@ interface Props {
   stats: CourseStats<Course>;
   /** Heading level of the course title, to fit the page outline. */
   headingLevel?: 2 | 3;
+  /** The course's theme, shown as a badge linking to its catalog section. */
+  theme?: { id: string; title: string };
 }
 
-const { stats, headingLevel = 2 } = Astro.props;
+const { stats, headingLevel = 2, theme } = Astro.props;
 const { course, total } = stats;
 const finished = finishedLessons(stats);
 const status = courseStatusDisplay(getCourseStatus(stats));
@@ -32,6 +35,7 @@ const progressId = `course-progress-${course.id}`;
   </Heading>
 
   <div class="cluster" style="--cluster-space: var(--space-2)">
+    <ThemeBadge theme={theme} />
     <LevelBadge level={course.level} />
     <span class:list={['badge', status.variant && `badge--${status.variant}`]}>
       <span class="visually-hidden">{t('status.label')}:</span> {t(status.key)}

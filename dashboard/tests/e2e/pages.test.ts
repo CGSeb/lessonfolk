@@ -38,7 +38,14 @@ const fixtures: Record<string, Expectations> = {
   'onboarded, no lesson yet (minimal)': {
     progressDir: join(PROGRESS_FIXTURES, 'minimal'),
     home: {
-      include: ['Welcome back!', 'Next up', LESSONS[0], '0 of 3 lessons finished', 'Courses completed: 0 of 1'],
+      include: [
+        'Welcome back!',
+        'Next up',
+        LESSONS[0],
+        '0 of 3 lessons finished',
+        'Courses completed: 0 of 1',
+        'Your progress by theme',
+      ],
       exclude: ['Welcome to Apprentice', INVALID_HOME],
     },
     catalog: { include: ['Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG] },
@@ -53,6 +60,8 @@ const fixtures: Record<string, Expectations> = {
         LESSONS[1],
         '1 of 3 lessons finished',
         'Courses completed: 0 of 1',
+        'Your progress by theme',
+        '1 of 3 lessons',
       ],
       exclude: ['Welcome to Apprentice', INVALID_HOME],
     },
@@ -155,6 +164,8 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     // Courses are grouped by theme; themes with no course yet are hidden.
     expect(page.html).toMatch(/<h2 id="theme-understanding-ai-title"[^>]*>Understanding AI<\/h2>/);
     expect(page.html).not.toContain('id="theme-ai-and-society"');
+    // Each card shows its theme, linking to the theme's section.
+    expect(page.html).toMatch(/<a class="badge theme-badge[^"]*" href="\/courses#theme-understanding-ai"/);
     // Themes are folded by default.
     expect(page.html).toMatch(/<details class="theme-details"(?![^>]*\bopen\b)[^>]*>/);
     expectText(page.text, fixture.catalog);
@@ -164,6 +175,8 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     const page = await getPage(server, '/courses/ai-foundations');
     expect(page.status).toBe(200);
     expect(page.text).toContain('AI Foundations');
+    expect(page.html).toMatch(/<a class="badge theme-badge[^"]*" href="\/courses#theme-understanding-ai"/);
+    expect(page.text).toContain('Theme: Understanding AI');
     expectText(page.text, fixture.course);
   });
 
