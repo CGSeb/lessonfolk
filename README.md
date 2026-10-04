@@ -1,6 +1,11 @@
-# Apprentice
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo-dark.svg">
+    <img src="assets/brand/logo.svg" alt="Apprentice" width="320">
+  </picture>
+</h1>
 
-**Learn AI from zero to advanced, with an AI as your tutor.**
+<p align="center"><strong>Learn AI from zero to advanced, with an AI as your tutor.</strong></p>
 
 Apprentice is a collection of open-source AI courses designed to be taught *by* an AI coding
 agent — [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex), or any
