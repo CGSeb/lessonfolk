@@ -1,0 +1,125 @@
+name: Task
+description: A unit of work for Apprentice — feature, course, tutor improvement, docs or infra.
+title: "[Task] "
+projects: ["CGSeb/3"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the work so that someone (human or AI agent) can implement it without asking further questions.
+        Keep one ticket = one deliverable that can be reviewed in a single pull request.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should be done, in one or two sentences.
+      placeholder: Add a "Prompting basics" beginner course with 4 lessons.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem this solves or the value it brings to learners or contributors.
+      placeholder: After AI Foundations, beginners need practical skills to use chat assistants effectively.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - course — course content
+        - tutor — AGENTS.md, skills, tutoring behaviour
+        - dashboard — web dashboard
+        - infra — MCP server, tooling, CI, packaging
+        - docs — README, course format, contributor docs
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - "Phase 1 — in-repo tutoring"
+        - "Phase 2 — MCP server / use from anywhere"
+        - "Phase 3 — dashboard"
+        - "Later / unscheduled"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is included. Be concrete — list the pieces to build or change.
+      placeholder: |
+        - Create courses/en/prompting-basics/ with course.yaml and 4 lessons
+        - Add the course to courses/en/index.yaml after ai-foundations
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What is explicitly NOT part of this ticket (avoids scope creep).
+      placeholder: French translation (separate ticket).
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkable conditions that mean the ticket is done.
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Files / components affected
+      description: Paths or parts of the project that will change, if known.
+      placeholder: |
+        courses/en/index.yaml
+        courses/en/prompting-basics/*
+
+  - type: checkboxes
+    id: agents
+    attributes:
+      label: Agent compatibility
+      description: Tutoring must work in both supported agents. Tick what must be tested for this ticket.
+      options:
+        - label: Test in Claude Code
+        - label: Test in Codex
+
+  - type: input
+    id: dependencies
+    attributes:
+      label: Depends on
+      description: Tickets that must be done first (e.g. #3, #5).
+      placeholder: "#3"
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Rough effort estimate.
+      options:
+        - S — under 2 hours
+        - M — half a day to a day
+        - L — several days (consider splitting)
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes, references, open questions
+      description: Links, design ideas, decisions still to make.
