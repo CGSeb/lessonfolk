@@ -1,0 +1,58 @@
+---
+import type { Course, Lesson } from '../lib/courses';
+import { t } from '../i18n/en';
+
+/**
+ * The lesson the tutor will teach next: course, title, duration and objectives,
+ * with a link to the course. Put how to start it (e.g. a SayPhrase) in the default slot.
+ */
+interface Props {
+  /** Card heading, e.g. "Next up". */
+  label: string;
+  course: Pick<Course, 'id' | 'title'>;
+  lesson: Pick<Lesson, 'title' | 'estimatedMinutes' | 'objectives'>;
+}
+
+const { label, course, lesson } = Astro.props;
+const headingId = 'next-lesson-heading';
+---
+
+<section class="card next-lesson stack" aria-labelledby={headingId}>
+  <h2 class="next-lesson__label" id={headingId}>{label}</h2>
+  <div class="stack" style="--stack-space: var(--space-1)">
+    <h3>{lesson.title}</h3>
+    <p class="cluster muted" style="--cluster-space: var(--space-2)">
+      <span>{t('home.inCourse', { course: course.title })}</span>
+      <span class="badge">{t('home.minutes', { minutes: lesson.estimatedMinutes })}</span>
+    </p>
+  </div>
+  <div class="stack" style="--stack-space: var(--space-2)">
+    <h4>{t('home.objectives')}</h4>
+    <ul class="next-lesson__objectives">
+      {lesson.objectives.map((objective) => <li>{objective}</li>)}
+    </ul>
+  </div>
+  <slot />
+  <p>
+    <a href={`/courses/${encodeURIComponent(course.id)}`}>{t('home.viewCourse', { course: course.title })}</a>
+  </p>
+</section>
+
+<style>
+  .next-lesson {
+    border-top: 4px solid var(--color-accent);
+  }
+
+  .next-lesson__label {
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .next-lesson__objectives {
+    display: grid;
+    gap: var(--space-1);
+  }
+</style>
