@@ -5,6 +5,7 @@ import NextLessonCard from '../components/NextLessonCard.astro';
 import Notice from '../components/Notice.astro';
 import OverallProgress from '../components/home/OverallProgress.astro';
 import SayPhrase from '../components/home/SayPhrase.astro';
+import ThemeProgress from '../components/home/ThemeProgress.astro';
 import { getHomeView } from '../components/home/homeView';
 import { t } from '../i18n/en';
 import { inspectCatalog } from '../lib/courses';
@@ -13,7 +14,11 @@ import { readProgress } from '../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
-const { view, name, lessons, courses, progressError } = getHomeView(catalog.courses, readProgress());
+const { view, name, lessons, courses, themes, progressError } = getHomeView(
+  catalog.courses,
+  readProgress(),
+  catalog.themes,
+);
 
 const MAX_ISSUES = 5;
 const { root } = getPaths();
@@ -111,7 +116,10 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
                 <p>{t('home.emptyBody')}</p>
               </section>
             )}
-            <OverallProgress lessons={lessons} courses={courses} />
+            <div class="stack" style="--stack-space: var(--space-5)">
+              <OverallProgress lessons={lessons} courses={courses} />
+              {themes.length > 0 && <ThemeProgress themes={themes} />}
+            </div>
           </div>
         </>
       )

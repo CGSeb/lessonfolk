@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import LevelBadge from '../../components/LevelBadge.astro';
 import Notice from '../../components/Notice.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
+import ThemeBadge from '../../components/ThemeBadge.astro';
 import SayPhrase from '../../components/home/SayPhrase.astro';
 import { getCourseView, issuesForCourse } from '../../components/course/courseView';
 import { t } from '../../i18n/en';
@@ -29,6 +30,7 @@ const shownIssues = courseIssues.slice(0, MAX_ISSUES).map(({ file, message }) =>
 }));
 
 const course = view?.course;
+const theme = course && catalog.themes.find((th) => th.id === course.theme);
 const total = view?.stats.total ?? 0;
 const progressText = t('courses.lessonsProgress', { done: view?.finished ?? 0, total });
 const hoursText = course
@@ -90,6 +92,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
           <header class="stack" style="--stack-space: var(--space-3)">
             <h1>{course.title}</h1>
             <div class="cluster" style="--cluster-space: var(--space-2)">
+              <ThemeBadge theme={theme} />
               <LevelBadge level={course.level} />
               <StatusBadge status={view.status} />
             </div>

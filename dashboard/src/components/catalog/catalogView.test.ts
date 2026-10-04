@@ -83,5 +83,19 @@ describe('getCatalogSections', () => {
       [1, 2, { finished: 2, total: 3 }],
       [0, 1, { finished: 1, total: 3 }],
     ]);
+    expect(sections.map((s) => s.completed)).toEqual([false, false]);
+  });
+
+  it('marks a theme completed when all its courses are completed', () => {
+    const themes = [theme('one', [a, b]), theme('two', [c])];
+    const sections = getCatalogSections(
+      courses,
+      themes,
+      progress({ 'a/01': 'done', 'a/02': 'skipped', 'b/01': 'done', 'c/01': 'done' }),
+    );
+    expect(sections.map((s) => [s.anchor, s.completed])).toEqual([
+      ['theme-one', true],
+      ['theme-two', false],
+    ]);
   });
 });

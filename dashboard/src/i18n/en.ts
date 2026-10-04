@@ -55,6 +55,12 @@ export const en = {
     done: 'Done',
     skipped: 'Skipped',
   },
+  theme: {
+    label: 'Theme',
+    linkTitle: 'See all {theme} courses',
+    progressTitle: 'Your progress by theme',
+    progressLessons: '{finished} of {total} lessons',
+  },
   level: {
     label: 'Level',
     beginner: 'Beginner',

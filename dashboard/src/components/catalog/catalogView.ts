@@ -16,6 +16,8 @@ export interface ThemeSection<C extends CourseRef> {
   anchor: string;
   courses: CourseStats<C>[];
   coursesCompleted: number;
+  /** Every course of the theme is completed (all its lessons done or skipped). */
+  completed: boolean;
   /** Done or skipped lessons, out of all lessons of the theme. */
   lessons: { finished: number; total: number };
 }
@@ -44,6 +46,7 @@ export function getCatalogSections<C extends CourseRef>(
       anchor,
       courses: courseStats,
       coursesCompleted: courseStats.filter((s) => s.completed).length,
+      completed: courseStats.length > 0 && courseStats.every((s) => s.completed),
       lessons: {
         finished: lessons.filter((l) => isFinished(progress, l.id)).length,
         total: lessons.length,

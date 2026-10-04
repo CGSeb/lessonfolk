@@ -74,4 +74,30 @@ describe('getHomeView', () => {
     expect(getHomeView([], ok({})).view.state).toBe('empty');
     expect(getHomeView([], { state: 'missing' }).view).toEqual({ state: 'new', first: null });
   });
+
+  describe('progress by theme', () => {
+    const theme = (id: string, members: CourseRef[]) => ({ id, title: `T ${id}`, description: 'd', courses: members });
+    const [basics, more] = courses;
+
+    it('lists non-empty themes in order with finished lessons', () => {
+      const home = getHomeView(courses, ok({ 'basics/01': 'done', 'more/01': 'skipped' }), [
+        theme('empty', []),
+        theme('second', [more]),
+        theme('first', [basics]),
+      ]);
+      expect(home.themes).toEqual([
+        { id: 'second', title: 'T second', anchor: 'theme-second', finished: 1, total: 1, completed: true },
+        { id: 'first', title: 'T first', anchor: 'theme-first', finished: 1, total: 2, completed: false },
+      ]);
+    });
+
+    it('leaves out courses whose theme is unknown', () => {
+      const home = getHomeView(courses, ok({}), [theme('first', [basics])]);
+      expect(home.themes.map((th) => th.id)).toEqual(['first']);
+    });
+
+    it('is empty without themes', () => {
+      expect(getHomeView(courses, ok({})).themes).toEqual([]);
+    });
+  });
 });

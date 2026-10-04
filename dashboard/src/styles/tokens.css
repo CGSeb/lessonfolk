@@ -99,6 +99,10 @@
   --color-focus: light-dark(var(--indigo-600), var(--brand-amber));
   --color-focus-halo: light-dark(var(--amber-300), var(--indigo-800));
   --color-glow: light-dark(rgb(79 70 229 / 0.07), rgb(99 102 241 / 0.12));
+  /* Theme badge: ~9:1 (light) and ~11:1 (dark) text contrast on its own background. */
+  --color-theme-badge-bg: light-dark(var(--indigo-50), var(--indigo-950));
+  --color-theme-badge-text: light-dark(var(--indigo-800), var(--indigo-200));
+  --color-theme-badge-border: var(--color-accent-border);
 
   --shadow-color: light-dark(rgb(26 28 51 / 0.06), rgb(0 0 0 / 0.4));
   --shadow-color-soft: light-dark(rgb(26 28 51 / 0.05), rgb(0 0 0 / 0.35));
