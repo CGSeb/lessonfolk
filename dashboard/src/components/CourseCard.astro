@@ -55,10 +55,16 @@ const progressId = `course-progress-${course.id}`;
 <style>
   .course-card {
     position: relative;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      transform 0.15s ease;
   }
 
   .course-card:hover {
-    border-color: var(--color-border-strong);
+    border-color: var(--color-accent-border);
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-2px);
   }
 
   .course-card__title {
@@ -71,8 +77,7 @@ const progressId = `course-progress-${course.id}`;
   }
 
   .course-card__title a:hover {
-    color: var(--color-accent-strong);
-    text-decoration: underline;
+    color: var(--color-accent);
   }
 
   /* The whole card is clickable through the title link. */
@@ -85,11 +90,13 @@ const progressId = `course-progress-${course.id}`;
 
   .course-card__title a:focus-visible {
     outline: none;
+    box-shadow: none;
   }
 
   .course-card__title a:focus-visible::after {
-    outline: 3px solid var(--color-focus);
-    outline-offset: 2px;
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+    box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
   }
 
   .course-card__meta {

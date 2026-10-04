@@ -18,6 +18,8 @@ export const en = {
     skipToContent: 'Skip to main content',
     mainNav: 'Main',
     homeLink: 'Apprentice, home',
+    themeToDark: 'Switch to dark theme',
+    themeToLight: 'Switch to light theme',
   },
   nav: {
     home: 'Home',

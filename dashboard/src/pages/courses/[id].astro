@@ -139,11 +139,11 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
             <ol class="lesson-list stack" role="list" style="--stack-space: var(--space-3)">
               {view.lessons.map((row) => (
                 <li
-                  class:list={['card', 'stack', 'lesson', row.isNext && 'lesson--next']}
+                  class:list={['card', 'stack', 'lesson', row.isNext && 'card--spark lesson--next']}
                   style="--stack-space: var(--space-3)"
                   aria-current={row.isNext ? 'step' : undefined}
                 >
-                  {row.isNext && <p class="lesson__next-label">{t('course.nextUp')}</p>}
+                  {row.isNext && <p class="overline">{t('course.nextUp')}</p>}
                   <div class="lesson__head">
                     <h3 class="lesson__title">{row.lesson.title}</h3>
                     <StatusBadge status={row.status} />
@@ -188,10 +188,16 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
   .breadcrumb li + li::before {
     content: '/';
     margin-right: var(--space-2);
-    color: var(--color-text-muted);
+    color: var(--color-border-strong);
+  }
+
+  .breadcrumb [aria-current='page'] {
+    color: var(--color-text);
+    font-weight: var(--weight-medium);
   }
 
   .course-lead {
+    color: var(--color-text-muted);
     font-size: var(--text-lg);
   }
 
@@ -212,12 +218,31 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
   }
 
   .course-card-title {
-    font-size: var(--text-lg);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    letter-spacing: normal;
   }
 
+  /* Achievement: a spark dot before the "course finished" message. */
   .course-done {
-    color: var(--color-success);
-    font-weight: var(--weight-medium);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-spark-subtle);
+    color: var(--color-text);
+    font-weight: var(--weight-semibold);
+  }
+
+  .course-done::before {
+    content: '';
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-spark);
   }
 
   .lesson-list {
@@ -232,15 +257,8 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
   }
 
   .lesson--next {
-    border-top: 4px solid var(--color-accent);
-  }
-
-  .lesson__next-label {
-    color: var(--color-accent);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-bold);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    padding-top: var(--space-6);
+    box-shadow: var(--shadow-raised);
   }
 
   .lesson__head {
@@ -266,14 +284,14 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
 
   .lesson__notes {
     padding: var(--space-3) var(--space-4);
-    border-left: 3px solid var(--color-border-strong);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     background: var(--color-surface-sunken);
   }
 
   .lesson__notes-label {
+    color: var(--color-text-muted);
     font-size: var(--text-sm);
-    font-weight: var(--weight-bold);
+    font-weight: var(--weight-semibold);
   }
 
   .course-issues {

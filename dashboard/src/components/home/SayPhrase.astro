@@ -21,14 +21,14 @@ const { instruction, phrase } = Astro.props;
     gap: var(--space-2);
   }
 
+  /* Phrase chip: what to type to the tutor. Looks like a friendly chat bubble, not code. */
   .say__phrase {
-    padding: 0.1em 0.6em;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface-sunken);
-    font-family: var(--font-mono);
-    font-size: 0.95em;
-    font-weight: var(--weight-medium);
+    padding: 0.2em 0.85em;
+    border: 1px solid var(--color-accent-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent-strong);
+    font-weight: var(--weight-semibold);
     white-space: nowrap;
   }
 </style>
