@@ -50,11 +50,17 @@ import { t } from '../i18n/en';
     }
   }
 
-  /** Re-open <details> the learner had open, matched by their summary text. */
+  /**
+   * Identity of a <details> across refreshes: its `data-details-key` when set
+   * (for summaries whose text changes with progress), else its summary text.
+   */
+  function detailsKey(details: HTMLDetailsElement): string {
+    return details.dataset.detailsKey ?? details.querySelector(':scope > summary')?.textContent?.trim() ?? '';
+  }
+
+  /** Keys of the <details> the learner has open, to re-open them after the swap. */
   function openDetails(main: HTMLElement): Set<string> {
-    return new Set(
-      [...main.querySelectorAll('details[open] > summary')].map((s) => s.textContent?.trim() ?? ''),
-    );
+    return new Set([...main.querySelectorAll<HTMLDetailsElement>('details[open]')].map(detailsKey));
   }
 
   function announce(area: string) {
@@ -90,8 +96,8 @@ import { t } from '../i18n/en';
       const opened = openDetails(main);
       const { scrollX, scrollY } = window;
       main.replaceChildren(...[...nextMain.childNodes].map((node) => document.importNode(node, true)));
-      for (const summary of main.querySelectorAll('details > summary')) {
-        if (opened.has(summary.textContent?.trim() ?? '')) summary.parentElement?.setAttribute('open', '');
+      for (const details of main.querySelectorAll<HTMLDetailsElement>('details')) {
+        if (opened.has(detailsKey(details))) details.open = true;
       }
       if (next.title) document.title = next.title;
       window.scrollTo(scrollX, scrollY);

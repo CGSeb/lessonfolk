@@ -2,15 +2,30 @@
 import { relative } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CourseCard from '../../components/CourseCard.astro';
+import { getCatalogSections } from '../../components/catalog/catalogView';
 import { t } from '../../i18n/en';
 import { inspectCatalog } from '../../lib/courses';
 import { getPaths } from '../../lib/paths';
-import { getStats, progressOrEmpty, readProgress } from '../../lib/progress';
+import { progressOrEmpty, readProgress } from '../../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
 const progressResult = readProgress();
-const { courses } = getStats(catalog.courses, progressOrEmpty(progressResult));
+const sections = getCatalogSections(catalog.courses, catalog.themes, progressOrEmpty(progressResult)).map(
+  (section) => ({
+    ...section,
+    title: section.theme?.title ?? t('courses.otherThemeTitle'),
+    description: section.theme?.description ?? t('courses.otherThemeDescription'),
+    coursesText: t(
+      section.courses.length === 1 ? 'courses.themeCoursesProgressOne' : 'courses.themeCoursesProgressOther',
+      { done: section.coursesCompleted, total: section.courses.length },
+    ),
+    lessonsText: t('courses.lessonsProgress', {
+      done: section.lessons.finished,
+      total: section.lessons.total,
+    }),
+  }),
+);
 
 const MAX_ISSUES = 5;
 const coursesDir = getPaths().courses;
@@ -58,20 +73,73 @@ const hiddenIssues = issues.length - shownIssues.length;
     }
 
     {
-      courses.length > 0 ? (
-        <ol class="grid course-list" role="list" aria-label={t('courses.listLabel')}>
-          {courses.map((stats) => (
-            <li>
-              <CourseCard stats={stats} />
-            </li>
-          ))}
-        </ol>
+      sections.length > 1 && (
+        <nav aria-label={t('courses.themeNavLabel')}>
+          <ul class="cluster theme-nav" role="list" style="--cluster-space: var(--space-2)">
+            {sections.map(({ anchor, title }) => (
+              <li>
+                <a class="theme-chip" href={`#${anchor}`}>
+                  {title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+
+    {
+      sections.length > 0 ? (
+        sections.map(({ anchor, title, description, courses, coursesText, lessonsText, lessons }) => (
+          <section class="theme-section" id={anchor} aria-labelledby={`${anchor}-title`}>
+            {/* Folded by default; the summary keeps the theme's title and progress visible. */}
+            <details class="theme-details" data-details-key={anchor}>
+              <summary class="theme-summary">
+                <span class="stack theme-header" style="--stack-space: var(--space-2)">
+                  <h2 id={`${anchor}-title`}>{title}</h2>
+                  <span class="muted theme-description">{description}</span>
+                  <span class="theme-progress">
+                    <span>{coursesText}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{lessonsText}</span>
+                  </span>
+                  <progress class="progress-bar" value={lessons.finished} max={Math.max(lessons.total, 1)} aria-label={lessonsText}>
+                    {lessonsText}
+                  </progress>
+                </span>
+                <span class="theme-chevron" aria-hidden="true"></span>
+              </summary>
+              <ol class="grid course-list" role="list" aria-label={t('courses.themeListLabel', { theme: title })}>
+                {courses.map((stats) => (
+                  <li>
+                    <CourseCard stats={stats} headingLevel={3} />
+                  </li>
+                ))}
+              </ol>
+            </details>
+          </section>
+        ))
       ) : (
         <p class="muted">{t('courses.empty')}</p>
       )
     }
   </div>
 </BaseLayout>
+
+<script>
+  /** Open a folded theme when the page navigates to it (theme chips, shared links). */
+  function openTarget() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const details = id ? document.getElementById(id)?.querySelector('details') : null;
+    if (details) details.open = true;
+  }
+  openTarget();
+  window.addEventListener('hashchange', openTarget);
+  // Clicking a chip for the theme already in the URL does not fire hashchange.
+  document.addEventListener('click', (event) => {
+    if ((event.target as Element).closest?.('a[href^="#theme-"]')) setTimeout(openTarget);
+  });
+</script>
 
 <style>
   .warning {
@@ -87,6 +155,103 @@ const hiddenIssues = issues.length - shownIssues.length;
     padding: 0;
     background: transparent;
     color: inherit;
+  }
+
+  .theme-nav {
+    padding: 0;
+    list-style: none;
+  }
+
+  .theme-chip {
+    display: inline-block;
+    padding: var(--space-1) var(--space-4);
+    border: 1px solid var(--color-accent-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent-strong);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+
+  .theme-chip:hover {
+    border-color: var(--color-accent);
+  }
+
+  .theme-section {
+    scroll-margin-top: var(--space-5);
+  }
+
+  .theme-details {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .theme-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .theme-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .theme-summary:hover .theme-chevron {
+    border-color: var(--color-accent);
+  }
+
+  .theme-header {
+    flex: 1;
+    max-width: 40rem;
+  }
+
+  .theme-description {
+    display: block;
+  }
+
+  /* Chevron drawn with borders: points down when folded, up when open. */
+  .theme-chevron {
+    flex: none;
+    margin-left: auto;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-top: 0.6rem;
+    border-right: 2px solid var(--color-text-muted);
+    border-bottom: 2px solid var(--color-text-muted);
+    transform: rotate(45deg);
+    transition: transform 150ms ease;
+  }
+
+  .theme-details[open] .theme-chevron {
+    margin-top: 0.9rem;
+    transform: rotate(-135deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-chevron {
+      transition: none;
+    }
+  }
+
+  .theme-details > .course-list {
+    padding: 0 var(--space-5) var(--space-5);
+  }
+
+  .theme-header .progress-bar {
+    max-width: 20rem;
+  }
+
+  .theme-progress {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
   }
 
   .course-list {
