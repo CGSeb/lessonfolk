@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CourseValidationError,
   findLesson,
+  inspectAllCourses,
   inspectCatalog,
   listLanguages,
   loadCatalog,
@@ -58,6 +59,7 @@ describe('loadCatalog (real courses)', () => {
   it('validates every language in the repo', () => {
     expect(listLanguages()).toContain('en');
     expect(validateAllCourses()).toEqual([]);
+    expect(inspectAllCourses().warnings).toEqual([]);
   });
 
   it('throws a clear error for an unknown language', () => {
@@ -126,8 +128,55 @@ describe('loadCatalog (invalid fixture)', () => {
 
   it('still returns the parts that loaded', () => {
     const { catalog } = inspectCatalog('en', invalidDir);
-    expect(catalog.courses.map((c) => c.id)).toEqual(['broken-refs']);
+    expect(catalog.courses.map((c) => c.id)).toEqual(['broken-refs', 'broken-sections']);
     expect(catalog.courses[0].prerequisites).toEqual([]);
+  });
+});
+
+describe('lesson sections (invalid fixture)', () => {
+  const sectionIssues = (lesson: string) =>
+    issuesFor(invalidDir)
+      .filter((i) => i.file === `en/broken-sections/${lesson}.md`)
+      .map((i) => i.message);
+
+  it('reports a missing section', () => {
+    expect(sectionIssues('01-missing-section')).toEqual(['missing section "## Teaching notes"']);
+  });
+
+  it('reports a misspelled section', () => {
+    expect(sectionIssues('02-misspelled-section')).toEqual([
+      'unknown section "## Key Idea"; did you mean "## Key ideas"?',
+      'missing section "## Key ideas"',
+    ]);
+  });
+
+  it('reports sections out of order', () => {
+    expect(sectionIssues('03-out-of-order')).toEqual([
+      'section "## Key ideas" must come before "## Teaching notes"',
+    ]);
+  });
+
+  it('reports a check question without a good answer', () => {
+    expect(sectionIssues('04-no-good-answer')).toEqual([
+      'question 2 in "## Check your understanding" has no "Good answer:" line',
+    ]);
+  });
+
+  it('reports guideline drift as warnings only', () => {
+    expect(sectionIssues('05-guideline-drift')).toEqual([]);
+    const { warnings } = inspectCatalog('en', invalidDir);
+    expect(warnings.map((w) => w.message)).toEqual([
+      '"## Key ideas" has 2 numbered ideas; guidelines suggest 3–6',
+      'estimatedMinutes is 40; guidelines suggest 10–25 minutes',
+    ]);
+    expect(warnings.every((w) => w.file.endsWith('05-guideline-drift.md'))).toBe(true);
+  });
+
+  it('does not block loading on warnings', () => {
+    const course = inspectCatalog('en', invalidDir).catalog.courses.find(
+      (c) => c.id === 'broken-sections',
+    );
+    expect(course?.lessons.map((l) => l.id)).toContain('broken-sections/05-guideline-drift');
   });
 });
 

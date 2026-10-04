@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { z } from 'zod';
+import { checkLessonBody } from './lesson-body.ts';
 import { getPaths } from './paths.ts';
 import {
   courseFileSchema,
@@ -84,20 +85,23 @@ function readYaml(file: string, issues: CourseIssue[]): unknown {
   }
 }
 
-function readFrontmatter(file: string, issues: CourseIssue[]): unknown {
-  const match = FRONTMATTER.exec(readFileSync(file, 'utf8'));
+/** Frontmatter data and the Markdown body that follows it. */
+function readLessonFile(file: string, issues: CourseIssue[]): { front: unknown; body: string } {
+  const text = readFileSync(file, 'utf8');
+  const match = FRONTMATTER.exec(text);
   if (!match) {
     issues.push({ file, message: 'missing YAML frontmatter (--- … ---) at the top of the file' });
-    return undefined;
+    return { front: undefined, body: text };
   }
+  const body = text.slice(match[0].length);
   try {
-    return parseYaml(match[1]);
+    return { front: parseYaml(match[1]), body };
   } catch (err) {
     issues.push({
       file,
       message: `cannot parse frontmatter: ${(err as Error).message.split('\n')[0]}`,
     });
-    return undefined;
+    return { front: undefined, body };
   }
 }
 
@@ -120,22 +124,24 @@ function isDir(path: string): boolean {
 /**
  * Load and check one language. Never throws for content problems: they are
  * returned in `issues` and the catalog contains whatever could be loaded.
+ * `warnings` lists drift from the writing guidelines; it never blocks loading.
  */
 export function inspectCatalog(
   lang = 'en',
   coursesDir: string = getPaths().courses,
-): { catalog: Catalog; issues: CourseIssue[] } {
+): { catalog: Catalog; issues: CourseIssue[]; warnings: CourseIssue[] } {
   const issues: CourseIssue[] = [];
+  const warnings: CourseIssue[] = [];
   const catalog: Catalog = { lang, courses: [] };
   const langDir = join(coursesDir, lang);
   const indexFile = join(langDir, 'index.yaml');
 
   if (!existsSync(indexFile)) {
     issues.push({ file: indexFile, message: `index.yaml not found for language "${lang}"` });
-    return { catalog, issues };
+    return { catalog, issues, warnings };
   }
   const index = validate(indexSchema, readYaml(indexFile, issues), indexFile, issues);
-  if (!index) return { catalog, issues };
+  if (!index) return { catalog, issues, warnings };
 
   const seenCourses = new Set<string>();
   for (const courseId of index.courses) {
@@ -144,7 +150,7 @@ export function inspectCatalog(
       continue;
     }
     seenCourses.add(courseId);
-    const course = loadCourseDir(langDir, courseId, indexFile, issues);
+    const course = loadCourseDir(langDir, courseId, indexFile, issues, warnings);
     if (course) catalog.courses.push(course);
   }
 
@@ -173,7 +179,7 @@ export function inspectCatalog(
     }
   }
 
-  return { catalog, issues };
+  return { catalog, issues, warnings };
 }
 
 function loadCourseDir(
@@ -181,6 +187,7 @@ function loadCourseDir(
   courseId: string,
   indexFile: string,
   issues: CourseIssue[],
+  warnings: CourseIssue[],
 ): Course | undefined {
   const courseDir = join(langDir, courseId);
   const courseFile = join(courseDir, 'course.yaml');
@@ -224,12 +231,8 @@ function loadCourseDir(
       });
       continue;
     }
-    const front = validate(
-      lessonFrontmatterSchema,
-      readFrontmatter(lessonFile, issues),
-      lessonFile,
-      issues,
-    );
+    const lessonText = readLessonFile(lessonFile, issues);
+    const front = validate(lessonFrontmatterSchema, lessonText.front, lessonFile, issues);
     if (!front) continue;
     if (front.id !== lessonId) {
       issues.push({
@@ -238,6 +241,9 @@ function loadCourseDir(
       });
       continue;
     }
+    const body = checkLessonBody(lessonText.body, front.estimatedMinutes);
+    for (const message of body.errors) issues.push({ file: lessonFile, message });
+    for (const message of body.warnings) warnings.push({ file: lessonFile, message });
     lessons.push({ ...front, file: lessonFile });
   }
 
@@ -303,11 +309,23 @@ export function listLanguages(coursesDir: string = getPaths().courses): string[]
     .sort();
 }
 
-/** Validate every language; returns all issues (empty when everything is valid). */
-export function validateAllCourses(coursesDir: string = getPaths().courses): CourseIssue[] {
+/** Check every language; `issues` are errors, `warnings` are drift from the writing guidelines. */
+export function inspectAllCourses(coursesDir: string = getPaths().courses): {
+  issues: CourseIssue[];
+  warnings: CourseIssue[];
+} {
   const langs = listLanguages(coursesDir);
   if (!langs.length) {
-    return [{ file: coursesDir, message: 'no language folders found' }];
+    return { issues: [{ file: coursesDir, message: 'no language folders found' }], warnings: [] };
   }
-  return langs.flatMap((lang) => inspectCatalog(lang, coursesDir).issues);
+  const results = langs.map((lang) => inspectCatalog(lang, coursesDir));
+  return {
+    issues: results.flatMap((r) => r.issues),
+    warnings: results.flatMap((r) => r.warnings),
+  };
+}
+
+/** Validate every language; returns all errors (empty when everything is valid). */
+export function validateAllCourses(coursesDir: string = getPaths().courses): CourseIssue[] {
+  return inspectAllCourses(coursesDir).issues;
 }

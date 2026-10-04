@@ -1,18 +1,15 @@
 ---
-id: broken-refs/01-start
-title: Start
+id: broken-sections/05-guideline-drift
+title: Guideline drift
 level: beginner
-estimatedMinutes: 10
+estimatedMinutes: 40
 objectives:
-  - Exist
-prerequisites:
-  - broken-refs/00-nope
+  - Be structurally valid but too long and too thin
 ---
 
 ## Key ideas
 1. Placeholder.
 2. Placeholder.
-3. Placeholder.
 
 ## Teaching notes
 Placeholder.

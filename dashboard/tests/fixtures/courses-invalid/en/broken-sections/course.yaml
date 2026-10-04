@@ -1,0 +1,12 @@
+# One lesson per lesson-body rule; frontmatter is valid everywhere.
+id: broken-sections
+title: Broken sections
+level: beginner
+description: Lessons with missing, misspelled or out-of-order sections, a check without a good answer, and guideline drift.
+estimatedHours: 1
+lessons:
+  - broken-sections/01-missing-section
+  - broken-sections/02-misspelled-section
+  - broken-sections/03-out-of-order
+  - broken-sections/04-no-good-answer
+  - broken-sections/05-guideline-drift

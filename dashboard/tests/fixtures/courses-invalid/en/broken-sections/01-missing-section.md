@@ -1,21 +1,16 @@
 ---
-id: broken-refs/01-start
-title: Start
+id: broken-sections/01-missing-section
+title: Missing section
 level: beginner
 estimatedMinutes: 10
 objectives:
-  - Exist
-prerequisites:
-  - broken-refs/00-nope
+  - Lack teaching notes
 ---
 
 ## Key ideas
 1. Placeholder.
 2. Placeholder.
 3. Placeholder.
-
-## Teaching notes
-Placeholder.
 
 ## Check your understanding
 1. Placeholder?
