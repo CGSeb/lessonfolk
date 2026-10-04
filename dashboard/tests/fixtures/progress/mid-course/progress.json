@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "profile": {
+    "name": "Alex",
+    "experience": "used ChatGPT-like tools",
+    "goal": "understand AI for my job",
+    "language": "en"
+  },
+  "current": "ai-foundations/02-how-machines-learn",
+  "lessons": {
+    "ai-foundations/01-what-is-ai": {
+      "status": "done",
+      "startedAt": "2026-10-04",
+      "completedAt": "2026-10-04",
+      "score": 0.8,
+      "notes": "Understood narrow vs general AI quickly; confused AI with robots at first."
+    },
+    "ai-foundations/02-how-machines-learn": {
+      "status": "in_progress",
+      "startedAt": "2026-10-05",
+      "notes": "Stopped after the 'training data' key idea."
+    }
+  }
+}
