@@ -106,6 +106,54 @@ Ask 1–2 questions from the lesson's checks. If the learner answers well, mark 
 If the user asks to create or edit courses, follow `docs/course-format.md` exactly and keep
 `course.yaml` and `index.yaml` in sync with the lesson files.
 
+- **"create a course about…" / "new course" / "write a course"** → [Create a course](#create-a-course)
+
+### Create a course
+This is contributing mode: the tutoring rule "never modify `courses/`" does not apply, but
+only write the new course's folder and `courses/<lang>/index.yaml`. Never touch `.progress/`
+and never edit other courses.
+
+1. **Prepare.** Read `docs/course-format.md`, `courses/<lang>/index.yaml` and every listed
+   `course.yaml`, so you know which courses exist and at what level. Read one or two lessons
+   of `ai-foundations` in full: they are the quality bar.
+2. **Interview**, one question at a time, skipping anything the author already said:
+   1. Topic, and what learners should be able to do at the end
+   2. Level (`beginner` / `intermediate` / `advanced`) and who the learners are
+   3. Prerequisites: suggest existing courses that fit
+   4. Length: number of lessons or total time
+   5. Position in the learning path (after which course in `index.yaml`)
+
+   Write in `en` unless the author asks otherwise; translations are a separate task.
+3. **Outline.** Propose: course id (kebab-case, not already used), title, level, a one- or
+   two-sentence description, `estimatedHours`, prerequisites, and 3–8 lessons, each with its
+   file name (`NN-slug`), title, a one-line objective and `estimatedMinutes` (10–25).
+   Point out any overlap with existing courses. **Write no file until the author approves
+   the outline**; revise it as often as they want.
+4. **Write** `course.yaml`, then the lessons in order, following `docs/course-format.md`:
+   - Frontmatter `id` matches the path; lesson `prerequisites` are usually the previous lesson.
+   - `## Key ideas`: 3–6 numbered ideas, each a short explanation the tutor can rephrase.
+   - `## Teaching notes`: at least one analogy that works, common misconceptions, how to
+     adapt for beginners vs experienced learners, and pacing hints.
+   - `## Check your understanding`: 2–4 numbered questions, each followed by a
+     `Good answer:` line describing what a correct answer contains (not a verbatim answer).
+   - `## Exercise` (optional): say whether it needs nothing, a computer or code; it must be free.
+   - `## Completion criteria`: tied to the checks, so the tutor can decide objectively.
+   - `## Going further` (optional): prefer topics or stable, well-known sources; never
+     invent links.
+   - Match the level: beginner lessons define every term and avoid math. Prefer everyday
+     examples. Avoid fast-aging claims (best model, prices, version numbers). If you are not
+     sure a fact is right, leave it out or flag it to the author.
+
+   After the first lesson, summarise it in a few lines and offer the author a look before
+   you write the rest.
+5. **Register** the course id in `courses/<lang>/index.yaml` at the agreed position.
+6. **Validate.** Run `npm run check:courses` (run `npm install` first if dependencies are
+   missing). Fix every error and run it again until it passes. Fix warnings too, or tell the
+   author why one is kept.
+7. **Hand back**: list the files created, any facts the author should double-check, and a
+   commit message in the format below (`feat: :sparkles: Add <title> course`). Suggest
+   previewing it with `npm run dashboard`. Do not commit unless the author asks.
+
 ### Commit messages
 Format: `<type>: <gitmoji> <imperative summary>` — a [Conventional Commits](https://www.conventionalcommits.org)
 type, then a [gitmoji](https://gitmoji.dev) shortcode, then the summary.
