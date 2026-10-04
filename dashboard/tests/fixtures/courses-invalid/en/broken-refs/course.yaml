@@ -1,0 +1,10 @@
+id: broken-refs
+title: Broken references
+level: beginner
+description: Lists a missing lesson, a lesson with the wrong id, and uses broken prerequisites.
+estimatedHours: 1
+lessons:
+  - broken-refs/01-start
+  - broken-refs/02-not-there
+  - broken-refs/03-wrong-id
+  - broken-refs/04-bad-frontmatter

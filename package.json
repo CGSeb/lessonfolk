@@ -12,6 +12,7 @@
     "dashboard": "npm run dev --workspace dashboard",
     "dashboard:build": "npm run build --workspace dashboard",
     "dashboard:start": "npm run start --workspace dashboard",
-    "test": "npm run test --workspace dashboard"
+    "test": "npm run test --workspace dashboard",
+    "check:courses": "npm run check:courses --workspace dashboard --"
   }
 }

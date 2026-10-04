@@ -1,0 +1,8 @@
+# "title" is missing.
+id: missing-field
+level: beginner
+description: A course whose course.yaml lacks a required field.
+estimatedHours: 1
+prerequisites: []
+lessons:
+  - missing-field/01-intro
