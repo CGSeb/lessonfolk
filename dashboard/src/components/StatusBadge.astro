@@ -1,0 +1,16 @@
+---
+import { t } from '../i18n/en';
+import { statusDisplay, type DisplayStatus } from './status-badge';
+
+/** Badge for a course status (not started / in progress / completed) or a lesson status (… / done / skipped). */
+interface Props {
+  status: DisplayStatus;
+}
+
+const { key, variant } = statusDisplay(Astro.props.status);
+---
+
+<span class:list={['badge', variant && `badge--${variant}`]}>
+  <span class="visually-hidden">{t('status.label')}:</span>
+  {t(key)}
+</span>
