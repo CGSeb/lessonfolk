@@ -7,7 +7,8 @@
     "build": "astro build",
     "start": "node ./dist/server/entry.mjs",
     "check": "astro check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:courses": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check-courses.ts"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.6",
