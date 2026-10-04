@@ -18,7 +18,7 @@ Courses are versioned here. Your progress stays on your computer (`.progress/`, 
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/apprentice.git
+git clone https://github.com/CGSeb/apprentice.git
 cd apprentice
 claude      # or: codex
 ```
