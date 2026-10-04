@@ -1,0 +1,85 @@
+/*
+ * Design tokens. Use these custom properties instead of raw values.
+ * Light palette on :root, dark palette follows the system setting.
+ * All text colors meet WCAG AA (>= 4.5:1) on --color-bg, --color-surface
+ * and --color-surface-sunken in both themes.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Colors (light) */
+  --color-bg: #fbf8f3;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f3ede4;
+  --color-text: #2a2420;
+  --color-text-muted: #5f554c;
+  --color-border: #ddd3c6;
+  --color-border-strong: #8c8073;
+  --color-accent: #a8471f;
+  --color-accent-strong: #8a3a18;
+  --color-on-accent: #ffffff;
+  --color-success: #2f6b3a;
+  --color-success-bg: #e4f1e5;
+  --color-info: #2d5f86;
+  --color-info-bg: #e3eef7;
+  --color-warning: #7a5410;
+  --color-warning-bg: #f8ecd2;
+  --color-focus: #2d5f86;
+  --shadow-card: 0 1px 2px rgb(42 36 32 / 0.06), 0 2px 8px rgb(42 36 32 / 0.05);
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
+  --leading-tight: 1.25;
+  --leading-normal: 1.6;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold: 650;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Shape and layout */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --content-width: 64rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1b1916;
+    --color-surface: #25221e;
+    --color-surface-sunken: #151310;
+    --color-text: #f2ece4;
+    --color-text-muted: #bdb2a5;
+    --color-border: #3d3832;
+    --color-border-strong: #7d7368;
+    --color-accent: #f2a27e;
+    --color-accent-strong: #f7bb9e;
+    --color-on-accent: #1b1916;
+    --color-success: #8fd19a;
+    --color-success-bg: #1f3324;
+    --color-info: #9cc8ec;
+    --color-info-bg: #1d2d3b;
+    --color-warning: #efc66e;
+    --color-warning-bg: #382c14;
+    --color-focus: #9cc8ec;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+  }
+}

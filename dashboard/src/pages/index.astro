@@ -1,23 +1,23 @@
 ---
 import { existsSync } from 'node:fs';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../i18n/en';
 import { getPaths } from '../lib/paths';
 
 const paths = getPaths();
 const hasProgress = existsSync(paths.progressFile);
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Apprentice</title>
-  </head>
-  <body>
-    <h1>Apprentice</h1>
-    <p>Dashboard is running. Pages are coming in the next tickets.</p>
+<BaseLayout>
+  <div class="stack">
+    <h1>{t('home.heading')}</h1>
+    <p>{t('home.placeholder')}</p>
     <ul>
-      <li>Courses: <code>{paths.courses}</code></li>
-      <li>Progress: <code>{paths.progressFile}</code> ({hasProgress ? 'found' : 'not created yet'})</li>
+      <li>{t('home.coursesPath')} <code>{paths.courses}</code></li>
+      <li>
+        {t('home.progressPath')} <code>{paths.progressFile}</code>
+        ({hasProgress ? t('home.progressFound') : t('home.progressMissing')})
+      </li>
     </ul>
-  </body>
-</html>
+  </div>
+</BaseLayout>
