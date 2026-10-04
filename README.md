@@ -66,5 +66,32 @@ automated tests and the manual end-to-end checklist with a real tutor.
 
 ## Contributing a course
 
-Read [`docs/course-format.md`](docs/course-format.md). A lesson is a Markdown file with key
-ideas, teaching notes for the tutor, comprehension checks and completion criteria.
+A lesson is a Markdown file with key ideas, teaching notes for the tutor, comprehension checks
+and completion criteria. You don't need to learn the format first: your agent can write the
+course with you. Open the agent in this folder and say:
+
+> Create a course about prompting for beginners.
+
+The agent asks a few questions one at a time (topic, level, prerequisites, length, place in
+the learning path), then proposes an outline. **Nothing is written until you approve it.**
+It then writes `course.yaml` and the lessons, adds the course to `courses/<lang>/index.yaml`,
+and validates everything before handing back with a suggested commit message.
+
+To change an existing course, say *"add a lesson about bias to AI Foundations"*, *"improve
+lesson 2 of AI Foundations"* or *"reorder the lessons of …"*. The agent proposes the changes,
+keeps file names, lesson ids and prerequisites in sync, and warns you before renaming a lesson
+that learners may already have completed.
+
+In Claude Code these are the `/create-course` and `/edit-course` skills; Codex follows the
+same procedures from `AGENTS.md`.
+
+Whether you write by hand or with the agent, check your work before opening a pull request:
+
+```bash
+npm install
+npm run check:courses
+```
+
+It fails on structural errors (missing or misspelled sections, broken ids or prerequisites)
+and warns about guideline drift. The full specification is in
+[`docs/course-format.md`](docs/course-format.md).

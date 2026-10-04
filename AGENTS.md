@@ -172,7 +172,8 @@ revision or a title change.
 
 **Renaming rules** (inserting or reordering):
 - Lesson files keep the `NN-slug.md` pattern, with `NN` matching the position in `course.yaml`.
-- Rename with `git mv` to keep history. Work from the last lesson backwards so names never
+- Rename with `git mv` to keep history (plain `mv` for files not committed yet, such as a
+  course still being drafted). Work from the last lesson backwards so names never
   collide (`03-…` → `04-…` before `02-…` → `03-…`).
 - For each renamed lesson, update its frontmatter `id`, its entry in `course.yaml`, and every
   `prerequisites` entry that refers to the old id, in all courses and all languages (search
@@ -186,7 +187,8 @@ revision or a title change.
    do after it, then where it goes (default: at the end).
 2. Propose a mini-outline (file name, title, objective, `estimatedMinutes`, the key ideas as
    one line each) and, if lessons move, the table of renames (old id → new id) and the
-   prerequisite changes. **Write nothing before the author approves.**
+   prerequisite changes. Point out any overlap with the other lessons of the course, and
+   propose trimming the overlapping part. **Write nothing before the author approves.**
 3. Apply the renames, then write the lesson with the writing rules of
    [Create a course](#create-a-course) step 4. Its prerequisites are usually the previous
    lesson; the lesson after it should now depend on the new one.

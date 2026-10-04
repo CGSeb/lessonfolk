@@ -4,6 +4,10 @@ Apprentice courses are plain files, versioned in git and taught by an AI agent
 (Claude Code, Codex, …) in chat. A lesson is a **script for a tutor**, not a page to read:
 it gives the content, how to teach it, and how to check understanding.
 
+You can write courses by hand from this spec, or let your agent do it with you: say *"create a
+course about…"* or *"add a lesson to…"* (the `create-course` and `edit-course` skills in Claude
+Code; the "Create a course" and "Edit a course" procedures in `AGENTS.md` for other agents).
+
 ## Layout
 
 ```
