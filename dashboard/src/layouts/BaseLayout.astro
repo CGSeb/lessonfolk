@@ -1,0 +1,177 @@
+---
+import '../styles/global.css';
+import { t } from '../i18n/en';
+
+interface Props {
+  /** Page name shown before the site name in the tab title. Omit for the site title alone. */
+  title?: string;
+  /** Meta description; defaults to the site description. */
+  description?: string;
+}
+
+const { title, description = t('site.description') } = Astro.props;
+const fullTitle = title ? t('site.titleTemplate', { page: title }) : t('site.title');
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const navItems = [
+  { href: '/', label: t('nav.home'), current: path === '/' },
+  { href: '/courses', label: t('nav.courses'), current: path === '/courses' || path.startsWith('/courses/') },
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t('a11y.skipToContent')}</a>
+
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="wordmark" href="/" aria-label={t('a11y.homeLink')}>
+          <span class="wordmark__mark" aria-hidden="true"></span>
+          <span>{t('site.name')}</span>
+        </a>
+        <nav aria-label={t('a11y.mainNav')}>
+          <ul class="nav-list" role="list">
+            {
+              navItems.map((item) => (
+                <li>
+                  <a class="nav-link" href={item.href} aria-current={item.current ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="container site-main" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container stack" style="--stack-space: var(--space-2)">
+        <p>{t('footer.about')}</p>
+        <p>{t('footer.privacy')}</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .container {
+    width: 100%;
+    max-width: var(--content-width);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .skip-link {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: 10;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-weight: var(--weight-medium);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .site-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    padding-block: var(--space-3);
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .wordmark:hover {
+    color: var(--color-text);
+  }
+
+  .wordmark__mark {
+    width: 0.9em;
+    height: 0.9em;
+    border-radius: 50% 50% 50% 15%;
+    background: var(--color-accent);
+  }
+
+  .nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-link {
+    display: inline-block;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-muted);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+
+  .nav-link:hover {
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+  }
+
+  .nav-link[aria-current='page'] {
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+    box-shadow: inset 0 -2px 0 var(--color-accent);
+  }
+
+  .site-main {
+    flex: 1;
+    padding-block: var(--space-6) var(--space-7);
+  }
+
+  .site-main:focus {
+    outline: none;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-5);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+</style>
