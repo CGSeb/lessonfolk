@@ -9,13 +9,17 @@ import {
   type Progress,
   emptyProgress,
   getNextLesson,
+  getLevel,
+  getProgressWarnings,
   getStats,
+  orderCourses,
   progressOrEmpty,
   readProgress,
 } from './progress';
 
 const fixtures = fileURLToPath(new URL('../../tests/fixtures/progress', import.meta.url));
 const fixture = (name: string) => join(fixtures, name, 'progress.json');
+const exampleFile = fileURLToPath(new URL('../../../.progress/progress.example.json', import.meta.url));
 
 interface Lesson {
   id: string;
@@ -93,6 +97,33 @@ describe('readProgress', () => {
     expect(result.progress.profile.name).toBe('Alex');
     expect(result.progress.current).toBe('ai-foundations/02-how-machines-learn');
     expect(result.progress.lessons['ai-foundations/01-what-is-ai']).toMatchObject({ status: 'done', score: 0.8 });
+  });
+
+  it('parses the level, interests and personal path of the shipped example', () => {
+    const result = readProgress(exampleFile);
+    expect(result.state).toBe('ok');
+    if (result.state !== 'ok') return;
+    expect(result.progress.profile.level).toBe('beginner');
+    expect(result.progress.profile.interests).toEqual(expect.any(Array));
+    expect(result.progress.path).toEqual(expect.any(Array));
+    expect(result.progress.pathReason).toEqual(expect.any(String));
+    expect(result.progress.pathUpdatedAt).toMatch(/^\d{4}-\d{2}-\d{2}/);
+  });
+
+  it('reads a file without level, interests or path as before', () => {
+    const result = readProgress(fixture('mid-course'));
+    expect(result.state === 'ok' && result.progress.path).toBeUndefined();
+    expect(result.state === 'ok' && result.progress.profile.level).toBeUndefined();
+    expect(result.state === 'ok' && result.progress.profile.interests).toBeUndefined();
+  });
+
+  it('keeps a file with an unknown level valid and ignores the level', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'apprentice-progress-'));
+    const file = join(dir, 'progress.json');
+    writeFileSync(file, JSON.stringify({ version: 1, profile: { level: 'expert' }, lessons: {} }));
+    const result = readProgress(file);
+    expect(result.state).toBe('ok');
+    expect(getLevel(result.state === 'ok' ? result.progress : null)).toBeUndefined();
   });
 
   it('fills defaults for a minimal file', () => {
@@ -200,6 +231,104 @@ describe('getNextLesson', () => {
     );
     expect(next(p)).toBeNull();
     expect(getStats(courses, p).overall.completed).toBe(true);
+  });
+});
+
+describe('getNextLesson with a personal path', () => {
+  const next = (progress: Progress | null) => getNextLesson(courses, progress)?.lesson.id;
+  const withPath = (path: string[] | undefined, lessons: Parameters<typeof progressWith>[0] = {}, current: string | null = null) => ({
+    ...progressWith(lessons, current),
+    path,
+  });
+
+  it('walks the path first', () => {
+    expect(next(withPath(['prompting']))).toBe('prompting/02-advanced');
+  });
+
+  it('still honours prerequisites inside the path', () => {
+    // prompting/01 needs ai-foundations/03, so the walk moves on to ai-foundations.
+    const p = withPath(['prompting'], { 'prompting/02-advanced': 'done' });
+    expect(next(p)).toBe('ai-foundations/01-what-is-ai');
+  });
+
+  it('moves on to the remaining courses in catalog order once the path is done', () => {
+    const p = withPath(['prompting'], {
+      'prompting/01-basics': 'skipped',
+      'prompting/02-advanced': 'done',
+    });
+    expect(next(p)).toBe('ai-foundations/01-what-is-ai');
+  });
+
+  it('continues a partly done path', () => {
+    const custom: CourseRef[] = [
+      { id: 'a', lessons: [{ id: 'a/1', prerequisites: [] }] },
+      { id: 'b', lessons: [{ id: 'b/1', prerequisites: [] }, { id: 'b/2', prerequisites: ['b/1'] }] },
+      { id: 'c', lessons: [{ id: 'c/1', prerequisites: [] }] },
+    ];
+    const p = { ...progressWith({ 'c/1': 'done', 'b/1': 'done' }), path: ['c', 'b'] };
+    expect(getNextLesson(custom, p)?.lesson.id).toBe('b/2');
+    const done = { ...progressWith({ 'c/1': 'done', 'b/1': 'done', 'b/2': 'done' }), path: ['c', 'b'] };
+    expect(getNextLesson(custom, done)?.lesson.id).toBe('a/1');
+  });
+
+  it('ignores unknown and repeated course ids in the path', () => {
+    const p = withPath(['nope', 'prompting', 'prompting', 'also-missing']);
+    expect(next(p)).toBe('prompting/02-advanced');
+    expect(orderCourses(courses, p).map((c) => c.id)).toEqual(['prompting', 'ai-foundations']);
+  });
+
+  it('keeps the catalog order with an empty path or no path', () => {
+    expect(orderCourses(courses, withPath([]))).toBe(courses);
+    expect(orderCourses(courses, withPath(undefined))).toBe(courses);
+    expect(orderCourses(courses, null)).toBe(courses);
+    expect(next(withPath([]))).toBe('ai-foundations/01-what-is-ai');
+    expect(next(withPath(undefined))).toBe('ai-foundations/01-what-is-ai');
+  });
+
+  it('still resumes `current` before walking the path', () => {
+    const p = withPath(['prompting'], { 'ai-foundations/01-what-is-ai': 'in_progress' }, 'ai-foundations/01-what-is-ai');
+    expect(getNextLesson(courses, p)?.kind).toBe('resume');
+    expect(next(p)).toBe('ai-foundations/01-what-is-ai');
+  });
+});
+
+describe('getProgressWarnings', () => {
+  const courseIds = courses.map((c) => c.id);
+  const themeIds = ['understanding-ai', 'using-ai'];
+
+  it('has no warnings without path or interests, or with known ids', () => {
+    expect(getProgressWarnings(null, courseIds, themeIds)).toEqual([]);
+    expect(getProgressWarnings(emptyProgress(), courseIds, themeIds)).toEqual([]);
+    const p: Progress = { ...emptyProgress(), path: ['prompting'], profile: { interests: ['using-ai'] } };
+    expect(getProgressWarnings(p, courseIds, themeIds)).toEqual([]);
+  });
+
+  it('reports unknown course ids in the path and unknown theme ids in interests', () => {
+    const p: Progress = {
+      ...emptyProgress(),
+      path: ['nope', 'prompting', 'nope'],
+      profile: { interests: ['using-ai', 'cooking', 'gardening'] },
+    };
+    expect(getProgressWarnings(p, courseIds, themeIds)).toEqual([
+      'path: unknown course id "nope" ignored',
+      'profile.interests: unknown theme ids "cooking", "gardening" ignored',
+    ]);
+  });
+
+  it('reports an unknown level, not a known one', () => {
+    const known: Progress = { ...emptyProgress(), profile: { level: 'advanced' } };
+    expect(getProgressWarnings(known, courseIds, themeIds)).toEqual([]);
+    const unknown: Progress = { ...emptyProgress(), profile: { level: 'expert' } };
+    expect(getProgressWarnings(unknown, courseIds, themeIds)).toEqual(['profile.level: unknown level "expert" ignored']);
+  });
+});
+
+describe('getLevel', () => {
+  it('returns a known level and ignores a missing or unknown one', () => {
+    expect(getLevel({ ...emptyProgress(), profile: { level: 'intermediate' } })).toBe('intermediate');
+    expect(getLevel(emptyProgress())).toBeUndefined();
+    expect(getLevel(null)).toBeUndefined();
+    expect(getLevel({ ...emptyProgress(), profile: { level: 'Beginner' } })).toBeUndefined();
   });
 });
 
