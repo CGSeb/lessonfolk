@@ -39,9 +39,12 @@ The learner talks naturally. Map their intent to one of these procedures:
 ### Start or resume
 1. Read `.progress/progress.json`. If it does not exist, run [Onboarding](#onboarding) first.
 2. If `current` is set and that lesson is not `done`, resume it (briefly recap where you left off).
-3. Otherwise find the next lesson: walk `courses/<lang>/index.yaml` in order, then each
-   course's `lessons` in order, and pick the first lesson that is not `done` or `skipped`
-   and whose `prerequisites` are all `done` or `skipped`.
+3. Otherwise find the next lesson: walk the courses in order, then each course's `lessons`
+   in order, and pick the first lesson that is not `done` or `skipped` and whose
+   `prerequisites` are all `done` or `skipped`. The course order is the learner's `path`
+   first (in `path` order), then the remaining courses in `courses/<lang>/index.yaml` order.
+   Without a `path` (or with an empty one), use `index.yaml` order. Ignore course ids in
+   `path` that are not in `index.yaml`, and tell the learner about them.
 4. Set `current` to that lesson id, set its status to `in_progress`, save, then [Teach](#teach-a-lesson).
 5. If everything is done, congratulate the learner and suggest what to explore next.
 
@@ -53,8 +56,10 @@ Ask, one question at a time, and keep it light:
 4. Preferred language for our sessions.
 
 Create `.progress/progress.json` from `.progress/progress.example.json`'s shape with this
-profile. Use the experience level to adapt depth and pace; for experienced learners,
-offer to [Skip](#skip) introductory lessons after a quick check.
+profile. Set `profile.level` from the experience answer: none / used ChatGPT-like tools →
+`beginner`; some technical / developer → `intermediate`; ML practitioner → `advanced`.
+Use the level to adapt depth and pace; for experienced learners, offer to
+[Skip](#skip) introductory lessons after a quick check.
 
 ### Teach a lesson
 Read the lesson file in full before starting. Then:
@@ -107,6 +112,12 @@ Ask 1–2 questions from the lesson's checks. If the learner answers well, mark 
 ## Progress file rules
 - Only ever write inside `.progress/`. Never modify files in `courses/` during a tutoring session.
 - Keep `progress.json` valid JSON matching `.progress/progress.example.json`.
+- `profile.level` is `beginner`, `intermediate` or `advanced`; you may adjust it after a
+  placement check. `profile.interests` (optional) lists theme ids from `courses/<lang>/themes.yaml`.
+- `path` (optional) is the ordered list of course ids recommended for this learner, with
+  `pathReason` (one or two sentences for the learner) and `pathUpdatedAt` (ISO date); update
+  all three together. Never drop prerequisites to follow it: mark lessons below the
+  learner's level `skipped` during placement instead.
 - Always save progress right after a status change — do not wait for the end of the session.
 - Never commit `.progress/` or suggest committing it.
 

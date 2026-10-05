@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { z } from 'zod';
 import { getPaths } from './paths';
+import { levelSchema, type Level } from './schemas';
 
 // ---------------------------------------------------------------------------
 // Schema (mirrors .progress/progress.example.json)
@@ -23,6 +24,14 @@ export const profileSchema = z.looseObject({
   experience: z.string().optional(),
   goal: z.string().optional(),
   language: z.string().optional(),
+  /**
+   * Learner level, derived from `experience` at onboarding; the tutor may adjust it after placement.
+   * Any string is accepted so a typo never invalidates the file: read it with `getLevel`, which
+   * ignores unknown values (reported by `getProgressWarnings`).
+   */
+  level: z.string().optional(),
+  /** Theme ids from themes.yaml the learner cares about. Unknown ids are ignored with a warning. */
+  interests: z.array(z.string()).optional(),
 });
 export type Profile = z.infer<typeof profileSchema>;
 
@@ -31,6 +40,12 @@ export const progressSchema = z.looseObject({
   profile: profileSchema.default({}),
   current: z.string().nullable().optional(),
   lessons: z.record(z.string(), lessonProgressSchema).default({}),
+  /** Course ids recommended for this learner, in order. Unknown ids are ignored with a warning. */
+  path: z.array(z.string()).optional(),
+  /** One or two sentences explaining the path to the learner. */
+  pathReason: z.string().optional(),
+  /** ISO date of the last change to `path`. */
+  pathUpdatedAt: z.string().optional(),
 });
 export type Progress = z.infer<typeof progressSchema>;
 
@@ -109,6 +124,57 @@ export function isFinished(progress: MaybeProgress, lessonId: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Personal path
+// ---------------------------------------------------------------------------
+
+/**
+ * Courses in the order the learner walks them: courses listed in `path` first (in path
+ * order), then the remaining courses in catalog (index.yaml) order. Unknown or repeated
+ * ids in `path` are ignored. Without a path (or with an empty one) the catalog order is kept.
+ */
+export function orderCourses<C extends CourseRef>(courses: C[], progress: MaybeProgress): C[] {
+  const path = progress?.path;
+  if (!path?.length) return courses;
+  const byId = new Map(courses.map((c) => [c.id, c]));
+  const ordered = new Set<C>();
+  for (const id of path) {
+    const course = byId.get(id);
+    if (course) ordered.add(course);
+  }
+  for (const course of courses) ordered.add(course);
+  return [...ordered];
+}
+
+/** The learner's level, or undefined when it is missing or not a known level. */
+export function getLevel(progress: MaybeProgress): Level | undefined {
+  const parsed = levelSchema.safeParse(progress?.profile.level);
+  return parsed.success ? parsed.data : undefined;
+}
+
+/**
+ * Human-readable warnings for values in the progress file that the dashboard does not know:
+ * `profile.level`, course ids in `path` and theme ids in `profile.interests`. These values are
+ * ignored, never fatal.
+ */
+export function getProgressWarnings(
+  progress: MaybeProgress,
+  courseIds: Iterable<string>,
+  themeIds: Iterable<string>,
+): string[] {
+  const knownCourses = new Set(courseIds);
+  const knownThemes = new Set(themeIds);
+  const unknownCourses = [...new Set(progress?.path ?? [])].filter((id) => !knownCourses.has(id));
+  const unknownThemes = [...new Set(progress?.profile.interests ?? [])].filter((id) => !knownThemes.has(id));
+  const quote = (ids: string[]) => ids.map((id) => `"${id}"`).join(', ');
+  const warnings: string[] = [];
+  const level = progress?.profile.level;
+  if (level !== undefined && !getLevel(progress)) warnings.push(`profile.level: unknown level ${quote([level])} ignored`);
+  if (unknownCourses.length) warnings.push(`path: unknown course id${unknownCourses.length > 1 ? 's' : ''} ${quote(unknownCourses)} ignored`);
+  if (unknownThemes.length) warnings.push(`profile.interests: unknown theme id${unknownThemes.length > 1 ? 's' : ''} ${quote(unknownThemes)} ignored`);
+  return warnings;
+}
+
+// ---------------------------------------------------------------------------
 // Next lesson ("Start or resume" in AGENTS.md)
 // ---------------------------------------------------------------------------
 
@@ -122,8 +188,9 @@ export interface NextLesson<C extends CourseRef> {
 /**
  * Implements "Start or resume" from AGENTS.md:
  * 1. If `current` is set and that lesson is not done (or skipped), resume it.
- * 2. Otherwise walk courses in order, then lessons in order, and pick the first
- *    lesson that is not done/skipped and whose prerequisites are all done/skipped.
+ * 2. Otherwise walk courses in order (see `orderCourses`: `path` first, then the rest in
+ *    catalog order), then lessons in order, and pick the first lesson that is not
+ *    done/skipped and whose prerequisites are all done/skipped.
  *
  * Returns null when no lesson is eligible: either everything is finished, or the
  * remaining lessons are blocked by unmet prerequisites (use `getStats().overall.completed`
@@ -139,7 +206,7 @@ export function getNextLesson<C extends CourseRef>(courses: C[], progress: Maybe
     // `current` refers to a lesson not in the catalog: fall through to the walk.
   }
 
-  for (const course of courses) {
+  for (const course of orderCourses(courses, progress)) {
     for (const lesson of course.lessons) {
       if (isFinished(progress, lesson.id)) continue;
       if (lesson.prerequisites.every((id) => isFinished(progress, id))) {

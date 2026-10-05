@@ -4,8 +4,13 @@
     "name": "Alex",
     "experience": "used ChatGPT-like tools",
     "goal": "understand AI for my job",
-    "language": "en"
+    "language": "en",
+    "level": "beginner",
+    "interests": ["understanding-ai", "using-ai"]
   },
+  "path": ["ai-foundations"],
+  "pathReason": "You use AI tools at work, so we start with how AI works before getting practical.",
+  "pathUpdatedAt": "2026-10-04",
   "current": "ai-foundations/02-how-machines-learn",
   "lessons": {
     "ai-foundations/01-what-is-ai": {

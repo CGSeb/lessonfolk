@@ -14,7 +14,7 @@ import { readProgress } from '../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
-const { view, name, lessons, courses, themes, progressError } = getHomeView(
+const { view, name, lessons, courses, themes, progressError, progressWarnings } = getHomeView(
   catalog.courses,
   readProgress(),
   catalog.themes,
@@ -37,6 +37,21 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
           <details>
             <summary>{t('home.technicalDetails')}</summary>
             <pre class="home-error">{progressError}</pre>
+          </details>
+        </Notice>
+      )
+    }
+    {
+      progressWarnings.length > 0 && (
+        <Notice tone="warning" title={t('home.progressWarningsTitle')}>
+          <p>{t('home.progressWarningsBody')}</p>
+          <details>
+            <summary>{t('home.technicalDetails')}</summary>
+            <ul class="home-issues">
+              {progressWarnings.map((warning) => (
+                <li>{warning}</li>
+              ))}
+            </ul>
           </details>
         </Notice>
       )

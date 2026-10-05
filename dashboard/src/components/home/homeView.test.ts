@@ -75,6 +75,24 @@ describe('getHomeView', () => {
     expect(getHomeView([], { state: 'missing' }).view).toEqual({ state: 'new', first: null });
   });
 
+  it('follows the personal path and warns about unknown ids', () => {
+    const home = getHomeView(
+      courses,
+      ok({ 'basics/01': 'done', 'basics/02': 'done' }, { path: ['gone', 'more'], profile: { interests: ['first', 'x'] } }),
+      [{ id: 'first', title: 'T', description: 'd', courses }],
+    );
+    expect(home.view).toMatchObject({ state: 'in_progress', next: { lesson: { id: 'more/01' } } });
+    expect(home.progressWarnings).toEqual([
+      'path: unknown course id "gone" ignored',
+      'profile.interests: unknown theme id "x" ignored',
+    ]);
+  });
+
+  it('has no progress warnings for a file without path or interests', () => {
+    expect(getHomeView(courses, ok({})).progressWarnings).toEqual([]);
+    expect(getHomeView(courses, { state: 'missing' }).progressWarnings).toEqual([]);
+  });
+
   describe('progress by theme', () => {
     const theme = (id: string, members: CourseRef[]) => ({ id, title: `T ${id}`, description: 'd', courses: members });
     const [basics, more] = courses;

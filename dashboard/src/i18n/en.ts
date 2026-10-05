@@ -135,6 +135,8 @@ export const en = {
     invalidProgressTitle: 'Your progress file could not be read',
     invalidProgressBody: 'This page is shown as if you were just starting. Your progress is not lost: ask your tutor to fix the file .progress/progress.json.',
     technicalDetails: 'Technical details',
+    progressWarningsTitle: 'Some of your learning path was ignored',
+    progressWarningsBody: 'Your progress file mentions courses or themes that do not exist (anymore). They are ignored. Ask your tutor to update your learning path.',
     courseIssuesTitle: 'Some course files have problems',
     courseIssuesBody: 'Courses with problems may be missing from this page. To see every problem, run this command in a terminal, in this folder:',
     courseIssuesCommand: 'npm run check:courses',

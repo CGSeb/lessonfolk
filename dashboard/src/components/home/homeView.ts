@@ -1,5 +1,6 @@
 import {
   getNextLesson,
+  getProgressWarnings,
   getStats,
   progressOrEmpty,
   type CourseRef,
@@ -34,6 +35,8 @@ export interface HomeView<C extends CourseRef> {
   themes: ThemeProgress[];
   /** Error message when the progress file exists but cannot be used. */
   progressError: string | undefined;
+  /** Ids in the progress file the catalog does not know (path courses, interest themes); they are ignored. */
+  progressWarnings: string[];
 }
 
 export interface ThemeProgress {
@@ -80,5 +83,10 @@ export function getHomeView<C extends CourseRef>(
       theme ? [{ id: theme.id, title: theme.title, anchor, ...lessons, completed }] : [],
     ),
     progressError: result.state === 'invalid' ? result.error : undefined,
+    progressWarnings: getProgressWarnings(
+      progress,
+      courses.map((c) => c.id),
+      themes.map((th) => th.id),
+    ),
   };
 }
