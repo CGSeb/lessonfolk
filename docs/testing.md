@@ -80,10 +80,15 @@ and repeat it after changes to `AGENTS.md`, the progress format or the dashboard
 - [ ] **Open the tutor.** In a second terminal, in the repository folder, run `claude` (Claude Code)
       or `codex` (Codex). Say: *Let's start learning AI*.
 - [ ] **Onboarding.** The tutor asks the onboarding questions one at a time (name, experience,
-      why you want to learn, language). Answer them.
+      why you want to learn, themes you are interested in, language). Answer "used ChatGPT-like
+      tools" for experience: there is no level check for beginners.
+- [ ] **Path.** The tutor recommends a path (AI Foundations) and explains why in 2–3 sentences,
+      then asks if it suits you. Nothing about the path is saved before you agree. Accept it.
 - [ ] **Progress file created.** `.progress/progress.json` exists, is valid JSON and matches
       `.progress/progress.example.json`: `version: 1`, a `profile` with your answers,
-      `current: "ai-foundations/01-what-is-ai"` and that lesson with `status: "in_progress"`.
+      `level: "beginner"`, your `interests` (theme ids), `path: ["ai-foundations"]` with
+      `pathReason` and `pathUpdatedAt`, `current: "ai-foundations/01-what-is-ai"` and that
+      lesson with `status: "in_progress"`.
 - [ ] **Live update, no reload.** Without touching the browser, home now greets you by name
       ("Welcome back, …!") and shows "What is AI?" under "Pick up where you left off". The course page
       shows lesson 1 "In progress" and the catalog shows AI Foundations "In progress".
@@ -96,6 +101,12 @@ and repeat it after changes to `AGENTS.md`, the progress format or the dashboard
 - [ ] **No warnings.** No page shows "Your progress file could not be read" or course file problems.
 - [ ] **Commands.** Say *show my progress*: the tutor's summary matches the dashboard.
 - [ ] **Not committed.** `git status` does not list anything in `.progress/` other than the example.
+
+To check the level check, start again from a deleted `progress.json` and answer "developer"
+for experience. The tutor offers an optional level check of at most 6 questions in total. A
+course you pass has all its lessons `skipped` with `notes: "placement"` (shown as "Skipped
+after level check" on the dashboard) and leaves the recommended path; a course you fail stays
+in it.
 
 Repeat the whole checklist in the other agent (Claude Code, then Codex, or the reverse), starting
 again from a deleted `progress.json`.
