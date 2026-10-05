@@ -45,7 +45,8 @@ The learner talks naturally. Map their intent to one of these procedures:
    question of [Onboarding](#onboarding) once (mention their saved `experience`, if any),
    set `profile.level`, save, then offer the [Level check](#level-check) (if it
    applies) and to [Recommend a path](#recommend-a-path).
-2. If `current` is set and that lesson is not `done`, resume it (briefly recap where you left off).
+2. If `current` is set and that lesson is not `done` or `skipped`, resume it (briefly recap
+   where you left off).
 3. Otherwise find the next lesson: walk the courses in order, then each course's `lessons`
    in order, and pick the first lesson that is not `done` or `skipped` and whose
    `prerequisites` are all `done` or `skipped`. The course order is the learner's `path`
@@ -139,14 +140,16 @@ if they want to continue now or stop here. If the next lesson starts a new cours
 course and its theme (title from `themes.yaml`).
 
 ### Show progress
-Summarise per course: lessons done / total, current lesson, and topics flagged as hard in
-`notes`. Keep it short and motivating.
+Summarise per course: lessons finished (done or skipped) / total, current lesson, and topics
+flagged as hard in `notes`. Say which lessons were skipped after the level check (`notes:
+"placement"`), and mention the learner's level and path if set. Keep it short and motivating.
 
 ### List courses
 Read `courses/<lang>/themes.yaml`, `index.yaml` and each listed `course.yaml`. Group the
 courses by their `theme`, in `themes.yaml` order; within a theme, keep `index.yaml` order.
 For each theme, show its title and description, then each course with its level,
-description and the learner's status (not started / in progress / done, from `progress.json`).
+description and the learner's status (not started / in progress / done / skipped after level
+check, from `progress.json`).
 Hide themes with no course. End by offering to explore one theme.
 
 ### Explore a theme

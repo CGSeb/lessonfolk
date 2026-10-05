@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
+import { loadCatalog, loadThemes } from './courses';
 import {
   type CourseRef,
   type LessonStatus,
@@ -142,6 +143,43 @@ describe('readProgress', () => {
     writeFileSync(join(dir, 'progress.json'), '﻿{"version":1,"current":"x","lessons":{}}');
     const again = readProgress();
     expect(again.state === 'ok' && again.progress.current).toBe('x');
+  });
+});
+
+describe('personalization scenario fixtures (docs/testing.md)', () => {
+  const coursesDir = fileURLToPath(new URL('../../../courses', import.meta.url));
+  const catalog = loadCatalog('en', coursesDir);
+  const themeIds = loadThemes('en', coursesDir).map((th) => th.id);
+  const read = (name: string) => {
+    const result = readProgress(fixture(name));
+    expect(result.state).toBe('ok');
+    return progressOrEmpty(result);
+  };
+
+  it.each(['beginner-onboarded', 'level-check-passed', 'mid-course'])('%s uses only known ids (no warning)', (name) => {
+    expect(getProgressWarnings(read(name), catalog.map((c) => c.id), themeIds)).toEqual([]);
+  });
+
+  it('beginner right after onboarding: beginner level, a path, and lesson 1 resumed', () => {
+    const progress = read('beginner-onboarded');
+    expect(getLevel(progress)).toBe('beginner');
+    expect(getPathCourseIds(catalog.map((c) => c.id), progress)).toEqual(['ai-foundations']);
+    expect(getNextLesson(catalog, progress)).toMatchObject({ kind: 'resume', lesson: { id: 'ai-foundations/01-what-is-ai' } });
+  });
+
+  it('developer after a passed level check: every lesson is a placement skip, nothing left', () => {
+    const progress = read('level-check-passed');
+    expect(getLevel(progress)).toBe('intermediate');
+    expect(getStats(catalog, progress).overall).toMatchObject({ skipped: 3, placementSkipped: 3, completed: true });
+    expect(getNextLesson(catalog, progress)).toBeNull();
+  });
+
+  it('old progress file: no level or path, lessons kept, lesson 2 resumed', () => {
+    const progress = read('mid-course');
+    expect(getLevel(progress)).toBeUndefined();
+    expect(getPathCourseIds(catalog.map((c) => c.id), progress)).toEqual([]);
+    expect(getStats(catalog, progress).overall).toMatchObject({ done: 1, inProgress: 1, skipped: 0 });
+    expect(getNextLesson(catalog, progress)).toMatchObject({ kind: 'resume', lesson: { id: 'ai-foundations/02-how-machines-learn' } });
   });
 });
 

@@ -5,7 +5,9 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { getPage, PROGRESS_FIXTURES, startDashboard, type DashboardServer } from './server';
+import { loadCatalog } from '../../src/lib/courses';
+import { getNextLesson, progressOrEmpty, readProgress } from '../../src/lib/progress';
+import { COURSES_DIR, getPage, PROGRESS_FIXTURES, startDashboard, type DashboardServer } from './server';
 
 const LESSONS = ['What is AI?', 'How do machines learn?', 'What is a large language model?'];
 
@@ -15,9 +17,14 @@ interface Expectations {
   home: { include: string[]; exclude: string[] };
   catalog: { include: string[]; exclude: string[] };
   course: { include: string[]; exclude: string[] };
+  /** Lessons the course page shows as "Skipped after level check" (default 0). */
+  placementLessons?: number;
 }
 
 const INVALID_HOME = 'Your progress file could not be read';
+const PATH_WARNING = 'Some of your learning path was ignored';
+const SUGGEST_PATH = ['Get a path made for you', 'recommend a path'];
+const PLACEMENT = 'Skipped after level check';
 const INVALID_CATALOG = 'Your progress file could not be read, so every course is shown as not started.';
 const COURSE_ISSUES = ['Some course files have problems', 'Some files of this course have problems'];
 
@@ -61,7 +68,9 @@ const fixtures: Record<string, Expectations> = {
     catalog: { include: ['Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG, 'Recommended for you'] },
     course: { include: ['Not started', '0 of 3 lessons', 'Next up', ...LESSONS], exclude: ['Status: Done', INVALID_HOME] },
   },
-  'mid-course': {
+  // Scenario 3: an old progress file, written before levels and paths (no level, interests or
+  // path). It loads without warnings, keeps every lesson, and suggests asking for a path.
+  'mid-course (old progress file)': {
     progressDir: join(PROGRESS_FIXTURES, 'mid-course'),
     home: {
       include: [
@@ -72,8 +81,9 @@ const fixtures: Record<string, Expectations> = {
         'Courses completed: 0 of 1',
         'Your progress by theme',
         '1 of 3 lessons',
+        ...SUGGEST_PATH,
       ],
-      exclude: ['Welcome to Apprentice', INVALID_HOME],
+      exclude: ['Welcome to Apprentice', 'Your path', 'Level:', 'Your interests:', PATH_WARNING, INVALID_HOME],
     },
     catalog: { include: ['In progress', '1 of 3 lessons'], exclude: [INVALID_CATALOG] },
     course: {
@@ -102,7 +112,8 @@ const fixtures: Record<string, Expectations> = {
         '3 of 3 lessons finished',
         'Courses completed: 1 of 1',
       ],
-      exclude: ['Next up', 'Pick up where you left off', INVALID_HOME],
+      // Nothing left to recommend: the tutor would say the catalog is covered.
+      exclude: ['Next up', 'Pick up where you left off', ...SUGGEST_PATH, INVALID_HOME],
     },
     catalog: { include: ['Completed', '3 of 3 lessons'], exclude: [INVALID_CATALOG, 'Not started'] },
     course: {
@@ -122,6 +133,67 @@ const fixtures: Record<string, Expectations> = {
       exclude: ['Next up', 'Not started', INVALID_HOME],
     },
   },
+  // Scenario 1: a beginner right after onboarding and accepting the recommended path.
+  'beginner right after onboarding': {
+    progressDir: join(PROGRESS_FIXTURES, 'beginner-onboarded'),
+    home: {
+      include: [
+        'Welcome back, Robin!',
+        'Level: Beginner',
+        'Your interests:',
+        'Theme: Understanding AI',
+        'Your path',
+        'Why this path',
+        'so we start with the foundations',
+        'Updated on Oct 4, 2026',
+        '0 of 3 lessons',
+        'Status: In progress',
+        'Pick up where you left off',
+        LESSONS[0],
+        '0 of 3 lessons finished',
+      ],
+      exclude: ['Welcome to Apprentice', 'after your level check', ...SUGGEST_PATH, PATH_WARNING, INVALID_HOME],
+    },
+    catalog: {
+      include: ['Recommended for you', 'In progress', '0 of 3 lessons'],
+      exclude: [INVALID_CATALOG, PLACEMENT, 'Completed'],
+    },
+    course: {
+      include: ['In progress', '0 of 3 lessons', 'Status: In progress', 'Next up', ...LESSONS],
+      exclude: ['Status: Done', 'Status: Skipped', INVALID_HOME],
+    },
+  },
+  // Scenario 2: a developer who passed the level check for AI Foundations. Their path was set
+  // before (e.g. before saying "change my level"), so home lists that course as skipped.
+  'a developer who passed the level check': {
+    progressDir: join(PROGRESS_FIXTURES, 'level-check-passed'),
+    home: {
+      include: [
+        'Welcome back, Casey!',
+        'Level: Intermediate',
+        'Your path',
+        `Status: ${PLACEMENT}`,
+        '3 of 3 lessons',
+        'You finished every lesson. Congratulations!',
+        '3 of 3 lessons finished',
+        'Courses completed: 1 of 1',
+      ],
+      // The badge already says it: no "3 lessons skipped after your level check" line.
+      exclude: ['after your level check', 'Next up', 'Pick up where you left off', ...SUGGEST_PATH, PATH_WARNING, INVALID_HOME],
+    },
+    catalog: {
+      // The course card says "Skipped after level check" (its theme section counts as completed).
+      include: ['Recommended for you', `Status: ${PLACEMENT}`, '3 of 3 lessons'],
+      exclude: [INVALID_CATALOG, 'In progress', 'Not started'],
+    },
+    course: {
+      include: [`Status: ${PLACEMENT}`, 'Skipped on Oct 5, 2026', '3 of 3 lessons', ...LESSONS],
+      // "placement" is a marker for the dashboard, never shown to the learner.
+      exclude: ['Status: Done', 'Notes from your tutor', 'Next up', 'placement', INVALID_HOME],
+    },
+    placementLessons: 3,
+  },
+  // Scenario 2, partly: one lesson skipped by the level check, one skipped by hand.
   'a personal path with placement skips': {
     progressDir: join(PROGRESS_FIXTURES, 'placement-path'),
     home: {
@@ -145,7 +217,8 @@ const fixtures: Record<string, Expectations> = {
       ],
       exclude: ['Get a path made for you', INVALID_HOME],
     },
-    catalog: { include: ['Recommended for you', 'In progress', '2 of 3 lessons'], exclude: [INVALID_CATALOG] },
+    // Only one lesson was skipped by the level check: the course card says "In progress".
+    catalog: { include: ['Recommended for you', 'In progress', '2 of 3 lessons'], exclude: [INVALID_CATALOG, PLACEMENT] },
     course: {
       include: [
         'Status: Skipped after level check',
@@ -154,8 +227,9 @@ const fixtures: Record<string, Expectations> = {
         'Skipped on Oct 4, 2026',
         'Next up',
       ],
-      exclude: ['Status: Done', INVALID_HOME],
+      exclude: ['Status: Done', 'placement', INVALID_HOME],
     },
+    placementLessons: 1,
   },
   'invalid JSON': {
     progressDir: join(PROGRESS_FIXTURES, 'invalid-json'),
@@ -223,6 +297,33 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(page.html).toMatch(/<a class="badge theme-badge[^"]*" href="\/courses#theme-understanding-ai"/);
     expect(page.text).toContain('Theme: Understanding AI');
     expectText(page.text, fixture.course);
+  });
+
+  it('shows the lesson getNextLesson picks, on home and on the course page', async () => {
+    // Same rule as the tutor's "Start or resume" (AGENTS.md), computed from the fixture itself.
+    const result = readProgress(join(fixture.progressDir, 'progress.json'));
+    const next = getNextLesson(loadCatalog('en', COURSES_DIR), progressOrEmpty(result));
+
+    const home = await getPage(server, '/');
+    const card = /id="next-lesson-heading"[^>]*>([^<]*)<\/h2>\s*<div[^>]*>\s*<h3[^>]*>([^<]*)<\/h3>/.exec(home.html);
+    if (!next) {
+      expect(card).toBeNull();
+    } else {
+      const label = result.state !== 'ok' ? 'Where beginners start' : next.kind === 'resume' ? 'Pick up where you left off' : 'Next up';
+      expect(card?.slice(1).map((text) => text.trim())).toEqual([label, next.lesson.title]);
+    }
+
+    const course = await getPage(server, '/courses/ai-foundations');
+    const marked = [...course.html.matchAll(/class="[^"]*\blesson--next\b[^"]*"[\s\S]*?<h3 class="lesson__title"[^>]*>([^<]*)<\/h3>/g)];
+    expect(marked.map((match) => match[1].trim())).toEqual(next?.course.id === 'ai-foundations' ? [next.lesson.title] : []);
+  });
+
+  it('marks the lessons skipped by the level check on the course page', async () => {
+    const page = await getPage(server, '/courses/ai-foundations');
+    // One chunk per lesson card (each is an <li> holding a lesson title).
+    const lessons = page.html.split(/<li\b/).filter((chunk) => chunk.includes('class="lesson__title"'));
+    expect(lessons).toHaveLength(LESSONS.length);
+    expect(lessons.filter((lesson) => lesson.includes(PLACEMENT))).toHaveLength(fixture.placementLessons ?? 0);
   });
 
   it('credits AI Foundations to Apprentice on the catalog and the course page', async () => {

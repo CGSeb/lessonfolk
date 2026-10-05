@@ -117,6 +117,15 @@ describe('getHomeView', () => {
     expect(getHomeView(courses, ok({}, { profile: { level: 'expert' } })).level).toBeUndefined();
   });
 
+  it('suggests asking for a path only when lessons are left and there is no path', () => {
+    expect(getHomeView(courses, ok({ 'basics/01': 'done' })).suggestPath).toBe(true);
+    expect(getHomeView(courses, ok({}, { path: ['basics'] })).suggestPath).toBe(false);
+    // Everything finished: the tutor would have nothing to recommend.
+    expect(getHomeView(courses, ok({ 'basics/01': 'done', 'basics/02': 'skipped', 'more/01': 'done' })).suggestPath).toBe(false);
+    // A new learner gets the "How to start" steps instead.
+    expect(getHomeView(courses, { state: 'missing' }).suggestPath).toBe(false);
+  });
+
   it('has no progress warnings for a file without path or interests', () => {
     expect(getHomeView(courses, ok({})).progressWarnings).toEqual([]);
     expect(getHomeView(courses, { state: 'missing' }).progressWarnings).toEqual([]);
