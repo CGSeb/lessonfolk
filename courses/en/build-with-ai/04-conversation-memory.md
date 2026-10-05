@@ -41,7 +41,8 @@ prerequisites:
 - Misconception: "more history is always better". Very long contexts are slower, cost more
   and can make the model lose track of details.
 - For experienced learners, mention that apps can also fetch only the relevant past
-  information when needed (a topic for later courses), without going deeper here.
+  information when needed (retrieval, covered in the AI Agents and Tools course), without
+  going deeper here.
 
 ## Check your understanding
 1. If the API keeps no memory, how does a chatbot remember what you said three messages ago?
