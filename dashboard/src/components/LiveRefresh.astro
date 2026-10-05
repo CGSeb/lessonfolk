@@ -114,18 +114,42 @@ import { t } from '../i18n/en';
     }
   }
 
+  /*
+   * Browsers allow only 6 open connections per site over HTTP/1.1, and each
+   * stream holds one until it is closed. Background tabs and pages kept in the
+   * back/forward cache would pile up streams until navigation stalls, so the
+   * stream only stays open while the page is visible.
+   */
   if ('EventSource' in window) {
-    const events = new EventSource('/api/events');
+    let events: EventSource | null = null;
     let lostConnection = false;
-    events.addEventListener('change', (event) => void refresh((event as MessageEvent).data));
-    // The browser reconnects by itself; changes made while disconnected (server
-    // restarted, laptop asleep) are caught by refreshing once on reconnect.
-    events.addEventListener('error', () => (lostConnection = true));
-    events.addEventListener('open', () => {
-      if (lostConnection) {
-        lostConnection = false;
-        void refresh('reconnect');
-      }
-    });
+
+    const connect = () => {
+      if (events || document.hidden) return;
+      const source = new EventSource('/api/events');
+      events = source;
+      source.addEventListener('change', (event) => void refresh((event as MessageEvent).data));
+      // The browser reconnects by itself; changes made while disconnected (server
+      // restarted, laptop asleep, tab hidden) are caught by refreshing once on reconnect.
+      source.addEventListener('error', () => (lostConnection = true));
+      source.addEventListener('open', () => {
+        if (lostConnection) {
+          lostConnection = false;
+          void refresh('reconnect');
+        }
+      });
+    };
+
+    const disconnect = () => {
+      if (!events) return;
+      events.close();
+      events = null;
+      lostConnection = true;
+    };
+
+    document.addEventListener('visibilitychange', () => (document.hidden ? disconnect() : connect()));
+    window.addEventListener('pagehide', disconnect);
+    window.addEventListener('pageshow', connect);
+    connect();
   }
 </script>
