@@ -1,0 +1,14 @@
+id: ai-safety
+title: Using AI Safely and Wisely
+level: beginner
+theme: ai-and-society
+authors: [apprentice]
+description: Use AI with your eyes open — why it can be confidently wrong, how to check answers, what to keep private, where bias comes from, and how to use AI-made content honestly.
+estimatedHours: 1.5
+prerequisites: [ai-foundations]
+lessons:
+  - ai-safety/01-hallucinations
+  - ai-safety/02-verifying-answers-and-sources
+  - ai-safety/03-privacy
+  - ai-safety/04-bias-and-fairness
+  - ai-safety/05-copyright-and-honest-use
