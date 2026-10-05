@@ -395,15 +395,22 @@ const hiddenIssues = issues.length - shownIssues.length;
     color: var(--color-on-theme-fill);
   }
 
+  /* Solid chip in the theme's strong colour; inverted on the selected (filled) badge. */
   .theme-filter__count {
     min-width: 1.6em;
     padding: 0 0.45em;
     border-radius: var(--radius-pill);
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+    background: var(--color-theme-fill);
+    color: var(--color-on-theme-fill);
     font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
     line-height: 1.6;
     text-align: center;
+  }
+
+  .theme-filter[aria-current] .theme-filter__count {
+    background: var(--color-on-theme-fill);
+    color: var(--color-theme-fill);
   }
 
   .pager__link {
