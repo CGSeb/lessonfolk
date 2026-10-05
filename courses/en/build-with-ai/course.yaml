@@ -1,0 +1,16 @@
+id: build-with-ai
+title: "Build with AI: Your First AI App"
+level: intermediate
+theme: building-with-ai
+authors: [apprentice]
+description: Go from using AI to building with it — call a model from Python, shape its behaviour, get structured output, manage conversations and ship a small chatbot, all with free tools.
+estimatedHours: 2.5
+prerequisites: [prompting-basics]
+lessons:
+  - build-with-ai/01-how-an-api-call-works
+  - build-with-ai/02-system-prompts
+  - build-with-ai/03-structured-output
+  - build-with-ai/04-conversation-memory
+  - build-with-ai/05-errors-cost-and-latency
+  - build-with-ai/06-build-a-small-chatbot
+  - build-with-ai/07-sharing-and-next-steps
