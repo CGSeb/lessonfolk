@@ -131,8 +131,8 @@ const rows = courses.map((row) => ({
 
   /* The course the next lesson comes from: same spark cue as the next-lesson card. */
   .your-path__item--next {
-    border-color: var(--color-accent-border);
-    box-shadow: inset var(--border-accent) 0 0 var(--color-spark);
+    padding: calc(var(--space-3) - var(--border-spark) + 1px);
+    border: var(--border-spark) solid var(--color-spark);
   }
 
   .your-path__body {
