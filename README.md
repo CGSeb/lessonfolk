@@ -27,10 +27,13 @@ Then just say:
 
 > Let's start learning AI.
 
-The tutor will ask a few questions about you, then begin the first lesson.
+The tutor asks your level and what interests you, then recommends where to begin: a personal
+path of courses. If you already know some AI, it offers a short, optional level check so you
+don't redo what you know. Then your first lesson starts.
 
 Useful things to say: *"continue"*, *"show my progress"*, *"what can I learn?"*, *"quiz me"*,
-*"I already know this, skip"*. In Claude Code you can also use `/learn`, `/progress`, `/review`.
+*"I already know this, skip"*, *"recommend a path"*, *"change my level"*. In Claude Code you
+can also use `/learn`, `/progress`, `/review`.
 
 ## How it works
 
@@ -49,8 +52,9 @@ npm install
 npm run dashboard
 ```
 
-Then open http://127.0.0.1:4321. It only listens on your machine and never modifies your progress —
-the AI tutor is the only thing that writes it.
+Then open http://127.0.0.1:4321. Home shows your level, your path and the next lesson; the
+catalog groups courses by theme. The dashboard only listens on your machine and never modifies
+your progress — the AI tutor is the only thing that writes it.
 
 | Script | Purpose |
 |---|---|
@@ -66,9 +70,12 @@ The logo, colours and type used by the dashboard are described in [`docs/brand.m
 
 ## Courses
 
-| Course | Level |
-|---|---|
-| AI Foundations | Beginner |
+Courses are grouped by theme: *Understanding AI*, *Using AI tools*, *Building with AI* and
+*AI and society* (themes without a course yet are hidden until one is added).
+
+| Course | Theme | Level |
+|---|---|---|
+| AI Foundations | Understanding AI | Beginner |
 
 ## Contributing a course
 
@@ -79,7 +86,7 @@ course with you. Open the agent in this folder and say:
 > Create a course about prompting for beginners.
 
 The agent asks a few questions one at a time (topic, level, prerequisites, length, place in
-the learning path), then proposes an outline. **Nothing is written until you approve it.**
+the learning path, theme), then proposes an outline. **Nothing is written until you approve it.**
 It then writes `course.yaml` and the lessons, adds the course to `courses/<lang>/index.yaml`,
 and validates everything before handing back with a suggested commit message.
 

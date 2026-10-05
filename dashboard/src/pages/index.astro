@@ -16,7 +16,7 @@ import { readProgress } from '../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
-const { view, name, level, interests, path, lessons, courses, themes, progressError, progressWarnings } = getHomeView(
+const { view, name, level, interests, path, suggestPath, lessons, courses, themes, progressError, progressWarnings } = getHomeView(
   catalog.courses,
   readProgress(),
   catalog.themes,
@@ -136,7 +136,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
                 </section>
               )}
               {path.state === 'set' && <YourPath courses={path.courses} reason={path.reason} updatedOn={path.updatedOn} />}
-              {path.state === 'none' && view.state !== 'empty' && (
+              {suggestPath && (
                 <section class="card stack" aria-labelledby="no-path-heading">
                   <h2 id="no-path-heading">{t('path.noneTitle')}</h2>
                   <p>{t('path.noneBody')}</p>

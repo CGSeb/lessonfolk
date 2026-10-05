@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "profile": {
+    "name": "Robin",
+    "experience": "none",
+    "goal": "curiosity",
+    "language": "en",
+    "level": "beginner",
+    "interests": ["understanding-ai"]
+  },
+  "path": ["ai-foundations"],
+  "pathReason": "You are new to AI and curious about how it works, so we start with the foundations: what AI is, how machines learn and what a language model does.",
+  "pathUpdatedAt": "2026-10-04",
+  "current": "ai-foundations/01-what-is-ai",
+  "lessons": {
+    "ai-foundations/01-what-is-ai": {
+      "status": "in_progress",
+      "startedAt": "2026-10-04"
+    }
+  }
+}

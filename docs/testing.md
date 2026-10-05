@@ -25,7 +25,7 @@ npm run check -w dashboard  # type-check the dashboard
 
 | Test | What it checks |
 |---|---|
-| `pages.test.ts` | Home, catalog, AI Foundations course page and an unknown course (404) for each fixture below |
+| `pages.test.ts` | Home, catalog, AI Foundations course page, authors and an unknown course (404) for each fixture below; for every valid fixture, the next lesson shown on home and on the course page is the one `getNextLesson` picks |
 | `live-refresh.test.ts` | Simulates a first session in a temporary `.progress/`: creating, updating and deleting `progress.json` each sends a `change` event on `/api/events`, and the pages show the new state |
 
 Progress fixtures (`dashboard/tests/fixtures/progress/`):
@@ -34,7 +34,10 @@ Progress fixtures (`dashboard/tests/fixtures/progress/`):
 |---|---|
 | *(no folder)* | New learner: no `progress.json` yet |
 | `minimal` | Onboarded, no lesson started |
-| `mid-course` | Lesson 1 done, lesson 2 in progress |
+| `mid-course` | Lesson 1 done, lesson 2 in progress. Also an **old progress file** (written before levels and paths: no `level`, `interests` or `path`): no warning, "recommend a path" suggested |
+| `beginner-onboarded` | **Beginner right after onboarding**: level, interests, `path: ["ai-foundations"]` with its reason, lesson 1 in progress |
+| `placement-path` | **Intermediate learner after a level check**: one lesson skipped by the level check, one skipped by hand, a path with unknown course and theme ids (ignored with a warning) |
+| `level-check-passed` | **Developer who passed the level check** for AI Foundations: every lesson `skipped` with `notes: "placement"`, shown as "Skipped after level check" on home, catalog and course page |
 | `all-done` | Every AI Foundations lesson done or skipped, with scores and notes |
 | `invalid-json` | `progress.json` is not valid JSON |
 | `invalid-shape` | Valid JSON, but not the expected shape |
@@ -102,14 +105,62 @@ and repeat it after changes to `AGENTS.md`, the progress format or the dashboard
 - [ ] **Commands.** Say *show my progress*: the tutor's summary matches the dashboard.
 - [ ] **Not committed.** `git status` does not list anything in `.progress/` other than the example.
 
-To check the level check, start again from a deleted `progress.json` and answer "developer"
-for experience. The tutor offers an optional level check of at most 6 questions in total. A
-course you pass has all its lessons `skipped` with `notes: "placement"` (shown as "Skipped
-after level check" on the dashboard) and leaves the recommended path; a course you fail stays
-in it.
-
 Repeat the whole checklist in the other agent (Claude Code, then Codex, or the reverse), starting
 again from a deleted `progress.json`.
+
+### Personalization scenarios
+
+Three more runs check that the tutor and the dashboard agree on levels, level checks and
+paths. The automated tests cover the same three learners with fixtures (`beginner-onboarded`,
+`level-check-passed` and `placement-path`, `mid-course`), but only a real session proves that
+the tutor writes what the dashboard reads. Run all three in **Claude Code**, and at least
+scenario 1 in **Codex**. Back up your own `progress.json` first (see [Before you start](#before-you-start)).
+
+**Scenario 1 — beginner, fresh start.** Delete `.progress/progress.json`, say *Let's start
+learning AI*.
+
+- [ ] The tutor asks name, experience, goal, interests (theme titles, empty themes marked
+      "coming soon") and language, one question at a time. Answer "none" for experience.
+- [ ] No level check is offered. The tutor recommends AI Foundations with a 2–3 sentence reason
+      and asks if it suits you. Accept.
+- [ ] `progress.json` has `profile.level: "beginner"`, `profile.interests` (theme ids, not titles),
+      `path: ["ai-foundations"]`, `pathReason`, `pathUpdatedAt`,
+      `current: "ai-foundations/01-what-is-ai"` and that lesson `in_progress`.
+- [ ] Home shows "Level: Beginner", your interests, "Your path" with the tutor's reason under
+      "Why this path", AI Foundations "In progress", and "What is AI?" under "Pick up where you
+      left off". No "Some of your learning path was ignored" warning.
+
+**Scenario 2 — developer, level check.** Delete `.progress/progress.json`, start again and
+answer "developer" for experience.
+
+- [ ] The tutor offers an optional "level check" (never calls it "placement") of at most 6
+      questions, one at a time, without teaching. Answer the AI Foundations questions well.
+- [ ] Every AI Foundations lesson is `skipped` with `notes: "placement"` exactly and a
+      `completedAt` date; `profile.level` is `"intermediate"`.
+- [ ] With today's catalog (AI Foundations is the only course), the tutor says you have covered
+      the catalog for now and saves no `path`.
+- [ ] The catalog and the course page show "Skipped after level check" (course badge and each
+      lesson), with no "Notes from your tutor" for these lessons. Home shows "You finished every
+      lesson" and does **not** suggest "recommend a path".
+- [ ] Variant: start over, answer the level check badly. Nothing is skipped, the tutor may lower
+      your level, and AI Foundations is in the path.
+- [ ] Say *show my progress*: the tutor counts skipped lessons as finished and says they were
+      skipped after the level check, matching the dashboard.
+
+**Scenario 3 — existing learner with an old progress file.** Copy
+`dashboard/tests/fixtures/progress/mid-course/progress.json` to `.progress/progress.json`
+(no `level`, `interests` or `path`; lesson 1 done, lesson 2 in progress).
+
+- [ ] Before talking to the tutor: home shows "Welcome back, Alex!", "1 of 3 lessons finished",
+      "How do machines learn?" under "Pick up where you left off", "Get a path made for you"
+      with the phrase "recommend a path", and no warning.
+- [ ] Say *continue*. The tutor asks the experience question **once** (mentioning your saved
+      experience). Answer "used ChatGPT-like tools": it saves `profile.level: "beginner"`, offers
+      no level check, and recommends a path.
+- [ ] Nothing is lost: lesson 1 is still `done` with its score and notes, lesson 2 is still
+      `in_progress`, and the tutor resumes lesson 2. Home shows the same counts.
+- [ ] If you accept the path, home shows "Your path" and stops suggesting "recommend a path".
+      Say *continue* again: the tutor does not ask your level a second time.
 
 ### Reset
 

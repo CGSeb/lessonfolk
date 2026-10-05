@@ -49,7 +49,39 @@ themes:                   # in display order
 ```
 
 Every course belongs to exactly one theme. A theme with no course yet is allowed (it is hidden
-in the dashboard and the tutor). Add a new theme only when no existing one fits.
+in the dashboard catalog and in the tutor's course listing). Add a new theme only when no
+existing one fits.
+
+Themes are used in three places:
+
+- **Catalog.** The dashboard and the tutor's "what can I learn?" group courses by theme, in
+  `themes.yaml` order; within a theme, courses keep `index.yaml` order.
+- **Interests.** During onboarding the tutor lists the theme titles (empty ones as "coming
+  soon") and saves the learner's picks as theme ids in `profile.interests`.
+- **Personal path.** When the tutor recommends a path, it keeps the unfinished courses at or
+  below the learner's level in the themes they picked, plus their prerequisites whatever their
+  theme. The course `level` matters too: the optional level check only asks about courses below
+  the learner's level.
+
+Theme ids end up in learners' local `progress.json`, so never rename or remove a theme id once
+it is published; change its title or description instead. Unknown ids are ignored with a
+warning on the dashboard, never fatal.
+
+### Choosing a theme
+
+Pick the theme that matches what the learner will be able to *do* after the course, not the
+technology it mentions:
+
+| If learners will mainly… | Theme |
+|---|---|
+| understand how AI works (concepts, vocabulary, what happens inside) | `understanding-ai` |
+| get better results from AI assistants they already use | `using-ai` |
+| build apps, tools or agents on top of AI models (usually needs code) | `building-with-ai` |
+| reason about risks, ethics and impact on people and work | `ai-and-society` |
+
+If a course seems to fit two themes, choose the one its last lesson serves, and link the other
+side through `prerequisites` or the lessons' "Going further". Propose a new theme (id, title,
+one-sentence description) in your pull request only when none of the existing ones fits.
 
 ## `authors.yaml`
 

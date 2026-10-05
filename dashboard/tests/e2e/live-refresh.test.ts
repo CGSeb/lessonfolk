@@ -10,6 +10,12 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { getPage, startDashboard, type DashboardServer } from './server';
 
 const EVENT_TIMEOUT_MS = 8_000;
+/**
+ * A change of the progress file. Other change events are skipped: right after a fresh
+ * checkout, Windows (antivirus, search indexer) can touch courses/ and the server rightly
+ * announces `data: courses`, which made these tests fail intermittently.
+ */
+const PROGRESS_CHANGE = /^event: change\ndata: progress$/m;
 
 /** Reads a Server-Sent Events stream and waits for specific events. */
 async function openEvents(server: DashboardServer) {
@@ -102,7 +108,7 @@ describe('live updates during a tutoring session', () => {
       join(progressDir, 'progress.json'),
       progressFile({ 'ai-foundations/01-what-is-ai': { status: 'in_progress', startedAt: '2026-10-04' } }, 'ai-foundations/01-what-is-ai'),
     );
-    expect(await events.waitFor(/^event: change$/m)).toMatch(/^data: progress$/m);
+    await events.waitFor(PROGRESS_CHANGE);
 
     const home = await getPage(server, '/');
     expect(home.text).toContain('Welcome back, Robin!');
@@ -131,7 +137,7 @@ describe('live updates during a tutoring session', () => {
         null,
       ),
     );
-    expect(await events.waitFor(/^event: change$/m)).toMatch(/^data: progress$/m);
+    await events.waitFor(PROGRESS_CHANGE);
 
     const home = await getPage(server, '/');
     expect(home.text).toContain('Next up');
@@ -150,7 +156,7 @@ describe('live updates during a tutoring session', () => {
       join(progressDir, 'progress.json'),
       JSON.stringify({ ...progress, path: ['ai-foundations'], pathReason: 'Start with the foundations.', pathUpdatedAt: '2026-10-05' }),
     );
-    expect(await events.waitFor(/^event: change$/m)).toMatch(/^data: progress$/m);
+    await events.waitFor(PROGRESS_CHANGE);
 
     const home = await getPage(server, '/');
     expect(home.text).toContain('Your path');
@@ -163,7 +169,7 @@ describe('live updates during a tutoring session', () => {
 
   it('announces a reset (progress.json deleted)', async () => {
     rmSync(join(progressDir, 'progress.json'));
-    expect(await events.waitFor(/^event: change$/m)).toMatch(/^data: progress$/m);
+    await events.waitFor(PROGRESS_CHANGE);
 
     const home = await getPage(server, '/');
     expect(home.text).toContain('Welcome to Apprentice');

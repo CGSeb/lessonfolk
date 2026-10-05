@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "profile": {
+    "name": "Casey",
+    "experience": "developer",
+    "goal": "build things with AI",
+    "language": "en",
+    "level": "intermediate",
+    "interests": ["understanding-ai", "building-with-ai"]
+  },
+  "path": ["ai-foundations"],
+  "pathReason": "You use AI tools every day, so we start with how AI works before you build on it.",
+  "pathUpdatedAt": "2026-10-03",
+  "current": null,
+  "lessons": {
+    "ai-foundations/01-what-is-ai": {
+      "status": "skipped",
+      "completedAt": "2026-10-05",
+      "notes": "placement"
+    },
+    "ai-foundations/02-how-machines-learn": {
+      "status": "skipped",
+      "completedAt": "2026-10-05",
+      "notes": "placement"
+    },
+    "ai-foundations/03-what-is-an-llm": {
+      "status": "skipped",
+      "completedAt": "2026-10-05",
+      "notes": "placement"
+    }
+  }
+}

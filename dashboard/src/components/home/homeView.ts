@@ -37,6 +37,11 @@ export interface HomeView<C extends CourseRef> {
   interests: { id: string; title: string }[];
   /** The personal path the tutor recommended, with each course's status. */
   path: PathView<C>;
+  /**
+   * Suggest saying "recommend a path": the learner has started, has no path, and still has
+   * lessons left. Not once every lesson is finished: the tutor would have nothing to recommend.
+   */
+  suggestPath: boolean;
   /** Done or skipped lessons, out of all lessons in the catalog. */
   lessons: { finished: number; total: number };
   courses: { completed: number; total: number };
@@ -76,12 +81,15 @@ export function getHomeView<C extends CourseRef>(
   else if (stats.overall.completed) view = { state: 'done' };
   else view = { state: 'blocked' };
 
+  const path = getPathView(courses, progress, next);
+
   return {
     view,
     name: progress.profile.name?.trim() || undefined,
     level: getLevel(progress),
     interests: getInterestThemes(progress, themes),
-    path: getPathView(courses, progress, next),
+    path,
+    suggestPath: path.state === 'none' && (view.state === 'in_progress' || view.state === 'blocked'),
     lessons: {
       finished: stats.overall.done + stats.overall.skipped,
       total: stats.overall.total,
