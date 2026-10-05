@@ -1,0 +1,15 @@
+id: ai-agents-and-tools
+title: AI Agents and Tools
+level: intermediate
+theme: building-with-ai
+authors: [apprentice]
+description: A clear mental model of AI agents, without the hype — let a model call your functions, run an agent loop, answer from your own documents, and keep it safe with guardrails and human oversight.
+estimatedHours: 2
+prerequisites: [build-with-ai]
+lessons:
+  - ai-agents-and-tools/01-from-chatbot-to-agent
+  - ai-agents-and-tools/02-tool-and-function-calling
+  - ai-agents-and-tools/03-the-agent-loop
+  - ai-agents-and-tools/04-giving-a-model-your-data
+  - ai-agents-and-tools/05-where-agents-fail
+  - ai-agents-and-tools/06-guardrails-and-human-oversight
