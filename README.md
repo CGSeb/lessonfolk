@@ -91,6 +91,10 @@ that learners may already have completed.
 In Claude Code these are the `/create-course` and `/edit-course` skills; Codex follows the
 same procedures from `AGENTS.md`.
 
+While `/create-course` runs, Claude Code shows a **Course builder** pane beside the chat: the
+course title, the steps of the procedure done so far and the lessons written. It is a mod in
+`.claude/skills/course-builder/` that loads with the project; run `/course-builder` to reopen it.
+
 Whether you write by hand or with the agent, check your work before opening a pull request:
 
 ```bash
