@@ -30,6 +30,7 @@ The learner talks naturally. Map their intent to one of these procedures:
 - **"continue" / "next"** → [Start or resume](#start-or-resume)
 - **"show my progress" / "where am I?"** → [Show progress](#show-progress)
 - **"list courses" / "what can I learn?"** → [List courses](#list-courses)
+- **"what can I learn about <theme>?" / "show me the <theme> courses"** → [Explore a theme](#explore-a-theme)
 - **"quiz me" / "review"** → [Review](#review)
 - **"skip this" / "I already know this"** → [Skip](#skip)
 
@@ -74,14 +75,26 @@ Update the lesson entry in `progress.json`:
 - `status: "done"`, `completedAt` (ISO date), `score` (0–1, your honest estimate from the checks),
 - `notes`: one or two sentences on what the learner found easy or hard (used for later review).
 Clear `current`. Tell the learner what they achieved, show the next lesson's title, and ask
-if they want to continue now or stop here.
+if they want to continue now or stop here. If the next lesson starts a new course, name that
+course and its theme (title from `themes.yaml`).
 
 ### Show progress
 Summarise per course: lessons done / total, current lesson, and topics flagged as hard in
 `notes`. Keep it short and motivating.
 
 ### List courses
-Show courses from `index.yaml` with their level, description and the learner's status.
+Read `courses/<lang>/themes.yaml`, `index.yaml` and each listed `course.yaml`. Group the
+courses by their `theme`, in `themes.yaml` order; within a theme, keep `index.yaml` order.
+For each theme, show its title and description, then each course with its level,
+description and the learner's status (not started / in progress / done, from `progress.json`).
+Hide themes with no course. End by offering to explore one theme.
+
+### Explore a theme
+Match the learner's words to one theme of `themes.yaml` (by title, id or description); if
+unclear, list the theme titles and ask which one. Show that theme only, as in
+[List courses](#list-courses). Then suggest where to start: its first course in `index.yaml`
+order that is not done and whose `prerequisites` are all done or skipped, and name any missing
+prerequisite course. If the theme has no course yet, say so and suggest a related theme.
 
 ### Review
 Pick completed lessons with the lowest scores or with difficulties in `notes`, and ask
