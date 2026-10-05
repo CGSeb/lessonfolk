@@ -37,8 +37,8 @@ prerequisites:
 - You are an LLM: be honest about your own limits here, with a concrete example (you may not
   know very recent events; you can make mistakes). Avoid stating your training cutoff or
   comparing models — that ages quickly.
-- Keep answer-checking short (idea 3). Say that a later course on using AI safely covers how
-  to verify answers; do not teach verification techniques here.
+- Keep answer-checking short (idea 3). Say that the Using AI Safely and Wisely course covers
+  how to verify answers; do not teach verification techniques here.
 - Misconception: "if the answer is wrong, my prompt was bad". Sometimes, but not always —
   the limit can be the model's knowledge or reliability, not the wording.
 - Misconception: "telling the AI 'don't make mistakes' or 'be 100% accurate' prevents
@@ -65,5 +65,5 @@ The learner answers the checks correctly and can explain, in their own words, th
 between what a better prompt can improve and what it cannot.
 
 ## Going further
-- A later course on using AI safely and responsibly, including how to check answers.
-- Building with AI: system prompts and using models through code go beyond chat prompting.
+- Using AI Safely and Wisely: hallucinations, how to check answers, privacy, bias and honest use.
+- Build with AI: Your First AI App: system prompts and using models through code go beyond chat prompting.

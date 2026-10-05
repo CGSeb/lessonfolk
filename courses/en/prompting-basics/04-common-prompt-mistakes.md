@@ -36,7 +36,7 @@ prerequisites:
 - Misconception: "the AI will tell me if my question is biased". Sometimes it pushes back,
   but often it goes along with the framing. The learner is responsible for asking neutrally.
 - Mistake 5 is only a short practical reminder; do not turn it into a privacy lecture. If
-  the learner asks for more, say a later course covers using AI safely.
+  the learner asks for more, point to the Using AI Safely and Wisely course (its privacy lesson).
 - Link back to lessons 1–3: mistake 1 is lesson 1 (context, goal, audience), mistake 2 uses
   lesson 3's idea of steps and feedback.
 - Pacing: this lesson is mostly practice. Keep explanations to a sentence or two per
