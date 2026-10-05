@@ -49,6 +49,8 @@ export interface Theme {
   id: string;
   title: string;
   description: string;
+  /** 0-based position in `themes.yaml` (duplicates left out); the dashboard picks the theme colour from it. */
+  position: number;
   /** Courses of this theme in `index.yaml` order; may be empty. */
   courses: Course[];
 }
@@ -62,6 +64,8 @@ export interface Author {
   github?: string;
   /** Personal website (http or https). */
   url?: string;
+  /** Avatar image file name in `courses/authors/`; left out when the file is missing or too large. */
+  avatar?: string;
   /** Courses of this author in `index.yaml` order; may be empty. */
   courses: Course[];
 }
@@ -215,6 +219,16 @@ export function inspectCatalog(
   return { catalog, issues, warnings };
 }
 
+/** Folder of author avatar images, next to `authors.yaml`; never a language. */
+export const AUTHORS_DIR = 'authors';
+/** Largest avatar image accepted, so a huge file never slows the dashboard down. */
+export const MAX_AVATAR_BYTES = 512 * 1024;
+
+/** Absolute path of an author's avatar image (`avatar` from `authors.yaml`). */
+export function authorAvatarPath(avatar: string, coursesDir: string = getPaths().courses): string {
+  return join(coursesDir, AUTHORS_DIR, avatar);
+}
+
 /** `courses/authors.yaml`: one file for every language. */
 export function authorsFilePath(coursesDir: string = getPaths().courses): string {
   return join(coursesDir, 'authors.yaml');
@@ -242,7 +256,8 @@ function readAuthors(
       issues.push({ file: authorsFile, message: `author "${entry.slug}" is listed more than once` });
       continue;
     }
-    authors.set(entry.slug, { ...entry, courses: [] });
+    const avatar = entry.avatar ? checkAvatar(entry.slug, entry.avatar, coursesDir, authorsFile, issues) : undefined;
+    authors.set(entry.slug, { ...entry, avatar, courses: [] });
   }
   for (const course of catalog.courses) {
     const courseFile = join(langDir, course.id, 'course.yaml');
@@ -257,6 +272,30 @@ function readAuthors(
     }
   }
   catalog.authors = [...authors.values()];
+}
+
+/** The avatar file name when its image exists and is small enough; otherwise reports it. */
+function checkAvatar(
+  slug: string,
+  avatar: string,
+  coursesDir: string,
+  authorsFile: string,
+  issues: CourseIssue[],
+): string | undefined {
+  const file = authorAvatarPath(avatar, coursesDir);
+  const stats = existsSync(file) ? statSync(file) : undefined;
+  if (!stats?.isFile()) {
+    issues.push({ file: authorsFile, message: `author "${slug}": avatar "${avatar}" not found in ${AUTHORS_DIR}/` });
+    return undefined;
+  }
+  if (stats.size > MAX_AVATAR_BYTES) {
+    issues.push({
+      file: authorsFile,
+      message: `author "${slug}": avatar "${avatar}" is larger than ${MAX_AVATAR_BYTES / 1024} KB`,
+    });
+    return undefined;
+  }
+  return avatar;
 }
 
 /** Read `themes.yaml`, check each course's theme and group the courses by theme. */
@@ -281,7 +320,7 @@ function readThemes(
       issues.push({ file: themesFile, message: `theme "${id}" is listed more than once` });
       continue;
     }
-    themes.set(id, { id, title, description, courses: [] });
+    themes.set(id, { id, title, description, position: themes.size, courses: [] });
   }
   for (const course of catalog.courses) {
     const theme = themes.get(course.theme);
@@ -446,7 +485,7 @@ export function findLesson(
 export function listLanguages(coursesDir: string = getPaths().courses): string[] {
   if (!isDir(coursesDir)) return [];
   return readdirSync(coursesDir)
-    .filter((name) => isDir(join(coursesDir, name)))
+    .filter((name) => name !== AUTHORS_DIR && isDir(join(coursesDir, name)))
     .sort();
 }
 

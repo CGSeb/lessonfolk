@@ -3,38 +3,64 @@ import { relative } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CourseCard from '../../components/CourseCard.astro';
 import { courseAuthors } from '../../components/authors/authorView';
-import { getCatalogSections } from '../../components/catalog/catalogView';
+import {
+  coursesHref,
+  filterCourses,
+  getThemeFilters,
+  OTHER_THEME,
+  pageNumbers,
+  paginate,
+  parseCatalogQuery,
+} from '../../components/catalog/catalogFilter';
+import { themeToneClass } from '../../components/theme-tone';
 import { t } from '../../i18n/en';
 import { inspectCatalog } from '../../lib/courses';
 import { getPaths } from '../../lib/paths';
-import { getPathCourseIds, progressOrEmpty, readProgress } from '../../lib/progress';
+import { getPathCourseIds, getStats, progressOrEmpty, readProgress } from '../../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
 const progressResult = readProgress();
+const progress = progressOrEmpty(progressResult);
 // Courses in the learner's personal path get a "Recommended for you" marker (order unchanged).
 const recommended = new Set(
   getPathCourseIds(
     catalog.courses.map((c) => c.id),
-    progressOrEmpty(progressResult),
+    progress,
   ),
 );
 const themesById = new Map(catalog.themes.map((theme) => [theme.id, theme]));
-const sections = getCatalogSections(catalog.courses, catalog.themes, progressOrEmpty(progressResult)).map(
-  (section) => ({
-    ...section,
-    title: section.theme?.title ?? t('courses.otherThemeTitle'),
-    description: section.theme?.description ?? t('courses.otherThemeDescription'),
-    coursesText: t(
-      section.courses.length === 1 ? 'courses.themeCoursesProgressOne' : 'courses.themeCoursesProgressOther',
-      { done: section.coursesCompleted, total: section.courses.length },
-    ),
-    lessonsText: t('courses.lessonsProgress', {
-      done: section.lessons.finished,
-      total: section.lessons.total,
-    }),
-  }),
+const stats = new Map(getStats(catalog.courses, progress).courses.map((s) => [s.course.id, s]));
+
+// Theme filter, search and page all come from the URL query, so the live refresh
+// (which re-fetches this URL), reloads and shared links keep them.
+const themeFilters = getThemeFilters(catalog.courses, catalog.themes);
+const query = parseCatalogQuery(
+  Astro.url.searchParams,
+  themeFilters.map((f) => f.id),
 );
+const themeTitle = (id: string | undefined) =>
+  id === OTHER_THEME ? t('courses.otherThemeTitle') : (themesById.get(id ?? '')?.title ?? t('courses.allThemes'));
+const badges = [{ id: undefined, count: catalog.courses.length }, ...themeFilters].map(({ id, count }) => ({
+  title: themeTitle(id),
+  count,
+  tone: id === undefined ? 'theme-filter--all' : themeToneClass(themesById.get(id)?.position),
+  href: coursesHref({ theme: id, q: query.q }),
+  current: id === query.theme,
+}));
+const matches = filterCourses(catalog.courses, query, catalog.themes);
+const shown = paginate(matches, query.page);
+const pages = pageNumbers(shown.page, shown.pageCount).map((page) =>
+  page === null ? null : { page, href: coursesHref({ ...query, page }), current: page === shown.page },
+);
+const resultsText =
+  shown.total === 0
+    ? query.theme
+      ? t('courses.noResultsInTheme', { theme: themeTitle(query.theme) })
+      : t('courses.noResults')
+    : shown.pageCount > 1
+      ? t('courses.resultsRange', { from: shown.from, to: shown.to, total: shown.total })
+      : t(shown.total === 1 ? 'courses.resultsOne' : 'courses.resultsOther', { total: shown.total });
 
 const MAX_ISSUES = 5;
 const coursesDir = getPaths().courses;
@@ -82,65 +108,129 @@ const hiddenIssues = issues.length - shownIssues.length;
     }
 
     {
-      sections.length > 1 && (
-        <nav aria-label={t('courses.themeNavLabel')}>
-          <ul class="cluster theme-nav" role="list" style="--cluster-space: var(--space-2)">
-            {sections.map(({ anchor, title }) => (
-              <li>
-                <a class="theme-chip" href={`#${anchor}`}>
-                  {title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )
-    }
+      catalog.courses.length > 0 ? (
+        <div class="stack" style="--stack-space: var(--space-5)">
+          <form class="catalog-search" role="search" method="get" action="/courses" data-catalog-search>
+            <label class="visually-hidden" for="catalog-search-input">
+              {t('courses.searchLabel')}
+            </label>
+            {query.theme && <input type="hidden" name="theme" value={query.theme} />}
+            <input
+              class="catalog-search__input"
+              id="catalog-search-input"
+              type="search"
+              name="q"
+              value={query.q}
+              placeholder={t('courses.searchPlaceholder')}
+              autocomplete="off"
+              maxlength="100"
+            />
+            <button class="catalog-search__button" type="submit">
+              {t('courses.searchButton')}
+            </button>
+          </form>
 
-    {
-      sections.length > 0 ? (
-        sections.map(({ anchor, title, description, courses, coursesText, lessonsText, lessons, completed }) => (
-          <section class="theme-section" id={anchor} aria-labelledby={`${anchor}-title`}>
-            {/* Folded by default; the summary keeps the theme's title and progress visible. */}
-            <details class="theme-details" data-details-key={anchor}>
-              <summary class="theme-summary">
-                <span class="stack theme-header" style="--stack-space: var(--space-2)">
-                  <span class="theme-title-row">
-                    <h2 id={`${anchor}-title`}>{title}</h2>
-                    {completed && (
-                      <span class="badge badge--success">
-                        <span class="visually-hidden">{t('status.label')}:</span> {t('status.completed')}
-                      </span>
-                    )}
-                  </span>
-                  <span class="muted theme-description">{description}</span>
-                  <span class="theme-progress">
-                    <span>{coursesText}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>{lessonsText}</span>
-                  </span>
-                  <progress class="progress-bar" value={lessons.finished} max={Math.max(lessons.total, 1)} aria-label={lessonsText}>
-                    {lessonsText}
-                  </progress>
-                </span>
-                <span class="theme-chevron" aria-hidden="true"></span>
-              </summary>
-              <ol class="grid course-list" role="list" aria-label={t('courses.themeListLabel', { theme: title })}>
-                {courses.map((stats) => (
+          {/* Announces the result count when the search updates in place. */}
+          <p class="visually-hidden" role="status" data-catalog-status></p>
+
+          {/* Swapped in place as the learner types (see the script below). */}
+          <div class="stack" style="--stack-space: var(--space-5)" data-catalog-results>
+            <nav aria-label={t('courses.themeFilterLabel')}>
+              <ul class="cluster theme-filters" role="list" style="--cluster-space: var(--space-2)">
+                {badges.map(({ title, count, tone, href, current }) => (
                   <li>
-                    <CourseCard
-                      stats={stats}
-                      headingLevel={3}
-                      theme={themesById.get(stats.course.theme)}
-                      authors={courseAuthors(stats.course, catalog.authors)}
-                      recommended={recommended.has(stats.course.id)}
-                    />
+                    <a class:list={['theme-filter', tone]} href={href} aria-current={current ? 'true' : undefined}>
+                      {title}
+                      <span class="theme-filter__count">
+                        <span aria-hidden="true">{count}</span>
+                        <span class="visually-hidden">({t(count === 1 ? 'courses.themeCountOne' : 'courses.themeCountOther', { count })})</span>
+                      </span>
+                    </a>
                   </li>
                 ))}
+              </ul>
+            </nav>
+
+            <div class="stack" style="--stack-space: var(--space-3)">
+              <p class="muted" data-catalog-count>
+                {resultsText}
+              </p>
+              {shown.total === 0 && (
+                <p class="cluster" style="--cluster-space: var(--space-4)">
+                  {query.q && <a href={coursesHref({ theme: query.theme })}>{t('courses.clearSearch')}</a>}
+                  {query.theme && <a href={coursesHref()}>{t('courses.showAll')}</a>}
+                </p>
+              )}
+            </div>
+
+            {shown.items.length > 0 && (
+              <ol class="grid course-list" role="list" aria-label={t('courses.listLabel')}>
+                {shown.items.flatMap((course) => {
+                  const courseStats = stats.get(course.id);
+                  return courseStats
+                    ? [
+                        <li>
+                          <CourseCard
+                            stats={courseStats}
+                            theme={themesById.get(course.theme)}
+                            authors={courseAuthors(course, catalog.authors)}
+                            recommended={recommended.has(course.id)}
+                          />
+                        </li>,
+                      ]
+                    : [];
+                })}
               </ol>
-            </details>
-          </section>
-        ))
+            )}
+
+            {shown.pageCount > 1 && (
+              <nav class="pager" aria-label={t('courses.pagerLabel')}>
+                <ul class="cluster" role="list" style="--cluster-space: var(--space-2)">
+                  <li>
+                    {shown.page > 1 ? (
+                      <a class="pager__link" href={coursesHref({ ...query, page: shown.page - 1 })} rel="prev">
+                        {t('courses.previousPage')}
+                      </a>
+                    ) : (
+                      <span class="pager__link" aria-disabled="true">
+                        {t('courses.previousPage')}
+                      </span>
+                    )}
+                  </li>
+                  {pages.map((item) =>
+                    item ? (
+                      <li>
+                        <a
+                          class="pager__link"
+                          href={item.href}
+                          aria-current={item.current ? 'page' : undefined}
+                          aria-label={t('courses.pageLabel', { page: item.page })}
+                        >
+                          {item.page}
+                        </a>
+                      </li>
+                    ) : (
+                      <li class="pager__gap" aria-hidden="true">
+                        …
+                      </li>
+                    ),
+                  )}
+                  <li>
+                    {shown.page < shown.pageCount ? (
+                      <a class="pager__link" href={coursesHref({ ...query, page: shown.page + 1 })} rel="next">
+                        {t('courses.nextPage')}
+                      </a>
+                    ) : (
+                      <span class="pager__link" aria-disabled="true">
+                        {t('courses.nextPage')}
+                      </span>
+                    )}
+                  </li>
+                </ul>
+              </nav>
+            )}
+          </div>
+        </div>
       ) : (
         <p class="muted">{t('courses.empty')}</p>
       )
@@ -149,17 +239,70 @@ const hiddenIssues = issues.length - shownIssues.length;
 </BaseLayout>
 
 <script>
-  /** Open a folded theme when the page navigates to it (theme chips, shared links). */
-  function openTarget() {
-    const id = decodeURIComponent(location.hash.slice(1));
-    const details = id ? document.getElementById(id)?.querySelector('details') : null;
-    if (details) details.open = true;
+  import { coursesHref } from '../../components/catalog/catalogFilter';
+
+  /*
+   * Progressive enhancement of the search form: results update as the learner
+   * types, without reloading the page (so the field keeps focus). Without
+   * JavaScript the form submits as a plain GET. Listeners are delegated because
+   * the live refresh replaces the page content.
+   */
+  const SEARCH = 'form[data-catalog-search]';
+  const RESULTS = '[data-catalog-results]';
+  const DEBOUNCE_MS = 250;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let controller: AbortController | undefined;
+
+  /** A new search keeps the theme and starts on page 1. */
+  function searchUrl(form: HTMLFormElement): string {
+    const data = new FormData(form);
+    return coursesHref({
+      theme: String(data.get('theme') ?? '') || undefined,
+      q: String(data.get('q') ?? '').trim(),
+    });
   }
-  openTarget();
-  window.addEventListener('hashchange', openTarget);
-  // Clicking a chip for the theme already in the URL does not fire hashchange.
-  document.addEventListener('click', (event) => {
-    if ((event.target as Element).closest?.('a[href^="#theme-"]')) setTimeout(openTarget);
+
+  async function update(url: string) {
+    controller?.abort();
+    controller = new AbortController();
+    try {
+      const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'text/html' } });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const next = new DOMParser().parseFromString(await response.text(), 'text/html').querySelector(RESULTS);
+      const current = document.querySelector(RESULTS);
+      if (!next || !current) throw new Error('Results not found');
+      current.replaceWith(document.importNode(next, true));
+      history.replaceState(history.state, '', url);
+      const status = document.querySelector('[data-catalog-status]');
+      const count = document.querySelector('[data-catalog-count]')?.textContent?.trim() ?? '';
+      if (status) {
+        status.textContent = '';
+        // A fresh text node makes screen readers announce repeated messages.
+        setTimeout(() => (status.textContent = count), 50);
+      }
+    } catch (error) {
+      // Anything unexpected: fall back to a normal page load of the same search.
+      if ((error as Error).name !== 'AbortError') location.assign(url);
+    }
+  }
+
+  function searchForm(event: Event): HTMLFormElement | null {
+    return (event.target as Element | null)?.closest?.<HTMLFormElement>(SEARCH) ?? null;
+  }
+
+  document.addEventListener('input', (event) => {
+    const form = searchForm(event);
+    if (!form) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => void update(searchUrl(form)), DEBOUNCE_MS);
+  });
+
+  document.addEventListener('submit', (event) => {
+    const form = searchForm(event);
+    if (!form) return;
+    event.preventDefault();
+    clearTimeout(timer);
+    void update(searchUrl(form));
   });
 </script>
 
@@ -179,108 +322,124 @@ const hiddenIssues = issues.length - shownIssues.length;
     color: inherit;
   }
 
-  .theme-nav {
+  .catalog-search {
+    display: flex;
+    gap: var(--space-2);
+    max-width: 32rem;
+  }
+
+  .catalog-search__input {
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+  }
+
+  .catalog-search__input::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .catalog-search__button {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font: inherit;
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .catalog-search__button:hover {
+    background: var(--color-accent-strong);
+  }
+
+  .theme-filters,
+  .pager ul {
     padding: 0;
     list-style: none;
   }
 
-  .theme-chip {
-    display: inline-block;
-    padding: var(--space-1) var(--space-4);
-    border: 1px solid var(--color-accent-border);
+  /* Coloured like the theme badges on the cards (tone classes in tokens.css). */
+  .theme-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+    border: 1px solid var(--color-theme-badge-border);
     border-radius: var(--radius-pill);
-    background: var(--color-accent-subtle);
-    color: var(--color-accent-strong);
+    background: var(--color-theme-badge-bg);
+    color: var(--color-theme-badge-text);
     font-weight: var(--weight-medium);
     text-decoration: none;
   }
 
-  .theme-chip:hover {
-    border-color: var(--color-accent);
+  /* "All" is not a theme: neutral, so it never reads as the first theme's colour. */
+  .theme-filter--all {
+    --color-theme-badge-border: var(--color-border-strong);
+    --color-theme-badge-bg: var(--color-surface);
+    --color-theme-badge-text: var(--color-text);
   }
 
-  .theme-section {
-    scroll-margin-top: var(--space-5);
+  .theme-filter:hover {
+    border-color: var(--color-theme-fill);
   }
 
-  .theme-details {
+  .theme-filter[aria-current] {
+    border-color: var(--color-theme-fill);
+    background: var(--color-theme-fill);
+    color: var(--color-on-theme-fill);
+  }
+
+  /* Solid chip in the theme's strong colour; inverted on the selected (filled) badge. */
+  .theme-filter__count {
+    min-width: 1.6em;
+    padding: 0 0.45em;
+    border-radius: var(--radius-pill);
+    background: var(--color-theme-fill);
+    color: var(--color-on-theme-fill);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .theme-filter[aria-current] .theme-filter__count {
+    background: var(--color-on-theme-fill);
+    color: var(--color-theme-fill);
+  }
+
+  .pager__link {
+    display: inline-block;
+    min-width: 2.5rem;
+    padding: var(--space-1) var(--space-3);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     background: var(--color-surface);
+    text-align: center;
+    text-decoration: none;
   }
 
-  .theme-summary {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-5);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .theme-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .theme-summary:hover .theme-chevron {
+  a.pager__link:hover {
     border-color: var(--color-accent);
   }
 
-  .theme-header {
-    flex: 1;
-    max-width: 40rem;
+  .pager__link[aria-current] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
   }
 
-  .theme-title-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
-  }
-
-  .theme-description {
-    display: block;
-  }
-
-  /* Chevron drawn with borders: points down when folded, up when open. */
-  .theme-chevron {
-    flex: none;
-    margin-left: auto;
-    width: 0.75rem;
-    height: 0.75rem;
-    margin-top: 0.6rem;
-    border-right: 2px solid var(--color-text-muted);
-    border-bottom: 2px solid var(--color-text-muted);
-    transform: rotate(45deg);
-    transition: transform 150ms ease;
-  }
-
-  .theme-details[open] .theme-chevron {
-    margin-top: 0.9rem;
-    transform: rotate(-135deg);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .theme-chevron {
-      transition: none;
-    }
-  }
-
-  .theme-details > .course-list {
-    padding: 0 var(--space-5) var(--space-5);
-  }
-
-  .theme-header .progress-bar {
-    max-width: 20rem;
-  }
-
-  .theme-progress {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
+  .pager__link[aria-disabled] {
     color: var(--color-text-muted);
-    font-size: var(--text-sm);
+  }
+
+  .pager__gap {
+    color: var(--color-text-muted);
   }
 
   .course-list {

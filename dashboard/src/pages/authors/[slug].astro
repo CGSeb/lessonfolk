@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CourseCard from '../../components/CourseCard.astro';
 import Notice from '../../components/Notice.astro';
+import AuthorAvatar from '../../components/authors/AuthorAvatar.astro';
 import { courseAuthors, getAuthorView } from '../../components/authors/authorView';
 import { t } from '../../i18n/en';
 import { authorsFilePath, inspectCatalog } from '../../lib/courses';
@@ -66,21 +67,24 @@ const linkText = (link: NonNullable<typeof view>['links'][number]) =>
         </section>
       ) : (
         <>
-          <header class="stack" style="--stack-space: var(--space-3)">
-            <h1>{author.name}</h1>
-            {author.bio && <p class="author-bio">{author.bio}</p>}
-            {view.links.length > 0 && (
-              <ul class="cluster author-links" role="list" aria-label={t('author.linksLabel')} style="--cluster-space: var(--space-2) var(--space-4)">
-                {view.links.map((link) => (
-                  <li>
-                    <a href={link.href} target="_blank" rel="noopener noreferrer">
-                      {linkText(link)}
-                      <span class="visually-hidden"> {t('author.newTab')}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <header class="author-header">
+            <AuthorAvatar author={author} size="lg" />
+            <div class="stack" style="--stack-space: var(--space-3)">
+              <h1>{author.name}</h1>
+              {author.bio && <p class="author-bio">{author.bio}</p>}
+              {view.links.length > 0 && (
+                <ul class="cluster author-links" role="list" aria-label={t('author.linksLabel')} style="--cluster-space: var(--space-2) var(--space-4)">
+                  {view.links.map((link) => (
+                    <li>
+                      <a href={link.href} target="_blank" rel="noopener noreferrer">
+                        {linkText(link)}
+                        <span class="visually-hidden"> {t('author.newTab')}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </header>
 
           {
@@ -139,6 +143,17 @@ const linkText = (link: NonNullable<typeof view>['links'][number]) =>
   .breadcrumb [aria-current='page'] {
     color: var(--color-text);
     font-weight: var(--weight-medium);
+  }
+
+  .author-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .author-header > .stack {
+    flex: 1 1 18rem;
   }
 
   .author-bio {

@@ -280,21 +280,56 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     const page = await getPage(server, '/courses');
     expect(page.status).toBe(200);
     expect(page.html).toContain('href="/courses/ai-foundations"');
-    // Courses are grouped by theme; themes with no course yet are hidden.
-    expect(page.html).toMatch(/<h2 id="theme-understanding-ai-title"[^>]*>Understanding AI<\/h2>/);
-    expect(page.html).not.toContain('id="theme-ai-and-society"');
-    // Each card shows its theme, linking to the theme's section.
-    expect(page.html).toMatch(/<a class="badge theme-badge[^"]*" href="\/courses#theme-understanding-ai"/);
-    // Themes are folded by default.
-    expect(page.html).toMatch(/<details class="theme-details"(?![^>]*\bopen\b)[^>]*>/);
+    // One flat grid: no theme sections.
+    expect(page.html).not.toContain('<details');
+    // Theme filters: "All" (selected) first, then themes with courses only.
+    expect(page.html).toMatch(/<a class="theme-filter[^"]*" href="\/courses" aria-current="true"[^>]*>\s*All/);
+    expect(page.html).toMatch(/<a class="theme-filter[^"]*" href="\/courses\?theme=understanding-ai"(?![^>]*aria-current)/);
+    expect(page.html).not.toContain('theme=ai-and-society');
+    // Each card shows its theme in the theme's colour, linking to the catalog filtered to it.
+    expect(page.html).toMatch(/<a class="badge theme-badge theme-tone-1[^"]*" href="\/courses\?theme=understanding-ai"/);
+    expect(page.html).toMatch(/<a class="theme-filter theme-tone-1[^"]*" href="\/courses\?theme=understanding-ai"/);
+    expect(page.html).toMatch(/<a class="theme-filter theme-filter--all[^"]*" href="\/courses"/);
+    expect(page.html).toMatch(/<form class="catalog-search[^"]*" role="search"/);
+    expect(page.text).toContain('1 course');
+    // A single page needs no pager.
+    expect(page.html).not.toContain('aria-label="Pages"');
     expectText(page.text, fixture.catalog);
+  });
+
+  it('filters the course catalog by theme and search from the URL', async () => {
+    const theme = await getPage(server, '/courses?theme=understanding-ai');
+    expect(theme.html).toMatch(/href="\/courses\?theme=understanding-ai" aria-current="true"/);
+    expect(theme.html).toContain('href="/courses/ai-foundations"');
+    // The search form keeps the selected theme.
+    expect(theme.html).toMatch(/<input type="hidden" name="theme" value="understanding-ai"/);
+
+    const found = await getPage(server, '/courses?q=foundations');
+    expect(found.html).toContain('href="/courses/ai-foundations"');
+    expect(found.html).toMatch(/<input[^>]*name="q" value="foundations"/);
+    // Theme filters keep the search.
+    expect(found.html).toContain('href="/courses?theme=understanding-ai&amp;q=foundations"');
+
+    const none = await getPage(server, '/courses?theme=understanding-ai&q=zzz-no-such-course');
+    expect(none.status).toBe(200);
+    expect(none.html).not.toContain('href="/courses/ai-foundations"');
+    expect(none.text).toContain('No course in Understanding AI matches your search.');
+    expect(none.html).toMatch(/href="\/courses\?theme=understanding-ai"[^>]*>Clear the search/);
+    expect(none.html).toMatch(/href="\/courses"[^>]*>See all courses/);
+  });
+
+  it('falls back to all courses and page 1 for an unknown theme or page', async () => {
+    const page = await getPage(server, '/courses?theme=no-such-theme&page=99');
+    expect(page.status).toBe(200);
+    expect(page.html).toMatch(/href="\/courses" aria-current="true"/);
+    expect(page.html).toContain('href="/courses/ai-foundations"');
   });
 
   it('renders the AI Foundations course page', async () => {
     const page = await getPage(server, '/courses/ai-foundations');
     expect(page.status).toBe(200);
     expect(page.text).toContain('AI Foundations');
-    expect(page.html).toMatch(/<a class="badge theme-badge[^"]*" href="\/courses#theme-understanding-ai"/);
+    expect(page.html).toMatch(/<a class="badge theme-badge[^"]*" href="\/courses\?theme=understanding-ai"/);
     expect(page.text).toContain('Theme: Understanding AI');
     expectText(page.text, fixture.course);
   });
@@ -339,12 +374,29 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(page.status).toBe(200);
     expect(page.html).toMatch(/<a href="\/authors\/apprentice"[^>]*>Apprentice<\/a>/);
     expect(page.text).toContain('1 course');
+    // Decorative avatar from courses/authors/: the name sits next to it.
+    expect(page.html).toMatch(/<img class="author-avatar[^"]*" src="\/api\/authors\/apprentice\/avatar" alt=""/);
+  });
+
+  it('serves author avatars from courses/authors/', async () => {
+    const avatar = await fetch(`${server.url}/api/authors/apprentice/avatar`);
+    expect(avatar.status).toBe(200);
+    expect(avatar.headers.get('content-type')).toBe('image/svg+xml');
+    expect(avatar.headers.get('content-security-policy')).toContain('sandbox');
+    expect(await avatar.text()).toContain('<svg');
+    // Revalidation answers 304 while the file is unchanged.
+    const again = await fetch(`${server.url}/api/authors/apprentice/avatar`, {
+      headers: { 'If-None-Match': avatar.headers.get('etag') ?? '' },
+    });
+    expect(again.status).toBe(304);
+    expect((await fetch(`${server.url}/api/authors/no-such-author/avatar`)).status).toBe(404);
   });
 
   it('renders the Apprentice author page with its courses and progress', async () => {
     const page = await getPage(server, '/authors/apprentice');
     expect(page.status).toBe(200);
     expect(page.text).toContain('Courses by Apprentice');
+    expect(page.html).toMatch(/<img class="author-avatar author-avatar--lg[^"]*" src="\/api\/authors\/apprentice\/avatar"/);
     expect(page.html).toContain('href="/courses/ai-foundations"');
     // No link is set in authors.yaml, so none is rendered.
     expect(page.html).not.toContain('target="_blank"');

@@ -9,6 +9,7 @@ import {
   type NextLesson,
   type ProgressResult,
 } from '../../lib/progress';
+import { coursesHref } from '../catalog/catalogFilter';
 import { getCatalogSections, type ThemeRef } from '../catalog/catalogView';
 import { getInterestThemes, getPathView, type PathView } from './pathView';
 
@@ -56,8 +57,8 @@ export interface HomeView<C extends CourseRef> {
 export interface ThemeProgress {
   id: string;
   title: string;
-  /** Anchor of the theme's section in the catalog. */
-  anchor: string;
+  /** The catalog filtered to this theme. */
+  href: string;
   finished: number;
   total: number;
   /** Every course of the theme is completed. */
@@ -99,8 +100,8 @@ export function getHomeView<C extends CourseRef>(
       total: stats.courses.length,
     },
     // Courses with an unknown theme are reported as content issues, not shown here.
-    themes: getCatalogSections(courses, themes, progress).flatMap(({ theme, anchor, lessons, completed }) =>
-      theme ? [{ id: theme.id, title: theme.title, anchor, ...lessons, completed }] : [],
+    themes: getCatalogSections(courses, themes, progress).flatMap(({ theme, lessons, completed }) =>
+      theme ? [{ id: theme.id, title: theme.title, href: coursesHref({ theme: theme.id }), ...lessons, completed }] : [],
     ),
     progressError: result.state === 'invalid' ? result.error : undefined,
     progressWarnings: getProgressWarnings(

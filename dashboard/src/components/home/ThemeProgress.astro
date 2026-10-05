@@ -2,7 +2,7 @@
 import { t } from '../../i18n/en';
 import type { ThemeProgress } from './homeView';
 
-/** Progress per theme: one row per non-empty theme, linking to its catalog section. */
+/** Progress per theme: one row per non-empty theme, linking to the catalog filtered to it. */
 interface Props {
   themes: ThemeProgress[];
 }
@@ -14,14 +14,14 @@ const { themes } = Astro.props;
   <h2 class="theme-progress__heading" id="theme-progress-heading">{t('theme.progressTitle')}</h2>
   <ul class="stack theme-progress__list" role="list" style="--stack-space: var(--space-3)">
     {
-      themes.map(({ id, title, anchor, finished, total, completed }) => {
+      themes.map(({ id, title, href, finished, total, completed }) => {
         const labelId = `theme-progress-${id}`;
         const text = t('theme.progressLessons', { finished, total });
         return (
           <li class="stack" style="--stack-space: var(--space-1)">
             <p class="theme-progress__row" id={labelId}>
               <span class="theme-progress__name">
-                <a href={`/courses#${anchor}`}>{title}</a>
+                <a href={href}>{title}</a>
                 {completed && (
                   <span class="theme-progress__done">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

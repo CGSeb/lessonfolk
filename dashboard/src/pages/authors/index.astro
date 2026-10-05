@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Notice from '../../components/Notice.astro';
+import AuthorAvatar from '../../components/authors/AuthorAvatar.astro';
 import { getAuthorList } from '../../components/authors/authorView';
 import { t } from '../../i18n/en';
 import { authorsFilePath, inspectCatalog } from '../../lib/courses';
@@ -45,11 +46,16 @@ const fileIssues = issues.filter((issue) => issue.file === authorsFile);
         <ul class="grid author-list" role="list">
           {authors.map(({ author, countText }) => (
             <li>
-              <article class="card stack author-card" style="--stack-space: var(--space-2)">
-                <h2 class="author-card__name">
-                  <a href={author.href}>{author.name}</a>
-                </h2>
-                <p class="muted author-card__count">{countText}</p>
+              <article class="card stack author-card" style="--stack-space: var(--space-3)">
+                <div class="author-card__header">
+                  <AuthorAvatar author={author} />
+                  <div class="stack" style="--stack-space: var(--space-1)">
+                    <h2 class="author-card__name">
+                      <a href={author.href}>{author.name}</a>
+                    </h2>
+                    <p class="muted author-card__count">{countText}</p>
+                  </div>
+                </div>
                 {author.bio && <p>{author.bio}</p>}
               </article>
             </li>
@@ -85,6 +91,12 @@ const fileIssues = issues.filter((issue) => issue.file === authorsFile);
   .author-card:hover {
     border-color: var(--color-accent-border);
     box-shadow: var(--shadow-raised);
+  }
+
+  .author-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
   }
 
   .author-card__name {

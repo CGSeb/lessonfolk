@@ -87,13 +87,13 @@ export function pathStatusDisplay(status: PathCourseStatus): { key: UiKey; varia
 }
 
 /** Interest theme ids resolved to themes, in the learner's order; unknown and repeated ids are ignored. */
-export function getInterestThemes<T extends { id: string; title: string }>(
+export function getInterestThemes<T extends { id: string; title: string; position?: number }>(
   progress: Progress,
   themes: T[],
-): { id: string; title: string }[] {
+): { id: string; title: string; position?: number }[] {
   const byId = new Map(themes.map((th) => [th.id, th]));
   return [...new Set(progress.profile.interests ?? [])].flatMap((id) => {
     const theme = byId.get(id);
-    return theme ? [{ id: theme.id, title: theme.title }] : [];
+    return theme ? [{ id: theme.id, title: theme.title, position: theme.position }] : [];
   });
 }

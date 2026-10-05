@@ -13,6 +13,7 @@ Code; the "Create a course" and "Edit a course" procedures in `AGENTS.md` for ot
 ```
 courses/
   authors.yaml                # course authors, shared by every language
+  authors/                    # optional author avatar images (never a language)
   en/                         # language code (ISO 639-1)
     index.yaml                # ordered learning path for this language
     themes.yaml               # themes that group courses in the catalog
@@ -92,12 +93,19 @@ authors:
     bio: One or two sentences about the author.   # optional
     github: some-username # optional, GitHub username (not a URL)
     url: https://example.com   # optional, personal website (http or https)
+    avatar: apprentice.svg     # optional, image file name in courses/authors/
 ```
 
 `courses/authors.yaml` is shared by every language. Each author gets a page in the dashboard
 (`/authors/<slug>`) listing their courses, with their links when set. Only add `github` or `url`
 when the author gives them; never guess. Courses written by the project's maintainers use
 the `apprentice` author.
+
+`avatar` is the file name of an image in `courses/authors/` (lower-case kebab-case, `.png`,
+`.jpg`, `.webp` or `.svg`, at most 512 KB), usually named after the slug. The dashboard shows it
+round on the authors list and the author's page; a square image works best. Without an avatar
+it shows the author's initials. Only add an image the author gave you and agreed to publish.
+`courses/authors/` holds only these images: it is never read as a language folder.
 
 ## `course.yaml`
 
@@ -166,8 +174,9 @@ Run `npm run check:courses` before opening a pull request. It fails on:
   match file paths, and broken prerequisites;
 - a missing `themes.yaml`, duplicate theme ids, or a course whose `theme` is missing or not
   listed in `themes.yaml`;
-- a missing or invalid `authors.yaml`, duplicate author slugs, or a course with no `authors` or
-  an author slug not listed in `authors.yaml`;
+- a missing or invalid `authors.yaml`, duplicate author slugs, an `avatar` whose image is
+  missing from `courses/authors/` or larger than 512 KB, or a course with no `authors` or an
+  author slug not listed in `authors.yaml`;
 - lesson sections that are missing, misspelled, duplicated or out of order (only the `##`
   headings above are allowed; `###` sub-headings are free);
 - a question under `## Check your understanding` without a `Good answer:` line.
