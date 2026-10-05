@@ -13,8 +13,8 @@ interface Props {
   stats: CourseStats<Course>;
   /** Heading level of the course title, to fit the page outline. */
   headingLevel?: 2 | 3;
-  /** The course's theme, shown as a badge linking to its catalog section. */
-  theme?: { id: string; title: string };
+  /** The course's theme, shown as a badge linking to the catalog filtered to it. */
+  theme?: { id: string; title: string; position?: number };
   /** The course's authors, shown as a byline linking to their pages. */
   authors?: AuthorLink[];
   /** The course is in the learner's personal path: shows a "Recommended for you" marker. */

@@ -54,6 +54,17 @@ Two brand colours, used with restraint, on calm cool-grey neutrals.
 `tokens.css` also holds the full ramps (`--indigo-50` to `--indigo-950`, `--amber-50` to
 `--amber-950`, `--neutral-0` to `--neutral-950`) that these roles map onto.
 
+### Course theme colours
+
+Each course theme has its own tone, so learners spot a theme at a glance on theme badges and
+the catalog's theme filters. The tones are cool hues next to the brand indigo, in
+`themes.yaml` order: **indigo, sky, violet, rose, teal** (a sixth theme starts again at indigo).
+Every tone follows the indigo badge pattern: a `50` tint with `800` text in light, a `950`
+tint with `200` text in dark, and a `700` / `300` fill for the selected filter (indigo keeps the accent `600` / `300`). Badge text is
+at least 7:1 and filled text at least 5.4:1. The classes `.theme-tone-1` to `.theme-tone-5` in
+`tokens.css` set them; the "All" filter stays neutral. Amber and green stay reserved for the
+spark and for success.
+
 ### Light and dark themes
 
 Each semantic colour is written once as `light-dark(<light>, <dark>)`, so a single token serves

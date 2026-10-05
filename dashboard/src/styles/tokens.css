@@ -65,6 +65,35 @@
   --neutral-925: #131528;
   --neutral-950: #0c0e1f;
 
+  /* Theme tones: cool hues next to indigo, so every theme gets its own colour. */
+  --sky-50: #f0f9ff;
+  --sky-200: #bae6fd;
+  --sky-300: #7dd3fc;
+  --sky-700: #0369a1;
+  --sky-800: #075985;
+  --sky-950: #082f49;
+
+  --violet-50: #f5f3ff;
+  --violet-200: #ddd6fe;
+  --violet-300: #c4b5fd;
+  --violet-700: #6d28d9;
+  --violet-800: #5b21b6;
+  --violet-950: #2e1065;
+
+  --rose-50: #fff1f2;
+  --rose-200: #fecdd3;
+  --rose-300: #fda4af;
+  --rose-700: #be123c;
+  --rose-800: #9f1239;
+  --rose-950: #4c0519;
+
+  --teal-50: #f0fdfa;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-950: #042f2e;
+
   --green-50: #ecfdf3;
   --green-100: #d3f5e0;
   --green-300: #86efac;
@@ -103,6 +132,9 @@
   --color-theme-badge-bg: light-dark(var(--indigo-50), var(--indigo-950));
   --color-theme-badge-text: light-dark(var(--indigo-800), var(--indigo-200));
   --color-theme-badge-border: var(--color-accent-border);
+  /* Selected theme filter: >= 5.4:1 in both themes for every tone. */
+  --color-theme-fill: var(--color-accent);
+  --color-on-theme-fill: var(--color-on-accent);
 
   --shadow-color: light-dark(rgb(26 28 51 / 0.06), rgb(0 0 0 / 0.4));
   --shadow-color-soft: light-dark(rgb(26 28 51 / 0.05), rgb(0 0 0 / 0.35));
@@ -157,6 +189,45 @@
   /* Layout */
   --content-width: 64rem;
   --gutter: clamp(1rem, 4vw, 2rem);
+}
+
+/*
+ * Theme tones: one colour per course theme, picked from its position in
+ * themes.yaml (see theme-tone.ts) and cycling after the last tone. Each tone
+ * overrides the theme badge tokens on the element that carries the class.
+ * Badge text is >= 7:1 on its background in both themes. Tone 1 is the
+ * default indigo.
+ */
+.theme-tone-2 {
+  --color-theme-badge-bg: light-dark(var(--sky-50), var(--sky-950));
+  --color-theme-badge-text: light-dark(var(--sky-800), var(--sky-200));
+  --color-theme-badge-border: light-dark(var(--sky-200), var(--sky-800));
+  --color-theme-fill: light-dark(var(--sky-700), var(--sky-300));
+  --color-on-theme-fill: light-dark(var(--neutral-0), var(--sky-950));
+}
+
+.theme-tone-3 {
+  --color-theme-badge-bg: light-dark(var(--violet-50), var(--violet-950));
+  --color-theme-badge-text: light-dark(var(--violet-800), var(--violet-200));
+  --color-theme-badge-border: light-dark(var(--violet-200), var(--violet-800));
+  --color-theme-fill: light-dark(var(--violet-700), var(--violet-300));
+  --color-on-theme-fill: light-dark(var(--neutral-0), var(--violet-950));
+}
+
+.theme-tone-4 {
+  --color-theme-badge-bg: light-dark(var(--rose-50), var(--rose-950));
+  --color-theme-badge-text: light-dark(var(--rose-800), var(--rose-200));
+  --color-theme-badge-border: light-dark(var(--rose-200), var(--rose-800));
+  --color-theme-fill: light-dark(var(--rose-700), var(--rose-300));
+  --color-on-theme-fill: light-dark(var(--neutral-0), var(--rose-950));
+}
+
+.theme-tone-5 {
+  --color-theme-badge-bg: light-dark(var(--teal-50), var(--teal-950));
+  --color-theme-badge-text: light-dark(var(--teal-800), var(--teal-200));
+  --color-theme-badge-border: light-dark(var(--teal-200), var(--teal-800));
+  --color-theme-fill: light-dark(var(--teal-700), var(--teal-300));
+  --color-on-theme-fill: light-dark(var(--neutral-0), var(--teal-950));
 }
 
 /*

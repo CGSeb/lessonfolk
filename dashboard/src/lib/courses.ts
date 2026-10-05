@@ -49,6 +49,8 @@ export interface Theme {
   id: string;
   title: string;
   description: string;
+  /** 0-based position in `themes.yaml` (duplicates left out); the dashboard picks the theme colour from it. */
+  position: number;
   /** Courses of this theme in `index.yaml` order; may be empty. */
   courses: Course[];
 }
@@ -281,7 +283,7 @@ function readThemes(
       issues.push({ file: themesFile, message: `theme "${id}" is listed more than once` });
       continue;
     }
-    themes.set(id, { id, title, description, courses: [] });
+    themes.set(id, { id, title, description, position: themes.size, courses: [] });
   }
   for (const course of catalog.courses) {
     const theme = themes.get(course.theme);

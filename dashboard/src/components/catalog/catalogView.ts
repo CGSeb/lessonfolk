@@ -12,18 +12,12 @@ export interface ThemeRef<C extends CourseRef> {
 export interface ThemeSection<C extends CourseRef> {
   /** `undefined` for the fallback section of courses with no known theme. */
   theme: Omit<ThemeRef<C>, 'courses'> | undefined;
-  /** Anchor id of the section, unique on the page. */
-  anchor: string;
   courses: CourseStats<C>[];
-  coursesCompleted: number;
   /** Every course of the theme is completed (all its lessons done or skipped). */
   completed: boolean;
   /** Done or skipped lessons, out of all lessons of the theme. */
   lessons: { finished: number; total: number };
 }
-
-/** Anchor of the fallback section; theme ids are kebab-case so they cannot collide. */
-export const OTHER_ANCHOR = 'theme--other';
 
 /**
  * One section per non-empty theme, in `themes.yaml` order, with courses in
@@ -38,14 +32,12 @@ export function getCatalogSections<C extends CourseRef>(
   const stats = new Map(getStats(courses, progress).courses.map((s) => [s.course.id, s]));
   const placed = new Set<string>();
 
-  const section = (theme: ThemeSection<C>['theme'], anchor: string, members: C[]): ThemeSection<C> => {
+  const section = (theme: ThemeSection<C>['theme'], members: C[]): ThemeSection<C> => {
     const courseStats = members.flatMap((c) => stats.get(c.id) ?? []);
     const lessons = members.flatMap((c) => c.lessons);
     return {
       theme,
-      anchor,
       courses: courseStats,
-      coursesCompleted: courseStats.filter((s) => s.completed).length,
       completed: courseStats.length > 0 && courseStats.every((s) => s.completed),
       lessons: {
         finished: lessons.filter((l) => isFinished(progress, l.id)).length,
@@ -61,9 +53,9 @@ export function getCatalogSections<C extends CourseRef>(
     const inTheme = courses.filter((c) => ids.has(c.id));
     if (!inTheme.length) continue;
     for (const c of inTheme) placed.add(c.id);
-    sections.push(section(theme, `theme-${theme.id}`, inTheme));
+    sections.push(section(theme, inTheme));
   }
   const others = courses.filter((c) => !placed.has(c.id));
-  if (others.length) sections.push(section(undefined, OTHER_ANCHOR, others));
+  if (others.length) sections.push(section(undefined, others));
   return sections;
 }

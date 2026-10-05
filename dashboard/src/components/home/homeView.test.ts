@@ -142,8 +142,8 @@ describe('getHomeView', () => {
         theme('first', [basics]),
       ]);
       expect(home.themes).toEqual([
-        { id: 'second', title: 'T second', anchor: 'theme-second', finished: 1, total: 1, completed: true },
-        { id: 'first', title: 'T first', anchor: 'theme-first', finished: 1, total: 2, completed: false },
+        { id: 'second', title: 'T second', href: '/courses?theme=second', finished: 1, total: 1, completed: true },
+        { id: 'first', title: 'T first', href: '/courses?theme=first', finished: 1, total: 2, completed: false },
       ]);
     });
 

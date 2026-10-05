@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyProgress, type CourseRef, type LessonStatus, type Progress } from '../../lib/progress';
-import { getCatalogSections, OTHER_ANCHOR, type ThemeRef } from './catalogView';
+import { getCatalogSections, type ThemeRef } from './catalogView';
 
 const course = (id: string, lessonCount: number): CourseRef => ({
   id,
@@ -27,21 +27,21 @@ function progress(lessons: Record<string, LessonStatus>): Progress {
 }
 
 const summary = (sections: ReturnType<typeof getCatalogSections>) =>
-  sections.map((s) => [s.anchor, s.courses.map((x) => x.course.id)]);
+  sections.map((s) => [s.theme?.id, s.courses.map((x) => x.course.id)]);
 
 describe('getCatalogSections', () => {
   it('groups courses by theme in themes.yaml order, keeping index.yaml order inside', () => {
     const themes = [theme('second', [c, a]), theme('first', [b])];
     expect(summary(getCatalogSections(courses, themes, emptyProgress()))).toEqual([
-      ['theme-second', ['a', 'c']],
-      ['theme-first', ['b']],
+      ['second', ['a', 'c']],
+      ['first', ['b']],
     ]);
   });
 
   it('hides empty themes', () => {
     const themes = [theme('empty', []), theme('all', courses)];
     expect(summary(getCatalogSections(courses, themes, emptyProgress()))).toEqual([
-      ['theme-all', ['a', 'b', 'c']],
+      ['all', ['a', 'b', 'c']],
     ]);
   });
 
@@ -53,22 +53,22 @@ describe('getCatalogSections', () => {
   it('puts courses with no known theme in a last section', () => {
     const sections = getCatalogSections(courses, [theme('t', [b])], emptyProgress());
     expect(summary(sections)).toEqual([
-      ['theme-t', ['b']],
-      [OTHER_ANCHOR, ['a', 'c']],
+      ['t', ['b']],
+      [undefined, ['a', 'c']],
     ]);
     expect(sections[1].theme).toBeUndefined();
   });
 
   it('shows every course in the fallback section when there are no themes', () => {
     expect(summary(getCatalogSections(courses, [], emptyProgress()))).toEqual([
-      [OTHER_ANCHOR, ['a', 'b', 'c']],
+      [undefined, ['a', 'b', 'c']],
     ]);
   });
 
   it('ignores theme members that are not in the loaded catalog', () => {
     const ghost = course('ghost', 1);
     expect(summary(getCatalogSections([a], [theme('t', [a, ghost])], emptyProgress()))).toEqual([
-      ['theme-t', ['a']],
+      ['t', ['a']],
     ]);
   });
 
@@ -79,7 +79,7 @@ describe('getCatalogSections', () => {
       themes,
       progress({ 'a/01': 'done', 'a/02': 'skipped', 'b/01': 'in_progress', 'c/01': 'done' }),
     );
-    expect(sections.map((s) => [s.coursesCompleted, s.courses.length, s.lessons])).toEqual([
+    expect(sections.map((s) => [s.courses.filter((x) => x.completed).length, s.courses.length, s.lessons])).toEqual([
       [1, 2, { finished: 2, total: 3 }],
       [0, 1, { finished: 1, total: 3 }],
     ]);
@@ -93,9 +93,9 @@ describe('getCatalogSections', () => {
       themes,
       progress({ 'a/01': 'done', 'a/02': 'skipped', 'b/01': 'done', 'c/01': 'done' }),
     );
-    expect(sections.map((s) => [s.anchor, s.completed])).toEqual([
-      ['theme-one', true],
-      ['theme-two', false],
+    expect(sections.map((s) => [s.theme?.id, s.completed])).toEqual([
+      ['one', true],
+      ['two', false],
     ]);
   });
 });

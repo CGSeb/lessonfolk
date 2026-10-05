@@ -1,9 +1,11 @@
 ---
 import { t } from '../i18n/en';
+import { coursesHref } from './catalog/catalogFilter';
+import { themeToneClass } from './theme-tone';
 
 interface Props {
-  /** The course's theme; renders nothing when the theme is unknown. */
-  theme: { id: string; title: string } | undefined;
+  /** The course's theme; renders nothing when the theme is unknown. `position` picks its colour. */
+  theme: { id: string; title: string; position?: number } | undefined;
 }
 
 const { theme } = Astro.props;
@@ -12,8 +14,8 @@ const { theme } = Astro.props;
 {
   theme && (
     <a
-      class="badge theme-badge"
-      href={`/courses#theme-${theme.id}`}
+      class:list={['badge theme-badge', themeToneClass(theme.position)]}
+      href={coursesHref({ theme: theme.id })}
       title={t('theme.linkTitle', { theme: theme.title })}
     >
       <span class="visually-hidden">{t('theme.label')}:</span> {theme.title}
@@ -33,7 +35,7 @@ const { theme } = Astro.props;
   }
 
   .theme-badge:hover {
-    border-color: var(--color-accent);
+    border-color: var(--color-theme-fill);
     text-decoration: underline;
   }
 </style>
