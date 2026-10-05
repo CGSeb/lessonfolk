@@ -5,6 +5,7 @@ import { courseStatusDisplay, finishedLessons, getCourseStatus } from './course-
 const counts = (over: Partial<Parameters<typeof getCourseStatus>[0]> = {}) => ({
   done: 0,
   skipped: 0,
+  placementSkipped: 0,
   inProgress: 0,
   total: 3,
   completed: false,
@@ -26,6 +27,17 @@ describe('getCourseStatus', () => {
     expect(getCourseStatus(counts({ done: 2, skipped: 1, completed: true }))).toBe('completed');
   });
 
+  it('ignores level-check skips when deciding whether the learner started', () => {
+    expect(getCourseStatus(counts({ skipped: 2, placementSkipped: 2 }))).toBe('not_started');
+    expect(getCourseStatus(counts({ skipped: 2, placementSkipped: 2, inProgress: 1 }))).toBe('in_progress');
+    expect(getCourseStatus(counts({ skipped: 2, placementSkipped: 1 }))).toBe('in_progress');
+  });
+
+  it('is skipped by placement when the level check skipped every lesson', () => {
+    expect(getCourseStatus(counts({ skipped: 3, placementSkipped: 3, completed: true }))).toBe('skipped_placement');
+    expect(getCourseStatus(counts({ done: 1, skipped: 2, placementSkipped: 2, completed: true }))).toBe('completed');
+  });
+
   it('treats an empty course as not started', () => {
     expect(getCourseStatus(counts({ total: 0 }))).toBe('not_started');
   });
@@ -42,5 +54,6 @@ describe('courseStatusDisplay', () => {
     expect(t(courseStatusDisplay('not_started').key)).toBe('Not started');
     expect(courseStatusDisplay('in_progress')).toEqual({ key: 'status.inProgress', variant: 'info' });
     expect(courseStatusDisplay('completed')).toEqual({ key: 'status.completed', variant: 'success' });
+    expect(courseStatusDisplay('skipped_placement')).toEqual({ key: 'status.skippedPlacement', variant: 'placement' });
   });
 });

@@ -1,0 +1,48 @@
+---
+import { t } from '../../i18n/en';
+import type { Level } from '../../lib/schemas';
+import LevelBadge from '../LevelBadge.astro';
+import ThemeBadge from '../ThemeBadge.astro';
+
+/** The learner's level and interests, as set by the tutor. Renders nothing when both are missing. */
+interface Props {
+  level: Level | undefined;
+  interests: { id: string; title: string }[];
+}
+
+const { level, interests } = Astro.props;
+---
+
+{
+  (level || interests.length > 0) && (
+    <div class="profile-summary" role="group" aria-label={t('home.profileLabel')}>
+      {level && <LevelBadge level={level} />}
+      {interests.length > 0 && (
+        <p class="profile-summary__interests">
+          <span class="muted">{t('home.interestsLabel')}</span>
+          {interests.map((theme) => (
+            <ThemeBadge theme={theme} />
+          ))}
+        </p>
+      )}
+    </div>
+  )
+}
+
+<style>
+  .profile-summary,
+  .profile-summary__interests {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .profile-summary {
+    column-gap: var(--space-4);
+  }
+
+  .profile-summary__interests {
+    font-size: var(--text-sm);
+  }
+</style>

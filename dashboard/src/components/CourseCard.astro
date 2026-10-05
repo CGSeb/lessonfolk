@@ -17,9 +17,11 @@ interface Props {
   theme?: { id: string; title: string };
   /** The course's authors, shown as a byline linking to their pages. */
   authors?: AuthorLink[];
+  /** The course is in the learner's personal path: shows a "Recommended for you" marker. */
+  recommended?: boolean;
 }
 
-const { stats, headingLevel = 2, theme, authors = [] } = Astro.props;
+const { stats, headingLevel = 2, theme, authors = [], recommended = false } = Astro.props;
 const { course, total } = stats;
 const finished = finishedLessons(stats);
 const status = courseStatusDisplay(getCourseStatus(stats));
@@ -41,6 +43,13 @@ const progressId = `course-progress-${course.id}`;
   <CourseAuthors authors={authors} />
 
   <div class="cluster" style="--cluster-space: var(--space-2)">
+    {
+      recommended && (
+        <span class="badge course-card__recommended" title={t('courses.recommendedTitle')}>
+          {t('courses.recommended')}
+        </span>
+      )
+    }
     <ThemeBadge theme={theme} />
     <LevelBadge level={course.level} />
     <span class:list={['badge', status.variant && `badge--${status.variant}`]}>
@@ -111,6 +120,23 @@ const progressId = `course-progress-${course.id}`;
 
   .course-card__meta {
     font-size: var(--text-sm);
+  }
+
+  /* Spark dot + amber tint: the same cue as the next-lesson card, for courses in the learner's path. */
+  .course-card__recommended {
+    border: 1px solid var(--color-warning-border);
+    background: var(--color-spark-subtle);
+    color: var(--color-text);
+    font-weight: var(--weight-semibold);
+  }
+
+  .course-card__recommended::before {
+    content: '';
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-spark);
   }
 
   .course-card__progress {

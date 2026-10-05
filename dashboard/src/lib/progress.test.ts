@@ -10,8 +10,10 @@ import {
   emptyProgress,
   getNextLesson,
   getLevel,
+  getPathCourseIds,
   getProgressWarnings,
   getStats,
+  isPlacementSkip,
   orderCourses,
   progressOrEmpty,
   readProgress,
@@ -332,12 +334,50 @@ describe('getLevel', () => {
   });
 });
 
+describe('isPlacementSkip', () => {
+  const withEntry = (status: LessonStatus, notes?: string): Progress => ({
+    ...emptyProgress(),
+    lessons: { 'a/01': notes === undefined ? { status } : { status, notes } },
+  });
+
+  it('is true for a skipped lesson whose note is "placement", ignoring spaces and case', () => {
+    expect(isPlacementSkip(withEntry('skipped', 'placement'), 'a/01')).toBe(true);
+    expect(isPlacementSkip(withEntry('skipped', '  Placement 	'), 'a/01')).toBe(true);
+  });
+
+  it('is false for manual skips, other statuses and unknown lessons', () => {
+    expect(isPlacementSkip(withEntry('skipped'), 'a/01')).toBe(false);
+    expect(isPlacementSkip(withEntry('skipped', 'Knew it already'), 'a/01')).toBe(false);
+    expect(isPlacementSkip(withEntry('skipped', 'placement check passed'), 'a/01')).toBe(false);
+    expect(isPlacementSkip(withEntry('done', 'placement'), 'a/01')).toBe(false);
+    expect(isPlacementSkip(withEntry('skipped', 'placement'), 'a/02')).toBe(false);
+    expect(isPlacementSkip(null, 'a/01')).toBe(false);
+  });
+});
+
+describe('getPathCourseIds', () => {
+  const ids = courses.map((c) => c.id);
+
+  it('keeps known ids in path order, without repeats', () => {
+    const progress = { ...emptyProgress(), path: ['prompting', 'gone', 'ai-foundations', 'prompting'] };
+    expect(getPathCourseIds(ids, progress)).toEqual(['prompting', 'ai-foundations']);
+  });
+
+  it('is empty without a path, with an empty path or with only unknown ids', () => {
+    expect(getPathCourseIds(ids, emptyProgress())).toEqual([]);
+    expect(getPathCourseIds(ids, { ...emptyProgress(), path: [] })).toEqual([]);
+    expect(getPathCourseIds(ids, { ...emptyProgress(), path: ['gone'] })).toEqual([]);
+    expect(getPathCourseIds(ids, undefined)).toEqual([]);
+  });
+});
+
 describe('getStats', () => {
   it('reports zeros with no progress', () => {
     const stats = getStats(courses, null);
     expect(stats.overall).toEqual({
       done: 0,
       skipped: 0,
+      placementSkipped: 0,
       inProgress: 0,
       total: 5,
       averageScore: null,

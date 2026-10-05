@@ -42,7 +42,7 @@ export const progressSchema = z.looseObject({
   lessons: z.record(z.string(), lessonProgressSchema).default({}),
   /** Course ids recommended for this learner, in order. Unknown ids are ignored with a warning. */
   path: z.array(z.string()).optional(),
-  /** One or two sentences explaining the path to the learner. */
+  /** Two or three sentences explaining the path to the learner. */
   pathReason: z.string().optional(),
   /** ISO date of the last change to `path`. */
   pathUpdatedAt: z.string().optional(),
@@ -123,9 +123,28 @@ export function isFinished(progress: MaybeProgress, lessonId: string): boolean {
   return status === 'done' || status === 'skipped';
 }
 
+/** The `notes` value the tutor writes on lessons it marks `skipped` during a placement check. */
+export const PLACEMENT_NOTE = 'placement';
+
+/**
+ * A lesson skipped by the tutor's placement check (shared contract with the tutor): status
+ * `skipped` and `notes` equal to "placement" (surrounding spaces and case are ignored).
+ * Any other skipped lesson is a manual skip.
+ */
+export function isPlacementSkip(progress: MaybeProgress, lessonId: string): boolean {
+  const entry = progress?.lessons[lessonId];
+  return entry?.status === 'skipped' && entry.notes?.trim().toLowerCase() === PLACEMENT_NOTE;
+}
+
 // ---------------------------------------------------------------------------
 // Personal path
 // ---------------------------------------------------------------------------
+
+/** Course ids of `path` that exist in the catalog, in path order, without repeats. */
+export function getPathCourseIds(courseIds: Iterable<string>, progress: MaybeProgress): string[] {
+  const known = new Set(courseIds);
+  return [...new Set(progress?.path ?? [])].filter((id) => known.has(id));
+}
 
 /**
  * Courses in the order the learner walks them: courses listed in `path` first (in path
@@ -224,6 +243,8 @@ export function getNextLesson<C extends CourseRef>(courses: C[], progress: Maybe
 export interface ProgressCounts {
   done: number;
   skipped: number;
+  /** Lessons among `skipped` that the tutor skipped during a level check (`isPlacementSkip`). */
+  placementSkipped: number;
   inProgress: number;
   total: number;
   /** Mean `score` of the scored lessons, or null if none is scored. */
@@ -244,13 +265,17 @@ export interface ProgressStats<C extends CourseRef> {
 function countLessons(lessons: LessonRef[], progress: MaybeProgress): ProgressCounts {
   let done = 0;
   let skipped = 0;
+  let placementSkipped = 0;
   let inProgress = 0;
   const scores: number[] = [];
   for (const lesson of lessons) {
     const entry = progress?.lessons[lesson.id];
     if (!entry) continue;
     if (entry.status === 'done') done++;
-    else if (entry.status === 'skipped') skipped++;
+    else if (entry.status === 'skipped') {
+      skipped++;
+      if (isPlacementSkip(progress, lesson.id)) placementSkipped++;
+    }
     else inProgress++;
     if (typeof entry.score === 'number') scores.push(entry.score);
   }
@@ -258,6 +283,7 @@ function countLessons(lessons: LessonRef[], progress: MaybeProgress): ProgressCo
   return {
     done,
     skipped,
+    placementSkipped,
     inProgress,
     total,
     averageScore: scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null,

@@ -26,8 +26,15 @@ const fixtures: Record<string, Expectations> = {
     // Never created: the tutor writes progress.json during onboarding.
     progressDir: join(PROGRESS_FIXTURES, 'new-learner-does-not-exist'),
     home: {
-      include: ['Welcome to Apprentice', 'How to start', "Let's start learning AI", 'Your first lesson', LESSONS[0]],
-      exclude: ['Welcome back', INVALID_HOME],
+      include: [
+        'Welcome to Apprentice',
+        'How to start',
+        "Let's start learning AI",
+        'questions about you and what you already know',
+        'Where beginners start',
+        LESSONS[0],
+      ],
+      exclude: ['Welcome back', 'Your path', 'recommend a path', INVALID_HOME],
     },
     catalog: { include: ['AI Foundations', 'Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG] },
     course: {
@@ -45,10 +52,13 @@ const fixtures: Record<string, Expectations> = {
         '0 of 3 lessons finished',
         'Courses completed: 0 of 1',
         'Your progress by theme',
+        // Profile without a path: suggest asking the tutor for one.
+        'Get a path made for you',
+        'recommend a path',
       ],
-      exclude: ['Welcome to Apprentice', INVALID_HOME],
+      exclude: ['Welcome to Apprentice', 'Your path', 'Level:', 'Your interests:', INVALID_HOME],
     },
-    catalog: { include: ['Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG] },
+    catalog: { include: ['Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG, 'Recommended for you'] },
     course: { include: ['Not started', '0 of 3 lessons', 'Next up', ...LESSONS], exclude: ['Status: Done', INVALID_HOME] },
   },
   'mid-course': {
@@ -112,11 +122,46 @@ const fixtures: Record<string, Expectations> = {
       exclude: ['Next up', 'Not started', INVALID_HOME],
     },
   },
+  'a personal path with placement skips': {
+    progressDir: join(PROGRESS_FIXTURES, 'placement-path'),
+    home: {
+      include: [
+        'Welcome back, Jordan!',
+        'Level: Intermediate',
+        'Your interests:',
+        'Theme: Building with AI',
+        'Theme: Understanding AI',
+        'Your path',
+        'Why this path',
+        'we skip the basics you know',
+        'Updated on Oct 4, 2026',
+        '2 of 3 lessons',
+        '1 lesson skipped after your level check',
+        'Status: In progress',
+        'Next up',
+        LESSONS[2],
+        // Unknown course and theme ids are ignored, with a warning.
+        'Some of your learning path was ignored',
+      ],
+      exclude: ['Get a path made for you', INVALID_HOME],
+    },
+    catalog: { include: ['Recommended for you', 'In progress', '2 of 3 lessons'], exclude: [INVALID_CATALOG] },
+    course: {
+      include: [
+        'Status: Skipped after level check',
+        'Status: Skipped',
+        'Already knew training data and models.',
+        'Skipped on Oct 4, 2026',
+        'Next up',
+      ],
+      exclude: ['Status: Done', INVALID_HOME],
+    },
+  },
   'invalid JSON': {
     progressDir: join(PROGRESS_FIXTURES, 'invalid-json'),
     home: {
       // Shown as a first visit, with a warning and the parse error.
-      include: [INVALID_HOME, 'Invalid JSON in', 'Welcome to Apprentice', 'Your first lesson', LESSONS[0]],
+      include: [INVALID_HOME, 'Invalid JSON in', 'Welcome to Apprentice', 'Where beginners start', LESSONS[0]],
       exclude: ['Welcome back'],
     },
     catalog: { include: [INVALID_CATALOG, 'Not started', '0 of 3 lessons'], exclude: [] },
