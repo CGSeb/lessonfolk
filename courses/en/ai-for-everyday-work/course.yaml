@@ -1,0 +1,15 @@
+id: ai-for-everyday-work
+title: AI for Everyday Work
+level: beginner
+theme: using-ai
+authors: [apprentice]
+description: Turn AI into everyday habits — summarise and draft, research and learn, work with documents, brainstorm, save time on repetitive tasks and build a routine that suits you. No code needed.
+estimatedHours: 2
+prerequisites: [prompting-basics, ai-safety]
+lessons:
+  - ai-for-everyday-work/01-summarizing-and-drafting
+  - ai-for-everyday-work/02-research-and-learning
+  - ai-for-everyday-work/03-documents-and-data
+  - ai-for-everyday-work/04-brainstorming-and-decisions
+  - ai-for-everyday-work/05-automating-repetitive-tasks
+  - ai-for-everyday-work/06-your-ai-routine
