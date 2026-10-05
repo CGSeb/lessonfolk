@@ -7,11 +7,18 @@ import { getCatalogSections } from '../../components/catalog/catalogView';
 import { t } from '../../i18n/en';
 import { inspectCatalog } from '../../lib/courses';
 import { getPaths } from '../../lib/paths';
-import { progressOrEmpty, readProgress } from '../../lib/progress';
+import { getPathCourseIds, progressOrEmpty, readProgress } from '../../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
 const progressResult = readProgress();
+// Courses in the learner's personal path get a "Recommended for you" marker (order unchanged).
+const recommended = new Set(
+  getPathCourseIds(
+    catalog.courses.map((c) => c.id),
+    progressOrEmpty(progressResult),
+  ),
+);
 const themesById = new Map(catalog.themes.map((theme) => [theme.id, theme]));
 const sections = getCatalogSections(catalog.courses, catalog.themes, progressOrEmpty(progressResult)).map(
   (section) => ({
@@ -126,6 +133,7 @@ const hiddenIssues = issues.length - shownIssues.length;
                       headingLevel={3}
                       theme={themesById.get(stats.course.theme)}
                       authors={courseAuthors(stats.course, catalog.authors)}
+                      recommended={recommended.has(stats.course.id)}
                     />
                   </li>
                 ))}

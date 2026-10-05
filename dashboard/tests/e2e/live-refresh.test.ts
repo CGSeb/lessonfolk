@@ -144,6 +144,23 @@ describe('live updates during a tutoring session', () => {
     expect(course.text).toContain('Liked the spam filter example.');
   });
 
+  it('announces a new path from the tutor and shows it', async () => {
+    const progress = JSON.parse(progressFile({ 'ai-foundations/01-what-is-ai': { status: 'skipped', notes: 'placement' } }, null));
+    writeFileSync(
+      join(progressDir, 'progress.json'),
+      JSON.stringify({ ...progress, path: ['ai-foundations'], pathReason: 'Start with the foundations.', pathUpdatedAt: '2026-10-05' }),
+    );
+    expect(await events.waitFor(/^event: change$/m)).toMatch(/^data: progress$/m);
+
+    const home = await getPage(server, '/');
+    expect(home.text).toContain('Your path');
+    expect(home.text).toContain('Start with the foundations.');
+    expect(home.text).not.toContain('recommend a path');
+
+    const catalog = await getPage(server, '/courses');
+    expect(catalog.text).toContain('Recommended for you');
+  });
+
   it('announces a reset (progress.json deleted)', async () => {
     rmSync(join(progressDir, 'progress.json'));
     expect(await events.waitFor(/^event: change$/m)).toMatch(/^data: progress$/m);

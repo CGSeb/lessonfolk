@@ -4,8 +4,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import NextLessonCard from '../components/NextLessonCard.astro';
 import Notice from '../components/Notice.astro';
 import OverallProgress from '../components/home/OverallProgress.astro';
+import ProfileSummary from '../components/home/ProfileSummary.astro';
 import SayPhrase from '../components/home/SayPhrase.astro';
 import ThemeProgress from '../components/home/ThemeProgress.astro';
+import YourPath from '../components/home/YourPath.astro';
 import { getHomeView } from '../components/home/homeView';
 import { t } from '../i18n/en';
 import { inspectCatalog } from '../lib/courses';
@@ -14,7 +16,7 @@ import { readProgress } from '../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
-const { view, name, lessons, courses, themes, progressError, progressWarnings } = getHomeView(
+const { view, name, level, interests, path, lessons, courses, themes, progressError, progressWarnings } = getHomeView(
   catalog.courses,
   readProgress(),
   catalog.themes,
@@ -101,36 +103,47 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
           <header class="stack" style="--stack-space: var(--space-2)">
             <h1>{name ? t('home.greeting', { name }) : t('home.greetingAnonymous')}</h1>
             <p class="home-lead">{t('home.greetingIntro')}</p>
+            <ProfileSummary level={level} interests={interests} />
           </header>
           <div class="home-columns">
-            {view.state === 'in_progress' && (
-              <NextLessonCard
-                label={view.next.kind === 'resume' ? t('home.resume') : t('home.nextUp')}
-                course={view.next.course}
-                lesson={view.next.lesson}
-              >
-                <SayPhrase instruction={t('home.continueHint')} phrase={t('home.continuePhrase')} />
-              </NextLessonCard>
-            )}
-            {view.state === 'done' && (
-              <section class="card card--spark stack home-done" aria-labelledby="done-heading">
-                <h2 id="done-heading">{t('home.doneTitle')}</h2>
-                <p>{t('home.doneBody')}</p>
-                <SayPhrase instruction={t('home.doneReview')} phrase={t('home.reviewPhrase')} />
-              </section>
-            )}
-            {view.state === 'blocked' && (
-              <section class="card stack" aria-labelledby="blocked-heading">
-                <h2 id="blocked-heading">{t('home.blockedTitle')}</h2>
-                <SayPhrase instruction={t('home.blockedBody')} phrase={t('home.continuePhrase')} />
-              </section>
-            )}
-            {view.state === 'empty' && (
-              <section class="card stack" aria-labelledby="empty-heading">
-                <h2 id="empty-heading">{t('home.emptyTitle')}</h2>
-                <p>{t('home.emptyBody')}</p>
-              </section>
-            )}
+            <div class="stack" style="--stack-space: var(--space-5)">
+              {view.state === 'in_progress' && (
+                <NextLessonCard
+                  label={view.next.kind === 'resume' ? t('home.resume') : t('home.nextUp')}
+                  course={view.next.course}
+                  lesson={view.next.lesson}
+                >
+                  <SayPhrase instruction={t('home.continueHint')} phrase={t('home.continuePhrase')} />
+                </NextLessonCard>
+              )}
+              {view.state === 'done' && (
+                <section class="card card--spark stack home-done" aria-labelledby="done-heading">
+                  <h2 id="done-heading">{t('home.doneTitle')}</h2>
+                  <p>{t('home.doneBody')}</p>
+                  <SayPhrase instruction={t('home.doneReview')} phrase={t('home.reviewPhrase')} />
+                </section>
+              )}
+              {view.state === 'blocked' && (
+                <section class="card stack" aria-labelledby="blocked-heading">
+                  <h2 id="blocked-heading">{t('home.blockedTitle')}</h2>
+                  <SayPhrase instruction={t('home.blockedBody')} phrase={t('home.continuePhrase')} />
+                </section>
+              )}
+              {view.state === 'empty' && (
+                <section class="card stack" aria-labelledby="empty-heading">
+                  <h2 id="empty-heading">{t('home.emptyTitle')}</h2>
+                  <p>{t('home.emptyBody')}</p>
+                </section>
+              )}
+              {path.state === 'set' && <YourPath courses={path.courses} reason={path.reason} updatedOn={path.updatedOn} />}
+              {path.state === 'none' && view.state !== 'empty' && (
+                <section class="card stack" aria-labelledby="no-path-heading">
+                  <h2 id="no-path-heading">{t('path.noneTitle')}</h2>
+                  <p>{t('path.noneBody')}</p>
+                  <SayPhrase instruction={t('path.noneSay')} phrase={t('path.nonePhrase')} />
+                </section>
+              )}
+            </div>
             <div class="stack" style="--stack-space: var(--space-5)">
               <OverallProgress lessons={lessons} courses={courses} />
               {themes.length > 0 && <ThemeProgress themes={themes} />}

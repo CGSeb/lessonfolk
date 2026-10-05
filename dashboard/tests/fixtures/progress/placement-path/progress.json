@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "profile": {
+    "name": "Jordan",
+    "experience": "developer",
+    "goal": "build things with AI",
+    "language": "en",
+    "level": "intermediate",
+    "interests": ["building-with-ai", "not-a-theme", "understanding-ai"]
+  },
+  "path": ["ai-foundations", "not-a-course"],
+  "pathReason": "You already build software, so we skip the basics you know and focus on how language models work.",
+  "pathUpdatedAt": "2026-10-04",
+  "current": null,
+  "lessons": {
+    "ai-foundations/01-what-is-ai": {
+      "status": "skipped",
+      "completedAt": "2026-10-04",
+      "notes": "placement"
+    },
+    "ai-foundations/02-how-machines-learn": {
+      "status": "skipped",
+      "completedAt": "2026-10-04",
+      "notes": "Already knew training data and models."
+    }
+  }
+}

@@ -236,7 +236,7 @@ summary {
   background: var(--color-spark);
 }
 
-/* Small status label (pill). Variants: --success, --info, --warning. */
+/* Small status label (pill). Variants: --success, --info, --placement, --warning. */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -259,6 +259,13 @@ summary {
 .badge--info {
   background: var(--color-info-bg);
   color: var(--color-info);
+}
+
+/* Skipped by the tutor's level check: outlined, so it reads apart from a manual skip. */
+.badge--placement {
+  border: 1px dashed var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
 }
 
 .badge--warning {

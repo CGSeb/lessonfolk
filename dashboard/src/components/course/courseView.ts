@@ -1,8 +1,8 @@
 import { relative, isAbsolute } from 'node:path';
 import type { Course, CourseIssue, Lesson } from '../../lib/courses';
-import { getLessonStatus, getNextLesson, getStats, type CourseStats, type Progress } from '../../lib/progress';
+import { getNextLesson, getStats, type CourseStats, type Progress } from '../../lib/progress';
 import { finishedLessons, getCourseStatus, type CourseStatus } from '../course-status';
-import type { LessonDisplayStatus } from '../status-badge';
+import { lessonDisplayStatus, type LessonDisplayStatus } from '../status-badge';
 
 export interface LessonRow {
   lesson: Lesson;
@@ -11,7 +11,7 @@ export interface LessonRow {
   scorePercent: number | null;
   /** Completion date, formatted for display, or null when absent. */
   completedOn: string | null;
-  /** Tutor's notes, or null when absent or blank. */
+  /** Tutor's notes, or null when absent, blank or just the placement marker. */
   notes: string | null;
   /** The lesson the tutor would teach next ("Start or resume" in AGENTS.md). */
   isNext: boolean;
@@ -60,12 +60,14 @@ export function getCourseView(courses: Course[], courseId: string, progress: Pro
 
   const lessons = course.lessons.map((lesson): LessonRow => {
     const entry = progress.lessons[lesson.id];
+    const status = lessonDisplayStatus(progress, lesson.id);
     return {
       lesson,
-      status: getLessonStatus(progress, lesson.id),
+      status,
       scorePercent: typeof entry?.score === 'number' ? Math.round(entry.score * 100) : null,
       completedOn: entry?.completedAt ? formatDate(entry.completedAt) : null,
-      notes: entry?.notes?.trim() || null,
+      // The "placement" note is a marker for the badge, not a message for the learner.
+      notes: status === 'skipped_placement' ? null : entry?.notes?.trim() || null,
       isNext: lesson.id === nextId,
     };
   });

@@ -66,6 +66,23 @@ describe('getCourseView', () => {
     expect(view.status).toBe('in_progress');
   });
 
+  it('shows placement skips apart from manual skips and hides the placement marker note', () => {
+    const view = getCourseView(
+      catalog,
+      'a',
+      progress({
+        lessons: {
+          'a/01': { status: 'skipped', notes: 'placement', completedAt: '2026-10-04' },
+          'a/02': { status: 'skipped', notes: 'Knew it already' },
+        },
+      }),
+    )!;
+    expect(view.lessons.map((r) => r.status)).toEqual(['skipped_placement', 'skipped', 'not_started']);
+    expect(view.lessons[0]).toMatchObject({ notes: null, completedOn: 'Oct 4, 2026' });
+    expect(view.lessons[1].notes).toBe('Knew it already');
+    expect(view.finished).toBe(2);
+  });
+
   it('marks no lesson as next when the next lesson is in another course', () => {
     const lessons = Object.fromEntries(catalog[0].lessons.map((l) => [l.id, { status: 'done' as const }]));
     const a = getCourseView(catalog, 'a', progress({ lessons }))!;

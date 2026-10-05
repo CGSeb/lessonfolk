@@ -5,7 +5,7 @@ import Notice from '../../components/Notice.astro';
 import { courseAuthors, getAuthorView } from '../../components/authors/authorView';
 import { t } from '../../i18n/en';
 import { authorsFilePath, inspectCatalog } from '../../lib/courses';
-import { progressOrEmpty, readProgress } from '../../lib/progress';
+import { getPathCourseIds, progressOrEmpty, readProgress } from '../../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const slug = Astro.params.slug ?? '';
@@ -15,6 +15,13 @@ const view = getAuthorView(catalog.courses, catalog.authors, slug, progressOrEmp
 
 if (!view) Astro.response.status = 404;
 
+// Courses in the learner's personal path get a "Recommended for you" marker (order unchanged).
+const recommended = new Set(
+  getPathCourseIds(
+    catalog.courses.map((c) => c.id),
+    progressOrEmpty(progressResult),
+  ),
+);
 const themesById = new Map(catalog.themes.map((theme) => [theme.id, theme]));
 const authorsFile = authorsFilePath();
 const fileIssues = issues.filter((issue) => issue.file === authorsFile);
@@ -96,6 +103,7 @@ const linkText = (link: NonNullable<typeof view>['links'][number]) =>
                         headingLevel={3}
                         theme={themesById.get(stats.course.theme)}
                         authors={courseAuthors(stats.course, catalog.authors)}
+                        recommended={recommended.has(stats.course.id)}
                       />
                     </li>
                   ))}

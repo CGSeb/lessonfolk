@@ -1,4 +1,6 @@
+import type { Level } from '../../lib/schemas';
 import {
+  getLevel,
   getNextLesson,
   getProgressWarnings,
   getStats,
@@ -8,6 +10,7 @@ import {
   type ProgressResult,
 } from '../../lib/progress';
 import { getCatalogSections, type ThemeRef } from '../catalog/catalogView';
+import { getInterestThemes, getPathView, type PathView } from './pathView';
 
 /**
  * What the home page shows:
@@ -28,6 +31,12 @@ export interface HomeView<C extends CourseRef> {
   view: HomeState<C>;
   /** Learner's name from the profile, or undefined when absent or blank. */
   name: string | undefined;
+  /** Learner's level, or undefined when missing or unknown. */
+  level: Level | undefined;
+  /** Interests resolved to known themes, in the learner's order. */
+  interests: { id: string; title: string }[];
+  /** The personal path the tutor recommended, with each course's status. */
+  path: PathView<C>;
   /** Done or skipped lessons, out of all lessons in the catalog. */
   lessons: { finished: number; total: number };
   courses: { completed: number; total: number };
@@ -70,6 +79,9 @@ export function getHomeView<C extends CourseRef>(
   return {
     view,
     name: progress.profile.name?.trim() || undefined,
+    level: getLevel(progress),
+    interests: getInterestThemes(progress, themes),
+    path: getPathView(courses, progress, next),
     lessons: {
       finished: stats.overall.done + stats.overall.skipped,
       total: stats.overall.total,

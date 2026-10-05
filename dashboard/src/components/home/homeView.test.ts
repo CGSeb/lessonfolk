@@ -88,6 +88,35 @@ describe('getHomeView', () => {
     ]);
   });
 
+  it('summarises the profile and the path, matching the next lesson', () => {
+    const home = getHomeView(
+      courses,
+      ok(
+        { 'basics/01': 'done' },
+        {
+          path: ['more', 'basics'],
+          pathReason: 'Because.',
+          profile: { level: 'intermediate', interests: ['first', 'x'] },
+        },
+      ),
+      [{ id: 'first', title: 'T', description: 'd', courses }],
+    );
+    expect(home.level).toBe('intermediate');
+    expect(home.interests).toEqual([{ id: 'first', title: 'T' }]);
+    expect(home.view).toMatchObject({ state: 'in_progress', next: { lesson: { id: 'basics/02' } } });
+    expect(home.path).toMatchObject({ state: 'set', reason: 'Because.' });
+    expect(home.path.state === 'set' && home.path.courses.map((c) => [c.course.id, c.status, c.isNext])).toEqual([
+      ['more', 'not_started', false],
+      ['basics', 'in_progress', true],
+    ]);
+  });
+
+  it('has no level, interests or path for a new learner or an unknown level', () => {
+    const home = getHomeView(courses, { state: 'missing' });
+    expect([home.level, home.interests, home.path]).toEqual([undefined, [], { state: 'none' }]);
+    expect(getHomeView(courses, ok({}, { profile: { level: 'expert' } })).level).toBeUndefined();
+  });
+
   it('has no progress warnings for a file without path or interests', () => {
     expect(getHomeView(courses, ok({})).progressWarnings).toEqual([]);
     expect(getHomeView(courses, { state: 'missing' }).progressWarnings).toEqual([]);
