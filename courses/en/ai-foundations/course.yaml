@@ -2,6 +2,7 @@ id: ai-foundations
 title: AI Foundations
 level: beginner
 theme: understanding-ai
+authors: [apprentice]
 description: Start from zero. What AI is, how machines learn, and what is really happening when you chat with an AI.
 estimatedHours: 1
 prerequisites: []

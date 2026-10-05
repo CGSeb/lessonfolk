@@ -1,0 +1,7 @@
+# Course authors, shared by every language. Each course.yaml lists its authors by slug.
+# Optional links (github, url) are shown on the author's page: add them only when the
+# author gives them, never guess.
+authors:
+  - slug: apprentice
+    name: Apprentice
+    bio: Apprentice is an open-source project that teaches AI to anyone, from complete beginners to advanced practitioners, through a conversation with an AI tutor. Courses written by the project's maintainers are credited to Apprentice.

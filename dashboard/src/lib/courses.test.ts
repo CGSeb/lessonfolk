@@ -16,6 +16,7 @@ import {
   inspectAllCourses,
   inspectCatalog,
   listLanguages,
+  loadAuthors,
   loadCatalog,
   loadCourse,
   loadThemes,
@@ -71,6 +72,14 @@ describe('loadCatalog (real courses)', () => {
     // Seeded themes may wait for their first course; nothing else should warn.
     const warnings = inspectAllCourses().warnings.map((w) => w.message);
     expect(warnings.filter((m) => !/^theme "[a-z-]+" has no course yet$/.test(m))).toEqual([]);
+  });
+
+  it('credits AI Foundations to the apprentice author', () => {
+    expect(loadCourse('ai-foundations')?.authors).toEqual(['apprentice']);
+    const apprentice = loadAuthors().find((a) => a.slug === 'apprentice');
+    expect(apprentice).toMatchObject({ name: 'Apprentice' });
+    expect(apprentice?.bio).toBeTruthy();
+    expect(apprentice?.courses.map((c) => c.id)).toContain('ai-foundations');
   });
 
   it('assigns AI Foundations to a theme and groups themes in themes.yaml order', () => {
@@ -230,6 +239,114 @@ describe('themes', () => {
       ['second', ['course-b', 'course-a']],
       ['understanding-ai', ['ai-foundations']],
     ]);
+  });
+});
+
+describe('authors', () => {
+  /** Copy of the real courses with `authors.yaml` replaced (or removed when `undefined`). */
+  function withAuthors(authorsYaml: string | undefined, courseAuthors?: string) {
+    const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
+    cpSync(realDir, dir, { recursive: true });
+    const authorsFile = join(dir, 'authors.yaml');
+    if (authorsYaml === undefined) rmSync(authorsFile);
+    else writeFileSync(authorsFile, authorsYaml);
+    if (courseAuthors !== undefined) {
+      const courseFile = join(dir, 'en', 'ai-foundations', 'course.yaml');
+      writeFileSync(
+        courseFile,
+        readFileSync(courseFile, 'utf8').replace(/^authors:.*$/m, courseAuthors),
+      );
+    }
+    return dir;
+  }
+  const author = (slug: string) => `  - slug: ${slug}\n    name: N ${slug}\n`;
+  const authorsYaml = (...slugs: string[]) => `authors:\n${slugs.map(author).join('')}`;
+  const allIssues = (dir: string) =>
+    inspectAllCourses(dir).issues.map((i) => ({
+      file: i.file.slice(dir.length + 1).replaceAll('\\', '/'),
+      message: i.message,
+    }));
+
+  it('reports an unknown author slug', () => {
+    expect(issuesFor(invalidDir)).toContainEqual({
+      file: 'en/broken-refs/course.yaml',
+      message: 'author "ghost-author" is not listed in authors.yaml',
+    });
+  });
+
+  it('reports a course without authors', () => {
+    expect(issuesFor(invalidDir)).toContainEqual({
+      file: 'en/missing-field/course.yaml',
+      message: 'authors: missing required field (expected array)',
+    });
+    expect(allIssues(withAuthors(authorsYaml('apprentice'), 'authors: []'))).toEqual([
+      {
+        file: 'en/ai-foundations/course.yaml',
+        message: 'authors: must list at least one author slug from authors.yaml',
+      },
+    ]);
+  });
+
+  it('reports an author listed twice in a course', () => {
+    const dir = withAuthors(authorsYaml('apprentice'), 'authors: [apprentice, apprentice]');
+    expect(issuesFor(dir)).toEqual([
+      { file: 'en/ai-foundations/course.yaml', message: 'author "apprentice" is listed more than once' },
+    ]);
+  });
+
+  it('reports a missing authors.yaml once', () => {
+    expect(allIssues(withAuthors(undefined))).toEqual([
+      { file: 'authors.yaml', message: 'authors.yaml not found' },
+    ]);
+  });
+
+  it('reports an invalid authors.yaml', () => {
+    const dir = withAuthors(
+      'authors:\n  - slug: Not Kebab\n    github: https://github.com/x\n    url: javascript:alert(1)\n',
+    );
+    expect(allIssues(dir).map((i) => i.message).sort()).toEqual([
+      'authors.0.github: must be a GitHub username (no URL, no @)',
+      'authors.0.name: missing required field (expected string)',
+      'authors.0.slug: must be a kebab-case author slug',
+      'authors.0.url: must be an http(s) URL',
+    ]);
+  });
+
+  it('reports duplicate author slugs', () => {
+    expect(allIssues(withAuthors(authorsYaml('apprentice', 'apprentice')))).toEqual([
+      { file: 'authors.yaml', message: 'author "apprentice" is listed more than once' },
+    ]);
+  });
+
+  it('warns on an author with no course in any language', () => {
+    const { issues, warnings } = inspectAllCourses(invalidDir);
+    expect(issues.length).toBeGreaterThan(0);
+    expect(warnings.filter((w) => w.file.endsWith('authors.yaml')).map((w) => w.message)).toEqual([
+      'author "unused" has no course yet',
+    ]);
+    const dir = withAuthors(authorsYaml('apprentice', 'idle'));
+    expect(inspectAllCourses(dir).warnings.map((w) => w.message)).toContain(
+      'author "idle" has no course yet',
+    );
+    // Per-language checks do not warn: the author may have courses in another language.
+    expect(inspectCatalog('en', dir).warnings.map((w) => w.message)).not.toContain(
+      'author "idle" has no course yet',
+    );
+  });
+
+  it('accepts optional bio and links, and lists authors in authors.yaml order', () => {
+    const dir = withAuthors(
+      `${authorsYaml('idle', 'apprentice')}    bio: B.\n    github: some-one\n    url: https://example.com/me\n`,
+    );
+    expect(loadAuthors('en', dir).map((a) => [a.slug, a.courses.map((c) => c.id)])).toEqual([
+      ['idle', []],
+      ['apprentice', ['ai-foundations']],
+    ]);
+    expect(loadAuthors('en', dir)[1]).toMatchObject({
+      bio: 'B.',
+      github: 'some-one',
+      url: 'https://example.com/me',
+    });
   });
 });
 

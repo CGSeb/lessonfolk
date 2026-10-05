@@ -12,6 +12,7 @@ Code; the "Create a course" and "Edit a course" procedures in `AGENTS.md` for ot
 
 ```
 courses/
+  authors.yaml                # course authors, shared by every language
   en/                         # language code (ISO 639-1)
     index.yaml                # ordered learning path for this language
     themes.yaml               # themes that group courses in the catalog
@@ -50,6 +51,22 @@ themes:                   # in display order
 Every course belongs to exactly one theme. A theme with no course yet is allowed (it is hidden
 in the dashboard and the tutor). Add a new theme only when no existing one fits.
 
+## `authors.yaml`
+
+```yaml
+authors:
+  - slug: apprentice      # kebab-case, unique; used in course.yaml and in the author page URL
+    name: Apprentice
+    bio: One or two sentences about the author.   # optional
+    github: some-username # optional, GitHub username (not a URL)
+    url: https://example.com   # optional, personal website (http or https)
+```
+
+`courses/authors.yaml` is shared by every language. Each author gets a page in the dashboard
+(`/authors/<slug>`) listing their courses, with their links when set. Only add `github` or `url`
+when the author gives them; never guess. Courses written by the project's maintainers use
+the `apprentice` author.
+
 ## `course.yaml`
 
 ```yaml
@@ -57,6 +74,7 @@ id: ai-foundations
 title: AI Foundations
 level: beginner           # beginner | intermediate | advanced
 theme: understanding-ai   # one theme id from themes.yaml
+authors: [apprentice]     # one or more author slugs from authors.yaml
 description: One or two sentences shown in the course list.
 estimatedHours: 2
 prerequisites: []         # course ids
@@ -116,10 +134,12 @@ Run `npm run check:courses` before opening a pull request. It fails on:
   match file paths, and broken prerequisites;
 - a missing `themes.yaml`, duplicate theme ids, or a course whose `theme` is missing or not
   listed in `themes.yaml`;
+- a missing or invalid `authors.yaml`, duplicate author slugs, or a course with no `authors` or
+  an author slug not listed in `authors.yaml`;
 - lesson sections that are missing, misspelled, duplicated or out of order (only the `##`
   headings above are allowed; `###` sub-headings are free);
 - a question under `## Check your understanding` without a `Good answer:` line.
 
 It only warns (without failing) when a lesson strays from the writing guidelines (fewer than
-3 or more than 6 numbered key ideas, or `estimatedMinutes` outside 10–25) and when a theme has
-no course yet.
+3 or more than 6 numbered key ideas, or `estimatedMinutes` outside 10–25), when a theme has
+no course yet, and when an author has no course in any language.

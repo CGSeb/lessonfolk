@@ -5,5 +5,7 @@ description: Create a new Apprentice course with its author — interview, outli
 
 Follow the "Create a course" procedure in `AGENTS.md` (Contributing section). Read
 `docs/course-format.md` first, and write no file before the author approves the outline.
+Every course credits its authors from `courses/authors.yaml` (default `apprentice` for the
+maintainer's courses); never invent an author's links.
 
 To change a course that already exists (add, revise or reorder lessons), use `edit-course` instead.

@@ -2,6 +2,7 @@
 import { relative } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CourseCard from '../../components/CourseCard.astro';
+import { courseAuthors } from '../../components/authors/authorView';
 import { getCatalogSections } from '../../components/catalog/catalogView';
 import { t } from '../../i18n/en';
 import { inspectCatalog } from '../../lib/courses';
@@ -120,7 +121,12 @@ const hiddenIssues = issues.length - shownIssues.length;
               <ol class="grid course-list" role="list" aria-label={t('courses.themeListLabel', { theme: title })}>
                 {courses.map((stats) => (
                   <li>
-                    <CourseCard stats={stats} headingLevel={3} theme={themesById.get(stats.course.theme)} />
+                    <CourseCard
+                      stats={stats}
+                      headingLevel={3}
+                      theme={themesById.get(stats.course.theme)}
+                      authors={courseAuthors(stats.course, catalog.authors)}
+                    />
                   </li>
                 ))}
               </ol>

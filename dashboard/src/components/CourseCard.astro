@@ -2,8 +2,10 @@
 import { t } from '../i18n/en';
 import type { Course } from '../lib/courses';
 import type { CourseStats } from '../lib/progress';
+import CourseAuthors from './CourseAuthors.astro';
 import LevelBadge from './LevelBadge.astro';
 import ThemeBadge from './ThemeBadge.astro';
+import type { AuthorLink } from './authors/authorView';
 import { courseStatusDisplay, finishedLessons, getCourseStatus } from './course-status';
 
 interface Props {
@@ -13,9 +15,11 @@ interface Props {
   headingLevel?: 2 | 3;
   /** The course's theme, shown as a badge linking to its catalog section. */
   theme?: { id: string; title: string };
+  /** The course's authors, shown as a byline linking to their pages. */
+  authors?: AuthorLink[];
 }
 
-const { stats, headingLevel = 2, theme } = Astro.props;
+const { stats, headingLevel = 2, theme, authors = [] } = Astro.props;
 const { course, total } = stats;
 const finished = finishedLessons(stats);
 const status = courseStatusDisplay(getCourseStatus(stats));
@@ -33,6 +37,8 @@ const progressId = `course-progress-${course.id}`;
   <Heading class="course-card__title">
     <a href={`/courses/${course.id}`}>{course.title}</a>
   </Heading>
+
+  <CourseAuthors authors={authors} />
 
   <div class="cluster" style="--cluster-space: var(--space-2)">
     <ThemeBadge theme={theme} />

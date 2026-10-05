@@ -1,0 +1,46 @@
+---
+/** "By <author>, <author>" byline; each name links to the author's page. */
+import { t } from '../i18n/en';
+import type { AuthorLink } from './authors/authorView';
+
+interface Props {
+  /** The course's authors in `course.yaml` order; renders nothing when empty. */
+  authors: AuthorLink[];
+  class?: string;
+}
+
+const { authors, class: className } = Astro.props;
+const [before, after = ''] = t('author.byline').split('{authors}');
+const separator = t('author.listSeparator');
+---
+
+{
+  authors.length > 0 && (
+    <p class:list={['course-authors', className]}>
+      {before}
+      {authors.map((author, i) => (
+        <>
+          {i > 0 && separator}
+          <a href={author.href} title={t('author.linkTitle', { author: author.name })}>
+            {author.name}
+          </a>
+        </>
+      ))}
+      {after}
+    </p>
+  )
+}
+
+<style>
+  .course-authors {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .course-authors a {
+    /* Above the course card's full-card link overlay, so author links stay clickable. */
+    position: relative;
+    z-index: 1;
+    font-weight: var(--weight-medium);
+  }
+</style>

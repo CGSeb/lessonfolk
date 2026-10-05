@@ -180,6 +180,38 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expectText(page.text, fixture.course);
   });
 
+  it('credits AI Foundations to Apprentice on the catalog and the course page', async () => {
+    for (const path of ['/courses', '/courses/ai-foundations']) {
+      const page = await getPage(server, path);
+      expect(page.text).toContain('By Apprentice');
+      expect(page.html).toMatch(/<a href="\/authors\/apprentice"[^>]*>\s*Apprentice\s*<\/a>/);
+    }
+  });
+
+  it('renders the authors list', async () => {
+    const page = await getPage(server, '/authors');
+    expect(page.status).toBe(200);
+    expect(page.html).toMatch(/<a href="\/authors\/apprentice"[^>]*>Apprentice<\/a>/);
+    expect(page.text).toContain('1 course');
+  });
+
+  it('renders the Apprentice author page with its courses and progress', async () => {
+    const page = await getPage(server, '/authors/apprentice');
+    expect(page.status).toBe(200);
+    expect(page.text).toContain('Courses by Apprentice');
+    expect(page.html).toContain('href="/courses/ai-foundations"');
+    // No link is set in authors.yaml, so none is rendered.
+    expect(page.html).not.toContain('target="_blank"');
+    expectText(page.text, { include: fixture.catalog.include, exclude: [] });
+  });
+
+  it('answers 404 for an unknown author', async () => {
+    const page = await getPage(server, '/authors/no-such-author');
+    expect(page.status).toBe(404);
+    expect(page.text).toContain('We could not find this author');
+    expect(page.text).toContain('no-such-author');
+  });
+
   it('answers 404 for an unknown course', async () => {
     const page = await getPage(server, '/courses/no-such-course');
     expect(page.status).toBe(404);
