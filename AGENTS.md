@@ -34,11 +34,17 @@ The learner talks naturally. Map their intent to one of these procedures:
 - **"what can I learn about <theme>?" / "show me the <theme> courses"** → [Explore a theme](#explore-a-theme)
 - **"quiz me" / "review"** → [Review](#review)
 - **"skip this" / "I already know this"** → [Skip](#skip)
+- **"recommend a path" / "recommend a path again"** → [Recommend a path](#recommend-a-path)
+- **"change my level" / "update my interests"** → [Update my profile](#update-my-profile)
 
 ## Procedures
 
 ### Start or resume
 1. Read `.progress/progress.json`. If it does not exist, run [Onboarding](#onboarding) first.
+   If it exists but `profile.level` is missing (or not a known level), ask the experience
+   question of [Onboarding](#onboarding) once (mention their saved `experience`, if any),
+   set `profile.level`, save, then offer the [Level check](#level-check) (if it
+   applies) and to [Recommend a path](#recommend-a-path).
 2. If `current` is set and that lesson is not `done`, resume it (briefly recap where you left off).
 3. Otherwise find the next lesson: walk the courses in order, then each course's `lessons`
    in order, and pick the first lesson that is not `done` or `skipped` and whose
@@ -54,13 +60,61 @@ Ask, one question at a time, and keep it light:
 1. What should I call you?
 2. What is your experience with AI? (none / used ChatGPT-like tools / some technical / developer / ML practitioner)
 3. Why do you want to learn AI? (curiosity, work, building things, career change…)
-4. Preferred language for our sessions.
+4. What would you like to explore? List the theme titles of `courses/<lang>/themes.yaml`
+   (one line each, "coming soon" for themes with no course yet); they may pick any, or say
+   "not sure".
+5. Preferred language for our sessions.
 
 Create `.progress/progress.json` from `.progress/progress.example.json`'s shape with this
-profile. Set `profile.level` from the experience answer: none / used ChatGPT-like tools →
-`beginner`; some technical / developer → `intermediate`; ML practitioner → `advanced`.
-Use the level to adapt depth and pace; for experienced learners, offer to
-[Skip](#skip) introductory lessons after a quick check.
+profile, no `path` yet, empty `lessons` and `current: null`. Set `profile.level` from the
+experience answer: none / used ChatGPT-like tools → `beginner`; some technical / developer →
+`intermediate`; ML practitioner → `advanced`. Set `profile.interests` to the chosen theme
+ids (omit it for "not sure"). Use the level to adapt depth and pace. Then run the
+[Level check](#level-check) if the level is `intermediate` or `advanced`, and
+[Recommend a path](#recommend-a-path).
+
+### Level check
+Only for `intermediate` and `advanced` learners. Offer it as optional (a few quick questions
+so they don't redo what they know); if they decline, go straight to the path. With the
+learner, call it a "level check", never "placement".
+1. Take the courses of `index.yaml` whose `level` is below the learner's, in order, skipping
+   those already done or skipped.
+2. Ask **at most 6 questions in total**, one at a time, from the `## Check your understanding`
+   sections of those courses (favour their later lessons): one per course, a second only if
+   the first answer is unclear. If there are more courses than questions, check the courses
+   closest to the learner's level first. Judge against the `Good answer:` hints without
+   teaching. The learner may stop at any time: unchecked courses stay as they are.
+3. Passed course (answers clearly good): mark each of its lessons that is not `done` as
+   `skipped` with `notes: "placement"` exactly (the dashboard relies on it and shows it as
+   "Skipped after level check") and `completedAt` (ISO date). Save. Failed course: change
+   nothing; it stays in the path.
+4. If the answers clearly don't match the level (e.g. an `intermediate` learner fails the
+   beginner courses), tell the learner and adjust `profile.level`. Save.
+5. Sum up in one sentence what was skipped and what stays.
+
+### Recommend a path
+1. Pick, from `index.yaml`, the courses that are not finished (all lessons done or skipped)
+   and whose `level` is at or below `profile.level`. If `profile.interests` is set, keep only
+   those in the chosen themes; if that leaves nothing, say so and use all themes. If still
+   nothing is left, use the unfinished courses one level up; if there are none, tell them
+   they have covered the catalog for now and save nothing.
+2. Add every unfinished course listed in their `prerequisites` (recursively), whatever its
+   theme. Keep `index.yaml` order.
+3. Show the path (course titles with their theme) and why, in 2–3 sentences tied to their
+   level, goal and interests. Ask whether it suits them; let them remove, add or reorder
+   courses, but keep each course after its prerequisites and never drop a prerequisite
+   (explain why).
+4. Only once they agree, save `path`, `pathReason` (the explanation) and `pathUpdatedAt`
+   (ISO date) together. If they decline, save nothing: courses follow `index.yaml` order.
+5. If this came from [Start or resume](#start-or-resume), continue it; otherwise offer to start.
+
+### Update my profile
+- **Change my level**: ask the experience question again and set `profile.level` from the
+  answer (or from the level they name). If it went up, offer the
+  [Level check](#level-check).
+- **Update my interests**: ask the interests question again and set `profile.interests`.
+
+Save, then [Recommend a path](#recommend-a-path).
 
 ### Teach a lesson
 Read the lesson file in full before starting. Then:
@@ -114,11 +168,11 @@ Ask 1–2 questions from the lesson's checks. If the learner answers well, mark 
 - Only ever write inside `.progress/`. Never modify files in `courses/` during a tutoring session.
 - Keep `progress.json` valid JSON matching `.progress/progress.example.json`.
 - `profile.level` is `beginner`, `intermediate` or `advanced`; you may adjust it after a
-  placement check. `profile.interests` (optional) lists theme ids from `courses/<lang>/themes.yaml`.
+  level check. `profile.interests` (optional) lists theme ids from `courses/<lang>/themes.yaml`.
 - `path` (optional) is the ordered list of course ids recommended for this learner, with
-  `pathReason` (one or two sentences for the learner) and `pathUpdatedAt` (ISO date); update
+  `pathReason` (two or three sentences for the learner) and `pathUpdatedAt` (ISO date); update
   all three together. Never drop prerequisites to follow it: mark lessons below the
-  learner's level `skipped` during placement instead.
+  learner's level `skipped` during the level check instead.
 - Always save progress right after a status change — do not wait for the end of the session.
 - Never commit `.progress/` or suggest committing it.
 
