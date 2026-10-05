@@ -26,6 +26,8 @@ import { getPaths } from './paths';
 
 const invalidDir = resolve(__dirname, '../../tests/fixtures/courses-invalid');
 const realDir = getPaths().courses;
+/** Pinned copy of the catalog (AI Foundations only), so new courses do not change test expectations. */
+const validDir = resolve(__dirname, '../../tests/fixtures/courses-valid');
 
 function issuesFor(dir: string) {
   return inspectCatalog('en', dir).issues.map((i) => ({
@@ -161,10 +163,10 @@ describe('loadCatalog (invalid fixture)', () => {
 });
 
 describe('themes', () => {
-  /** Copy of the real courses with `themes.yaml` replaced (or removed when `undefined`). */
+  /** Copy of the pinned courses with `themes.yaml` replaced (or removed when `undefined`). */
   function withThemes(themesYaml: string | undefined, extraCourses: string[] = []) {
     const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
-    cpSync(realDir, dir, { recursive: true });
+    cpSync(validDir, dir, { recursive: true });
     const themesFile = join(dir, 'en', 'themes.yaml');
     if (themesYaml === undefined) rmSync(themesFile);
     else writeFileSync(themesFile, themesYaml);
@@ -243,10 +245,10 @@ describe('themes', () => {
 });
 
 describe('authors', () => {
-  /** Copy of the real courses with `authors.yaml` replaced (or removed when `undefined`). */
+  /** Copy of the pinned courses with `authors.yaml` replaced (or removed when `undefined`). */
   function withAuthors(authorsYaml: string | undefined, courseAuthors?: string) {
     const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
-    cpSync(realDir, dir, { recursive: true });
+    cpSync(validDir, dir, { recursive: true });
     const authorsFile = join(dir, 'authors.yaml');
     if (authorsYaml === undefined) rmSync(authorsFile);
     else writeFileSync(authorsFile, authorsYaml);
@@ -400,7 +402,7 @@ describe('lesson sections (invalid fixture)', () => {
 describe('loadCatalog (live edits)', () => {
   it('reads files at call time, without caching', () => {
     const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
-    cpSync(realDir, dir, { recursive: true });
+    cpSync(validDir, dir, { recursive: true });
     const courseFile = join(dir, 'en', 'ai-foundations', 'course.yaml');
     expect(loadCourse('ai-foundations', 'en', dir)?.title).toBe('AI Foundations');
 
@@ -413,7 +415,7 @@ describe('loadCatalog (live edits)', () => {
 
   it('accepts Windows line endings in frontmatter', () => {
     const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
-    cpSync(realDir, dir, { recursive: true });
+    cpSync(validDir, dir, { recursive: true });
     const lessonFile = join(dir, 'en', 'ai-foundations', '01-what-is-ai.md');
     writeFileSync(lessonFile, readFileSync(lessonFile, 'utf8').replace(/\r?\n/g, '\r\n'));
     expect(findLesson('ai-foundations/01-what-is-ai', 'en', dir)?.lesson.title).toBe(

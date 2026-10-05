@@ -1,0 +1,12 @@
+id: ai-foundations
+title: AI Foundations
+level: beginner
+theme: understanding-ai
+authors: [apprentice]
+description: Start from zero. What AI is, how machines learn, and what is really happening when you chat with an AI.
+estimatedHours: 1
+prerequisites: []
+lessons:
+  - ai-foundations/01-what-is-ai
+  - ai-foundations/02-how-machines-learn
+  - ai-foundations/03-what-is-an-llm

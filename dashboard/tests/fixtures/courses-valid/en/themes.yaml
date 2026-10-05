@@ -1,0 +1,15 @@
+# Themes group courses in the catalog, in this order. Each course.yaml names exactly one theme.
+# index.yaml stays the recommended learning path across all themes.
+themes:
+  - id: understanding-ai
+    title: Understanding AI
+    description: What AI is, how it learns and what really happens when you use it.
+  - id: using-ai
+    title: Using AI tools
+    description: Practical skills to get useful, reliable results from AI assistants.
+  - id: building-with-ai
+    title: Building with AI
+    description: Create your own apps, tools and agents on top of AI models.
+  - id: ai-and-society
+    title: AI and society
+    description: Risks, ethics and the impact of AI on people, work and the world.

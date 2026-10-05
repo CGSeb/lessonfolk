@@ -20,8 +20,13 @@ npm run check -w dashboard  # type-check the dashboard
 - **End-to-end tests** live in `dashboard/tests/e2e/`. Before they run, a global setup builds the
   production server into `dashboard/node_modules/.cache/apprentice-e2e/` (your own `dashboard/dist`
   is never touched). Each test file then starts that server as a real Node process on a free
-  port, pointed at the real `courses/` folder and at one progress fixture, and fetches pages over
+  port, pointed at the pinned course fixture and at one progress fixture, and fetches pages over
   HTTP. Servers and temporary folders are removed when the tests finish.
+- **Course fixtures** live in `dashboard/tests/fixtures/`: `courses-valid/` is a pinned copy of the
+  catalog with only AI Foundations, used by every test that expects an exact catalog (themes,
+  authors, personalization scenarios, e2e pages), so adding a course to `courses/` never breaks
+  them; `courses-invalid/` holds broken courses for the validation tests. The real `courses/`
+  folder is checked by `npm run check:courses`.
 
 | Test | What it checks |
 |---|---|

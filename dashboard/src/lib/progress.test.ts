@@ -147,7 +147,7 @@ describe('readProgress', () => {
 });
 
 describe('personalization scenario fixtures (docs/testing.md)', () => {
-  const coursesDir = fileURLToPath(new URL('../../../courses', import.meta.url));
+  const coursesDir = fileURLToPath(new URL('../../tests/fixtures/courses-valid', import.meta.url));
   const catalog = loadCatalog('en', coursesDir);
   const themeIds = loadThemes('en', coursesDir).map((th) => th.id);
   const read = (name: string) => {
