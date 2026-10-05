@@ -1,0 +1,14 @@
+id: prompting-basics
+title: Prompting Basics
+level: beginner
+theme: using-ai
+authors: [apprentice]
+description: Write clear requests and get reliably good answers from a chat assistant — context, examples, format, and how to fix an answer that missed.
+estimatedHours: 1.5
+prerequisites: [ai-foundations]
+lessons:
+  - prompting-basics/01-why-wording-matters
+  - prompting-basics/02-role-examples-and-format
+  - prompting-basics/03-iterating-on-a-bad-answer
+  - prompting-basics/04-common-prompt-mistakes
+  - prompting-basics/05-what-prompting-cannot-fix
