@@ -12,6 +12,7 @@ Courses live in `courses/` (versioned). The learner's progress lives in `.progre
 |---|---|
 | `courses/<lang>/index.yaml` | Ordered catalog of courses for a language (the recommended learning path) |
 | `courses/<lang>/themes.yaml` | Ordered themes that group courses; each course names one in `course.yaml` |
+| `courses/authors.yaml` | Course authors (all languages); each course lists its authors in `course.yaml` |
 | `courses/<lang>/<course>/course.yaml` | Course metadata and ordered list of lessons |
 | `courses/<lang>/<course>/<lesson>.md` | A lesson: content + teaching notes + checks |
 | `docs/course-format.md` | Specification of the course and lesson format |
@@ -113,11 +114,12 @@ If the user asks to create or edit courses, follow `docs/course-format.md` exact
 ### Create a course
 This is contributing mode: the tutoring rule "never modify `courses/`" does not apply, but
 only write the new course's folder and `courses/<lang>/index.yaml` (plus
-`courses/<lang>/themes.yaml` if the author approves a new theme). Never touch `.progress/`
+`courses/<lang>/themes.yaml` if the author approves a new theme, and `courses/authors.yaml`
+to add a new course author). Never touch `.progress/`
 and never edit other courses.
 
 1. **Prepare.** Read `docs/course-format.md`, `courses/<lang>/index.yaml`,
-   `courses/<lang>/themes.yaml` and every listed
+   `courses/<lang>/themes.yaml`, `courses/authors.yaml` and every listed
    `course.yaml`, so you know which courses exist and at what level. Read one or two lessons
    of `ai-foundations` in full: they are the quality bar.
 2. **Interview**, one question at a time, skipping anything the author already said:
@@ -128,10 +130,15 @@ and never edit other courses.
    5. Position in the learning path (after which course in `index.yaml`)
    6. Theme: suggest the theme from `themes.yaml` that fits best. Propose a new theme (id,
       title, one-sentence description) only if none fits
+   7. Course author(s), credited on the dashboard: default to `apprentice` for courses written
+      by the maintainer. For an external contributor, reuse their slug if they are in
+      `authors.yaml`; otherwise add them there when you write the course (slug, name,
+      optional one- or two-sentence bio, and
+      `github` / `url` only if they give them: never invent links, ask or leave them out)
 
    Write in `en` unless the author asks otherwise; translations are a separate task.
 3. **Outline.** Propose: course id (kebab-case, not already used), title, level, a one- or
-   two-sentence description, theme, `estimatedHours`, prerequisites, and 3–8 lessons, each with its
+   two-sentence description, theme, authors, `estimatedHours`, prerequisites, and 3–8 lessons, each with its
    file name (`NN-slug`), title, a one-line objective and `estimatedMinutes` (10–25).
    Point out any overlap with existing courses. **Write no file until the author approves
    the outline**; revise it as often as they want.

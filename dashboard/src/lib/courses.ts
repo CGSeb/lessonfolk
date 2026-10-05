@@ -5,6 +5,7 @@ import type { z } from 'zod';
 import { checkLessonBody } from './lesson-body.ts';
 import { getPaths } from './paths.ts';
 import {
+  authorsSchema,
   courseFileSchema,
   formatIssues,
   indexSchema,
@@ -35,6 +36,8 @@ export interface Course {
   description: string;
   /** Theme id from `themes.yaml`. */
   theme: string;
+  /** Author slugs from `courses/authors.yaml`, in `course.yaml` order. */
+  authors: string[];
   estimatedHours: number;
   /** Course ids; `[]` when absent. */
   prerequisites: string[];
@@ -50,12 +53,27 @@ export interface Theme {
   courses: Course[];
 }
 
+export interface Author {
+  /** Kebab-case id, used in `course.yaml` and in the author page URL. */
+  slug: string;
+  name: string;
+  bio?: string;
+  /** GitHub username. */
+  github?: string;
+  /** Personal website (http or https). */
+  url?: string;
+  /** Courses of this author in `index.yaml` order; may be empty. */
+  courses: Course[];
+}
+
 export interface Catalog {
   lang: string;
   /** Courses in `index.yaml` order. */
   courses: Course[];
   /** Themes in `themes.yaml` order, each with its courses. */
   themes: Theme[];
+  /** Authors in `authors.yaml` order, each with its courses in this language. */
+  authors: Author[];
 }
 
 export interface CourseIssue {
@@ -145,7 +163,7 @@ export function inspectCatalog(
 ): { catalog: Catalog; issues: CourseIssue[]; warnings: CourseIssue[] } {
   const issues: CourseIssue[] = [];
   const warnings: CourseIssue[] = [];
-  const catalog: Catalog = { lang, courses: [], themes: [] };
+  const catalog: Catalog = { lang, courses: [], themes: [], authors: [] };
   const langDir = join(coursesDir, lang);
   const indexFile = join(langDir, 'index.yaml');
 
@@ -193,7 +211,52 @@ export function inspectCatalog(
   }
 
   readThemes(langDir, catalog, issues, warnings);
+  readAuthors(coursesDir, langDir, catalog, issues);
   return { catalog, issues, warnings };
+}
+
+/** `courses/authors.yaml`: one file for every language. */
+export function authorsFilePath(coursesDir: string = getPaths().courses): string {
+  return join(coursesDir, 'authors.yaml');
+}
+
+/** Read `authors.yaml`, check each course's authors and list each author's courses. */
+function readAuthors(
+  coursesDir: string,
+  langDir: string,
+  catalog: Catalog,
+  issues: CourseIssue[],
+): void {
+  const authorsFile = authorsFilePath(coursesDir);
+  if (!existsSync(authorsFile)) {
+    issues.push({ file: authorsFile, message: 'authors.yaml not found' });
+    return;
+  }
+  const file = validate(authorsSchema, readYaml(authorsFile, issues), authorsFile, issues);
+  // Without a valid authors.yaml every course would be reported; the file error is enough.
+  if (!file) return;
+
+  const authors = new Map<string, Author>();
+  for (const entry of file.authors) {
+    if (authors.has(entry.slug)) {
+      issues.push({ file: authorsFile, message: `author "${entry.slug}" is listed more than once` });
+      continue;
+    }
+    authors.set(entry.slug, { ...entry, courses: [] });
+  }
+  for (const course of catalog.courses) {
+    const courseFile = join(langDir, course.id, 'course.yaml');
+    for (const [i, slug] of course.authors.entries()) {
+      const author = authors.get(slug);
+      if (course.authors.indexOf(slug) !== i) {
+        issues.push({ file: courseFile, message: `author "${slug}" is listed more than once` });
+      } else if (author) author.courses.push(course);
+      else {
+        issues.push({ file: courseFile, message: `author "${slug}" is not listed in authors.yaml` });
+      }
+    }
+  }
+  catalog.authors = [...authors.values()];
 }
 
 /** Read `themes.yaml`, check each course's theme and group the courses by theme. */
@@ -319,6 +382,7 @@ function loadCourseDir(
     level: meta.level,
     description: meta.description,
     theme: meta.theme,
+    authors: meta.authors,
     estimatedHours: meta.estimatedHours,
     prerequisites: meta.prerequisites,
     lessons,
@@ -344,6 +408,16 @@ export function loadThemes(lang = 'en', coursesDir: string = getPaths().courses)
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.themes;
+}
+
+/**
+ * Load the authors in `authors.yaml` order, each with their courses of this
+ * language in `index.yaml` order. Authors with no course are included. Throws like `loadCatalog`.
+ */
+export function loadAuthors(lang = 'en', coursesDir: string = getPaths().courses): Author[] {
+  const { catalog, issues } = inspectCatalog(lang, coursesDir);
+  if (issues.length) throw new CourseValidationError(issues, coursesDir);
+  return catalog.authors;
 }
 
 /** Load one course by id, or `undefined` if it is not in the catalog. */
@@ -386,10 +460,34 @@ export function inspectAllCourses(coursesDir: string = getPaths().courses): {
     return { issues: [{ file: coursesDir, message: 'no language folders found' }], warnings: [] };
   }
   const results = langs.map((lang) => inspectCatalog(lang, coursesDir));
+  const warnings = results.flatMap((r) => r.warnings);
+
+  // authors.yaml is shared: an author needs a course in at least one language.
+  const authorsFile = authorsFilePath(coursesDir);
+  const withCourses = new Set(
+    results.flatMap((r) => r.catalog.authors.filter((a) => a.courses.length).map((a) => a.slug)),
+  );
+  for (const author of results[0].catalog.authors) {
+    if (!withCourses.has(author.slug)) {
+      warnings.push({ file: authorsFile, message: `author "${author.slug}" has no course yet` });
+    }
+  }
+
   return {
-    issues: results.flatMap((r) => r.issues),
-    warnings: results.flatMap((r) => r.warnings),
+    // Each language reads the shared authors.yaml: report its problems once.
+    issues: uniqueIssues(results.flatMap((r) => r.issues)),
+    warnings,
   };
+}
+
+function uniqueIssues(issues: CourseIssue[]): CourseIssue[] {
+  const seen = new Set<string>();
+  return issues.filter(({ file, message }) => {
+    const key = JSON.stringify([file, message]);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** Validate every language; returns all errors (empty when everything is valid). */

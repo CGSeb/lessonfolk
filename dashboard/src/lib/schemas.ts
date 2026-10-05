@@ -36,12 +36,35 @@ export const themesSchema = z.strictObject({
 });
 export type ThemesFile = z.infer<typeof themesSchema>;
 
+export const authorSlugSchema = z.string().regex(kebab, 'must be a kebab-case author slug');
+
+/** GitHub usernames: letters, digits and single hyphens, not at either end, up to 39 characters. */
+const githubUsername = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
+
+/** `courses/authors.yaml`, shared by every language. */
+export const authorsSchema = z.strictObject({
+  authors: z
+    .array(
+      z.strictObject({
+        slug: authorSlugSchema,
+        name: z.string().min(1),
+        bio: z.string().min(1).optional(),
+        github: z.string().regex(githubUsername, 'must be a GitHub username (no URL, no @)').optional(),
+        // Only web links: the dashboard renders this as a clickable link.
+        url: z.url({ protocol: /^https?$/, error: 'must be an http(s) URL' }).optional(),
+      }),
+    )
+    .min(1),
+});
+export type AuthorsFile = z.infer<typeof authorsSchema>;
+
 /** `courses/<lang>/<course>/course.yaml` */
 export const courseFileSchema = z.strictObject({
   id: courseIdSchema,
   title: z.string().min(1),
   level: levelSchema,
   theme: themeIdSchema,
+  authors: z.array(authorSlugSchema).min(1, 'must list at least one author slug from authors.yaml'),
   description: z.string().min(1),
   estimatedHours: z.number().positive(),
   prerequisites: z.array(courseIdSchema).default([]),

@@ -20,6 +20,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const navItems = [
   { href: '/', label: t('nav.home'), current: path === '/' },
   { href: '/courses', label: t('nav.courses'), current: path === '/courses' || path.startsWith('/courses/') },
+  { href: '/authors', label: t('nav.authors'), current: path === '/authors' || path.startsWith('/authors/') },
 ];
 ---
 

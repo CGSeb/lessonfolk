@@ -1,0 +1,6 @@
+# Deliberately broken content, used by courses.test.ts and to demo check:courses.
+authors:
+  - slug: tester
+    name: Test Author
+  - slug: unused
+    name: Author with no course

@@ -3,6 +3,7 @@ id: broken-sections
 title: Broken sections
 level: beginner
 theme: basics
+authors: [tester]
 description: Lessons with missing, misspelled or out-of-order sections, a check without a good answer, and guideline drift.
 estimatedHours: 1
 lessons:

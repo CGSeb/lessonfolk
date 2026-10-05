@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Notice from '../../components/Notice.astro';
+import { getAuthorList } from '../../components/authors/authorView';
+import { t } from '../../i18n/en';
+import { authorsFilePath, inspectCatalog } from '../../lib/courses';
+
+// Read on every request so the page reflects the latest course files.
+const { catalog, issues } = inspectCatalog('en');
+const authors = getAuthorList(catalog.authors).map((item) => ({
+  ...item,
+  countText: t(item.courseCount === 1 ? 'author.courseCountOne' : 'author.courseCountOther', {
+    count: item.courseCount,
+  }),
+}));
+const authorsFile = authorsFilePath();
+const fileIssues = issues.filter((issue) => issue.file === authorsFile);
+---
+
+<BaseLayout title={t('author.listTitle')}>
+  <div class="stack" style="--stack-space: var(--space-5)">
+    <header class="stack" style="--stack-space: var(--space-2)">
+      <h1>{t('author.listHeading')}</h1>
+      <p class="muted">{t('author.listIntro')}</p>
+    </header>
+
+    {
+      fileIssues.length > 0 && (
+        <Notice tone="warning" title={t('author.issuesTitle')}>
+          <p>{t('author.issuesBody')}</p>
+          <pre><code>{t('author.issuesCommand')}</code></pre>
+          <ul>
+            {fileIssues.map((issue) => (
+              <li>
+                <code>courses/authors.yaml</code> {issue.message}
+              </li>
+            ))}
+          </ul>
+        </Notice>
+      )
+    }
+
+    {
+      authors.length > 0 ? (
+        <ul class="grid author-list" role="list">
+          {authors.map(({ author, countText }) => (
+            <li>
+              <article class="card stack author-card" style="--stack-space: var(--space-2)">
+                <h2 class="author-card__name">
+                  <a href={author.href}>{author.name}</a>
+                </h2>
+                <p class="muted author-card__count">{countText}</p>
+                {author.bio && <p>{author.bio}</p>}
+              </article>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">{t('author.listEmpty')}</p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .author-list {
+    --grid-min: 18rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .author-list > li {
+    display: flex;
+    max-width: none;
+  }
+
+  .author-card {
+    flex: 1;
+    position: relative;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .author-card:hover {
+    border-color: var(--color-accent-border);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .author-card__name {
+    font-size: var(--text-xl);
+  }
+
+  .author-card__name a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .author-card__name a:hover {
+    color: var(--color-accent);
+  }
+
+  /* The whole card is clickable through the name link. */
+  .author-card__name a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+  }
+
+  .author-card__name a:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .author-card__name a:focus-visible::after {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+    box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
+  }
+
+  .author-card__count {
+    font-size: var(--text-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .author-card {
+      transition: none;
+    }
+  }
+</style>

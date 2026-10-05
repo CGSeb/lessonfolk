@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CourseCard from '../../components/CourseCard.astro';
+import Notice from '../../components/Notice.astro';
+import { courseAuthors, getAuthorView } from '../../components/authors/authorView';
+import { t } from '../../i18n/en';
+import { authorsFilePath, inspectCatalog } from '../../lib/courses';
+import { progressOrEmpty, readProgress } from '../../lib/progress';
+
+// Read on every request so the page reflects the tutor's latest writes.
+const slug = Astro.params.slug ?? '';
+const { catalog, issues } = inspectCatalog('en');
+const progressResult = readProgress();
+const view = getAuthorView(catalog.courses, catalog.authors, slug, progressOrEmpty(progressResult));
+
+if (!view) Astro.response.status = 404;
+
+const themesById = new Map(catalog.themes.map((theme) => [theme.id, theme]));
+const authorsFile = authorsFilePath();
+const fileIssues = issues.filter((issue) => issue.file === authorsFile);
+const author = view?.author;
+const linkText = (link: NonNullable<typeof view>['links'][number]) =>
+  link.kind === 'github' ? t('author.github', { username: link.label }) : t('author.website', { host: link.label });
+---
+
+<BaseLayout title={author ? author.name : t('author.notFoundTitle')} description={author?.bio}>
+  <div class="stack" style="--stack-space: var(--space-5)">
+    <nav aria-label={t('author.breadcrumbLabel')}>
+      <ol class="breadcrumb" role="list">
+        <li><a href="/authors">{t('nav.authors')}</a></li>
+        {author && <li aria-current="page">{author.name}</li>}
+      </ol>
+    </nav>
+
+    {
+      fileIssues.length > 0 && (
+        <Notice tone="warning" title={t('author.issuesTitle')}>
+          <p>{t('author.issuesBody')}</p>
+          <pre><code>{t('author.issuesCommand')}</code></pre>
+          <ul>
+            {fileIssues.map((issue) => (
+              <li>
+                <code>courses/authors.yaml</code> {issue.message}
+              </li>
+            ))}
+          </ul>
+        </Notice>
+      )
+    }
+
+    {
+      !view || !author ? (
+        <section class="card stack" aria-labelledby="not-found-heading">
+          <h1 id="not-found-heading">{t('author.notFoundHeading')}</h1>
+          <p>{t('author.notFoundBody', { slug })}</p>
+          <p>
+            <a href="/authors">{t('author.backToAuthors')}</a>
+          </p>
+        </section>
+      ) : (
+        <>
+          <header class="stack" style="--stack-space: var(--space-3)">
+            <h1>{author.name}</h1>
+            {author.bio && <p class="author-bio">{author.bio}</p>}
+            {view.links.length > 0 && (
+              <ul class="cluster author-links" role="list" aria-label={t('author.linksLabel')} style="--cluster-space: var(--space-2) var(--space-4)">
+                {view.links.map((link) => (
+                  <li>
+                    <a href={link.href} target="_blank" rel="noopener noreferrer">
+                      {linkText(link)}
+                      <span class="visually-hidden"> {t('author.newTab')}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </header>
+
+          {
+            progressResult.state === 'invalid' && (
+              <p class="warning" role="status">
+                {t('author.progressInvalid')}
+              </p>
+            )
+          }
+
+          <section class="stack" aria-labelledby="author-courses-heading" style="--stack-space: var(--space-4)">
+            <h2 id="author-courses-heading">{t('author.coursesHeading', { author: author.name })}</h2>
+            {
+              view.courses.length > 0 ? (
+                <ol class="grid course-list" role="list">
+                  {view.courses.map((stats) => (
+                    <li>
+                      <CourseCard
+                        stats={stats}
+                        headingLevel={3}
+                        theme={themesById.get(stats.course.theme)}
+                        authors={courseAuthors(stats.course, catalog.authors)}
+                      />
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p class="muted">{t('author.noCourses')}</p>
+              )
+            }
+          </section>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .breadcrumb li + li::before {
+    content: '/';
+    margin-right: var(--space-2);
+    color: var(--color-border-strong);
+  }
+
+  .breadcrumb [aria-current='page'] {
+    color: var(--color-text);
+    font-weight: var(--weight-medium);
+  }
+
+  .author-bio {
+    max-width: 40rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .author-links {
+    padding: 0;
+    list-style: none;
+    font-weight: var(--weight-medium);
+  }
+
+  .author-links a {
+    overflow-wrap: anywhere;
+  }
+
+  .warning {
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-warning-border);
+    border-left-width: var(--border-accent);
+    border-radius: var(--radius-md);
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+  }
+
+  .course-list {
+    --grid-min: 20rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .course-list > li {
+    display: flex;
+    max-width: none;
+  }
+
+  .course-list > li > :global(*) {
+    flex: 1;
+  }
+</style>
