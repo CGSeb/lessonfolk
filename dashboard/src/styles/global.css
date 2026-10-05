@@ -198,20 +198,12 @@ summary {
 
 /*
  * Highlighted card for the "spark" moments (next lesson, achievements):
- * an amber stripe along the top edge, clipped by the card's rounding.
+ * an amber border all around. The padding absorbs the thicker border so the
+ * content lines up with plain cards.
  */
 .card--spark {
-  position: relative;
-  overflow: hidden;
-  border-color: var(--color-accent-border);
-}
-
-.card--spark::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: var(--border-accent);
-  background: var(--color-spark);
+  padding: calc(var(--space-5) - var(--border-spark) + 1px);
+  border: var(--border-spark) solid var(--color-spark);
 }
 
 /* Small uppercase label with a spark dot, e.g. "Next up". */
