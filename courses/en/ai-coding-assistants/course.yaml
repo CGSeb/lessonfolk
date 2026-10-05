@@ -1,0 +1,15 @@
+id: ai-coding-assistants
+title: AI Coding Assistants in Practice
+level: intermediate
+theme: using-ai
+authors: [apprentice]
+description: Work with AI coding assistants like a senior developer — know what they see, split work into tasks they handle well, review their code, protect your secrets, and keep tests and git as your safety net. The course works with any tool.
+estimatedHours: 2
+prerequisites: [prompting-basics, ai-safety]
+lessons:
+  - ai-coding-assistants/01-what-your-assistant-sees
+  - ai-coding-assistants/02-splitting-the-work
+  - ai-coding-assistants/03-reviewing-ai-code
+  - ai-coding-assistants/04-tests-and-small-commits
+  - ai-coding-assistants/05-secrets-and-private-code
+  - ai-coding-assistants/06-drive-or-delegate
