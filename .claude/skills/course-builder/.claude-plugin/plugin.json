@@ -1,0 +1,6 @@
+{
+  "name": "course-builder",
+  "version": "0.1.0",
+  "description": "Side pane summarising an Apprentice create-course session: course title and workflow steps done so far",
+  "author": { "name": "Apprentice" }
+}
