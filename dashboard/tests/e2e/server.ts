@@ -2,8 +2,8 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { inject } from 'vitest';
 
-/** The real course content, pinned so tests do not depend on the working directory. */
-export const COURSES_DIR = fileURLToPath(new URL('../../../courses', import.meta.url));
+/** Pinned copy of the catalog (AI Foundations only), so new courses do not change test expectations. */
+export const COURSES_DIR = fileURLToPath(new URL('../fixtures/courses-valid', import.meta.url));
 /** Progress fixtures, one folder per learner state. */
 export const PROGRESS_FIXTURES = fileURLToPath(new URL('../fixtures/progress', import.meta.url));
 
