@@ -350,6 +350,44 @@ describe('authors', () => {
       url: 'https://example.com/me',
     });
   });
+
+  describe('avatars', () => {
+    const withAvatar = (avatar: string) => withAuthors(`${authorsYaml('apprentice')}    avatar: ${avatar}\n`);
+
+    it('keeps an avatar whose image is in courses/authors/', () => {
+      expect(loadAuthors('en', validDir)[0].avatar).toBe('apprentice.svg');
+      expect(allIssues(withAvatar('apprentice.svg'))).toEqual([]);
+    });
+
+    it('never treats the avatars folder as a language', () => {
+      expect(listLanguages(validDir)).toEqual(['en']);
+    });
+
+    it('reports a missing image and drops the avatar', () => {
+      const dir = withAvatar('nobody.png');
+      expect(allIssues(dir)).toEqual([
+        { file: 'authors.yaml', message: 'author "apprentice": avatar "nobody.png" not found in authors/' },
+      ]);
+      expect(inspectCatalog('en', dir).catalog.authors[0].avatar).toBeUndefined();
+    });
+
+    it('reports an image that is too large', () => {
+      const dir = withAvatar('big.png');
+      writeFileSync(join(dir, 'authors', 'big.png'), Buffer.alloc(512 * 1024 + 1));
+      expect(allIssues(dir)).toEqual([
+        { file: 'authors.yaml', message: 'author "apprentice": avatar "big.png" is larger than 512 KB' },
+      ]);
+    });
+
+    it.each(['../secret.png', 'authors/me.png', 'me.gif', 'Me.png', 'https://example.com/me.png'])(
+      'rejects the avatar name %s',
+      (avatar) => {
+        expect(allIssues(withAvatar(JSON.stringify(avatar))).map((i) => i.message)).toEqual([
+          'authors.0.avatar: must be an image file name in courses/authors/ (png, jpg, webp or svg)',
+        ]);
+      },
+    );
+  });
 });
 
 describe('lesson sections (invalid fixture)', () => {

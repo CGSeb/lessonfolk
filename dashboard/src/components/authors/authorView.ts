@@ -7,6 +7,8 @@ export interface AuthorRef<C extends CourseRef> {
   bio?: string;
   github?: string;
   url?: string;
+  /** Avatar image file name in `courses/authors/`. */
+  avatar?: string;
   /** Courses in `index.yaml` order. */
   courses: C[];
 }
@@ -17,6 +19,8 @@ export interface AuthorLink {
   name: string;
   /** Author page, e.g. `/authors/apprentice`. */
   href: string;
+  /** Avatar image URL; `undefined` shows the initials instead. */
+  avatar?: string;
 }
 
 export interface ExternalLink {
@@ -40,11 +44,32 @@ export interface AuthorView<C extends CourseRef> {
 
 export const authorHref = (slug: string): string => `/authors/${encodeURIComponent(slug)}`;
 
-const toLink = ({ slug, name }: { slug: string; name: string }): AuthorLink => ({
+/** URL of the endpoint serving an author's avatar image. */
+export const authorAvatarHref = (slug: string): string => `/api/authors/${encodeURIComponent(slug)}/avatar`;
+
+const toLink = ({ slug, name, avatar }: { slug: string; name: string; avatar?: string }): AuthorLink => ({
   slug,
   name,
   href: authorHref(slug),
+  avatar: avatar ? authorAvatarHref(slug) : undefined,
 });
+
+/**
+ * Up to two initials for the avatar fallback: the first letters of the first
+ * and last words ("Ada Lovelace" → "AL", "Apprentice" → "A").
+ */
+export function authorInitials(name: string): string {
+  const words = name.trim().split(/[\s-]+/).filter(Boolean);
+  const first = (word: string | undefined) => (word ? Array.from(word)[0] : '');
+  return (first(words[0]) + (words.length > 1 ? first(words.at(-1)) : '')).toLocaleUpperCase();
+}
+
+/** Stable number for the colour of an author's initials (see `themeToneClass`), from their slug. */
+export function authorTone(slug: string): number {
+  let hash = 0;
+  for (const char of slug) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return hash;
+}
 
 /**
  * The authors of a course, in `course.yaml` order, as links to their pages.

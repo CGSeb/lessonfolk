@@ -41,6 +41,9 @@ export const authorSlugSchema = z.string().regex(kebab, 'must be a kebab-case au
 /** GitHub usernames: letters, digits and single hyphens, not at either end, up to 39 characters. */
 const githubUsername = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
 
+/** Avatar image file names: lower-case kebab-case with an image extension. */
+const avatarFile = /^[a-z0-9]+(?:-[a-z0-9]+)*\.(?:png|jpe?g|webp|svg)$/;
+
 /** `courses/authors.yaml`, shared by every language. */
 export const authorsSchema = z.strictObject({
   authors: z
@@ -52,6 +55,11 @@ export const authorsSchema = z.strictObject({
         github: z.string().regex(githubUsername, 'must be a GitHub username (no URL, no @)').optional(),
         // Only web links: the dashboard renders this as a clickable link.
         url: z.url({ protocol: /^https?$/, error: 'must be an http(s) URL' }).optional(),
+        // A file name only (no folder), so it can never point outside courses/authors/.
+        avatar: z
+          .string()
+          .regex(avatarFile, 'must be an image file name in courses/authors/ (png, jpg, webp or svg)')
+          .optional(),
       }),
     )
     .min(1),

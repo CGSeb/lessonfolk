@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { emptyProgress, type CourseRef, type Progress } from '../../lib/progress';
 import {
+  authorAvatarHref,
   authorHref,
+  authorInitials,
   authorLinks,
+  authorTone,
   courseAuthors,
   getAuthorList,
   getAuthorView,
@@ -111,5 +114,33 @@ describe('getAuthorView', () => {
 describe('authorHref', () => {
   it('builds the author page path', () => {
     expect(authorHref('apprentice')).toBe('/authors/apprentice');
+  });
+});
+
+describe('avatars', () => {
+  it('links to the avatar endpoint only when the author has an avatar', () => {
+    const withAvatar = author('ada', [a], { avatar: 'ada.png' });
+    expect(courseAuthors(a, [withAvatar])).toEqual([
+      { slug: 'ada', name: 'Name ada', href: '/authors/ada', avatar: '/api/authors/ada/avatar' },
+    ]);
+    expect(courseAuthors(a, [author('ada', [a])])[0].avatar).toBeUndefined();
+    expect(authorAvatarHref('a b')).toBe('/api/authors/a%20b/avatar');
+  });
+
+  it.each([
+    ['Ada Lovelace', 'AL'],
+    ['Apprentice', 'A'],
+    ['  grace   brewster murray hopper ', 'GH'],
+    ['Jean-Luc', 'JL'],
+    ['élodie dupont', 'ÉD'],
+    ['', ''],
+  ])('takes the initials of %j', (name, initials) => {
+    expect(authorInitials(name)).toBe(initials);
+  });
+
+  it('gives each slug a stable tone', () => {
+    expect(authorTone('ada')).toBe(authorTone('ada'));
+    expect(authorTone('ada')).not.toBe(authorTone('bob'));
+    expect(Number.isInteger(authorTone(''))).toBe(true);
   });
 });

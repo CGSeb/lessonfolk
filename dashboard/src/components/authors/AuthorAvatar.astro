@@ -1,0 +1,70 @@
+---
+/**
+ * An author's avatar: their image from `courses/authors/`, or their initials
+ * on a tint when they have none. Decorative: the author's name is always shown
+ * next to it, so screen readers skip it.
+ */
+import { themeToneClass } from '../theme-tone';
+import { authorInitials, authorTone } from './authorView';
+
+interface Props {
+  author: { slug: string; name: string; avatar?: string };
+  size?: 'md' | 'lg';
+}
+
+const { author, size = 'md' } = Astro.props;
+const pixels = size === 'lg' ? 96 : 56;
+---
+
+{
+  author.avatar ? (
+    <img
+      class:list={['author-avatar', `author-avatar--${size}`]}
+      src={author.avatar}
+      alt=""
+      width={pixels}
+      height={pixels}
+      decoding="async"
+    />
+  ) : (
+    <span
+      class:list={['author-avatar', `author-avatar--${size}`, 'author-avatar--initials', themeToneClass(authorTone(author.slug))]}
+      aria-hidden="true"
+    >
+      {authorInitials(author.name)}
+    </span>
+  )
+}
+
+<style>
+  .author-avatar {
+    flex: none;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-pill);
+    object-fit: cover;
+    background: var(--color-surface-sunken);
+  }
+
+  .author-avatar--lg {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .author-avatar--initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-theme-badge-border);
+    background: var(--color-theme-badge-bg);
+    color: var(--color-theme-badge-text);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-wide);
+    user-select: none;
+  }
+
+  .author-avatar--lg.author-avatar--initials {
+    font-size: var(--text-2xl);
+  }
+</style>

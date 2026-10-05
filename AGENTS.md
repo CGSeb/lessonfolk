@@ -196,7 +196,8 @@ If the user asks to create or edit courses, follow `docs/course-format.md` exact
 This is contributing mode: the tutoring rule "never modify `courses/`" does not apply, but
 only write the new course's folder and `courses/<lang>/index.yaml` (plus
 `courses/<lang>/themes.yaml` if the author approves a new theme, and `courses/authors.yaml`
-to add a new course author). Never touch `.progress/`
+(with the author's avatar image in `courses/authors/` if they give one) to add a new course
+author). Never touch `.progress/`
 and never edit other courses.
 
 1. **Prepare.** Read `docs/course-format.md`, `courses/<lang>/index.yaml`,
@@ -215,7 +216,8 @@ and never edit other courses.
       by the maintainer. For an external contributor, reuse their slug if they are in
       `authors.yaml`; otherwise add them there when you write the course (slug, name,
       optional one- or two-sentence bio, and
-      `github` / `url` only if they give them: never invent links, ask or leave them out)
+      `github` / `url` only if they give them: never invent links, ask or leave them out; an
+      `avatar` only if they give you an image to publish, saved as `courses/authors/<slug>.<ext>`)
 
    Write in `en` unless the author asks otherwise; translations are a separate task.
 3. **Outline.** Propose: course id (kebab-case, not already used), title, level, a one- or

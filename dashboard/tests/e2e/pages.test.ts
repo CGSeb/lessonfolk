@@ -374,12 +374,29 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(page.status).toBe(200);
     expect(page.html).toMatch(/<a href="\/authors\/apprentice"[^>]*>Apprentice<\/a>/);
     expect(page.text).toContain('1 course');
+    // Decorative avatar from courses/authors/: the name sits next to it.
+    expect(page.html).toMatch(/<img class="author-avatar[^"]*" src="\/api\/authors\/apprentice\/avatar" alt=""/);
+  });
+
+  it('serves author avatars from courses/authors/', async () => {
+    const avatar = await fetch(`${server.url}/api/authors/apprentice/avatar`);
+    expect(avatar.status).toBe(200);
+    expect(avatar.headers.get('content-type')).toBe('image/svg+xml');
+    expect(avatar.headers.get('content-security-policy')).toContain('sandbox');
+    expect(await avatar.text()).toContain('<svg');
+    // Revalidation answers 304 while the file is unchanged.
+    const again = await fetch(`${server.url}/api/authors/apprentice/avatar`, {
+      headers: { 'If-None-Match': avatar.headers.get('etag') ?? '' },
+    });
+    expect(again.status).toBe(304);
+    expect((await fetch(`${server.url}/api/authors/no-such-author/avatar`)).status).toBe(404);
   });
 
   it('renders the Apprentice author page with its courses and progress', async () => {
     const page = await getPage(server, '/authors/apprentice');
     expect(page.status).toBe(200);
     expect(page.text).toContain('Courses by Apprentice');
+    expect(page.html).toMatch(/<img class="author-avatar author-avatar--lg[^"]*" src="\/api\/authors\/apprentice\/avatar"/);
     expect(page.html).toContain('href="/courses/ai-foundations"');
     // No link is set in authors.yaml, so none is rendered.
     expect(page.html).not.toContain('target="_blank"');
