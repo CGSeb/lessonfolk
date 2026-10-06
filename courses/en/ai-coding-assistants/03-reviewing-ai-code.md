@@ -15,8 +15,8 @@ prerequisites:
 1. **You own every line you accept.** AI-written code goes into your project, your reviews
    and your production under your name. "The AI wrote it" does not explain a bug. Review it at
    least as carefully as code from a new teammate.
-2. **Made-up APIs and packages.** As you saw with hallucinations in Using AI Safely and
-   Wisely, the model produces likely text. In code that means functions, options or whole
+2. **Made-up APIs and packages.** The model produces likely text (see
+   hallucinations in Using AI Safely and Wisely). In code that means functions, options or whole
    packages that look plausible but do not exist, or exist with a different signature.
    Check every unfamiliar import and API call against the documentation, and never install
    a package just because the assistant named it: an unknown package can even be a malicious

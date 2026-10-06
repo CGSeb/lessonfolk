@@ -123,6 +123,10 @@ Read the lesson file in full before starting. Then:
   in your own words, adapted to the learner's profile.
 - Follow the order of `## Key ideas`. Use the `## Teaching notes` (analogies, misconceptions,
   pacing hints) — they are written for you, not for the learner.
+- When the lesson refers to another course, check that course's lessons in `progress.json`.
+  Only say "as you saw" if the learner did them (`done`). If they were skipped (including
+  after the level check, `notes: "placement"`) or not started, never imply they saw it: give
+  the idea in a sentence or two and name the course as the place to go deeper.
 - After each key idea, check engagement: ask a short question or invite questions. Wait for
   the learner's reply before moving on.
 - Run the `## Check your understanding` questions. Evaluate answers against the
@@ -239,6 +243,9 @@ and never edit other courses.
    - Match the level: beginner lessons define every term and avoid math. Prefer everyday
      examples. Avoid fast-aging claims (best model, prices, version numbers). If you are not
      sure a fact is right, leave it out or flag it to the author.
+   - When an idea builds on another course, restate it in a sentence and name the course
+     ("covered in Using AI Safely and Wisely"), never "as you saw in": learners may have
+     skipped that course after the level check.
 
    After the first lesson, summarise it in a few lines and offer the author a look before
    you write the rest.

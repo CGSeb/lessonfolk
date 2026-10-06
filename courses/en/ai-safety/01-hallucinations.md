@@ -13,8 +13,8 @@ prerequisites:
 ## Key ideas
 1. **A "hallucination" is a confident answer that is false or made up.** The word is a
    metaphor: the AI is not seeing things, it is producing text that looks right but is not.
-2. **It happens because the model produces likely text, not checked facts.** As seen in AI
-   Foundations, an LLM predicts what plausibly comes next. Most of the time plausible and
+2. **It happens because the model produces likely text, not checked facts.** An LLM predicts
+   (covered in AI Foundations) what plausibly comes next. Most of the time plausible and
    true overlap; when they do not, you get a fluent, wrong answer.
 3. **Confidence is not a signal of accuracy.** The assistant writes in the same calm,
    assured tone whether it is right or wrong. A detailed, well-written answer can still be

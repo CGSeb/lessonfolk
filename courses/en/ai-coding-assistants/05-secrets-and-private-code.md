@@ -12,8 +12,8 @@ prerequisites:
 ---
 
 ## Key ideas
-1. **Coding assistants see more than what you type.** As you saw in Using AI Safely and
-   Wisely, what you send goes somewhere. With code, the tool may also send open files, files
+1. **Coding assistants see more than what you type.** What you send goes somewhere (covered in
+   Using AI Safely and Wisely). With code, the tool may also send open files, files
    it searches or reads, and the output of commands it runs. A `.env` file, a config with a
    database password, or a log full of customer emails can reach the model without you ever
    pasting it.
