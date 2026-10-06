@@ -1,0 +1,7 @@
+{
+  "name": "course-companion",
+  "version": "0.1.0",
+  "description": "Side pane for Apprentice learners: the current course, its lessons, the lesson's key ideas and what comes next",
+  "author": { "name": "Apprentice" },
+  "types": "./types/index.d.ts"
+}
