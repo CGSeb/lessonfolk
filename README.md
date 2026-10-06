@@ -35,6 +35,12 @@ Useful things to say: *"continue"*, *"show my progress"*, *"what can I learn?"*,
 *"I already know this, skip"*, *"recommend a path"*, *"change my level"*. In Claude Code you
 can also use `/learn`, `/progress`, `/review`.
 
+In Claude Code, the **Course companion** helps you follow along (an optional mod that loads with
+the project):
+- a side pane with your course, its lessons and the key ideas of the current lesson;
+- buttons above the prompt for the usual commands, or for the answers to the tutor's question;
+- **Companion** reopens the pane, **Dashboard** starts the [dashboard](#dashboard-optional).
+
 ## How it works
 
 | What | Where | Versioned? |
