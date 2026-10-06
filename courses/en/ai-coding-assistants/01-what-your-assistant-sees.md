@@ -46,7 +46,8 @@ prerequisites:
   its training date and may default to older patterns unless the project files or your
   message show the version you use.
 - Mention in one line that many tools read a project instructions file (team conventions,
-  commands to run) automatically. It is a big topic for another course; do not teach it here.
+  commands to run) automatically. Do not teach it here: the
+  AI Coding Assistants for Teams: Rules, Skills and Plugins course covers it.
 - Stay tool-agnostic: never rank tools or name "the best one". If the learner uses a specific
   tool, use it as the example, and let them check its documentation for what it includes in
   context.
@@ -76,5 +77,6 @@ checks correctly, and can list what a good brief for a coding task contains.
 ## Going further
 - The AI Agents and Tools course, for how agent-style assistants run their loop of reading,
   acting and checking.
-- Project instructions files and team conventions for AI assistants (a future course).
+- AI Coding Assistants for Teams: Rules, Skills and Plugins, for the project instructions files and team
+  conventions your assistant reads automatically.
 - Your assistant's documentation on how it chooses which files to include.
