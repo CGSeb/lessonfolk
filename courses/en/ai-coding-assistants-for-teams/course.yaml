@@ -1,0 +1,15 @@
+id: ai-coding-assistants-for-teams
+title: "AI Coding Assistants for Teams: Rules, Skills and Plugins"
+level: intermediate
+theme: using-ai
+authors: [apprentice]
+description: Set up your coding assistant for a whole team — write an AGENTS.md it follows, scope and share rules, package workflows as commands, skills and plugins, and add guardrails with permissions and hooks. Taught with the tool you use, with equivalents in the other major tools.
+estimatedHours: 2
+prerequisites: [ai-coding-assistants]
+lessons:
+  - ai-coding-assistants-for-teams/01-how-assistants-load-instructions
+  - ai-coding-assistants-for-teams/02-writing-agents-md
+  - ai-coding-assistants-for-teams/03-scopes-layers-and-imports
+  - ai-coding-assistants-for-teams/04-commands-skills-and-plugins
+  - ai-coding-assistants-for-teams/05-permissions-and-hooks
+  - ai-coding-assistants-for-teams/06-team-setup
