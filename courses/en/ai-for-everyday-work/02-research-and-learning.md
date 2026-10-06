@@ -23,8 +23,8 @@ prerequisites:
    topic, or to point out what you got wrong. Explaining something back is one of the
    best ways to learn it.
 4. **Use it to explore, not as the final source.** AI is a fast way to find what to look for
-   and to understand it. For facts you will rely on or repeat, check them in reliable sources,
-   as seen in Using AI Safely and Wisely. Asking for the key terms to search for makes that
+   and to understand it. For facts you will rely on or repeat, check them in reliable sources
+   (covered in Using AI Safely and Wisely). Asking for the key terms to search for makes that
    checking easier.
 5. **Know what it may not know.** Very recent developments, local details or very specialised
    knowledge may be missing or wrong. Assistants with web search can help with recent topics,

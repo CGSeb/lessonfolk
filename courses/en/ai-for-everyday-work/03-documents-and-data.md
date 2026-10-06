@@ -14,8 +14,8 @@ prerequisites:
 ## Key ideas
 1. **Bring the document into the conversation.** Paste the text, or attach the file if your
    tool allows it. The assistant only knows what is in the conversation, so it cannot answer
-   about a document you have not shared. Before sharing, remove anything confidential, as
-   seen in Using AI Safely and Wisely.
+   about a document you have not shared. Before sharing, remove anything confidential (covered
+   in Using AI Safely and Wisely).
 2. **Ask precise questions, and ask where the answer comes from.** "What does this contract
    say about cancelling?" works better than "explain this contract". Ask the assistant to
    quote or point to the passage it used, then read that passage yourself: it may have
@@ -28,7 +28,7 @@ prerequisites:
    example) and ask what it shows, what stands out, or how to present it. It is good at
    describing trends and suggesting questions.
 5. **Be careful with exact numbers.** Totals, averages and counts can go wrong when the
-   assistant predicts text instead of calculating, as seen in Prompting Basics. Some tools
+   assistant predicts text instead of calculating, covered in Prompting Basics. Some tools
    can run calculations; otherwise, check the numbers yourself or do the maths in a
    spreadsheet.
 

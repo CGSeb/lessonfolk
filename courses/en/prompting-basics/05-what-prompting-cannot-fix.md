@@ -19,7 +19,7 @@ prerequisites:
    files, your company's internal rules: unless you paste them in, or the tool is connected
    to search or your documents, the assistant does not have them, however well you ask.
 3. **A great prompt can still get a wrong answer.** The model generates likely text, so it
-   can still be confidently wrong (a "hallucination", seen in AI Foundations). For anything
+   can still be confidently wrong (a "hallucination", covered in AI Foundations). For anything
    that matters — health, money, legal, facts you will repeat — check the answer against a
    reliable source.
 4. **Some tasks are a poor fit without a tool.** Exact counting (letters, words), precise
