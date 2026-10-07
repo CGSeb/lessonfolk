@@ -5,7 +5,7 @@
 import { asc, eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runMigrations } from './connection.ts';
-import { learner, lessonProgress, progressEvent } from './schema.ts';
+import { account, learner, lessonProgress, progressEvent, session, user } from './schema.ts';
 import { createTestDatabase, type TestDatabase } from './testing.ts';
 
 let testDb: TestDatabase;
@@ -19,11 +19,19 @@ afterAll(async () => {
 });
 
 describe('migrations', () => {
-  it('create the progress tables', async () => {
+  it('create the sign-in and progress tables', async () => {
     const rows = await testDb.sql<{ table_name: string }[]>`
       select table_name from information_schema.tables
       where table_schema = 'public' order by table_name`;
-    expect(rows.map((r) => r.table_name)).toEqual(['learner', 'lesson_progress', 'progress_event']);
+    expect(rows.map((r) => r.table_name)).toEqual([
+      'account',
+      'learner',
+      'lesson_progress',
+      'progress_event',
+      'session',
+      'user',
+      'verification',
+    ]);
   });
 
   it('are recorded, so running them again changes nothing', async () => {
@@ -38,7 +46,14 @@ describe('migrations', () => {
 describe('progress tables', () => {
   const userId = 'learner-1';
 
+  it('need a user for every learner', async () => {
+    await expect(testDb.db.insert(learner).values({ userId: 'nobody' })).rejects.toMatchObject({
+      cause: { code: '23503' }, // foreign_key_violation
+    });
+  });
+
   it('store a learner with a profile and a path', async () => {
+    await testDb.db.insert(user).values({ id: userId, name: 'Alex', email: 'alex@example.com' });
     await testDb.db.insert(learner).values({
       userId,
       profile: { name: 'Alex', level: 'beginner', interests: ['understanding-ai'] },
@@ -105,5 +120,36 @@ describe('progress tables', () => {
     const [{ lessons }] = await testDb.db.select({ lessons: sql<number>`count(*)::int` }).from(lessonProgress);
     const [{ events }] = await testDb.db.select({ events: sql<number>`count(*)::int` }).from(progressEvent);
     expect({ lessons, events }).toEqual({ lessons: 0, events: 0 });
+  });
+});
+
+describe('sign-in tables', () => {
+  const userId = 'user-2';
+
+  it('keep emails and session tokens unique', async () => {
+    await testDb.db.insert(user).values({ id: userId, name: 'Sam', email: 'sam@example.com' });
+    await expect(testDb.db.insert(user).values({ id: 'user-3', name: 'Sam', email: 'sam@example.com' })).rejects.toMatchObject({
+      cause: { code: '23505' },
+    });
+
+    const expiresAt = new Date(Date.now() + 60_000);
+    await testDb.db.insert(session).values({ id: 's1', token: 'token-1', userId, expiresAt });
+    await expect(testDb.db.insert(session).values({ id: 's2', token: 'token-1', userId, expiresAt })).rejects.toMatchObject({
+      cause: { code: '23505' },
+    });
+  });
+
+  it('delete a user with their sessions, accounts and learner', async () => {
+    await testDb.db.insert(account).values({ id: 'a1', accountId: '42', providerId: 'github', userId });
+    await testDb.db.insert(learner).values({ userId });
+    await testDb.db.delete(user).where(eq(user.id, userId));
+
+    const count = async (table: typeof session | typeof account | typeof learner) =>
+      (await testDb.db.select({ n: sql<number>`count(*)::int` }).from(table))[0].n;
+    expect({ sessions: await count(session), accounts: await count(account), learners: await count(learner) }).toEqual({
+      sessions: 0,
+      accounts: 0,
+      learners: 0,
+    });
   });
 });

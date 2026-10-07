@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Notice from '../components/Notice.astro';
+import { getAuthSettings } from '../lib/auth/current-user';
+import { safeReturnPath } from '../lib/auth/redirect';
+import { enabledProviders, type ProviderId } from '../lib/auth/settings';
+import { t } from '../i18n/en';
+
+export const prerender = false;
+
+const settings = getAuthSettings();
+const next = safeReturnPath(Astro.url.searchParams.get('next'));
+// Nothing to sign in to without OAuth, and nothing to do when already signed in.
+if (settings.mode !== 'oauth' || Astro.locals.user) return Astro.redirect(next, 303);
+
+const PROVIDER_NAMES: Record<ProviderId, string> = { github: 'GitHub', google: 'Google', fake: 'Test provider' };
+const providers = enabledProviders(settings).map((id) => ({
+  id,
+  label: t('auth.signInWith', { provider: PROVIDER_NAMES[id] }),
+}));
+// Better Auth sends errors back here as ?error=<code>.
+const error = Astro.url.searchParams.get('error');
+---
+
+<BaseLayout title={t('auth.signInTitle')}>
+  <div class="stack sign-in" style="--stack-space: var(--space-5)">
+    <header class="stack" style="--stack-space: var(--space-2)">
+      <h1>{t('auth.signInHeading')}</h1>
+      <p class="muted">{t('auth.signInIntro')}</p>
+    </header>
+
+    {
+      error && (
+        <Notice tone="warning" title={t('auth.signInError')}>
+          <p class="muted">{t('auth.signInErrorDetails', { code: error })}</p>
+        </Notice>
+      )
+    }
+
+    <ul class="stack sign-in__providers" role="list" aria-label={t('auth.providersLabel')} style="--stack-space: var(--space-3)">
+      {
+        providers.map((provider) => (
+          <li>
+            <form method="post" action={`/sign-in/${provider.id}`}>
+              <input type="hidden" name="next" value={next} />
+              <button class="sign-in__button" type="submit" data-provider={provider.id}>
+                {provider.label}
+              </button>
+            </form>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .sign-in {
+    max-width: 28rem;
+  }
+
+  .sign-in__providers {
+    padding: 0;
+    list-style: none;
+  }
+
+  .sign-in__button {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+  }
+
+  .sign-in__button:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>

@@ -1,0 +1,15 @@
+/** A 303 redirect to `location` that keeps the cookies Better Auth set on `from`. */
+export function redirectWithCookies(location: string, from?: Response): Response {
+  const headers = new Headers({ Location: location, 'Cache-Control': 'no-store' });
+  for (const cookie of from?.headers.getSetCookie() ?? []) headers.append('Set-Cookie', cookie);
+  return new Response(null, { status: 303, headers });
+}
+
+/**
+ * A same-site path to go back to after signing in. Anything else (absolute URLs,
+ * `//host`, missing) becomes `/`, so the sign-in flow cannot redirect elsewhere.
+ */
+export function safeReturnPath(next: string | null | undefined): string {
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return '/';
+  return next;
+}

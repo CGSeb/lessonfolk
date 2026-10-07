@@ -51,8 +51,8 @@ docker compose stop db    # when you are done (`docker compose down -v` also del
 
 - Name database test files `*.db.test.ts`. When Postgres is not reachable they fail with
   "Cannot reach Postgres at … run `docker compose up -d db`".
-- **Without Docker**, the pure unit tests still run: `npm test -w packages/core`, `npm test -w dashboard`
-  (no database test there yet) and `npm run test:unit -w @lessonfolk/db` (everything but `*.db.test.ts`).
+- **Without Docker**, the tests that need no database still run: `npm test -w packages/core`,
+  `npm run test:unit -w dashboard` and `npm run test:unit -w @lessonfolk/db` (everything but `*.db.test.ts`).
 - If a run is interrupted, leftover `lessonfolk_test_*` databases may stay behind. They are
   harmless; `docker compose down -v` removes them with the rest of the data.
 
@@ -61,8 +61,9 @@ request, with Postgres as a service container.
 
 ### Database schema and migrations
 
-The schema lives in `packages/db/src/schema.ts` (Drizzle): `learner`, `lesson_progress`
-and the append-only `progress_event` log. After changing it, generate a migration and commit
+The schema lives in `packages/db/src/schema.ts` (Drizzle): the sign-in tables of Better Auth
+(`user`, `session`, `account`, `verification`), then `learner` (one per user),
+`lesson_progress` and the append-only `progress_event` log. After changing it, generate a migration and commit
 it with the schema change:
 
 ```bash
@@ -81,8 +82,11 @@ Migrations are applied automatically when the app starts in Docker (`docker comp
 - **End-to-end tests** live in `dashboard/tests/e2e/`. Before they run, a global setup builds the
   production server into `dashboard/node_modules/.cache/lessonfolk-e2e/` (your own `dashboard/dist`
   is never touched). Each test file then starts that server as a real Node process on a free
-  port, pointed at the pinned course fixture and at one progress fixture, and fetches pages over
-  HTTP. Servers and temporary folders are removed when the tests finish.
+  port, through `dashboard/scripts/serve.ts` (the startup checks, like `npm run dashboard:start`),
+  pointed at the pinned course fixture and at one progress fixture, and fetches pages over
+  HTTP. Servers and temporary folders are removed when the tests finish. The servers never inherit
+  sign-in settings or `DATABASE_URL` from your shell or `.env`: each test sets what it needs
+  (by default `LESSONFOLK_AUTH=none` without a database).
 - **Course fixtures** live in `packages/core/tests/fixtures/`: `courses-valid/` is a pinned copy of the
   catalog with only AI Foundations, used by every test that expects an exact catalog (themes,
   authors, personalization scenarios, e2e pages), so adding a course to `courses/` never breaks
@@ -93,6 +97,9 @@ Migrations are applied automatically when the app starts in Docker (`docker comp
 |---|---|
 | `pages.test.ts` | Home, catalog, AI Foundations course page, authors and an unknown course (404) for each fixture below; for every valid fixture, the next lesson shown on home and on the course page is the one `getNextLesson` picks |
 | `live-refresh.test.ts` | Simulates a first session in a temporary `.progress/`: creating, updating and deleting `progress.json` each sends a `change` event on `/api/events`, and the pages show the new state |
+| `auth-startup.test.ts` | Startup checks: `LESSONFOLK_AUTH=none` refuses a server reachable beyond 127.0.0.1 (`HOST`, or `LESSONFOLK_BIND` as in Docker), `oauth` refuses to start with no provider; `none` gives every page the local learner, with no sign-in |
+| `auth-oauth.db.test.ts` | Sign-in with `LESSONFOLK_AUTH=oauth` through the **fake OAuth provider** (`fake-oauth.ts`, enabled only with `NODE_ENV=test`): only configured providers are listed, callbacks use `LESSONFOLK_BASE_URL`, sign-in creates the user, account and learner rows, two users stay apart, sign-out, signing in again finds the same user. Needs Postgres |
+| `auth-none.db.test.ts` | `LESSONFOLK_AUTH=none` with a database: the local learner is created on first start, once. Needs Postgres |
 
 Progress fixtures (`dashboard/tests/fixtures/progress/`):
 
@@ -237,3 +244,29 @@ visit view by itself). Restore your backup if you made one. Stop the dashboard w
 
 Note the agent, the step that failed, and attach `.progress/progress.json` (remove anything personal)
 plus a screenshot of the dashboard. Open an issue on GitHub.
+
+## Manual check: sign-in with GitHub and Google
+
+The automated tests sign in through a fake provider. Real GitHub and Google sign-in needs your
+own development OAuth apps, so it is checked by hand: after changes to sign-in, Better Auth
+upgrades, or the auth tables. Follow [`docs/auth-dev.md`](auth-dev.md) to create the apps and
+fill in `.env` (`LESSONFOLK_AUTH=oauth`, `LESSONFOLK_BASE_URL=http://localhost:4321`,
+`BETTER_AUTH_SECRET`, both providers' credentials), then run `docker compose up --build`.
+
+- [ ] **Startup.** The app log says "Sign-in with OAuth (LESSONFOLK_AUTH=oauth) at http://localhost:4321".
+- [ ] **Signed out.** http://localhost:4321 shows the dashboard with a **Sign in** button in the header.
+- [ ] **Sign-in page.** **Sign in** opens a page listing "Sign in with GitHub" and "Sign in with Google".
+      Remove the Google values from `.env`, restart: only GitHub is listed. Put them back.
+- [ ] **GitHub.** Sign in with GitHub, approve the app: you land back on the page you came from,
+      and the header shows "Signed in as <your name>" and **Sign out**.
+- [ ] **Sign out.** **Sign out** brings you home with the **Sign in** button again.
+- [ ] **Google.** Same with Google (your account must be a test user of the Google app).
+- [ ] **Same user again.** Sign in again with GitHub: `docker compose exec db psql -U lessonfolk -d lessonfolk -c 'select id, name, email from "user"'`
+      shows no duplicate, and every user has a row in `learner`.
+- [ ] **Errors.** Cancel on the GitHub approval screen: you are back on the sign-in page with
+      "Signing in did not work". Set only `GITHUB_CLIENT_ID` (no secret): the app refuses to start
+      and says `GITHUB_CLIENT_SECRET` is missing.
+- [ ] **No sign-in mode.** Set `LESSONFOLK_AUTH=none`: no **Sign in** button, `/sign-in` sends you home.
+      Set `LESSONFOLK_BIND=0.0.0.0` too: the app refuses to start ("only runs on 127.0.0.1").
+
+Put `.env` back the way it was when you are done, and never commit it.
