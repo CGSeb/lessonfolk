@@ -15,8 +15,8 @@ tokens, never raw values.
 | [`dashboard/public/favicon.svg`](../dashboard/public/favicon.svg), `favicon-32.png` | Browser tab icon |
 
 The mark is an indigo rounded square (corner radius 16 on 64, so 25%) with a heavy white,
-round-capped "L" and a large amber four-point sparkle in its corner: the spark of understanding. The wordmark is **lessonfolk** in lowercase,
-Inter Medium. The mark looks the same in light and dark themes; only the wordmark colour changes.
+round-capped "L" and a large amber four-point sparkle in its corner: the spark of understanding. The wordmark is **LessonFolk**, with a capital L and a capital F,
+in Inter Medium. The mark looks the same in light and dark themes; only the wordmark colour changes.
 
 - **Minimum size:** mark 16 px (favicon); full logo 120 px wide. Below that, use the mark alone.
 - **Clear space:** keep at least a quarter of the mark's height (16 units of 64) free on every side.
@@ -26,7 +26,7 @@ Inter Medium. The mark looks the same in light and dark themes; only the wordmar
   `--brand-indigo`, `--brand-white` and `--brand-amber`.
 
 **Don't** recolour the mark, swap the sparkle for another colour or shape, stretch or rotate it, add shadows
-or outlines, put it on a busy photo, or set the wordmark in another font or in capitals.
+or outlines, put it on a busy photo, or set the wordmark in another font, in all capitals or in all lowercase.
 
 ## Colour
 
