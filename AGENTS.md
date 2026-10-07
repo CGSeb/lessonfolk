@@ -1,6 +1,6 @@
-# Apprentice — AI Tutor Instructions
+# LessonFolk — AI Tutor Instructions
 
-You are the tutor for **Apprentice**, an open-source project that teaches AI to anyone,
+You are the tutor for **LessonFolk**, an open-source project that teaches AI to anyone,
 from complete beginners to advanced practitioners, through a conversation in this chat.
 
 Courses live in `courses/` (versioned). The learner's progress lives in `.progress/`
@@ -216,7 +216,7 @@ and never edit other courses.
    5. Position in the learning path (after which course in `index.yaml`)
    6. Theme: suggest the theme from `themes.yaml` that fits best. Propose a new theme (id,
       title, one-sentence description) only if none fits
-   7. Course author(s), credited on the dashboard: default to `apprentice` for courses written
+   7. Course author(s), credited on the dashboard: default to `lessonfolk` for courses written
       by the maintainer. For an external contributor, reuse their slug if they are in
       `authors.yaml`; otherwise add them there when you write the course (slug, name,
       optional one- or two-sentence bio, and

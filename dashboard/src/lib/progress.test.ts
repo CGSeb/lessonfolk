@@ -70,11 +70,11 @@ function progressWith(
 
 describe('readProgress', () => {
   afterEach(() => {
-    delete process.env.APPRENTICE_PROGRESS_DIR;
+    delete process.env.LESSONFOLK_PROGRESS_DIR;
   });
 
   it('returns missing when there is no file', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'apprentice-progress-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-progress-'));
     const result = readProgress(join(dir, 'progress.json'));
     expect(result).toEqual({ state: 'missing' });
     expect(progressOrEmpty(result)).toEqual(emptyProgress());
@@ -121,7 +121,7 @@ describe('readProgress', () => {
   });
 
   it('keeps a file with an unknown level valid and ignores the level', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'apprentice-progress-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-progress-'));
     const file = join(dir, 'progress.json');
     writeFileSync(file, JSON.stringify({ version: 1, profile: { level: 'expert' }, lessons: {} }));
     const result = readProgress(file);
@@ -135,8 +135,8 @@ describe('readProgress', () => {
   });
 
   it('uses the default path from getPaths and reads at call time', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'apprentice-progress-'));
-    process.env.APPRENTICE_PROGRESS_DIR = dir;
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-progress-'));
+    process.env.LESSONFOLK_PROGRESS_DIR = dir;
     expect(readProgress().state).toBe('missing');
     writeFileSync(join(dir, 'progress.json'), JSON.stringify({ version: 1, lessons: {} }));
     expect(readProgress().state).toBe('ok');

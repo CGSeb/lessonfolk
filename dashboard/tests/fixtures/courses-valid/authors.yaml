@@ -3,7 +3,7 @@
 # author gives them, never guess. Optional avatar: an image file name in courses/authors/
 # (png, jpg, webp or svg, up to 512 KB), shown round on the author pages.
 authors:
-  - slug: apprentice
-    name: Apprentice
-    avatar: apprentice.svg
-    bio: Apprentice is an open-source project that teaches AI to anyone, from complete beginners to advanced practitioners, through a conversation with an AI tutor. Courses written by the project's maintainers are credited to Apprentice.
+  - slug: lessonfolk
+    name: LessonFolk
+    avatar: lessonfolk.svg
+    bio: LessonFolk is an open-source project that teaches AI to anyone, from complete beginners to advanced practitioners, through a conversation with an AI tutor. Courses written by the project's maintainers are credited to LessonFolk.

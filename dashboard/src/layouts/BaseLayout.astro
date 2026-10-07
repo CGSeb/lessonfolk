@@ -33,7 +33,7 @@ const navItems = [
     <script is:inline>
       // Apply the saved light/dark choice before first paint (see ThemeToggle).
       try {
-        const theme = localStorage.getItem('apprentice-theme');
+        const theme = localStorage.getItem('lessonfolk-theme');
         if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
       } catch {}
     </script>
@@ -51,12 +51,12 @@ const navItems = [
             <rect class="wordmark__tile" width="64" height="64" rx="16"></rect>
             <path
               class="wordmark__letter"
-              d="M18 48 L32 15 L46 48"
+              d="M24 15 L24 48 L45 48"
               fill="none"
               stroke-width="6"
               stroke-linecap="round"
               stroke-linejoin="round"></path>
-            <circle class="wordmark__spark" cx="32" cy="38" r="4.5"></circle>
+            <circle class="wordmark__spark" cx="36" cy="37" r="4.5"></circle>
           </svg>
           <span class="wordmark__text">{t('site.name')}</span>
         </a>
@@ -175,7 +175,7 @@ const navItems = [
     fill: var(--brand-amber);
   }
 
-  /* The wordmark is lowercase by design; the i18n name stays "Apprentice". */
+  /* The wordmark is lowercase by design; the i18n name stays "LessonFolk". */
   .wordmark__text {
     text-transform: lowercase;
   }

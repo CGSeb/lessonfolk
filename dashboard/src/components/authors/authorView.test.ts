@@ -113,7 +113,7 @@ describe('getAuthorView', () => {
 
 describe('authorHref', () => {
   it('builds the author page path', () => {
-    expect(authorHref('apprentice')).toBe('/authors/apprentice');
+    expect(authorHref('lessonfolk')).toBe('/authors/lessonfolk');
   });
 });
 
@@ -129,7 +129,7 @@ describe('avatars', () => {
 
   it.each([
     ['Ada Lovelace', 'AL'],
-    ['Apprentice', 'A'],
+    ['LessonFolk', 'L'],
     ['  grace   brewster murray hopper ', 'GH'],
     ['Jean-Luc', 'JL'],
     ['élodie dupont', 'ÉD'],

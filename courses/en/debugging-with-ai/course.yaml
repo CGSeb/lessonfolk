@@ -2,7 +2,7 @@ id: debugging-with-ai
 title: Debugging with AI
 level: intermediate
 theme: using-ai
-authors: [apprentice]
+authors: [lessonfolk]
 description: Turn your AI assistant into a debugging partner, not a guessing machine — give it the right evidence, read errors together, test ranked hypotheses, fix the root cause instead of the symptom and prove the fix works. Works with any language and any tool.
 estimatedHours: 2
 prerequisites: [ai-coding-assistants]

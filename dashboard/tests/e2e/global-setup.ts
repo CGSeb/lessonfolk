@@ -15,7 +15,7 @@ declare module 'vitest' {
 const dashboardDir = fileURLToPath(new URL('../..', import.meta.url));
 // Inside node_modules so the built server resolves its dependencies, and so it
 // never overwrites the learner's own dashboard/dist build.
-const cacheDir = join(dashboardDir, 'node_modules', '.cache', 'apprentice-e2e');
+const cacheDir = join(dashboardDir, 'node_modules', '.cache', 'lessonfolk-e2e');
 const outDir = join(cacheDir, 'dist');
 
 /**

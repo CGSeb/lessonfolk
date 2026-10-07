@@ -1,6 +1,6 @@
 ---
 name: learn
-description: Start or resume an Apprentice AI course — onboards new learners (level, interests, level check, personal path), finds the learner's next lesson and teaches it interactively. Use when the user says "start", "continue", "next lesson", "recommend a path", "change my level", "update my interests", or wants to learn.
+description: Start or resume a LessonFolk AI course — onboards new learners (level, interests, level check, personal path), finds the learner's next lesson and teaches it interactively. Use when the user says "start", "continue", "next lesson", "recommend a path", "change my level", "update my interests", or wants to learn.
 ---
 
 Read `.progress/progress.json` first, then follow `AGENTS.md`:

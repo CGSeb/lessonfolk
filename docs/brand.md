@@ -1,7 +1,7 @@
-# Apprentice brand
+# LessonFolk brand
 
-Apprentice should feel friendly, calm and trustworthy: a patient tutor, not a developer tool.
-Everything here derives from the **Spark A** logo. The dashboard implements it as CSS design
+LessonFolk should feel friendly, calm and trustworthy: a patient tutor, not a developer tool.
+Everything here derives from the **Spark L** logo. The dashboard implements it as CSS design
 tokens in [`dashboard/src/styles/tokens.css`](../dashboard/src/styles/tokens.css); use the
 tokens, never raw values.
 
@@ -15,7 +15,7 @@ tokens, never raw values.
 | [`dashboard/public/favicon.svg`](../dashboard/public/favicon.svg), `favicon-32.png` | Browser tab icon |
 
 The mark is an indigo rounded square (corner radius 16 on 64, so 25%) with a white, round-capped
-"A" and an amber dot: the spark of understanding. The wordmark is **apprentice** in lowercase,
+"L" and an amber dot: the spark of understanding. The wordmark is **lessonfolk** in lowercase,
 Inter Medium. The mark looks the same in light and dark themes; only the wordmark colour changes.
 
 - **Minimum size:** mark 16 px (favicon); full logo 120 px wide. Below that, use the mark alone.
@@ -69,7 +69,7 @@ spark and for success.
 
 Each semantic colour is written once as `light-dark(<light>, <dark>)`, so a single token serves
 both themes. The theme follows the system setting until the learner uses the sun/moon switch in
-the header; the choice is saved in the browser (`localStorage`, key `apprentice-theme`) and sets
+the header; the choice is saved in the browser (`localStorage`, key `lessonfolk-theme`) and sets
 `data-theme="light"` or `"dark"` on `<html>`, which pins `color-scheme`. Without JavaScript the
 switch is hidden and the system setting applies.
 
@@ -84,7 +84,7 @@ amber dot before "Next up"), **achievements** (finished every lesson, finished a
 Every text colour reaches WCAG AA (at least 4.5:1) on the background, surface and sunken surface
 in both themes; the lowest pair is accent on sunken in light (5.6:1). The focus ring, progress
 fill and strong borders reach at least 3:1 against what surrounds them. The pull request for
-[#15](https://github.com/CGSeb/apprentice/issues/15) has the full table.
+[#15](https://github.com/CGSeb/lessonfolk/issues/15) has the full table.
 
 **Amber is never text on a light background** (it is only 1.7:1 on white). In light mode it is
 always a shape: a stripe, a dot, a halo. Warning text uses dark brown `#78350F` instead.

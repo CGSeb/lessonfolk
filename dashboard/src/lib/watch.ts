@@ -159,14 +159,14 @@ export function watchDirectory(dir: string, onChange: () => void, options: Watch
   };
 }
 
-export interface ApprenticeWatchOptions extends Pick<WatchDirOptions, 'debounceMs' | 'pollMs' | 'forcePolling'> {
+export interface LessonFolkWatchOptions extends Pick<WatchDirOptions, 'debounceMs' | 'pollMs' | 'forcePolling'> {
   progressDir: string;
   coursesDir: string;
 }
 
 /** Watch the progress directory and the courses tree; `onChange` gets the area that changed. */
-export function watchApprentice(
-  options: ApprenticeWatchOptions,
+export function watchLessonFolk(
+  options: LessonFolkWatchOptions,
   onChange: (area: ChangeArea) => void,
 ): () => void {
   const { progressDir, coursesDir, ...rest } = options;
@@ -184,7 +184,7 @@ type Listener = (area: ChangeArea) => void;
  * Shares one set of file watchers between every connected page. Watchers start
  * with the first subscriber and stop when the last one leaves.
  */
-export function createChangeHub(getOptions: () => ApprenticeWatchOptions) {
+export function createChangeHub(getOptions: () => LessonFolkWatchOptions) {
   const listeners = new Set<Listener>();
   let stop: (() => void) | undefined;
 
@@ -192,7 +192,7 @@ export function createChangeHub(getOptions: () => ApprenticeWatchOptions) {
     subscribe(listener: Listener): () => void {
       listeners.add(listener);
       if (!stop) {
-        stop = watchApprentice(getOptions(), (area) => {
+        stop = watchLessonFolk(getOptions(), (area) => {
           for (const l of [...listeners]) {
             try {
               l(area);

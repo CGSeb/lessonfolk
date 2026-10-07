@@ -2,7 +2,7 @@ id: prompting-basics
 title: Prompting Basics
 level: beginner
 theme: using-ai
-authors: [apprentice]
+authors: [lessonfolk]
 description: Write clear requests and get reliably good answers from a chat assistant — context, examples, format, and how to fix an answer that missed.
 estimatedHours: 1.5
 prerequisites: [ai-foundations]

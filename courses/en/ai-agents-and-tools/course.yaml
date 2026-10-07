@@ -2,7 +2,7 @@ id: ai-agents-and-tools
 title: AI Agents and Tools
 level: intermediate
 theme: building-with-ai
-authors: [apprentice]
+authors: [lessonfolk]
 description: A clear mental model of AI agents, without the hype — let a model call your functions, run an agent loop, answer from your own documents, and keep it safe with guardrails and human oversight.
 estimatedHours: 2
 prerequisites: [build-with-ai]

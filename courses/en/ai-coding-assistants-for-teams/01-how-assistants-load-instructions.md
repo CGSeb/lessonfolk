@@ -40,7 +40,7 @@ prerequisites:
   (Claude Code, Codex, Copilot, Cursor, Gemini CLI…), say which one you are and use it as the
   main example for the whole course; also ask which tool they use at work, if different.
   Teach with that tool's names, and only mention the others briefly through the table below.
-- Live example: the learner is taking this course inside the Apprentice repository. Open
+- Live example: the learner is taking this course inside the LessonFolk repository. Open
   `AGENTS.md` at its root with them: it is the instructions file you are following right now
   (the tutor procedures, the repository map, the commit rules). Then show `CLAUDE.md`: its
   first line, `@AGENTS.md`, imports the shared file for Claude Code (lesson 3 explains imports).

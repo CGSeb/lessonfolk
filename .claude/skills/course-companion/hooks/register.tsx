@@ -121,12 +121,12 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'course-companion',
-      description: 'Show the Apprentice course companion pane',
+      description: 'Show the LessonFolk course companion pane',
     })
     await $.tool.register({
       name: 'key_idea',
       description:
-        'Updates the Course companion pane while you teach an Apprentice lesson. Call it when ' +
+        'Updates the Course companion pane while you teach a LessonFolk lesson. Call it when ' +
         'you start teaching a key idea of the current lesson (status "active") and when the ' +
         'learner has understood it (status "done"). Key ideas are numbered from 1 in the ' +
         'order of the lesson\'s "## Key ideas" section. Lesson progress comes from ' +
@@ -148,7 +148,7 @@ export const register: Register = on => {
     await $.tool.register({
       name: 'choices',
       description:
-        'Shows the answers to the question you just asked the Apprentice learner as buttons ' +
+        'Shows the answers to the question you just asked the LessonFolk learner as buttons ' +
         'above the prompt; a press sends that answer as the learner\'s reply. Call it after ' +
         'asking a question with a fixed set of answers you listed: onboarding (experience, ' +
         'goal, themes to explore), accepting a path, "continue now or stop here?", yes/no. ' +

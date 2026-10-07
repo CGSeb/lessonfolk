@@ -34,7 +34,7 @@ prerequisites:
 ## Teaching notes
 - Analogy that works: **a recipe card, not a cookbook**. It lists the steps and the traps
   ("do not open the oven before 20 minutes"), not the history of French cooking.
-- Live example: walk through the Apprentice `AGENTS.md` with the learner. Point out its
+- Live example: walk through the LessonFolk `AGENTS.md` with the learner. Point out its
   repository map, its procedures and its commit-message table. Then point out what could be
   better for a code project: it has almost no build or test commands (those live in
   `CLAUDE.md` here), which shows that one file can serve more than one audience.
