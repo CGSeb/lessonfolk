@@ -6,7 +6,7 @@ import {
   type CourseRef,
   type LessonProgress,
   type Progress,
-} from '../../lib/progress';
+} from '@lessonfolk/core';
 import { getInterestThemes, getPathView, pathStatusDisplay, type PathCourseStatus } from './pathView';
 
 const courses: CourseRef[] = [

@@ -1,6 +1,13 @@
 import { relative, isAbsolute } from 'node:path';
-import type { Course, CourseIssue, Lesson } from '../../lib/courses';
-import { getNextLesson, getStats, type CourseStats, type Progress } from '../../lib/progress';
+import {
+  getNextLesson,
+  getStats,
+  type Course,
+  type CourseIssue,
+  type CourseStats,
+  type Lesson,
+  type Progress,
+} from '@lessonfolk/core';
 import { finishedLessons, getCourseStatus, type CourseStatus } from '../course-status';
 import { lessonDisplayStatus, type LessonDisplayStatus } from '../status-badge';
 

@@ -10,9 +10,9 @@ import SayPhrase from '../../components/home/SayPhrase.astro';
 import { courseAuthors } from '../../components/authors/authorView';
 import { getCourseView, issuesForCourse } from '../../components/course/courseView';
 import { t } from '../../i18n/en';
-import { inspectCatalog } from '../../lib/courses';
+import { inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
-import { progressOrEmpty, readProgress } from '../../lib/progress';
+import { readProgress } from '../../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const id = Astro.params.id ?? '';

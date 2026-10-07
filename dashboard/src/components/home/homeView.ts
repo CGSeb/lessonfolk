@@ -1,14 +1,14 @@
-import type { Level } from '../../lib/schemas';
 import {
   getLevel,
   getNextLesson,
   getProgressWarnings,
   getStats,
   progressOrEmpty,
+  type Level,
   type CourseRef,
   type NextLesson,
   type ProgressResult,
-} from '../../lib/progress';
+} from '@lessonfolk/core';
 import { coursesHref } from '../catalog/catalogFilter';
 import { getCatalogSections, type ThemeRef } from '../catalog/catalogView';
 import { getInterestThemes, getPathView, type PathView } from './pathView';

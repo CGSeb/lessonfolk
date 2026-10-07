@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkLessonBody } from './lesson-body';
+import { checkLessonBody } from './lesson-body.ts';
 
 const IDEAS = '1. One.\n2. Two.\n3. Three.';
 const CHECKS = '1. Why?\n   Good answer: because.';

@@ -1,7 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import { extname } from 'node:path';
 import type { APIRoute } from 'astro';
-import { authorAvatarPath, inspectCatalog } from '../../../../lib/courses';
+import { authorAvatarPath, inspectCatalog } from '@lessonfolk/core';
 
 export const prerender = false;
 

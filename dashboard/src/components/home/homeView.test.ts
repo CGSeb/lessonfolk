@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { CourseRef, LessonStatus, Progress, ProgressResult } from '../../lib/progress';
+import type { CourseRef, LessonStatus, Progress, ProgressResult } from '@lessonfolk/core';
 import { getHomeView } from './homeView';
 
 const courses: CourseRef[] = [

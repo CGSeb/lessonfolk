@@ -1,5 +1,5 @@
 import type { UiKey } from '../i18n/en';
-import type { ProgressCounts } from '../lib/progress';
+import type { ProgressCounts } from '@lessonfolk/core';
 
 /** Where the learner stands in a course, as shown on course cards. */
 export type CourseStatus = 'not_started' | 'in_progress' | 'completed' | 'skipped_placement';

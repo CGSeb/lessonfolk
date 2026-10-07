@@ -1,7 +1,6 @@
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { Course, Lesson } from '../../lib/courses';
-import { emptyProgress, type Progress } from '../../lib/progress';
+import { emptyProgress, type Course, type Lesson, type Progress } from '@lessonfolk/core';
 import { formatDate, getCourseView, issuesForCourse } from './courseView';
 
 const lesson = (id: string, prerequisites: string[] = []): Lesson => ({

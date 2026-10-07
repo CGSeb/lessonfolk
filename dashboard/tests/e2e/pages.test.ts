@@ -5,8 +5,8 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { loadCatalog } from '../../src/lib/courses';
-import { getNextLesson, progressOrEmpty, readProgress } from '../../src/lib/progress';
+import { getNextLesson, loadCatalog, progressOrEmpty } from '@lessonfolk/core';
+import { readProgress } from '../../src/lib/progress';
 import { COURSES_DIR, getPage, PROGRESS_FIXTURES, startDashboard, type DashboardServer } from './server';
 
 const LESSONS = ['What is AI?', 'How do machines learn?', 'What is a large language model?'];

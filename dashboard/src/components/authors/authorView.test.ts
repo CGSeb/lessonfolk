@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emptyProgress, type CourseRef, type Progress } from '../../lib/progress';
+import { emptyProgress, type CourseRef, type Progress } from '@lessonfolk/core';
 import {
   authorAvatarHref,
   authorHref,

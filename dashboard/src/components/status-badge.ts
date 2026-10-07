@@ -1,5 +1,5 @@
 import type { UiKey } from '../i18n/en';
-import { getLessonStatus, isPlacementSkip, type LessonStatus, type Progress } from '../lib/progress';
+import { getLessonStatus, isPlacementSkip, type LessonStatus, type Progress } from '@lessonfolk/core';
 import { courseStatusDisplay, type BadgeVariant, type CourseStatus } from './course-status';
 
 /**

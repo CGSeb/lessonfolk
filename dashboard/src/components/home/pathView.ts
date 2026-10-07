@@ -5,7 +5,7 @@ import {
   type CourseRef,
   type NextLesson,
   type Progress,
-} from '../../lib/progress';
+} from '@lessonfolk/core';
 import { formatDate } from '../course/courseView';
 import { finishedLessons, getCourseStatus, type BadgeVariant } from '../course-status';
 
