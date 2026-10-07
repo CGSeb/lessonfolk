@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Notice from '../components/Notice.astro';
+import SayPhrase from '../components/home/SayPhrase.astro';
+import { connectClients } from '../components/connect/clients';
+import { getAuthSettings } from '../lib/auth/current-user';
+import { mcpConnection } from '../lib/connect';
+import { t } from '../i18n/en';
+
+export const prerender = false;
+
+// Open to everyone: it only shows how to connect, never anyone's data.
+const connection = mcpConnection(getAuthSettings(), Astro.url);
+const clients = connectClients(connection);
+const host = new URL(connection.url).host;
+---
+
+<BaseLayout title={t('connect.title')}>
+  <div class="stack" style="--stack-space: var(--space-6)">
+    <header class="stack" style="--stack-space: var(--space-2)">
+      <h1>{t('connect.heading')}</h1>
+      <p class="connect-lead">{t('connect.intro')}</p>
+    </header>
+
+    <section class="card stack" aria-labelledby="url-heading" style="--stack-space: var(--space-3)">
+      <h2 id="url-heading" class="connect-url__label">{t('connect.urlLabel')}</h2>
+      <pre class="connect-url"><code data-mcp-url>{connection.url}</code></pre>
+      <p class="muted">{t('connect.urlHint')}</p>
+    </section>
+
+    {
+      connection.mode === 'none' ? (
+        <>
+          <Notice title={t('connect.localTitle')}>
+            <p>{t('connect.localBody')}</p>
+          </Notice>
+          {connection.tokenRequired ? (
+            <Notice title={t('connect.tokenTitle')}>
+              <p>{t('connect.tokenBody')}</p>
+            </Notice>
+          ) : (
+            <p class="muted">{t('connect.tokenOptional')}</p>
+          )}
+        </>
+      ) : (
+        <>
+          <Notice title={t('connect.oauthTitle')}>
+            <p>{t('connect.oauthBody')}</p>
+          </Notice>
+          {!connection.reachableFromWeb && (
+            <Notice tone="warning" title={t('connect.webTitle')}>
+              <p>{t('connect.webBody', { host })}</p>
+            </Notice>
+          )}
+        </>
+      )
+    }
+
+    <section class="stack" aria-labelledby="clients-heading" style="--stack-space: var(--space-4)">
+      <h2 id="clients-heading">{t('connect.clientsHeading')}</h2>
+      <div class="grid" style="--grid-min: 20rem">
+        {
+          clients.map((client) => (
+            <article class="card stack connect-client" data-client={client.id} aria-labelledby={`client-${client.id}`} style="--stack-space: var(--space-3)">
+              <div class="cluster" style="--cluster-space: var(--space-2)">
+                <h3 id={`client-${client.id}`}>{client.name}</h3>
+                {!client.available && <span class="badge">{t('connect.notAvailable')}</span>}
+              </div>
+              <ol class="stack connect-steps" style="--stack-space: var(--space-3)">
+                {client.steps.map((step) => (
+                  <li class="stack" style="--stack-space: var(--space-2)">
+                    <p>{step.text}</p>
+                    {step.code && <pre><code>{step.code}</code></pre>}
+                  </li>
+                ))}
+              </ol>
+              {client.note && <p class="muted connect-note">{client.note}</p>}
+            </article>
+          ))
+        }
+      </div>
+      <p class="muted">{t('connect.menusChange')}</p>
+    </section>
+
+    <section class="card stack" aria-labelledby="then-heading">
+      <h2 id="then-heading">{t('connect.thenTitle')}</h2>
+      <SayPhrase instruction={t('connect.thenSay')} phrase={t('connect.thenPhrase')} />
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .connect-lead {
+    max-width: 70ch;
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .connect-url__label {
+    font-size: var(--text-xl);
+  }
+
+  .connect-url {
+    font-size: var(--text-lg);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .connect-steps {
+    padding-left: var(--space-5);
+  }
+
+  .connect-steps pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .connect-note {
+    font-size: var(--text-sm);
+  }
+</style>

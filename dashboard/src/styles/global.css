@@ -141,6 +141,48 @@ pre code {
   background: none;
 }
 
+/* Copy buttons, added by CopyButtons.astro to every <pre> and every [data-copy] phrase. */
+.copy-box {
+  position: relative;
+}
+
+.copy-box > pre {
+  padding-right: 5.5rem;
+}
+
+.copy-button {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+.copy-button[data-state='done'] {
+  border-color: var(--color-accent-border);
+  color: var(--color-accent-strong);
+}
+
+.copy-button--box {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: 0.3em 0.7em;
+}
+
+.copy-button--phrase {
+  padding: 0.15em 0.6em;
+}
+
 summary {
   cursor: pointer;
   font-weight: var(--weight-medium);
@@ -187,6 +229,43 @@ summary {
 }
 
 /* Components */
+
+/* Pill button for forms and downloads. Variants: --primary (main action), --warning (cannot be undone). */
+.button {
+  display: inline-block;
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.button--primary,
+.button--primary:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.button--primary:hover {
+  background: var(--color-accent-strong);
+}
+
+.button--warning,
+.button--warning:hover {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
 
 .card {
   padding: var(--space-5);

@@ -115,11 +115,12 @@ The mod lives in `.claude/skills/course-companion/`. Codex has no companion.
 ## The dashboard
 
 The dashboard is a small website that runs on your computer and shows your courses and
-progress. It is optional. It never changes your progress: only the tutor writes it.
+progress. It is optional. Only the tutor writes your progress, except on the **Your data** page
+(import, export, erase).
 
 The dashboard reads your progress from a database (Postgres), not from
-`.progress/progress.json`. Until the tutor saves to the database itself, copy your file into it
-with `npm run progress:import` (see [Import your progress](#import-your-progress)).
+`.progress/progress.json`. Until the tutor saves to the database itself, import your file on the
+**Your data** page (see [Your data](#your-data-import-export-erase)).
 
 ### Start it
 
@@ -150,6 +151,8 @@ npm run dashboard:start
 | **Courses** | `/courses` | The catalog: every course grouped by theme, with its level, length and your status. Filter by theme or search by title or topic. Courses in your path are marked "Recommended for you". |
 | **A course** | `/courses/<course-id>` | The course's lessons with your status, scores, finish dates and the tutor's notes, what the course builds on, and the next lesson. |
 | **Authors** | `/authors` | The people and projects who write the courses, and the courses of each author. |
+| **Connect** | `/connect` | Your LessonFolk address for AI chats and the setup steps for each app (see [Connect your AI chat with MCP](#connect-your-ai-chat-with-mcp)). |
+| **Your data** | `/account` | Download, import or erase your progress (see [Your data](#your-data-import-export-erase)). |
 
 Reload a page to see your latest progress (pages refresh by themselves only when course files
 change). Lessons you skipped after the level check show as "Skipped after level check".
@@ -157,15 +160,22 @@ change). Lessons you skipped after the level check show as "Skipped after level 
 With sign-in (`LESSONFOLK_AUTH=oauth`), the courses and authors pages are open to everyone,
 without progress. Home needs you to sign in, and each person sees only their own progress.
 
-### Import your progress
+### Your data (import, export, erase)
 
-```bash
-npm run progress:import                           # .progress/progress.json
-npm run progress:import -- path/to/progress.json  # another file
-```
+The **Your data** page (`/account`) holds your progress, as a `progress.json` file:
 
-It replaces the progress the database holds for the local learner (no sign-in) with the file;
-the file is not changed. Run it again after a tutoring session to see your new progress.
+- **Download** it, as a backup or to move to another LessonFolk.
+- **Import** a `progress.json`. LessonFolk checks the file and shows what changes before you
+  confirm; an invalid file is refused with the list of problems. Importing replaces the progress
+  saved here. On your first visit without sign-in, home and this page offer to import
+  `.progress/progress.json` for you. Import it again after a tutoring session to see your new
+  progress (the file itself is never changed).
+- **Erase** it. Without sign-in this erases the local learner's progress and its history from the
+  database (there is no account to delete; `.progress/progress.json` is kept). With sign-in it
+  deletes your account and all its data.
+
+From a terminal, `npm run progress:import [-- path/to/progress.json]` does the same import for
+the local learner, without the preview.
 
 ## Your progress and your privacy
 
@@ -173,12 +183,13 @@ the file is not changed. Run it again after a tutoring session to see your new p
   tutor creates it during onboarding and saves it after every change.
 - It stays on your computer. Git ignores the `.progress/` folder, so your progress is never
   committed or shared, even if you contribute to the project.
-- The dashboard reads the copy you [import](#import-your-progress) into the database, which
+- The dashboard reads the copy you [import](#your-data-import-export-erase) into the database, which
   runs on your computer. Without sign-in, it only listens on your own computer (`127.0.0.1`).
 - Your conversations go to your agent's provider (Anthropic for Claude Code, OpenAI for Codex),
   as with any use of that agent. Without sign-in (the default), LessonFolk itself sends
   nothing anywhere.
-- To start over, delete `.progress/progress.json`. Copy it somewhere first if you want to keep it.
+- To start over, delete `.progress/progress.json` and erase the database copy on the **Your data**
+  page. Download or copy it first if you want to keep it.
 
 ## Run it with Docker (self-hosting)
 
@@ -195,8 +206,8 @@ docker compose up --build
 - Open http://127.0.0.1:4321. The database listens on `127.0.0.1:5432`. Both only listen on your
   own computer.
 - Add `-d` (`docker compose up -d --build`) to run it in the background.
-- The dashboard reads your progress from the database: copy `.progress/progress.json` into it
-  with `npm run progress:import` (needs Node.js). The courses are copied into the app when it
+- The dashboard reads your progress from the database: upload `.progress/progress.json` on the
+  **Your data** page (the container cannot see the file itself). The courses are copied into the app when it
   is built.
 - The database keeps its data in a Docker volume called `db-data`, so it survives restarts.
 
@@ -223,6 +234,11 @@ compose down` removes the containers but keeps the data; `docker compose down -v
 deletes the database volume.
 
 ## Connect your AI chat with MCP
+
+The dashboard's **Connect** page (`/connect`) shows your exact address and short steps for Claude
+Code, Codex, Cursor, Claude Desktop, claude.ai and ChatGPT. Web chats (claude.ai, ChatGPT) connect
+from their company's servers, so they cannot reach LessonFolk on your computer: without sign-in,
+use an app that runs on your computer.
 
 The running app (e.g. with Docker above) is also an [MCP](https://modelcontextprotocol.io)
 server at `http://localhost:4321/mcp`. An AI chat connected to it gets the courses and reads
@@ -270,12 +286,13 @@ the dashboard again. With your own Postgres, set `DATABASE_URL` in `.env`.
 
 **The dashboard shows no progress.**
 
-- Did you import it? Run `npm run progress:import`, then reload the page.
+- Did you import it? Import it on the **Your data** page (or run `npm run progress:import`), then
+  reload the page.
 - Did onboarding finish? Check that `.progress/progress.json` exists in the LessonFolk folder.
   If not, say *"let's start"* to your tutor.
 - Was the agent opened in the LessonFolk folder? If you opened it elsewhere, the tutor saved
   nothing here. Close it and open it again in this folder.
-- `progress:import` says the file is not valid: ask your tutor to check
+- The import says the file is not valid: ask your tutor to check
   `.progress/progress.json`. Your progress is not lost.
 - "Your progress could not be loaded": the database stopped. Start it again with
   `docker compose up -d db` and reload the page.

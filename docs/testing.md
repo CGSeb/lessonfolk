@@ -85,6 +85,8 @@ Changing the schema and generating migrations: see
 | `auth-oauth.db.test.ts` | Sign-in with `LESSONFOLK_AUTH=oauth` through the **fake OAuth provider** (`fake-oauth.ts`, enabled only with `NODE_ENV=test`): only configured providers are listed, callbacks use `LESSONFOLK_BASE_URL`, sign-in creates the user, account and learner rows, home redirects to sign-in and public pages show no progress when signed out, **two users each see only their own progress**, sign-out, signing in again finds the same user |
 | `auth-none.db.test.ts` | `LESSONFOLK_AUTH=none`: the local learner is created on first start, once; pages show its progress without sign-in; the Docker-style start (`HOST=0.0.0.0`, `LESSONFOLK_BIND=127.0.0.1`) works |
 | `mcp-none.db.test.ts` | `/mcp` in `none` mode with the MCP client: tools for the local learner, other sites refused, `LESSONFOLK_MCP_TOKEN` required when set |
+| `account-none.db.test.ts` | `none` mode: the Connect page (address, apps, token note), the first-run import of `.progress/progress.json` (from a temporary `LESSONFOLK_ROOT`), import preview and confirm, invalid files refused, export round trip, cross-site posts refused, erase removes the local learner's rows |
+| `account-oauth.db.test.ts` | `oauth` mode: Connect page with `LESSONFOLK_BASE_URL`, account routes need sign-in, import and export for the signed-in user only, deleting the account removes all that user's rows and signs out |
 | `mcp-oauth.db.test.ts` | `/mcp` in `oauth` mode as an MCP client connects: 401 with the resource metadata, discovery, dynamic client registration, sign-in (fake provider), consent (allow and deny), PKCE token, then the tools as that user; two users apart; forged tokens refused |
 
 Progress fixtures (`dashboard/tests/fixtures/progress/`, progress.json files the tests import into Postgres):
@@ -253,6 +255,20 @@ fill in `.env` (`LESSONFOLK_AUTH=oauth`, `LESSONFOLK_BASE_URL=http://localhost:4
       Set `LESSONFOLK_BIND=0.0.0.0` too: the app refuses to start ("only runs on 127.0.0.1").
 
 Put `.env` back the way it was when you are done, and never commit it.
+
+## Manual check: Connect and Your data pages
+
+After changes to these pages, with `npm run dashboard` (no sign-in) and a copy of your own
+`progress.json` kept somewhere safe:
+
+- [ ] **Connect** (`/connect`) shows `http://127.0.0.1:4321/mcp`, marks claude.ai and ChatGPT as
+      not available, and its Claude Code command connects (`/mcp` in Claude Code).
+- [ ] **First run.** With no progress in the database and a `.progress/progress.json`, home offers
+      to import it; the preview shows your name and lessons; **Replace my progress** imports it.
+- [ ] **Your data** (`/account`): **Download progress.json** saves the file; importing a file that
+      is not JSON shows "This file cannot be imported" and changes nothing; **Erase my progress**
+      needs "delete" typed, then home shows the first visit again.
+- [ ] Both themes and a 375 px wide window look right.
 
 ## Manual check: Claude Code over MCP
 
