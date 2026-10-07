@@ -9,14 +9,73 @@ From the repository root:
 
 ```bash
 npm ci                 # once
-npm test               # tests of every workspace (core + dashboard unit and end-to-end), about 10 s
+docker compose up -d db  # once per session: Postgres for the database tests
+npm test               # every workspace: dashboard and packages/*
 npm run check:courses  # validate every course and lesson file
 npm run check -w dashboard  # type-check the dashboard
 npm run check -w packages/core  # type-check the core package
+npm run check -w @lessonfolk/db  # type-check the database package
 ```
 
-`npm test` runs [Vitest](https://vitest.dev) in every workspace: `packages/core/` (course loading,
-schemas and progress logic, `@lessonfolk/core`) and `dashboard/`:
+`npm test` runs `npm test` in every workspace that has one, each with [Vitest](https://vitest.dev):
+`packages/core/` (course loading, schemas and progress logic, `@lessonfolk/core`),
+`packages/db/` (Postgres schema and migrations, `@lessonfolk/db`) and `dashboard/`.
+
+### Database tests (Postgres)
+
+Database tests run against a real Postgres, never a mock, locally and in CI, so we test what
+we run. You need [Docker](https://docs.docker.com/get-docker/):
+
+```bash
+docker compose up -d db   # Postgres 17 on 127.0.0.1:5432, data in the `db-data` volume
+npm test
+docker compose stop db    # when you are done (`docker compose down -v` also deletes the data)
+```
+
+- The tests connect with `DATABASE_URL`, by default
+  `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` (the `db` service). To use
+  another server or port, copy `.env.example` to `.env` and change it there (or set
+  `DATABASE_URL` in your shell). The user needs the right to create databases.
+- Each test file gets its **own fresh database**, created and migrated by
+  `createTestDatabase()` from `@lessonfolk/db/testing` and dropped at the end, so test
+  files run in parallel without seeing each other's rows:
+
+  ```ts
+  import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
+
+  let testDb: TestDatabase;
+  beforeAll(async () => { testDb = await createTestDatabase(); });
+  afterAll(() => testDb?.drop());
+  // testDb.db is a Drizzle client, testDb.sql the raw postgres.js client.
+  ```
+
+- Name database test files `*.db.test.ts`. When Postgres is not reachable they fail with
+  "Cannot reach Postgres at … run `docker compose up -d db`".
+- **Without Docker**, the pure unit tests still run: `npm test -w packages/core`, `npm test -w dashboard`
+  (no database test there yet) and `npm run test:unit -w @lessonfolk/db` (everything but `*.db.test.ts`).
+- If a run is interrupted, leftover `lessonfolk_test_*` databases may stay behind. They are
+  harmless; `docker compose down -v` removes them with the rest of the data.
+
+CI (`.github/workflows/test.yml`) runs `npm test` and `npm run check:courses` on every pull
+request, with Postgres as a service container.
+
+### Database schema and migrations
+
+The schema lives in `packages/db/src/schema.ts` (Drizzle): `learner`, `lesson_progress`
+and the append-only `progress_event` log. After changing it, generate a migration and commit
+it with the schema change:
+
+```bash
+npm run generate -w @lessonfolk/db   # writes packages/db/drizzle/NNNN_*.sql
+npm run migrate -w @lessonfolk/db    # apply pending migrations to DATABASE_URL by hand
+```
+
+Migrations are applied automatically when the app starts in Docker (`docker compose up
+--build`), before the dashboard server listens.
+
+### Core and dashboard tests
+
+`npm test -w packages/core` and `npm test -w dashboard` run:
 
 - **Unit tests** sit next to the code (`packages/core/src/**/*.test.ts`, `dashboard/src/**/*.test.ts`).
 - **End-to-end tests** live in `dashboard/tests/e2e/`. Before they run, a global setup builds the
