@@ -4,6 +4,7 @@
 #   docker compose up -d db     # Postgres only (127.0.0.1:5432), for `npm test`
 #
 # Ports only listen on 127.0.0.1. Change them in .env (see .env.example).
+# Sign-in: LESSONFOLK_AUTH=none (default, one local learner) or oauth (docs/auth-dev.md).
 name: lessonfolk
 
 services:
@@ -28,8 +29,18 @@ services:
     build: .
     environment:
       DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD:-lessonfolk}@db:5432/lessonfolk
+      LESSONFOLK_AUTH: ${LESSONFOLK_AUTH:-none}
+      # The host address the app port is published on (see `ports` below). Inside the
+      # container the server listens on 0.0.0.0, so LESSONFOLK_AUTH=none checks this instead.
+      LESSONFOLK_BIND: ${LESSONFOLK_BIND:-127.0.0.1}
+      LESSONFOLK_BASE_URL: ${LESSONFOLK_BASE_URL:-}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     ports:
-      - "127.0.0.1:${LESSONFOLK_PORT:-4321}:4321"
+      - "${LESSONFOLK_BIND:-127.0.0.1}:${LESSONFOLK_PORT:-4321}:4321"
     volumes:
       # Progress is still read from .progress/progress.json until the Postgres store lands.
       - ./.progress:/app/.progress:ro

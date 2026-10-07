@@ -69,6 +69,10 @@ your progress — the AI tutor is the only thing that writes it.
 | `npm run dashboard:start` | Run the built server |
 | `npm test` | Run the tests (core package and dashboard) |
 
+By default there is no sign-in (`LESSONFOLK_AUTH=none`): one local learner, and the dashboard
+refuses to listen on anything but `127.0.0.1`. To sign in with GitHub or Google instead
+(`LESSONFOLK_AUTH=oauth`), see [`docs/auth-dev.md`](docs/auth-dev.md).
+
 Set `LESSONFOLK_COURSES_DIR` or `LESSONFOLK_PROGRESS_DIR` to point the dashboard at other folders
 (useful for testing with sample progress files). See [`docs/testing.md`](docs/testing.md) for the
 automated tests and the manual end-to-end checklist with a real tutor.

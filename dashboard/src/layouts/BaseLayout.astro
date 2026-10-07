@@ -22,6 +22,9 @@ const navItems = [
   { href: '/courses', label: t('nav.courses'), current: path === '/courses' || path.startsWith('/courses/') },
   { href: '/authors', label: t('nav.authors'), current: path === '/authors' || path.startsWith('/authors/') },
 ];
+// Sign in / sign out, only when people sign in (LESSONFOLK_AUTH=oauth).
+const { authMode, user } = Astro.locals;
+const signInHref = `/sign-in?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`;
 ---
 
 <html lang="en">
@@ -74,6 +77,25 @@ const navItems = [
               }
             </ul>
           </nav>
+          {
+            authMode === 'oauth' &&
+              (user ? (
+                <form class="account" method="post" action="/sign-out" aria-label={t('auth.accountLabel')}>
+                  <span class="account__name" title={user.email}>
+                    {t('auth.signedInAs', { name: user.name || user.email })}
+                  </span>
+                  <button class="account__button" type="submit">
+                    {t('auth.signOut')}
+                  </button>
+                </form>
+              ) : (
+                path !== '/sign-in' && (
+                  <a class="account__button" href={signInHref}>
+                    {t('auth.signIn')}
+                  </a>
+                )
+              ))
+          }
           <ThemeToggle />
         </div>
       </div>
@@ -212,6 +234,35 @@ const navItems = [
     background: var(--color-accent-subtle);
     color: var(--color-accent);
     font-weight: var(--weight-semibold);
+  }
+
+  .account {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .account__name {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .account__button {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .account__button:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
   .site-main {
