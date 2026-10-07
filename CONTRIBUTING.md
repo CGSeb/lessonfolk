@@ -64,8 +64,9 @@ other settings, copy `.env.example` to `.env` and change it (see
 When you are done, `docker compose stop db` stops Postgres and keeps its data;
 `docker compose down -v` removes it with its data.
 
-To run the dashboard while you work, `npm run dashboard` (http://127.0.0.1:4321). It reloads as
-you edit. The [learner guide](docs/using-lessonfolk.md#the-dashboard) describes its pages.
+To run the dashboard while you work, `npm run dashboard` (http://127.0.0.1:4321), with Postgres
+running. It reloads as you edit. To see a progress fixture, import it:
+`npm run progress:import -- dashboard/tests/fixtures/progress/all-done/progress.json`. The [learner guide](docs/using-lessonfolk.md#the-dashboard) describes its pages.
 
 ## Environment variables
 
@@ -78,7 +79,7 @@ never committed). Variables already set in your shell win over `.env`.
 
 | Variable | Default | What it does |
 |---|---|---|
-| `DATABASE_URL` | `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` | The Postgres server for the tests, the migrations and sign-in. The dashboard in `LESSONFOLK_AUTH=none` runs without a database when it is not set. In Docker Compose, the app gets its own value pointing to the `db` service. |
+| `DATABASE_URL` | `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` | The Postgres server for the tests, the migrations, sign-in and the dashboard's progress (in every mode; `LESSONFOLK_AUTH=none` applies pending migrations and creates the local learner on start). In Docker Compose, the app gets its own value pointing to the `db` service. |
 | `POSTGRES_PASSWORD` | `lessonfolk` | Docker Compose: the password of the `db` service. Change `DATABASE_URL` to match. |
 | `LESSONFOLK_PORT` | `4321` | Docker Compose: the port of the app on your computer. |
 | `LESSONFOLK_DB_PORT` | `5432` | Docker Compose: the port of Postgres on your computer. Change `DATABASE_URL` to match. |
@@ -103,7 +104,6 @@ never committed). Variables already set in your shell win over `.env`.
 | `PORT` | `4321` | The port `npm run dashboard:start` listens on. (For `npm run dashboard`, see the [learner guide](docs/using-lessonfolk.md#troubleshooting).) |
 | `LESSONFOLK_ROOT` | the nearest folder above the working directory that holds `AGENTS.md` | The repository root, where `courses/` and `.progress/` are found. The Docker image sets `/app`. |
 | `LESSONFOLK_COURSES_DIR` | `<root>/courses` | Read the courses from another folder, e.g. a test fixture. |
-| `LESSONFOLK_PROGRESS_DIR` | `<root>/.progress` | Read `progress.json` from another folder, e.g. a [progress fixture](docs/testing.md#core-and-dashboard-tests). Use an absolute path. |
 
 **Set by the tooling** (you don't set these yourself)
 
@@ -125,6 +125,7 @@ Run root scripts from the repository root. Run a workspace script with `-w <work
 | `npm run dashboard:start` | Run the built server, after the sign-in startup checks (`dashboard/scripts/serve.ts`). Build first. |
 | `npm test` | Run the tests of every workspace (core, db, dashboard). Needs Postgres. |
 | `npm run check:courses` | Validate every course and lesson file. Add `-- <folder>` to check another courses folder. |
+| `npm run progress:import` | Copy `.progress/progress.json` (or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. The dashboard reads progress from the database. |
 | `npm run check -w dashboard` | Type-check the dashboard (`astro check`). |
 | `npm run check -w packages/core` | Type-check `@lessonfolk/core`. |
 | `npm run check -w @lessonfolk/db` | Type-check `@lessonfolk/db`. |

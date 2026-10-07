@@ -13,3 +13,8 @@ export function safeReturnPath(next: string | null | undefined): string {
   if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return '/';
   return next;
 }
+
+/** The sign-in page, coming back to `url` (path and query) afterwards. */
+export function signInHref(url: URL): string {
+  return `/sign-in?next=${encodeURIComponent(url.pathname + url.search)}`;
+}

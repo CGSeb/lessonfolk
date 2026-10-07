@@ -61,10 +61,13 @@ Changing the schema and generating migrations: see
   production server into `dashboard/node_modules/.cache/lessonfolk-e2e/` (your own `dashboard/dist`
   is never touched). Each test file then starts that server as a real Node process on a free
   port, through `dashboard/scripts/serve.ts` (the startup checks, like `npm run dashboard:start`),
-  pointed at the pinned course fixture and at one progress fixture, and fetches pages over
-  HTTP. Servers and temporary folders are removed when the tests finish. The servers never inherit
-  sign-in settings or `DATABASE_URL` from your shell or `.env`: each test sets what it needs
-  (by default `LESSONFOLK_AUTH=none` without a database).
+  pointed at the pinned course fixture and at its own test database, and fetches pages over
+  HTTP. Servers and databases are removed when the tests finish. The servers never inherit
+  sign-in settings or `DATABASE_URL` from your shell or `.env`: each test sets what it needs.
+- **Seeding progress.** Progress lives in Postgres: tests write it with `seedProgress(db, userId,
+  fixture)` from `tests/e2e/server.ts` (the store's `importProgress` of a progress fixture, or
+  `null` for a learner with nothing saved) or with `testProgressStore(db)` to write step by step
+  as the tutor would. The local learner of `LESSONFOLK_AUTH=none` has the user id `local`.
 - **Course fixtures** live in `packages/core/tests/fixtures/`: `courses-valid/` is a pinned copy of the
   catalog with only AI Foundations, used by every test that expects an exact catalog (themes,
   authors, personalization scenarios, e2e pages), so adding a course to `courses/` never breaks
@@ -73,37 +76,29 @@ Changing the schema and generating migrations: see
 
 | Test | What it checks |
 |---|---|
-| `pages.test.ts` | Home, catalog, AI Foundations course page, authors and an unknown course (404) for each fixture below; for every valid fixture, the next lesson shown on home and on the course page is the one `getNextLesson` picks |
-| `live-refresh.test.ts` | Simulates a first session in a temporary `.progress/`: creating, updating and deleting `progress.json` each sends a `change` event on `/api/events`, and the pages show the new state |
-| `auth-startup.test.ts` | Startup checks: `LESSONFOLK_AUTH=none` refuses a server reachable beyond 127.0.0.1 (`HOST`, or `LESSONFOLK_BIND` as in Docker), `oauth` refuses to start with no provider; `none` gives every page the local learner, with no sign-in |
-| `auth-oauth.db.test.ts` | Sign-in with `LESSONFOLK_AUTH=oauth` through the **fake OAuth provider** (`fake-oauth.ts`, enabled only with `NODE_ENV=test`): only configured providers are listed, callbacks use `LESSONFOLK_BASE_URL`, sign-in creates the user, account and learner rows, two users stay apart, sign-out, signing in again finds the same user. Needs Postgres |
-| `auth-none.db.test.ts` | `LESSONFOLK_AUTH=none` with a database: the local learner is created on first start, once. Needs Postgres |
+| `pages.db.test.ts` | Home, catalog, AI Foundations course page, authors and an unknown course (404) for each fixture below, seeded as the local learner's progress; the next lesson shown on home and on the course page is the one `getNextLesson` picks |
+| `progress-updates.db.test.ts` | Simulates a first session through the progress store (onboarding, lesson started and done, path, reset): each page load shows the new state |
+| `auth-startup.test.ts` | Startup checks: `LESSONFOLK_AUTH=none` refuses a server reachable beyond 127.0.0.1 (`HOST`, or `LESSONFOLK_BIND` as in Docker) or an unreachable database, `oauth` refuses to start with no provider. No Postgres needed |
+| `auth-oauth.db.test.ts` | Sign-in with `LESSONFOLK_AUTH=oauth` through the **fake OAuth provider** (`fake-oauth.ts`, enabled only with `NODE_ENV=test`): only configured providers are listed, callbacks use `LESSONFOLK_BASE_URL`, sign-in creates the user, account and learner rows, home redirects to sign-in and public pages show no progress when signed out, **two users each see only their own progress**, sign-out, signing in again finds the same user |
+| `auth-none.db.test.ts` | `LESSONFOLK_AUTH=none`: the local learner is created on first start, once; pages show its progress without sign-in; the Docker-style start (`HOST=0.0.0.0`, `LESSONFOLK_BIND=127.0.0.1`) works |
 
-Progress fixtures (`dashboard/tests/fixtures/progress/`):
+Progress fixtures (`dashboard/tests/fixtures/progress/`, progress.json files the tests import into Postgres):
 
 | Fixture | Learner state |
 |---|---|
-| *(no folder)* | New learner: no `progress.json` yet |
-| `minimal` | Onboarded, no lesson started |
+| *(none, `null`)* | New learner: nothing saved yet |
+| `minimal` | Onboarded (experience and language only), no lesson started |
 | `mid-course` | Lesson 1 done, lesson 2 in progress. Also an **old progress file** (written before levels and paths: no `level`, `interests` or `path`): no warning, "recommend a path" suggested |
 | `beginner-onboarded` | **Beginner right after onboarding**: level, interests, `path: ["ai-foundations"]` with its reason, lesson 1 in progress |
 | `placement-path` | **Intermediate learner after a level check**: one lesson skipped by the level check, one skipped by hand, a path with unknown course and theme ids (ignored with a warning) |
 | `level-check-passed` | **Developer who passed the level check** for AI Foundations: every lesson `skipped` with `notes: "placement"`, shown as "Skipped after level check" on home, catalog and course page |
 | `all-done` | Every AI Foundations lesson done or skipped, with scores and notes |
-| `invalid-json` | `progress.json` is not valid JSON |
-| `invalid-shape` | Valid JSON, but not the expected shape |
 
-To look at a fixture in the browser, point the dashboard at it with an **absolute** path
-(relative paths resolve from `dashboard/`):
+To look at a fixture in the browser, import it as the local learner's progress (this replaces
+what your database holds for it), then reload the dashboard:
 
 ```bash
-# macOS / Linux
-LESSONFOLK_PROGRESS_DIR="$PWD/dashboard/tests/fixtures/progress/all-done" npm run dashboard
-```
-
-```powershell
-# Windows PowerShell
-$env:LESSONFOLK_PROGRESS_DIR = "$PWD\dashboard\tests\fixtures\progress\all-done"; npm run dashboard
+npm run progress:import -- dashboard/tests/fixtures/progress/all-done/progress.json
 ```
 
 ## Manual end-to-end check with a real tutor
@@ -125,6 +120,10 @@ and repeat it after changes to `AGENTS.md`, the progress format or the dashboard
 
 4. Open http://127.0.0.1:4321 and keep it visible next to the chat. Also open
    http://127.0.0.1:4321/courses/ai-foundations in a second tab.
+5. The tutor still writes `.progress/progress.json` and the dashboard reads the database: each
+   time a step below checks the dashboard, run `npm run progress:import` first, then reload the
+   page. To start as a new learner, also clear the database copy:
+   `docker compose exec db psql -U lessonfolk -c "delete from learner where user_id = 'local'"`.
 
 ### Checklist
 
@@ -143,7 +142,7 @@ and repeat it after changes to `AGENTS.md`, the progress format or the dashboard
       `level: "beginner"`, your `interests` (theme ids), `path: ["ai-foundations"]` with
       `pathReason` and `pathUpdatedAt`, `current: "ai-foundations/01-what-is-ai"` and that
       lesson with `status: "in_progress"`.
-- [ ] **Live update, no reload.** Without touching the browser, home now greets you by name
+- [ ] **Dashboard after onboarding.** After the import and a reload, home greets you by name
       ("Welcome back, …!") and shows "What is AI?" under "Pick up where you left off". The course page
       shows lesson 1 "In progress" and the catalog shows AI Foundations "In progress".
 - [ ] **Teach lesson 1.** Work through the lesson, answer the checks, finish it.
@@ -152,7 +151,7 @@ and repeat it after changes to `AGENTS.md`, the progress format or the dashboard
 - [ ] **Dashboard reflects it.** Home shows "1 of 3 lessons finished" and "How do machines learn?"
       under "Next up". The course page shows lesson 1 "Done" with its score, finish date and tutor notes,
       lesson 2 marked "Next up", and "1 of 3 lessons". The catalog shows "1 of 3 lessons".
-- [ ] **No warnings.** No page shows "Your progress file could not be read" or course file problems.
+- [ ] **No warnings.** `progress:import` reports no problem, and no page shows "Your progress could not be loaded" or course file problems.
 - [ ] **Commands.** Say *show my progress*: the tutor's summary matches the dashboard.
 - [ ] **Not committed.** `git status` does not list anything in `.progress/` other than the example.
 
@@ -215,8 +214,8 @@ answer "developer" for experience.
 
 ### Reset
 
-Stop the tutor, then delete `.progress/progress.json` (the dashboard switches back to the first
-visit view by itself). Restore your backup if you made one. Stop the dashboard with `Ctrl+C`.
+Stop the tutor, then delete `.progress/progress.json` and clear the database copy (step 5 of
+[Before you start](#before-you-start)): the dashboard shows the first visit view again. Restore your backup if you made one. Stop the dashboard with `Ctrl+C`.
 
 ### Reporting a problem
 
@@ -232,7 +231,8 @@ fill in `.env` (`LESSONFOLK_AUTH=oauth`, `LESSONFOLK_BASE_URL=http://localhost:4
 `BETTER_AUTH_SECRET`, both providers' credentials), then run `docker compose up --build`.
 
 - [ ] **Startup.** The app log says "Sign-in with OAuth (LESSONFOLK_AUTH=oauth) at http://localhost:4321".
-- [ ] **Signed out.** http://localhost:4321 shows the dashboard with a **Sign in** button in the header.
+- [ ] **Signed out.** http://localhost:4321 sends you to the sign-in page. http://localhost:4321/courses
+      shows the catalog without progress, an invitation to sign in and a **Sign in** button in the header.
 - [ ] **Sign-in page.** **Sign in** opens a page listing "Sign in with GitHub" and "Sign in with Google".
       Remove the Google values from `.env`, restart: only GitHub is listed. Put them back.
 - [ ] **GitHub.** Sign in with GitHub, approve the app: you land back on the page you came from,

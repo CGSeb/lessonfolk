@@ -12,16 +12,18 @@ import {
   paginate,
   parseCatalogQuery,
 } from '../../components/catalog/catalogFilter';
+import SignInPrompt from '../../components/SignInPrompt.astro';
 import { themeToneClass } from '../../components/theme-tone';
 import { t } from '../../i18n/en';
 import { getPathCourseIds, getStats, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
-import { readProgress } from '../../lib/progress';
+import { loadProgressFor } from '../../lib/store';
 
-// Read on every request so the page reflects the tutor's latest writes.
+// Read on every request so the page reflects the tutor's latest writes. Public page:
+// signed out (`progressResult` null), courses are shown without progress.
 const { catalog, issues } = inspectCatalog('en');
-const progressResult = readProgress();
-const progress = progressOrEmpty(progressResult);
+const progressResult = await loadProgressFor(Astro.locals.user);
+const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
 // Courses in the learner's personal path get a "Recommended for you" marker (order unchanged).
 const recommended = new Set(
   getPathCourseIds(
@@ -78,8 +80,10 @@ const hiddenIssues = issues.length - shownIssues.length;
       <p class="muted">{t('courses.intro')}</p>
     </header>
 
+    <SignInPrompt />
+
     {
-      progressResult.state === 'invalid' && (
+      progressResult?.state === 'invalid' && (
         <p class="warning" role="status">
           {t('courses.progressInvalid')}
         </p>
@@ -175,6 +179,7 @@ const hiddenIssues = issues.length - shownIssues.length;
                             theme={themesById.get(course.theme)}
                             authors={courseAuthors(course, catalog.authors)}
                             recommended={recommended.has(course.id)}
+                            showProgress={progressResult !== null}
                           />
                         </li>,
                       ]

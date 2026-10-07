@@ -9,14 +9,12 @@ const HEARTBEAT_MS = 25_000;
 /** How long the browser waits before reconnecting after the stream drops. */
 const RETRY_MS = 2_000;
 
-const hub = createChangeHub(() => {
-  const { progress, courses } = getPaths();
-  return { progressDir: progress, coursesDir: courses };
-});
+const hub = createChangeHub(() => ({ coursesDir: getPaths().courses }));
 
 /**
- * Server-Sent Events stream: sends `event: change` with `data: progress|courses`
- * whenever the learner's progress or the course files change on disk.
+ * Server-Sent Events stream: sends `event: change` with `data: courses` whenever
+ * the course files change on disk. Progress changes are not pushed: pages read
+ * it from the database on every load.
  */
 export const GET: APIRoute = ({ request }) => {
   const encoder = new TextEncoder();

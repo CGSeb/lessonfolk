@@ -59,7 +59,7 @@ export const en = {
     recommended: 'Recommended for you',
     recommendedTitle: 'This course is in the learning path your tutor recommended for you',
     progressInvalid:
-      'Your progress file could not be read, so every course is shown as not started. Ask your tutor to check .progress/progress.json.',
+      'Your progress could not be loaded, so every course is shown as not started. Reload the page in a moment.',
     contentIssues: 'Some course files have problems, so parts of the catalog may be missing:',
     contentIssuesMore: '…and {count} more.',
     contentIssuesHint: 'Run {command} in the project folder for details.',
@@ -98,7 +98,7 @@ export const en = {
     coursesHeading: 'Courses by {author}',
     noCourses: 'This author has no course in this language yet.',
     progressInvalid:
-      'Your progress file could not be read, so every course is shown as not started. Ask your tutor to check .progress/progress.json.',
+      'Your progress could not be loaded, so every course is shown as not started. Reload the page in a moment.',
     issuesTitle: 'The authors file has problems',
     issuesBody: 'Some authors may be missing from this page. To see every problem, run this command in a terminal, in this folder:',
     issuesCommand: 'npm run check:courses',
@@ -129,8 +129,8 @@ export const en = {
     nextUp: 'Next up',
     continueHint: 'To work on it with your tutor, open Claude Code or Codex in this folder and say:',
     continuePhrase: 'continue',
-    invalidProgressTitle: 'Your progress file could not be read',
-    invalidProgressBody: 'Lessons are shown as not started. Your progress is not lost: ask your tutor to fix the file .progress/progress.json.',
+    invalidProgressTitle: 'Your progress could not be loaded',
+    invalidProgressBody: 'Lessons are shown as not started. Your progress is not lost: reload the page in a moment.',
     technicalDetails: 'Technical details',
     issuesTitle: 'Some files of this course have problems',
     issuesBody: 'Some lessons may be missing from this page. To see every problem, run this command in a terminal, in this folder:',
@@ -144,6 +144,7 @@ export const en = {
   footer: {
     about: 'LessonFolk is an open-source app developed by CG Seb. It teaches AI to anyone, through a conversation with an AI tutor.',
     privacy: 'Your progress is saved only on this computer.',
+    privacyAccount: 'Your progress is saved on this LessonFolk server, with your account.',
     license: 'Code under the MIT license, courses under CC BY 4.0.',
   },
   home: {
@@ -179,11 +180,11 @@ export const en = {
     blockedBody: 'The lessons you have left need other lessons to be finished first. Your tutor can help you sort this out. Open Claude Code or Codex in this folder and say:',
     emptyTitle: 'No courses to show',
     emptyBody: 'No course could be loaded, so there is no lesson to suggest yet.',
-    invalidProgressTitle: 'Your progress file could not be read',
-    invalidProgressBody: 'This page is shown as if you were just starting. Your progress is not lost: ask your tutor to fix the file .progress/progress.json.',
+    invalidProgressTitle: 'Your progress could not be loaded',
+    invalidProgressBody: 'This page is shown as if you were just starting. Your progress is not lost: reload the page in a moment.',
     technicalDetails: 'Technical details',
     progressWarningsTitle: 'Some of your learning path was ignored',
-    progressWarningsBody: 'Your progress file mentions courses or themes that do not exist (anymore). They are ignored. Ask your tutor to update your learning path.',
+    progressWarningsBody: 'Your progress mentions courses or themes that do not exist (anymore). They are ignored. Ask your tutor to update your learning path.',
     courseIssuesTitle: 'Some course files have problems',
     courseIssuesBody: 'Courses with problems may be missing from this page. To see every problem, run this command in a terminal, in this folder:',
     courseIssuesCommand: 'npm run check:courses',
@@ -217,9 +218,10 @@ export const en = {
     signOut: 'Sign out',
     signedInAs: 'Signed in as {name}',
     accountLabel: 'Your account',
+    promptTitle: 'Sign in to see your progress',
+    promptBody: 'Courses are open to everyone. Sign in to see your lessons, scores and what to learn next.',
   },
   live: {
-    progressUpdated: 'Your progress was updated.',
     coursesUpdated: 'The courses were updated.',
   },
 } as const;

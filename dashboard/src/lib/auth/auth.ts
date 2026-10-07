@@ -5,7 +5,8 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { genericOAuth } from 'better-auth/plugins';
-import { account, connect, databaseUrl, session, user, verification, type Database } from '@lessonfolk/db';
+import { account, session, user, verification, type Database } from '@lessonfolk/db';
+import { getDatabase } from '../store.ts';
 import { ensureLearner } from './local-learner.ts';
 import { readAuthSettings, type OAuthSettings } from './settings.ts';
 
@@ -69,7 +70,7 @@ export function getAuth(): Auth {
   if (!instance) {
     const settings = readAuthSettings();
     if (settings.mode !== 'oauth') throw new Error('Better Auth is only used with LESSONFOLK_AUTH=oauth.');
-    instance = createAuth(settings, connect(databaseUrl()).db);
+    instance = createAuth(settings, getDatabase());
   }
   return instance;
 }

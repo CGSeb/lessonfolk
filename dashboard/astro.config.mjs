@@ -10,11 +10,12 @@ import { authStartupChecks } from './src/lib/auth/dev-integration.ts';
 const envFile = fileURLToPath(new URL('../.env', import.meta.url));
 if (existsSync(envFile)) process.loadEnvFile(envFile);
 
-// The dashboard runs as a local Node server so it can read courses/ and
-// .progress/ from disk on every request. It only listens on localhost.
+// The dashboard runs as a Node server: it reads courses/ from disk and progress from
+// Postgres on every request. The address it listens on (HOST, `astro dev --host`) is
+// checked at startup by the sign-in settings (LESSONFOLK_AUTH=none: 127.0.0.1 only).
 export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
-  server: { host: '127.0.0.1', port: 4321 },
+  server: { port: 4321 },
   integrations: [authStartupChecks()],
 });

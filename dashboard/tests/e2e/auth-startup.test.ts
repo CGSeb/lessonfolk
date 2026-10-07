@@ -1,10 +1,9 @@
 /**
- * Sign-in startup checks of the built server (scripts/serve.ts), and `none`
- * mode without a database. No Postgres needed.
+ * Startup checks of the built server (scripts/serve.ts): settings it must refuse
+ * before it listens. No Postgres needed.
  */
-import { join } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { expectStartupFailure, getPage, PROGRESS_FIXTURES, startDashboard, type DashboardServer } from './server';
+import { describe, expect, it } from 'vitest';
+import { expectStartupFailure, freePort } from './server';
 
 const SECRET = 'test-secret-that-is-long-enough-1234567890';
 
@@ -24,6 +23,19 @@ describe('startup checks', () => {
     expect(output).toContain('"0.0.0.0" (from LESSONFOLK_BIND)');
   });
 
+  it('refuse LESSONFOLK_AUTH=none without a reachable database, saying how to start it', async () => {
+    // A port nothing listens on.
+    const port = await freePort();
+    const { code, output } = await expectStartupFailure({
+      DATABASE_URL: `postgres://lessonfolk:secret-password@127.0.0.1:${port}/lessonfolk`,
+    });
+    expect(code).toBe(1);
+    expect(output).toContain('LessonFolk cannot start: your progress is kept in Postgres');
+    expect(output).toContain('docker compose up -d db');
+    expect(output).not.toContain('secret-password');
+    expect(output).not.toMatch(/listening on/i);
+  });
+
   it('refuse LESSONFOLK_AUTH=oauth without any provider', async () => {
     const { code, output } = await expectStartupFailure({
       LESSONFOLK_AUTH: 'oauth',
@@ -39,55 +51,5 @@ describe('startup checks', () => {
     const { code, output } = await expectStartupFailure({ LESSONFOLK_AUTH: 'password' });
     expect(code).toBe(1);
     expect(output).toContain('LESSONFOLK_AUTH is "password"');
-  });
-});
-
-describe('LESSONFOLK_AUTH=none, inside docker compose', () => {
-  let server: DashboardServer;
-
-  beforeAll(async () => {
-    // What the Docker image does: listen on 0.0.0.0, published on 127.0.0.1 only.
-    server = await startDashboard(join(PROGRESS_FIXTURES, 'minimal'), { HOST: '0.0.0.0', LESSONFOLK_BIND: '127.0.0.1' });
-  });
-  afterAll(async () => {
-    await server?.stop();
-  });
-
-  it('starts', async () => {
-    const page = await getPage(server, '/');
-    expect(page.status).toBe(200);
-  });
-});
-
-describe('LESSONFOLK_AUTH=none', () => {
-  let server: DashboardServer;
-
-  beforeAll(async () => {
-    server = await startDashboard(join(PROGRESS_FIXTURES, 'minimal'));
-  });
-  afterAll(async () => {
-    await server?.stop();
-  });
-
-  it('gives pages and API routes the local learner, without signing in', async () => {
-    const me = await fetch(`${server.url}/api/me`).then((r) => r.json());
-    expect(me).toEqual({
-      authMode: 'none',
-      user: { id: 'local', name: 'Local learner', email: 'local@lessonfolk.localhost', image: null },
-    });
-  });
-
-  it('shows no sign-in or sign-out', async () => {
-    const home = await getPage(server, '/');
-    expect(home.status).toBe(200);
-    expect(home.text).not.toContain('Sign in');
-    expect(home.text).not.toContain('Sign out');
-  });
-
-  it('has no sign-in page or auth routes', async () => {
-    const signIn = await fetch(`${server.url}/sign-in`, { redirect: 'manual' });
-    expect(signIn.status).toBe(303);
-    expect(new URL(signIn.headers.get('location')!, server.url).pathname).toBe('/');
-    expect((await fetch(`${server.url}/api/auth/get-session`)).status).toBe(404);
   });
 });

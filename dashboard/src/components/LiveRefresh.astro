@@ -1,9 +1,9 @@
 ---
 /**
- * Keeps the page in sync with the learner's files: listens to /api/events and,
- * when progress or courses change on disk, re-fetches the page and swaps the
- * <main> content in place. Progressive enhancement: without JavaScript the page
- * simply stays as rendered.
+ * Keeps the page in sync with the course files: listens to /api/events and,
+ * when courses change on disk, re-fetches the page and swaps the <main> content
+ * in place. Progress is read from the database on each page load, not pushed.
+ * Progressive enhancement: without JavaScript the page simply stays as rendered.
  */
 import { t } from '../i18n/en';
 ---
@@ -13,7 +13,6 @@ import { t } from '../i18n/en';
   role="status"
   aria-live="polite"
   data-live-refresh
-  data-msg-progress={t('live.progressUpdated')}
   data-msg-courses={t('live.coursesUpdated')}
 >
 </div>
@@ -64,8 +63,8 @@ import { t } from '../i18n/en';
   }
 
   function announce(area: string) {
-    if (!status || (area !== 'progress' && area !== 'courses')) return;
-    const message = area === 'courses' ? status.dataset.msgCourses : status.dataset.msgProgress;
+    if (!status || area !== 'courses') return;
+    const message = status.dataset.msgCourses;
     status.textContent = '';
     // A fresh text node makes screen readers announce repeated messages.
     setTimeout(() => (status.textContent = message ?? ''), 50);

@@ -106,25 +106,22 @@ describe.each([
 });
 
 describe('watchLessonFolk', () => {
-  it('reports which area changed', async () => {
-    const progressDir = tempDir();
+  it('reports changes to the course files, in subfolders too', async () => {
     const coursesDir = tempDir();
+    mkdirSync(join(coursesDir, 'en'));
     const areas: ChangeArea[] = [];
-    stops.push(watchLessonFolk({ progressDir, coursesDir, debounceMs: DEBOUNCE, pollMs: POLL }, (a) => areas.push(a)));
+    stops.push(watchLessonFolk({ coursesDir, debounceMs: DEBOUNCE, pollMs: POLL }, (a) => areas.push(a)));
     await sleep(POLL * 2);
 
-    writeFileSync(join(progressDir, 'progress.json'), '{}');
-    await vi.waitFor(() => expect(areas).toEqual(['progress']), { timeout: 3000 });
-    writeFileSync(join(coursesDir, 'index.yaml'), 'courses: []');
-    await vi.waitFor(() => expect(areas).toEqual(['progress', 'courses']), { timeout: 3000 });
+    writeFileSync(join(coursesDir, 'en', 'index.yaml'), 'courses: []');
+    await vi.waitFor(() => expect(areas).toEqual(['courses']), { timeout: 3000 });
   });
 });
 
 describe('createChangeHub', () => {
   it('shares watchers and stops them when the last subscriber leaves', async () => {
-    const progressDir = tempDir();
     const coursesDir = tempDir();
-    const getOptions = vi.fn(() => ({ progressDir, coursesDir, debounceMs: DEBOUNCE, pollMs: POLL }));
+    const getOptions = vi.fn(() => ({ coursesDir, debounceMs: DEBOUNCE, pollMs: POLL }));
     const hub = createChangeHub(getOptions);
 
     const a = vi.fn();
@@ -135,17 +132,17 @@ describe('createChangeHub', () => {
     expect(hub.size).toBe(2);
     await sleep(POLL * 2);
 
-    writeFileSync(join(progressDir, 'progress.json'), '{}');
+    writeFileSync(join(coursesDir, 'index.yaml'), 'courses: []');
     await vi.waitFor(() => {
-      expect(a).toHaveBeenCalledWith('progress');
-      expect(b).toHaveBeenCalledWith('progress');
+      expect(a).toHaveBeenCalledWith('courses');
+      expect(b).toHaveBeenCalledWith('courses');
     }, { timeout: 3000 });
 
     offA();
     offB();
     expect(hub.size).toBe(0);
     a.mockClear();
-    writeFileSync(join(progressDir, 'progress.json'), '{"x":1}');
+    writeFileSync(join(coursesDir, 'index.yaml'), 'courses: [x]');
     await sleep(DEBOUNCE * 4);
     expect(a).not.toHaveBeenCalled();
 

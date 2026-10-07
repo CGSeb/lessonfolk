@@ -18,9 +18,11 @@ interface Props {
   authors?: AuthorLink[];
   /** The course is in the learner's personal path: shows a "Recommended for you" marker. */
   recommended?: boolean;
+  /** Show the learner's status and progress bar (false when signed out). */
+  showProgress?: boolean;
 }
 
-const { stats, headingLevel = 2, theme, authors = [], recommended = false } = Astro.props;
+const { stats, headingLevel = 2, theme, authors = [], recommended = false, showProgress = true } = Astro.props;
 const { course, total } = stats;
 const finished = finishedLessons(stats);
 const status = courseStatusDisplay(getCourseStatus(stats));
@@ -51,9 +53,13 @@ const progressId = `course-progress-${course.id}`;
     }
     <ThemeBadge theme={theme} />
     <LevelBadge level={course.level} />
-    <span class:list={['badge', status.variant && `badge--${status.variant}`]}>
-      <span class="visually-hidden">{t('status.label')}:</span> {t(status.key)}
-    </span>
+    {
+      showProgress && (
+        <span class:list={['badge', status.variant && `badge--${status.variant}`]}>
+          <span class="visually-hidden">{t('status.label')}:</span> {t(status.key)}
+        </span>
+      )
+    }
   </div>
 
   <p>{course.description}</p>
@@ -62,12 +68,18 @@ const progressId = `course-progress-${course.id}`;
     {hoursText} <span aria-hidden="true">·</span> {lessonCountText}
   </p>
 
-  <div class="stack course-card__progress" style="--stack-space: var(--space-1)">
-    <progress class="progress-bar" value={finished} max={Math.max(total, 1)} aria-labelledby={progressId}>
-      {progressText}
-    </progress>
-    <p class="muted course-card__meta" id={progressId}>{progressText}</p>
-  </div>
+  {
+    showProgress && (
+      <div class="stack course-card__progress" style="--stack-space: var(--space-1)">
+        <progress class="progress-bar" value={finished} max={Math.max(total, 1)} aria-labelledby={progressId}>
+          {progressText}
+        </progress>
+        <p class="muted course-card__meta" id={progressId}>
+          {progressText}
+        </p>
+      </div>
+    )
+  }
 </article>
 
 <style>

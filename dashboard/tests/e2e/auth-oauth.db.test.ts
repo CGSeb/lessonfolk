@@ -4,12 +4,11 @@
  * played by fetch with a small cookie jar, following each redirect by hand.
  */
 import { and, eq } from 'drizzle-orm';
-import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { account, learner, session, user } from '@lessonfolk/db';
 import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
 import { startFakeOAuth, type FakeOAuthServer } from './fake-oauth';
-import { freePort, PROGRESS_FIXTURES, startDashboard, visibleText, type DashboardServer } from './server';
+import { freePort, seedProgress, startDashboard, visibleText, type DashboardServer } from './server';
 
 /** Cookies the dashboard set, sent back to the dashboard only. */
 class Browser {
@@ -70,7 +69,7 @@ beforeAll(async () => {
   fake = await startFakeOAuth();
   const port = await freePort();
   baseURL = `http://127.0.0.1:${port}`;
-  server = await startDashboard(join(PROGRESS_FIXTURES, 'minimal'), {
+  server = await startDashboard({
     PORT: String(port),
     DATABASE_URL: testDb.url,
     LESSONFOLK_AUTH: 'oauth',
@@ -150,14 +149,31 @@ describe('signing in and out', () => {
   let robin: Browser;
   let robinId: string;
 
-  it('keeps public pages open when signed out, with a sign-in link', async () => {
+  it('sends signed-out visitors of the home page (their progress) to sign in', async () => {
     robin = browser();
     expect(await robin.me()).toEqual({ authMode: 'oauth', user: null });
     const home = await robin.request('/');
-    expect(home.status).toBe(200);
-    const html = await home.text();
-    expect(html).toContain('href="/sign-in?next=%2F"');
-    expect(visibleText(html)).not.toContain('Sign out');
+    expect(home.status).toBe(303);
+    expect(location(home)).toBe('/sign-in?next=%2F');
+  });
+
+  it('keeps the catalog, course and author pages open when signed out, without progress', async () => {
+    for (const path of ['/courses', '/courses/ai-foundations', '/authors/lessonfolk', '/authors']) {
+      const response = await robin.request(path);
+      expect(response.status, path).toBe(200);
+      const html = await response.text();
+      const text = visibleText(html);
+      expect(html, path).toContain(`href="/sign-in?next=${encodeURIComponent(path)}"`);
+      expect(text, path).not.toContain('Sign out');
+      // No status, progress bar or "next up": nothing is known about a signed-out visitor.
+      for (const progress of ['0 of 3 lessons', 'Not started', 'Status:', 'Next up']) {
+        expect(text, path).not.toContain(progress);
+      }
+      expect(html, path).not.toContain('<progress');
+    }
+    const course = visibleText(await (await robin.request('/courses/ai-foundations')).text());
+    expect(course).toContain('Sign in to see your progress');
+    expect(course).toContain('What is AI?');
   });
 
   it('signs in through the provider and creates the user, account and learner', async () => {
@@ -188,6 +204,11 @@ describe('signing in and out', () => {
     expect(location(signInPage)).toBe('/courses');
   });
 
+  it('shows a new user a first visit, with nothing saved yet', async () => {
+    const home = visibleText(await (await robin.request('/')).text());
+    expect(home).toContain('Welcome to LessonFolk');
+  });
+
   it('keeps users apart', async () => {
     const sam = browser();
     fake.signInAs({ sub: 'fake-sam', name: 'Sam Other', email: 'sam@example.test' });
@@ -196,6 +217,39 @@ describe('signing in and out', () => {
     expect(samMe.user).toMatchObject({ name: 'Sam Other' });
     expect(samMe.user!.id).not.toBe(robinId);
     expect((await robin.me()).user!.id).toBe(robinId);
+  });
+
+  it('shows each user only their own progress', async () => {
+    const sam = browser();
+    fake.signInAs({ sub: 'fake-sam', name: 'Sam Other', email: 'sam@example.test' });
+    await signIn(sam, '/');
+    const samId = (await sam.me()).user!.id;
+    // mid-course belongs to "Alex" (lesson 1 done), all-done to "Sam" (every lesson finished).
+    await seedProgress(testDb.db, robinId, 'mid-course');
+    await seedProgress(testDb.db, samId, 'all-done');
+
+    const page = async (who: Browser, path: string) => visibleText(await (await who.request(path)).text());
+
+    const robinHome = await page(robin, '/');
+    expect(robinHome).toContain('Welcome back, Alex!');
+    expect(robinHome).toContain('1 of 3 lessons finished');
+    expect(robinHome).not.toContain('Welcome back, Sam!');
+    const samHome = await page(sam, '/');
+    expect(samHome).toContain('Welcome back, Sam!');
+    expect(samHome).toContain('3 of 3 lessons finished');
+    expect(samHome).not.toContain('Welcome back, Alex!');
+
+    const robinCourse = await page(robin, '/courses/ai-foundations');
+    expect(robinCourse).toContain('confused AI with robots at first');
+    expect(robinCourse).not.toContain('Needed a second analogy');
+    const samCourse = await page(sam, '/courses/ai-foundations');
+    expect(samCourse).toContain('Needed a second analogy');
+    expect(samCourse).not.toContain('confused AI with robots at first');
+
+    expect(await page(robin, '/courses')).toContain('1 of 3 lessons');
+    expect(await page(sam, '/courses')).toContain('3 of 3 lessons');
+    // Signed in: no invitation to sign in.
+    expect(await page(robin, '/courses')).not.toContain('Sign in to see your progress');
   });
 
   it('signs out', async () => {

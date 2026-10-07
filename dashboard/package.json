@@ -4,12 +4,13 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --host 127.0.0.1",
     "build": "astro build",
     "start": "node --env-file-if-exists=../.env --experimental-strip-types --disable-warning=ExperimentalWarning scripts/serve.ts",
     "check": "astro check",
     "test": "vitest run",
     "test:unit": "vitest run --exclude \"**/*.db.test.ts\"",
+    "progress:import": "node --env-file-if-exists=../.env --experimental-strip-types --disable-warning=ExperimentalWarning scripts/import-progress.ts",
     "check:courses": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check-courses.ts"
   },
   "dependencies": {

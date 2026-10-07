@@ -41,9 +41,6 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     ports:
       - "${LESSONFOLK_BIND:-127.0.0.1}:${LESSONFOLK_PORT:-4321}:4321"
-    volumes:
-      # Progress is still read from .progress/progress.json until the Postgres store lands.
-      - ./.progress:/app/.progress:ro
     depends_on:
       db:
         condition: service_healthy
