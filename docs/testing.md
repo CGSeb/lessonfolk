@@ -19,7 +19,7 @@ npm run check -w @lessonfolk/db  # type-check the database package
 
 `npm test` runs `npm test` in every workspace that has one, each with [Vitest](https://vitest.dev):
 `packages/core/` (course loading, schemas, progress logic and the tutor rules, `@lessonfolk/core`),
-`packages/db/` (Postgres schema and migrations, `@lessonfolk/db`) and `dashboard/`.
+`packages/db/` (Postgres schema, migrations and the progress store, `@lessonfolk/db`) and `dashboard/`.
 
 ### Database tests (Postgres)
 
