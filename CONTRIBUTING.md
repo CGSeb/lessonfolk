@@ -30,8 +30,9 @@ You can contribute in two ways, and they need different setups:
 | [`AGENTS.md`](AGENTS.md) | The tutor's instructions: every procedure the agent follows, for learners and for course authors. [`CLAUDE.md`](CLAUDE.md) points Claude Code to it. |
 | [`courses/`](courses) | The courses: `courses/<lang>/index.yaml` (the recommended order), `themes.yaml`, one folder per course, and `courses/authors.yaml`. Format: [`docs/course-format.md`](docs/course-format.md). |
 | [`dashboard/`](dashboard) | The web dashboard (an [Astro](https://astro.build) server), its sign-in code, its end-to-end tests, and the scripts `scripts/serve.ts` (starts the built server after checking its settings) and `scripts/check-courses.ts`. |
-| [`packages/core/`](packages/core) | `@lessonfolk/core`: loading and validating courses, the progress file, and the tutor's rules (next lesson, path, level check) as code. |
-| [`packages/db/`](packages/db) | `@lessonfolk/db`: the Postgres schema ([Drizzle](https://orm.drizzle.team)), the migrations in `drizzle/`, and the database test helpers. |
+| [`packages/core/`](packages/core) | `@lessonfolk/core`: loading and validating courses, the progress file, the tutor's rules (next lesson, path, level check) as code, and the `ProgressStore` interface every progress backend follows. |
+| [`packages/db/`](packages/db) | `@lessonfolk/db`: the Postgres schema ([Drizzle](https://orm.drizzle.team)), the migrations in `drizzle/`, the Postgres progress store (`createPostgresProgressStore`) and the database test helpers. |
+| [`packages/mcp/`](packages/mcp) | `@lessonfolk/mcp`: the MCP server (course and progress tools, course resources) the dashboard serves at `/mcp`, and its OAuth setup for `LESSONFOLK_AUTH=oauth`. |
 | [`.claude/skills/`](.claude/skills) | Claude Code skills (`learn`, `progress`, `review`, `create-course`, `edit-course`) and two mods: `course-companion` (for learners) and `course-builder` (for course authors). |
 | [`docs/`](docs) | Documentation: see the [index](docs/README.md). |
 | [`assets/brand/`](assets/brand) | Logo files. |
@@ -41,7 +42,7 @@ You can contribute in two ways, and they need different setups:
 
 The repository is an npm **workspace**: one `npm install` at the root installs the dashboard
 and every package under `packages/`, and links them together (the dashboard imports
-`@lessonfolk/core` and `@lessonfolk/db` straight from their source).
+`@lessonfolk/core`, `@lessonfolk/db` and `@lessonfolk/mcp` straight from their source).
 
 ## Development setup
 
@@ -95,6 +96,7 @@ never committed). Variables already set in your shell win over `.env`.
 | `BETTER_AUTH_SECRET` | (none) | `oauth` only, required: a random secret of 32 characters or more that signs the session cookies. |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | (none) | `oauth`: your GitHub OAuth app. Set both or neither. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | (none) | `oauth`: your Google OAuth client. Set both or neither. |
+| `LESSONFOLK_MCP_TOKEN` | (none) | `none` only: when set, the MCP server at `/mcp` requires `Authorization: Bearer <token>`. Without it, `/mcp` only answers this computer. (`oauth` uses OAuth access tokens instead.) |
 
 **Dashboard server and folders**
 
@@ -123,14 +125,15 @@ Run root scripts from the repository root. Run a workspace script with `-w <work
 | `npm run dashboard` | Start the dashboard in development mode on http://127.0.0.1:4321, reloading as you edit (`astro dev`). |
 | `npm run dashboard:build` | Build the production server into `dashboard/dist/`. |
 | `npm run dashboard:start` | Run the built server, after the sign-in startup checks (`dashboard/scripts/serve.ts`). Build first. |
-| `npm test` | Run the tests of every workspace (core, db, dashboard). Needs Postgres. |
+| `npm test` | Run the tests of every workspace (core, db, mcp, dashboard). Needs Postgres. |
 | `npm run check:courses` | Validate every course and lesson file. Add `-- <folder>` to check another courses folder. |
 | `npm run progress:import` | Copy `.progress/progress.json` (or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. The dashboard reads progress from the database. |
 | `npm run check -w dashboard` | Type-check the dashboard (`astro check`). |
 | `npm run check -w packages/core` | Type-check `@lessonfolk/core`. |
 | `npm run check -w @lessonfolk/db` | Type-check `@lessonfolk/db`. |
+| `npm run check -w @lessonfolk/mcp` | Type-check `@lessonfolk/mcp`. |
 | `npm test -w <workspace>` | Run one workspace's tests. |
-| `npm run test:unit -w dashboard`, `npm run test:unit -w @lessonfolk/db` | Run the tests that need no database (everything but `*.db.test.ts`). |
+| `npm run test:unit -w dashboard`, `npm run test:unit -w @lessonfolk/db`, `npm run test:unit -w @lessonfolk/mcp` | Run the tests that need no database (everything but `*.db.test.ts`). |
 | `npm run generate -w @lessonfolk/db` | Write a new migration from changes to the schema. See [Database changes](#database-changes). |
 | `npm run migrate -w @lessonfolk/db` | Apply pending migrations to `DATABASE_URL`. |
 
@@ -141,7 +144,7 @@ The dashboard workspace also has `dev`, `build` and `start`: the root `dashboard
 
 The schema lives in [`packages/db/src/schema.ts`](packages/db/src/schema.ts) (Drizzle). It
 holds the sign-in tables of [Better Auth](https://www.better-auth.com) (`user`, `session`,
-`account`, `verification`), then `learner` (one per user), `lesson_progress` and the
+`account`, `verification`) and those of the MCP authorization server (`jwks`, `oauth_*`), then `learner` (one per user), `lesson_progress` and the
 append-only `progress_event` log.
 
 To change it:

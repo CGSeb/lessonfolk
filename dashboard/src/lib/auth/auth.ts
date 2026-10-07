@@ -6,6 +6,8 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { genericOAuth } from 'better-auth/plugins';
 import { account, session, user, verification, type Database } from '@lessonfolk/db';
+// The MCP authorization server (/mcp, packages/mcp): its Better Auth plugins and tables.
+import { mcpAuthPlugins, mcpAuthSchema } from '@lessonfolk/mcp';
 import { getDatabase } from '../store.ts';
 import { ensureLearner } from './local-learner.ts';
 import { readAuthSettings, type OAuthSettings } from './settings.ts';
@@ -20,12 +22,12 @@ export function createAuth(settings: OAuthSettings, db: Database) {
     baseURL: settings.baseURL,
     basePath: AUTH_BASE_PATH,
     secret: settings.secret,
-    database: drizzleAdapter(db, { provider: 'pg', schema: { user, session, account, verification } }),
+    database: drizzleAdapter(db, { provider: 'pg', schema: { user, session, account, verification, ...mcpAuthSchema } }),
     socialProviders: {
       ...(github && { github: { clientId: github.clientId, clientSecret: github.clientSecret } }),
       ...(google && { google: { clientId: google.clientId, clientSecret: google.clientSecret } }),
     },
-    plugins: settings.fakeOAuthURL ? [fakeOAuthProvider(settings.fakeOAuthURL)] : [],
+    plugins: [...mcpAuthPlugins(settings.baseURL), ...(settings.fakeOAuthURL ? [fakeOAuthProvider(settings.fakeOAuthURL)] : [])],
     databaseHooks: {
       user: {
         create: {

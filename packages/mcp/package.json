@@ -1,0 +1,30 @@
+{
+  "name": "@lessonfolk/mcp",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "The LessonFolk MCP server (Streamable HTTP at /mcp): course and progress tools for any AI chat.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude \"**/*.db.test.ts\"",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-auth/mcp": "1.7.7",
+    "@better-auth/oauth-provider": "1.7.7",
+    "@lessonfolk/core": "*",
+    "@lessonfolk/db": "*",
+    "@modelcontextprotocol/server": "2.3.1",
+    "better-auth": "^1.7.7",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "@types/node": "^22.20.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}

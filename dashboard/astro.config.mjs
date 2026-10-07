@@ -18,4 +18,7 @@ export default defineConfig({
   adapter: node({ mode: 'standalone' }),
   server: { port: 4321 },
   integrations: [authStartupChecks()],
+  // Cross-site form posts are refused in src/middleware.ts instead (src/lib/auth/origin-check.ts),
+  // which lets MCP clients post to the OAuth token endpoint.
+  security: { checkOrigin: false },
 });

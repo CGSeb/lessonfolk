@@ -12,7 +12,9 @@ then Postgres with `docker compose up -d db`), then run `npm test` and, for cour
 
 `npm test` runs `npm test` in every workspace that has one, each with [Vitest](https://vitest.dev):
 `packages/core/` (course loading, schemas, progress logic and the tutor rules, `@lessonfolk/core`),
-`packages/db/` (Postgres schema, migrations and the progress store, `@lessonfolk/db`) and `dashboard/`.
+`packages/db/` (Postgres schema, migrations and the progress store, `@lessonfolk/db`),
+`packages/mcp/` (the MCP server's tools and resources through the official MCP client, against
+Postgres, `@lessonfolk/mcp`) and `dashboard/`.
 
 ### Database tests (Postgres)
 
@@ -40,7 +42,8 @@ the `db-data` volume); `docker compose stop db` stops it when you are done.
 - Name database test files `*.db.test.ts`. When Postgres is not reachable they fail with
   "Cannot reach Postgres at … run `docker compose up -d db`".
 - **Without Docker**, the tests that need no database still run: `npm test -w packages/core`,
-  `npm run test:unit -w dashboard` and `npm run test:unit -w @lessonfolk/db` (everything but `*.db.test.ts`).
+  `npm run test:unit -w dashboard`, `npm run test:unit -w @lessonfolk/db` and
+  `npm run test:unit -w @lessonfolk/mcp` (everything but `*.db.test.ts`).
 - If a run is interrupted, leftover `lessonfolk_test_*` databases may stay behind. They are
   harmless; `docker compose down -v` removes them with the rest of the data.
 
@@ -81,6 +84,8 @@ Changing the schema and generating migrations: see
 | `auth-startup.test.ts` | Startup checks: `LESSONFOLK_AUTH=none` refuses a server reachable beyond 127.0.0.1 (`HOST`, or `LESSONFOLK_BIND` as in Docker) or an unreachable database, `oauth` refuses to start with no provider. No Postgres needed |
 | `auth-oauth.db.test.ts` | Sign-in with `LESSONFOLK_AUTH=oauth` through the **fake OAuth provider** (`fake-oauth.ts`, enabled only with `NODE_ENV=test`): only configured providers are listed, callbacks use `LESSONFOLK_BASE_URL`, sign-in creates the user, account and learner rows, home redirects to sign-in and public pages show no progress when signed out, **two users each see only their own progress**, sign-out, signing in again finds the same user |
 | `auth-none.db.test.ts` | `LESSONFOLK_AUTH=none`: the local learner is created on first start, once; pages show its progress without sign-in; the Docker-style start (`HOST=0.0.0.0`, `LESSONFOLK_BIND=127.0.0.1`) works |
+| `mcp-none.db.test.ts` | `/mcp` in `none` mode with the MCP client: tools for the local learner, other sites refused, `LESSONFOLK_MCP_TOKEN` required when set |
+| `mcp-oauth.db.test.ts` | `/mcp` in `oauth` mode as an MCP client connects: 401 with the resource metadata, discovery, dynamic client registration, sign-in (fake provider), consent (allow and deny), PKCE token, then the tools as that user; two users apart; forged tokens refused |
 
 Progress fixtures (`dashboard/tests/fixtures/progress/`, progress.json files the tests import into Postgres):
 
@@ -248,3 +253,21 @@ fill in `.env` (`LESSONFOLK_AUTH=oauth`, `LESSONFOLK_BASE_URL=http://localhost:4
       Set `LESSONFOLK_BIND=0.0.0.0` too: the app refuses to start ("only runs on 127.0.0.1").
 
 Put `.env` back the way it was when you are done, and never commit it.
+
+## Manual check: Claude Code over MCP
+
+The automated tests connect with the official MCP client. Check a real AI chat by hand after
+changes to `packages/mcp`, the OAuth setup or Better Auth upgrades. Start the app with a database
+(`docker compose up --build`), then follow [Connect your AI chat with MCP](using-lessonfolk.md#connect-your-ai-chat-with-mcp).
+
+- [ ] **`none` mode.** `claude mcp add --transport http lessonfolk http://localhost:4321/mcp`, start
+      `claude`: `/mcp` shows `lessonfolk` connected with its tools. Say *Let's start learning AI*:
+      the tutor calls `get_progress`, onboards you and saves with `set_profile`, `set_path`,
+      `start_lesson`. The rows appear in Postgres (`select * from lesson_progress`).
+- [ ] **Token.** Set `LESSONFOLK_MCP_TOKEN` in `.env`, restart: without the header Claude Code fails
+      to connect; with `--header "Authorization: Bearer <token>"` it connects.
+- [ ] **`oauth` mode.** With the settings of [`auth-dev.md`](auth-dev.md), `claude mcp remove lessonfolk`,
+      add it again, then `/mcp` → `lessonfolk` → authenticate. The browser shows sign-in, then
+      "Allow Claude Code to use LessonFolk?". Allow: Claude Code connects and the tools act on your
+      signed-in user. Deny once: Claude Code reports the authorization failed.
+- [ ] **Codex.** Repeat the `none` and `oauth` checks with Codex's MCP settings for the same URL.

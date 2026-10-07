@@ -15,6 +15,7 @@ this folder and teaches them to you in a conversation.
 - [The dashboard](#the-dashboard)
 - [Your progress and your privacy](#your-progress-and-your-privacy)
 - [Run it with Docker (self-hosting)](#run-it-with-docker-self-hosting)
+- [Connect your AI chat with MCP](#connect-your-ai-chat-with-mcp)
 - [Troubleshooting](#troubleshooting)
 
 ## What you need
@@ -220,6 +221,24 @@ docker compose up -d --build
 **Stop** it with `Ctrl+C` (or `docker compose stop` if it runs in the background). `docker
 compose down` removes the containers but keeps the data; `docker compose down -v` also
 deletes the database volume.
+
+## Connect your AI chat with MCP
+
+The running app (e.g. with Docker above) is also an [MCP](https://modelcontextprotocol.io)
+server at `http://localhost:4321/mcp`. An AI chat connected to it gets the courses and reads
+and saves your progress in the database through tools (`get_progress`, `get_next_lesson`,
+`start_lesson`, `complete_lesson`…), from any folder. In Claude Code:
+
+```bash
+claude mcp add --transport http lessonfolk http://localhost:4321/mcp
+```
+
+- **`LESSONFOLK_AUTH=none`**: that's all; it only works from your own computer. If you set
+  `LESSONFOLK_MCP_TOKEN` in `.env`, add
+  `--header "Authorization: Bearer <your token>"` to the command.
+- **`LESSONFOLK_AUTH=oauth`**: in Claude Code, run `/mcp`, pick `lessonfolk` and authenticate.
+  Your browser opens: sign in, then **Allow** the app to use LessonFolk. Every learner signs in
+  as themselves and only ever sees their own progress.
 
 ## Troubleshooting
 

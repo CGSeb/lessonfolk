@@ -19,14 +19,22 @@ afterAll(async () => {
 });
 
 describe('migrations', () => {
-  it('create the sign-in and progress tables', async () => {
+  it('create the sign-in, MCP authorization and progress tables', async () => {
     const rows = await testDb.sql<{ table_name: string }[]>`
       select table_name from information_schema.tables
       where table_schema = 'public' order by table_name`;
     expect(rows.map((r) => r.table_name)).toEqual([
       'account',
+      'jwks',
       'learner',
       'lesson_progress',
+      'oauth_access_token',
+      'oauth_client',
+      'oauth_client_assertion',
+      'oauth_client_resource',
+      'oauth_consent',
+      'oauth_refresh_token',
+      'oauth_resource',
       'progress_event',
       'session',
       'user',
