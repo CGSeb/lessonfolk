@@ -1,7 +1,7 @@
 /**
  * The tutor procedures, served as the server `instructions` and the `learn`, `review` and
- * `progress` prompts. The text lives in packages/mcp/prompts/*.md (the single source, adapted
- * from AGENTS.md to the MCP tools). The files are imported as text (`?raw`), so the dashboard
+ * `progress` prompts. The text lives in packages/mcp/prompts/*.md, the single source of the
+ * tutoring procedures (the `learn`, `progress` and `review` skills point to it too). The files are imported as text (`?raw`), so the dashboard
  * build bundles them: the running server never reads them from disk.
  */
 import type { McpServer } from '@modelcontextprotocol/server';

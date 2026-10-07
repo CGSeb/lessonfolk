@@ -27,16 +27,17 @@ You can contribute in two ways, and they need different setups:
 
 | Path | What it holds |
 |---|---|
-| [`AGENTS.md`](AGENTS.md) | The tutor's instructions: every procedure the agent follows, for learners and for course authors. [`CLAUDE.md`](CLAUDE.md) points Claude Code to it. |
+| [`AGENTS.md`](AGENTS.md) | Instructions for AI agents opened in this folder: the course authoring procedures, and for learners a pointer to the MCP server. [`CLAUDE.md`](CLAUDE.md) points Claude Code to it. |
 | [`courses/`](courses) | The courses: `courses/<lang>/index.yaml` (the recommended order), `themes.yaml`, one folder per course, and `courses/authors.yaml`. Format: [`docs/course-format.md`](docs/course-format.md). |
 | [`dashboard/`](dashboard) | The web dashboard (an [Astro](https://astro.build) server), its sign-in code, its end-to-end tests, and the scripts `scripts/serve.ts` (starts the built server after checking its settings) and `scripts/check-courses.ts`. |
-| [`packages/core/`](packages/core) | `@lessonfolk/core`: loading and validating courses, the progress file, the tutor's rules (next lesson, path, level check) as code, and the `ProgressStore` interface every progress backend follows. |
+| [`packages/core/`](packages/core) | `@lessonfolk/core`: loading and validating courses, the progress format (progress.json v1), the tutor's rules (next lesson, path, level check) as code, and the `ProgressStore` interface every progress backend follows. |
 | [`packages/db/`](packages/db) | `@lessonfolk/db`: the Postgres schema ([Drizzle](https://orm.drizzle.team)), the migrations in `drizzle/`, the Postgres progress store (`createPostgresProgressStore`) and the database test helpers. |
-| [`packages/mcp/`](packages/mcp) | `@lessonfolk/mcp`: the MCP server (course and progress tools, course resources, tutor prompts) the dashboard serves at `/mcp`, and its OAuth setup for `LESSONFOLK_AUTH=oauth`. The tutor's instructions and the `learn`, `review` and `progress` prompts are `packages/mcp/prompts/*.md`, adapted from the procedures of `AGENTS.md`: when you change a tutor rule, change both. |
-| [`.claude/skills/`](.claude/skills) | Claude Code skills (`learn`, `progress`, `review`, `create-course`, `edit-course`) and two mods: `course-companion` (for learners) and `course-builder` (for course authors). |
+| [`packages/mcp/`](packages/mcp) | `@lessonfolk/mcp`: the MCP server (course and progress tools, course resources, tutor prompts) the dashboard serves at `/mcp`, and its OAuth setup for `LESSONFOLK_AUTH=oauth`. The tutor's instructions and the `learn`, `review` and `progress` prompts are `packages/mcp/prompts/*.md`: the only copy of the tutoring procedures (the skills point to them). |
+| [`.claude/skills/`](.claude/skills) | Claude Code skills (`learn`, `progress` and `review`, which run the MCP prompts; `create-course`, `edit-course`) and two mods: `course-companion` (for learners) and `course-builder` (for course authors). |
 | [`docs/`](docs) | Documentation: see the [index](docs/README.md). |
 | [`assets/brand/`](assets/brand) | Logo files. |
-| `.progress/` | A learner's progress. Local only: git ignores everything in it except `progress.example.json`. Never commit it. |
+| [`.mcp.json`](.mcp.json) | Connects Claude Code opened in this folder to the MCP server of a local LessonFolk (`http://localhost:4321/mcp`). |
+| `.progress/` | Where older versions of the tutor saved progress (`progress.json`). Git ignores it; only the import reads it. The format is [`docs/progress.example.json`](docs/progress.example.json). |
 | `docker-compose.yml`, `Dockerfile` | Postgres and the app in containers. |
 | `.github/` | The issue template and the CI workflow. |
 
@@ -104,7 +105,7 @@ never committed). Variables already set in your shell win over `.env`.
 |---|---|---|
 | `HOST` | `127.0.0.1` | The address `npm run dashboard:start` listens on. With `LESSONFOLK_AUTH=none`, anything else is refused. The Docker image sets `0.0.0.0` and relies on `LESSONFOLK_BIND`. |
 | `PORT` | `4321` | The port `npm run dashboard:start` listens on. (For `npm run dashboard`, see the [learner guide](docs/using-lessonfolk.md#troubleshooting).) |
-| `LESSONFOLK_ROOT` | the nearest folder above the working directory that holds `AGENTS.md` | The repository root, where `courses/` and `.progress/` are found. The Docker image sets `/app`. |
+| `LESSONFOLK_ROOT` | the nearest folder above the working directory that holds `AGENTS.md` | The repository root, where `courses/` (and an old `.progress/progress.json` to import) are found. The Docker image sets `/app`. |
 | `LESSONFOLK_COURSES_DIR` | `<root>/courses` | Read the courses from another folder, e.g. a test fixture. |
 
 **Set by the tooling** (you don't set these yourself)
@@ -127,7 +128,7 @@ Run root scripts from the repository root. Run a workspace script with `-w <work
 | `npm run dashboard:start` | Run the built server, after the sign-in startup checks (`dashboard/scripts/serve.ts`). Build first. |
 | `npm test` | Run the tests of every workspace (core, db, mcp, dashboard). Needs Postgres. |
 | `npm run check:courses` | Validate every course and lesson file. Add `-- <folder>` to check another courses folder. |
-| `npm run progress:import` | Copy `.progress/progress.json` (or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. The dashboard reads progress from the database. |
+| `npm run progress:import` | Copy a `progress.json` (default: the old `.progress/progress.json`, or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. |
 | `npm run check -w dashboard` | Type-check the dashboard (`astro check`). |
 | `npm run check -w packages/core` | Type-check `@lessonfolk/core`. |
 | `npm run check -w @lessonfolk/db` | Type-check `@lessonfolk/db`. |

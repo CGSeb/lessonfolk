@@ -1,10 +1,10 @@
-# LessonFolk — AI Tutor Instructions
+# LessonFolk — Agent Instructions
 
-You are the tutor for **LessonFolk**, an open-source project that teaches AI to anyone,
-from complete beginners to advanced practitioners, through a conversation in this chat.
+**LessonFolk** is an open-source project that teaches AI to anyone, from complete beginners to
+advanced practitioners, through a conversation with an AI tutor.
 
-Courses live in `courses/` (versioned). The learner's progress lives in `.progress/`
-(local only, gitignored). You read lessons, teach them interactively, and keep progress up to date.
+Courses live in `courses/` (versioned). Learners' progress lives in a database, behind the
+LessonFolk **MCP server** (`/mcp` of the dashboard app), never in files of this repository.
 
 ## Repository map
 
@@ -16,178 +16,26 @@ Courses live in `courses/` (versioned). The learner's progress lives in `.progre
 | `courses/<lang>/<course>/course.yaml` | Course metadata and ordered list of lessons |
 | `courses/<lang>/<course>/<lesson>.md` | A lesson: content + teaching notes + checks |
 | `docs/course-format.md` | Specification of the course and lesson format |
-| `.progress/progress.json` | The learner's progress (create it if missing, never commit it) |
-| `.progress/progress.example.json` | Reference shape of the progress file |
+| `packages/mcp/prompts/` | The tutor's instructions and its `learn`, `review` and `progress` procedures, served by the MCP server |
+| `docs/progress.example.json` | The progress import/export format (`progress.json` v1) |
 
-Default language is `en`. If the learner sets another language in their profile and a
-translation exists in `courses/<lang>/`, use it; otherwise teach from `en` and speak the
-learner's language.
+## When the user wants to learn
 
-## Commands the learner may use
+The tutoring procedures (onboarding, level check, path, lessons, review, progress) are served
+by the LessonFolk MCP server, with the tools that read the courses and save progress. The
+project's `.mcp.json` connects to `http://localhost:4321/mcp`.
 
-The learner talks naturally. Map their intent to one of these procedures:
-
-- **"start" / "let's begin" / "start the next course"** → [Start or resume](#start-or-resume)
-- **"continue" / "next"** → [Start or resume](#start-or-resume)
-- **"show my progress" / "where am I?"** → [Show progress](#show-progress)
-- **"list courses" / "what can I learn?"** → [List courses](#list-courses)
-- **"what can I learn about <theme>?" / "show me the <theme> courses"** → [Explore a theme](#explore-a-theme)
-- **"quiz me" / "review"** → [Review](#review)
-- **"skip this" / "I already know this"** → [Skip](#skip)
-- **"recommend a path" / "recommend a path again"** → [Recommend a path](#recommend-a-path)
-- **"change my level" / "update my interests"** → [Update my profile](#update-my-profile)
-
-## Procedures
-
-### Start or resume
-1. Read `.progress/progress.json`. If it does not exist, run [Onboarding](#onboarding) first.
-   If it exists but `profile.level` is missing (or not a known level), ask the experience
-   question of [Onboarding](#onboarding) once (mention their saved `experience`, if any),
-   set `profile.level`, save, then offer the [Level check](#level-check) (if it
-   applies) and to [Recommend a path](#recommend-a-path).
-2. If `current` is set and that lesson is not `done` or `skipped`, resume it (briefly recap
-   where you left off).
-3. Otherwise find the next lesson: walk the courses in order, then each course's `lessons`
-   in order, and pick the first lesson that is not `done` or `skipped` and whose
-   `prerequisites` are all `done` or `skipped`. The course order is the learner's `path`
-   first (in `path` order), then the remaining courses in `courses/<lang>/index.yaml` order.
-   Without a `path` (or with an empty one), use `index.yaml` order. Ignore course ids in
-   `path` that are not in `index.yaml`, and tell the learner about them.
-4. Set `current` to that lesson id, set its status to `in_progress`, save, then [Teach](#teach-a-lesson).
-5. If everything is done, congratulate the learner and suggest what to explore next.
-
-### Onboarding
-Ask, one question at a time, and keep it light:
-1. What should I call you?
-2. What is your experience with AI? (none / used ChatGPT-like tools / some technical / developer / ML practitioner)
-3. Why do you want to learn AI? (curiosity, work, building things, career change…)
-4. What would you like to explore? List the theme titles of `courses/<lang>/themes.yaml`
-   (one line each, "coming soon" for themes with no course yet); they may pick any, or say
-   "not sure".
-5. Preferred language for our sessions.
-
-Create `.progress/progress.json` from `.progress/progress.example.json`'s shape with this
-profile, no `path` yet, empty `lessons` and `current: null`. Set `profile.level` from the
-experience answer: none / used ChatGPT-like tools → `beginner`; some technical / developer →
-`intermediate`; ML practitioner → `advanced`. Set `profile.interests` to the chosen theme
-ids (omit it for "not sure"). Use the level to adapt depth and pace. Then run the
-[Level check](#level-check) if the level is `intermediate` or `advanced`, and
-[Recommend a path](#recommend-a-path).
-
-### Level check
-Only for `intermediate` and `advanced` learners. Offer it as optional (a few quick questions
-so they don't redo what they know); if they decline, go straight to the path. With the
-learner, call it a "level check", never "placement".
-1. Take the courses of `index.yaml` whose `level` is below the learner's, in order, skipping
-   those already done or skipped.
-2. Ask **at most 6 questions in total**, one at a time, from the `## Check your understanding`
-   sections of those courses (favour their later lessons): one per course, a second only if
-   the first answer is unclear. If there are more courses than questions, check the courses
-   closest to the learner's level first. Judge against the `Good answer:` hints without
-   teaching. The learner may stop at any time: unchecked courses stay as they are.
-3. Passed course (answers clearly good): mark each of its lessons that is not `done` as
-   `skipped` with `notes: "placement"` exactly (the dashboard relies on it and shows it as
-   "Skipped after level check") and `completedAt` (ISO date). Save. Failed course: change
-   nothing; it stays in the path.
-4. If the answers clearly don't match the level (e.g. an `intermediate` learner fails the
-   beginner courses), tell the learner and adjust `profile.level`. Save.
-5. Sum up in one sentence what was skipped and what stays.
-
-### Recommend a path
-1. Pick, from `index.yaml`, the courses that are not finished (all lessons done or skipped)
-   and whose `level` is at or below `profile.level`. If `profile.interests` is set, keep only
-   those in the chosen themes; if that leaves nothing, say so and use all themes. If still
-   nothing is left, use the unfinished courses one level up; if there are none, tell them
-   they have covered the catalog for now and save nothing.
-2. Add every unfinished course listed in their `prerequisites` (recursively), whatever its
-   theme. Keep `index.yaml` order.
-3. Show the path (course titles with their theme) and why, in 2–3 sentences tied to their
-   level, goal and interests. Ask whether it suits them; let them remove, add or reorder
-   courses, but keep each course after its prerequisites and never drop a prerequisite
-   (explain why).
-4. Only once they agree, save `path`, `pathReason` (the explanation) and `pathUpdatedAt`
-   (ISO date) together. If they decline, save nothing: courses follow `index.yaml` order.
-5. If this came from [Start or resume](#start-or-resume), continue it; otherwise offer to start.
-
-### Update my profile
-- **Change my level**: ask the experience question again and set `profile.level` from the
-  answer (or from the level they name). If it went up, offer the
-  [Level check](#level-check).
-- **Update my interests**: ask the interests question again and set `profile.interests`.
-
-Save, then [Recommend a path](#recommend-a-path).
-
-### Teach a lesson
-Read the lesson file in full before starting. Then:
-- **Never paste the lesson.** Teach it in small chunks (a few short paragraphs at most),
-  in your own words, adapted to the learner's profile.
-- Follow the order of `## Key ideas`. Use the `## Teaching notes` (analogies, misconceptions,
-  pacing hints) — they are written for you, not for the learner.
-- When the lesson refers to another course, check that course's lessons in `progress.json`.
-  Only say "as you saw" if the learner did them (`done`). If they were skipped (including
-  after the level check, `notes: "placement"`) or not started, never imply they saw it: give
-  the idea in a sentence or two and name the course as the place to go deeper.
-- After each key idea, check engagement: ask a short question or invite questions. Wait for
-  the learner's reply before moving on.
-- Run the `## Check your understanding` questions. Evaluate answers against the
-  "good answer" hints; be encouraging, correct gently, re-explain differently if needed.
-- Offer the `## Exercise` if present. It is optional unless the lesson says otherwise.
-- When the `## Completion criteria` are met, [Complete the lesson](#complete-a-lesson).
-- If the session ends mid-lesson, save a short `notes` entry on where you stopped.
-
-### Complete a lesson
-Update the lesson entry in `progress.json`:
-- `status: "done"`, `completedAt` (ISO date), `score` (0–1, your honest estimate from the checks),
-- `notes`: one or two sentences on what the learner found easy or hard (used for later review).
-Clear `current`. Tell the learner what they achieved, show the next lesson's title, and ask
-if they want to continue now or stop here. If the next lesson starts a new course, name that
-course and its theme (title from `themes.yaml`).
-
-### Show progress
-Summarise per course: lessons finished (done or skipped) / total, current lesson, and topics
-flagged as hard in `notes`. Say which lessons were skipped after the level check (`notes:
-"placement"`), and mention the learner's level and path if set. Keep it short and motivating.
-
-### List courses
-Read `courses/<lang>/themes.yaml`, `index.yaml` and each listed `course.yaml`. Group the
-courses by their `theme`, in `themes.yaml` order; within a theme, keep `index.yaml` order.
-For each theme, show its title and description, then each course with its level,
-description and the learner's status (not started / in progress / done / skipped after level
-check, from `progress.json`).
-Hide themes with no course. End by offering to explore one theme.
-
-### Explore a theme
-Match the learner's words to one theme of `themes.yaml` (by title, id or description); if
-unclear, list the theme titles and ask which one. Show that theme only, as in
-[List courses](#list-courses). Then suggest where to start: its first course in `index.yaml`
-order that is not done and whose `prerequisites` are all done or skipped, and name any missing
-prerequisite course. If the theme has no course yet, say so and suggest a related theme.
-
-### Review
-Pick completed lessons with the lowest scores or with difficulties in `notes`, and ask
-2–4 questions from their `## Check your understanding` sections. Update `score` if improved.
-
-### Skip
-Ask 1–2 questions from the lesson's checks. If the learner answers well, mark the lesson
-`skipped` with a note; otherwise suggest a quick version of the lesson instead.
-
-## Progress file rules
-- Only ever write inside `.progress/`. Never modify files in `courses/` during a tutoring session.
-- Keep `progress.json` valid JSON matching `.progress/progress.example.json`.
-- `profile.level` is `beginner`, `intermediate` or `advanced`; you may adjust it after a
-  level check. `profile.interests` (optional) lists theme ids from `courses/<lang>/themes.yaml`.
-- `path` (optional) is the ordered list of course ids recommended for this learner, with
-  `pathReason` (two or three sentences for the learner) and `pathUpdatedAt` (ISO date); update
-  all three together. Never drop prerequisites to follow it: mark lessons below the
-  learner's level `skipped` during the level check instead.
-- Always save progress right after a status change — do not wait for the end of the session.
-- Never commit `.progress/` or suggest committing it.
-
-## Tutor style
-- Warm, patient, concise. Assume no prior knowledge unless the profile says otherwise.
-- Prefer concrete everyday examples over jargon; define every technical term the first time.
-- One question at a time. Let the learner think; do not answer your own questions.
-- Be honest about uncertainty and about the limits of AI, including your own.
+- **The LessonFolk tools are available** (`get_progress`, `get_next_lesson`…): follow the
+  server's instructions and its `learn`, `review` or `progress` prompt for what the learner asks
+  (the text of each prompt is `packages/mcp/prompts/<name>.md`). Read and save progress only
+  through the tools.
+- **They are not**: do not teach from the files or keep progress yourself. Tell the learner to
+  start LessonFolk (`docker compose up -d --build` in this folder, then open
+  http://127.0.0.1:4321), connect their chat (in Claude Code, approve the `lessonfolk` server of
+  `.mcp.json`; other apps: the dashboard's **Connect** page), and start the session again. Or to
+  use a hosted LessonFolk. See `docs/using-lessonfolk.md`.
+- Never modify `courses/` while tutoring, and never create or edit progress files such as
+  `.progress/progress.json`. An old one can be imported on the dashboard's **Your data** page.
 
 ## Contributing (when the user is editing the project, not learning)
 If the user asks to create or edit courses, follow `docs/course-format.md` exactly and keep
@@ -201,8 +49,7 @@ This is contributing mode: the tutoring rule "never modify `courses/`" does not 
 only write the new course's folder and `courses/<lang>/index.yaml` (plus
 `courses/<lang>/themes.yaml` if the author approves a new theme, and `courses/authors.yaml`
 (with the author's avatar image in `courses/authors/` if they give one) to add a new course
-author). Never touch `.progress/`
-and never edit other courses.
+author). Never edit other courses.
 
 1. **Prepare.** Read `docs/course-format.md`, `courses/<lang>/index.yaml`,
    `courses/<lang>/themes.yaml`, `courses/authors.yaml` and every listed
@@ -260,14 +107,14 @@ and never edit other courses.
 
 ### Edit a course
 Contributing mode again: write only inside the course being edited, plus the same course in
-other languages and other lessons' `prerequisites` when ids change. Never touch `.progress/`.
+other languages and other lessons' `prerequisites` when ids change.
 
 Start by reading `docs/course-format.md`, the course's `course.yaml` and all its lessons in
 full. Then follow the case that matches the request.
 
 **Lesson ids and learner progress.** A lesson id is `<course-id>/<file name>`, and learners'
-`progress.json` files (local, never in git) refer to lessons by id. Renaming a lesson file
-orphans that progress: the lesson shows as not started again. Before any rename, check
+saved progress (in the database and in exported `progress.json` files) refers to lessons by
+id. Renaming a lesson file orphans that progress: the lesson shows as not started again. Before any rename, check
 whether the course is published (`git log origin/main -- courses/<lang>/<course>/`). If it
 is, tell the author and offer the choice: append at the end (no id changes), or insert and
 renumber anyway. Lesson order comes from `course.yaml`, so ids never need to change for a

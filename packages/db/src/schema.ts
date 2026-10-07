@@ -6,8 +6,8 @@
  *
  * MCP authorization server (oauth mode): `jwks` and the `oauth_*` tables.
  *
- * Learner progress mirrors .progress/progress.json (see
- * .progress/progress.example.json): one `learner` row per user, one
+ * Learner progress mirrors a progress.json v1 file (see
+ * docs/progress.example.json): one `learner` row per user, one
  * `lesson_progress` row per lesson they started, and an append-only
  * `progress_event` log of every change.
  *

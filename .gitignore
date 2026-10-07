@@ -1,6 +1,6 @@
-# Learner progress is personal and stays local
-.progress/*
-!.progress/progress.example.json
+# Old file-based learner progress (before the MCP server): personal, never committed.
+# The dashboard can still import .progress/progress.json.
+.progress/
 
 # Node / Astro
 node_modules/

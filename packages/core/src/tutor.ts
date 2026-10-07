@@ -13,7 +13,7 @@ import {
 } from './progress.ts';
 
 /**
- * The tutor rules of AGENTS.md ("Procedures" and "Progress file rules") as pure functions, so
+ * The tutor rules (the procedures of packages/mcp/prompts/learn.md) as pure functions, so
  * a server can enforce them instead of trusting the AI to follow the prose.
  *
  * Every function takes the courses in `index.yaml` order (e.g. `Catalog.courses`) and never

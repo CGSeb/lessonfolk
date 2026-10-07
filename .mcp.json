@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lessonfolk": {
+      "type": "http",
+      "url": "http://localhost:4321/mcp"
+    }
+  }
+}
