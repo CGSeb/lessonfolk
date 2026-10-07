@@ -16,7 +16,8 @@ development OAuth apps. You need a GitHub account and/or a Google account. Nothi
 
 ## 1. Prepare your settings
 
-Copy `.env.example` to `.env` at the repository root (if you have not already), then set:
+Copy `.env.example` to `.env` at the repository root (if you have not already), then set the
+following (every setting is listed in [Environment variables](../CONTRIBUTING.md#environment-variables)):
 
 ```bash
 LESSONFOLK_AUTH=oauth

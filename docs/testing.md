@@ -5,17 +5,10 @@ one command, and a manual end-to-end session with a real AI tutor.
 
 ## Automated tests
 
-From the repository root:
-
-```bash
-npm ci                 # once
-docker compose up -d db  # once per session: Postgres for the database tests
-npm test               # every workspace: dashboard and packages/*
-npm run check:courses  # validate every course and lesson file
-npm run check -w dashboard  # type-check the dashboard
-npm run check -w packages/core  # type-check the core package
-npm run check -w @lessonfolk/db  # type-check the database package
-```
+Set up once as in [Development setup](../CONTRIBUTING.md#development-setup) (`npm install`,
+then Postgres with `docker compose up -d db`), then run `npm test` and, for course changes,
+`npm run check:courses`. Every command, type checks included, is listed in
+[npm scripts](../CONTRIBUTING.md#npm-scripts).
 
 `npm test` runs `npm test` in every workspace that has one, each with [Vitest](https://vitest.dev):
 `packages/core/` (course loading, schemas, progress logic and the tutor rules, `@lessonfolk/core`),
@@ -24,18 +17,13 @@ npm run check -w @lessonfolk/db  # type-check the database package
 ### Database tests (Postgres)
 
 Database tests run against a real Postgres, never a mock, locally and in CI, so we test what
-we run. You need [Docker](https://docs.docker.com/get-docker/):
-
-```bash
-docker compose up -d db   # Postgres 17 on 127.0.0.1:5432, data in the `db-data` volume
-npm test
-docker compose stop db    # when you are done (`docker compose down -v` also deletes the data)
-```
+we run. Start Postgres with `docker compose up -d db` (Postgres 17 on 127.0.0.1:5432, data in
+the `db-data` volume); `docker compose stop db` stops it when you are done.
 
 - The tests connect with `DATABASE_URL`, by default
   `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` (the `db` service). To use
-  another server or port, copy `.env.example` to `.env` and change it there (or set
-  `DATABASE_URL` in your shell). The user needs the right to create databases.
+  another server or port, see [Environment variables](../CONTRIBUTING.md#environment-variables).
+  The user needs the right to create databases.
 - Each test file gets its **own fresh database**, created and migrated by
   `createTestDatabase()` from `@lessonfolk/db/testing` and dropped at the end, so test
   files run in parallel without seeing each other's rows:
@@ -61,18 +49,8 @@ request, with Postgres as a service container.
 
 ### Database schema and migrations
 
-The schema lives in `packages/db/src/schema.ts` (Drizzle): the sign-in tables of Better Auth
-(`user`, `session`, `account`, `verification`), then `learner` (one per user),
-`lesson_progress` and the append-only `progress_event` log. After changing it, generate a migration and commit
-it with the schema change:
-
-```bash
-npm run generate -w @lessonfolk/db   # writes packages/db/drizzle/NNNN_*.sql
-npm run migrate -w @lessonfolk/db    # apply pending migrations to DATABASE_URL by hand
-```
-
-Migrations are applied automatically when the app starts in Docker (`docker compose up
---build`), before the dashboard server listens.
+Changing the schema and generating migrations: see
+[Database changes](../CONTRIBUTING.md#database-changes).
 
 ### Core and dashboard tests
 
