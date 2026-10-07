@@ -1,0 +1,186 @@
+---
+import { readFileSync } from 'node:fs';
+import { inspectCatalog } from '@lessonfolk/core';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Notice from '../../components/Notice.astro';
+import { findLocalProgressFile, MAX_IMPORT_BYTES, previewImport, type ImportPreview, type ProgressSummary } from '../../lib/account';
+import { getProgressStore } from '../../lib/store';
+import { t } from '../../i18n/en';
+
+export const prerender = false;
+
+/**
+ * Step 1 of an import: the account page posts a progress.json here (or, in `none` mode,
+ * asks for the tutor's .progress/progress.json). It is checked and compared with the saved
+ * progress; nothing is written. "Replace my progress" posts it to /api/account/import.
+ */
+const { authMode, user } = Astro.locals;
+if (Astro.request.method !== 'POST') return Astro.redirect('/account', 303);
+if (!user) return Astro.redirect('/sign-in?next=%2Faccount', 303);
+
+let preview: ImportPreview | undefined;
+let problem: string | undefined;
+
+const form = await Astro.request.formData().catch(() => undefined);
+let text: string | undefined;
+if (form?.get('source') === 'local' && authMode === 'none') {
+  const file = findLocalProgressFile();
+  if (file) text = readFileSync(file, 'utf8');
+  else problem = t('account.notFoundLocal', { file: '.progress/progress.json' });
+} else {
+  const file = form?.get('file');
+  if (!(file instanceof File) || file.size === 0) problem = t('account.noFile');
+  else if (file.size > MAX_IMPORT_BYTES) problem = t('account.tooLarge');
+  else text = await file.text();
+}
+if (text !== undefined) {
+  const current = await getProgressStore().getProgress(user.id);
+  preview = previewImport(text, current, inspectCatalog('en').catalog.courses);
+}
+
+const levelName = (summary: ProgressSummary) => (summary.level ? t(`level.${summary.level}`) : t('account.previewNone'));
+const rows = (s: ProgressSummary) => [
+  s.name ?? t('account.previewNone'),
+  levelName(s),
+  t('account.previewFinishedValue', { finished: s.finished, total: s.total }),
+  String(s.inProgress),
+  s.current ?? t('account.previewNone'),
+  s.path.length ? s.path.join(', ') : t('account.previewNone'),
+];
+const labels = [
+  t('account.previewName'),
+  t('account.previewLevel'),
+  t('account.previewFinished'),
+  t('account.previewInProgress'),
+  t('account.previewCurrent'),
+  t('account.previewPath'),
+];
+if (preview && !preview.ok) Astro.response.status = 422;
+else if (problem) Astro.response.status = 400;
+---
+
+<BaseLayout title={t('account.previewTitle')}>
+  <div class="stack import-page" style="--stack-space: var(--space-5)">
+    {
+      preview?.ok ? (
+        <>
+          <header class="stack" style="--stack-space: var(--space-2)">
+            <h1>{t('account.previewHeading')}</h1>
+            <p class="import-lead">{t('account.previewIntro')}</p>
+          </header>
+          <div class="card import-table">
+            <table>
+              <thead>
+                <tr>
+                  <td />
+                  <th scope="col">{t('account.previewNow')}</th>
+                  <th scope="col">{t('account.previewAfter')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {labels.map((label, i) => {
+                  const before = preview.before.empty ? (i === 0 ? t('account.previewEmpty') : '') : rows(preview.before)[i];
+                  const after = rows(preview.after)[i];
+                  return (
+                    <tr data-changed={before !== after ? 'true' : undefined}>
+                      <th scope="row">{label}</th>
+                      <td>{before}</td>
+                      <td>{after}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {preview.after.unknownLessons > 0 && (
+            <p class="muted">
+              {t(preview.after.unknownLessons === 1 ? 'account.previewUnknownOne' : 'account.previewUnknownOther', {
+                count: preview.after.unknownLessons,
+              })}
+            </p>
+          )}
+          <form method="post" action="/api/account/import" class="cluster">
+            <input type="hidden" name="progress" value={preview.text} />
+            <button class="button button--primary" type="submit">
+              {t('account.previewConfirm')}
+            </button>
+            <a class="button" href="/account">
+              {t('account.previewCancel')}
+            </a>
+          </form>
+        </>
+      ) : (
+        <>
+          <h1>{t('account.invalidTitle')}</h1>
+          <Notice tone="warning" title={preview && !preview.ok ? preview.message : (problem ?? t('account.noFile'))}>
+            {preview && !preview.ok && preview.problems.length > 0 && (
+              <>
+                <p>{t('account.invalidBody')}</p>
+                <ul class="import-problems">
+                  {preview.problems.map((line) => (
+                    <li>
+                      <code>{line}</code>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <p>{t('account.invalidHint')}</p>
+          </Notice>
+          <p>
+            <a class="button" href="/account">
+              {t('account.previewCancel')}
+            </a>
+          </p>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .import-page {
+    max-width: 44rem;
+  }
+
+  .import-lead {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .import-table {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  thead th {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  tbody th {
+    font-weight: var(--weight-semibold);
+  }
+
+  tr[data-changed] td:last-child {
+    background: var(--color-accent-subtle);
+    font-weight: var(--weight-semibold);
+  }
+
+  .import-problems {
+    display: grid;
+    gap: var(--space-1);
+  }
+</style>

@@ -1,0 +1,16 @@
+---
+/**
+ * `none` mode, first run: the database holds no progress but the tutor's
+ * .progress/progress.json exists. Offers to import it (with the usual preview first).
+ */
+import Notice from '../Notice.astro';
+import { t } from '../../i18n/en';
+---
+
+<Notice title={t('account.localFoundTitle')}>
+  <p>{t('account.localFoundBody', { file: '.progress/progress.json' })}</p>
+  <form method="post" action="/account/import">
+    <input type="hidden" name="source" value="local" />
+    <button class="button button--primary" type="submit">{t('account.localFoundButton')}</button>
+  </form>
+</Notice>

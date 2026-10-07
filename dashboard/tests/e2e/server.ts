@@ -10,6 +10,11 @@ import { inject } from 'vitest';
 export const COURSES_DIR = fileURLToPath(new URL('../../../packages/core/tests/fixtures/courses-valid', import.meta.url));
 /** Progress fixtures (progress.json files), one folder per learner state, imported into Postgres by the tests. */
 export const PROGRESS_FIXTURES = fileURLToPath(new URL('../fixtures/progress', import.meta.url));
+/**
+ * LESSONFOLK_ROOT of the test servers: a folder with no `.progress/progress.json`, so a
+ * learner's real progress file never shows up in the tests (the first-run import offer).
+ */
+export const ROOT_WITHOUT_PROGRESS = fileURLToPath(new URL('../fixtures', import.meta.url));
 /** The launcher that runs the sign-in startup checks, then the built server (like `npm run start`). */
 const SERVE_SCRIPT = fileURLToPath(new URL('../../scripts/serve.ts', import.meta.url));
 
@@ -23,6 +28,7 @@ const CONTROLLED_ENV = [
   'LESSONFOLK_BASE_URL',
   'LESSONFOLK_TEST_OAUTH_URL',
   'LESSONFOLK_MCP_TOKEN',
+  'LESSONFOLK_ROOT',
   'BETTER_AUTH_SECRET',
   'GITHUB_CLIENT_ID',
   'GITHUB_CLIENT_SECRET',
@@ -45,6 +51,7 @@ function serverProcess(env: ServerEnv): ChildProcess {
         PORT: '0',
         NODE_ENV: 'test',
         LESSONFOLK_COURSES_DIR: COURSES_DIR,
+        LESSONFOLK_ROOT: ROOT_WITHOUT_PROGRESS,
         NO_COLOR: '1',
         FORCE_COLOR: '0',
         ...env,

@@ -21,10 +21,18 @@ export const en = {
     themeToDark: 'Switch to dark theme',
     themeToLight: 'Switch to light theme',
   },
+  copy: {
+    button: 'Copy',
+    done: 'Copied',
+    failed: 'Copy failed',
+    phrase: 'Copy “{text}”',
+  },
   nav: {
     home: 'Home',
     courses: 'Courses',
     authors: 'Authors',
+    connect: 'Connect',
+    account: 'Your data',
   },
   courses: {
     title: 'Courses',
@@ -223,6 +231,132 @@ export const en = {
   },
   live: {
     coursesUpdated: 'The courses were updated.',
+  },
+  connect: {
+    title: 'Connect your AI chat',
+    heading: 'Connect your AI chat',
+    intro:
+      'Your AI chat can be your LessonFolk tutor from any folder. Connect it to this LessonFolk with MCP (Model Context Protocol, a standard way for AI apps to use tools): it then reads the courses and saves your progress here.',
+    urlLabel: 'Your LessonFolk address for AI chats',
+    urlHint: 'Every app below needs this address.',
+    localTitle: 'Only apps on this computer can connect',
+    localBody:
+      'This LessonFolk runs without sign-in, on this computer only. Apps running on this computer can connect: Claude Code, Codex, Cursor and Claude Desktop. Web chats like claude.ai and ChatGPT cannot: they connect from their company’s servers, which cannot reach this computer.',
+    tokenTitle: 'This LessonFolk needs a token',
+    tokenBody:
+      'LESSONFOLK_MCP_TOKEN is set, so every app must send it in a header: Authorization: Bearer <your token>. The steps below show where it goes. The token is in your .env file; this page never shows it.',
+    tokenOptional:
+      'Optional: to make sure only your own apps connect, set LESSONFOLK_MCP_TOKEN in your .env file and restart LessonFolk. Each app then has to send that token.',
+    oauthTitle: 'Everyone signs in as themselves',
+    oauthBody:
+      'The first time an app connects, your browser opens: sign in, then allow the app to use LessonFolk. The app then only sees your own progress.',
+    webTitle: 'Web chats cannot reach this address',
+    webBody:
+      'claude.ai and ChatGPT connect from their company’s servers, so they need a public https:// address (LESSONFOLK_BASE_URL). {host} is only reachable from this computer or network.',
+    clientsHeading: 'Set up your app',
+    notAvailable: 'Not available here',
+    notAvailableLocal: 'Web chats cannot reach a LessonFolk that runs on this computer. Use an app on this computer instead.',
+    notAvailableWeb: 'This needs LessonFolk on a public https:// address.',
+    thenTitle: 'Then start learning',
+    thenSay: 'Open a new chat in your app and say:',
+    thenPhrase: "Let's start learning AI",
+    menusChange:
+      'Apps change their menus from time to time. If a step does not match what you see, look for “MCP” or “connectors” in the app’s settings or help pages.',
+    claudeCode: {
+      add: 'In a terminal, run:',
+      checkNone: 'Start Claude Code (claude) and type /mcp: lessonfolk shows as connected.',
+      checkOauth: 'Start Claude Code (claude), type /mcp, choose lessonfolk and authenticate. Your browser opens: sign in, then allow.',
+    },
+    codex: {
+      add: 'In a terminal, run:',
+      tokenNote: 'Codex reads the token from the LESSONFOLK_MCP_TOKEN environment variable: set it in the terminal where you start Codex.',
+      checkNone: 'Start Codex (codex): the LessonFolk tools are there in every chat.',
+      checkOauth: 'Then run this command. Your browser opens: sign in, then allow.',
+    },
+    cursor: {
+      add: 'Open Cursor’s MCP settings and add a server, or add this to the file ~/.cursor/mcp.json (in your home folder):',
+      checkNone: 'Cursor lists lessonfolk with its tools in its MCP settings.',
+      checkOauth: 'When Cursor asks you to log in to lessonfolk, sign in, then allow.',
+    },
+    claudeDesktop: {
+      connector:
+        'In Claude Desktop, open the connectors settings and add a custom connector with your address. Connect it: your browser opens, sign in, then allow.',
+      connectorNote: 'Custom connectors connect from Anthropic’s servers, so they need a public https:// address.',
+      local:
+        'Custom connectors connect from Anthropic’s servers and cannot reach this computer. Add LessonFolk as a local server instead: in Claude Desktop, open Settings, then Developer, edit the config file (claude_desktop_config.json), add this, then restart Claude Desktop:',
+      localNote:
+        'mcp-remote is a small community bridge that needs Node.js; it is not part of LessonFolk or Claude. To send a token, see its documentation.',
+    },
+    claudeAi: {
+      steps: 'In claude.ai, open the connectors settings and add a custom connector with your address. Connect it: sign in, then allow.',
+    },
+    chatgpt: {
+      steps:
+        'In ChatGPT, open Settings, then Apps, and turn on developer mode in the advanced settings. Create an app with your address and OAuth authentication, then sign in and allow when asked.',
+      note: 'Developer mode is not available on every ChatGPT plan.',
+    },
+  },
+  account: {
+    title: 'Your data',
+    heading: 'Your data',
+    introNone:
+      'LessonFolk runs without sign-in here: your progress belongs to the one local learner and is saved in the database on this computer.',
+    introOauth: 'Signed in as {name} ({email}). Your progress is saved on this LessonFolk server, with your account.',
+    exportTitle: 'Download your progress',
+    exportBody:
+      'Get your progress as a progress.json file: your profile, path, lessons, scores and the tutor’s notes. Keep it as a backup, or import it into another LessonFolk.',
+    exportButton: 'Download progress.json',
+    importTitle: 'Import a progress.json',
+    importBody:
+      'Bring your progress from another LessonFolk, or from the progress.json file the tutor writes. It replaces the progress saved here. You see what changes before anything is saved.',
+    importFileLabel: 'Your progress.json file',
+    importButton: 'Check this file',
+    localFoundTitle: 'We found your progress file',
+    localFoundBody:
+      'There is no progress in the database yet, but {file} exists in this folder. Import it to see your progress here. The file itself is not changed.',
+    localFoundButton: 'Import my progress file',
+    deleteTitleNone: 'Erase your progress',
+    deleteBodyNone:
+      'Erases your profile, path, lessons, scores, notes and their history from the database. LessonFolk then starts fresh, as on your first visit. There is no account to delete without sign-in, and the .progress/progress.json file is not touched. This cannot be undone: download your progress first if you may want it back.',
+    deleteTitleOauth: 'Delete your account',
+    deleteBodyOauth:
+      'Deletes your account and all your data from this LessonFolk: your sign-in, your profile, path, lessons, scores, notes and their history, and the AI apps you connected. This cannot be undone: download your progress first if you may want it back.',
+    deleteConfirmLabel: 'Type “delete” to confirm',
+    deleteButtonNone: 'Erase my progress',
+    deleteButtonOauth: 'Delete my account and data',
+    importedOne: 'Your progress was imported: 1 lesson saved.',
+    importedOther: 'Your progress was imported: {count} lessons saved.',
+    erased: 'Your progress was erased. LessonFolk starts fresh.',
+    deleted: 'Your account and all your data were deleted.',
+    deletedBody: 'Thank you for learning with LessonFolk. You can sign in again at any time to start over.',
+    confirmMissing: 'Nothing was deleted',
+    confirmMissingBody: 'To confirm, type “delete” in the box, then press the button again.',
+    importExpired: 'Nothing was imported',
+    importExpiredBody: 'The file could not be read again. Please choose it again.',
+    previewTitle: 'Check before you import',
+    previewHeading: 'Here is what changes',
+    previewIntro: 'Importing replaces all the progress saved here with this file.',
+    previewNow: 'Saved now',
+    previewAfter: 'After the import',
+    previewName: 'Name',
+    previewLevel: 'Level',
+    previewFinished: 'Lessons finished',
+    previewFinishedValue: '{finished} of {total}',
+    previewInProgress: 'Lessons in progress',
+    previewCurrent: 'Current lesson',
+    previewPath: 'Your path',
+    previewNone: 'None',
+    previewEmpty: 'Nothing saved yet',
+    previewUnknownOne: '1 lesson in this file is not in the courses here. It is kept, but not shown.',
+    previewUnknownOther: '{count} lessons in this file are not in the courses here. They are kept, but not shown.',
+    previewConfirm: 'Replace my progress',
+    previewCancel: 'Cancel',
+    invalidTitle: 'This file cannot be imported',
+    invalidBody: 'Nothing was changed. The file has these problems:',
+    invalidHint: 'Check that you picked a progress.json file. If the tutor wrote it, ask your tutor to check it.',
+    noFile: 'Choose a progress.json file first.',
+    tooLarge: 'This file is too large to be a progress.json (more than 1 MB).',
+    notFoundLocal: 'The progress file {file} was not found.',
   },
 } as const;
 

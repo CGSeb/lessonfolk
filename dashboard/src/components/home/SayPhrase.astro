@@ -10,7 +10,7 @@ const { instruction, phrase } = Astro.props;
 
 <p class="say">
   <span>{instruction}</span>
-  <q class="say__phrase">{phrase}</q>
+  <q class="say__phrase" data-copy={phrase}>{phrase}</q>
 </p>
 
 <style>

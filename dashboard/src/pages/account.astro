@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Notice from '../components/Notice.astro';
+import LocalImportOffer from '../components/account/LocalImportOffer.astro';
+import { offerLocalImport } from '../lib/account';
+import { signInHref } from '../lib/auth/redirect';
+import { loadProgress } from '../lib/store';
+import { t } from '../i18n/en';
+
+export const prerender = false;
+
+/**
+ * The learner's data: download it, import a progress.json (checked and previewed on
+ * /account/import), delete it. Changes are POSTs to /api/account/*, refused from other sites
+ * by the origin check (src/lib/auth/origin-check.ts).
+ */
+const { authMode, user } = Astro.locals;
+const params = Astro.url.searchParams;
+
+// Just deleted (oauth): signed out, nothing left to show but the confirmation.
+const deleted = authMode === 'oauth' && !user && params.get('deleted') === '1';
+if (!user && !deleted) return Astro.redirect(signInHref(Astro.url), 303);
+
+const progress = user ? await loadProgress(user.id) : undefined;
+const offerImport = offerLocalImport(authMode, progress?.state);
+
+const importedParam = params.get('imported');
+const imported = importedParam !== null && /^\d+$/.test(importedParam) ? Number(importedParam) : undefined;
+const error = params.get('error');
+const oauth = authMode === 'oauth';
+---
+
+<BaseLayout title={t('account.title')}>
+  <div class="stack account-page" style="--stack-space: var(--space-6)">
+    {
+      deleted || !user ? (
+        <header class="stack" style="--stack-space: var(--space-2)">
+          <h1>{t('account.deleted')}</h1>
+          <p class="muted">{t('account.deletedBody')}</p>
+        </header>
+      ) : (
+        <>
+          <header class="stack" style="--stack-space: var(--space-2)">
+            <h1>{t('account.heading')}</h1>
+            <p class="account-lead">
+              {oauth ? t('account.introOauth', { name: user.name || user.email, email: user.email }) : t('account.introNone')}
+            </p>
+          </header>
+
+          {imported !== undefined && (
+            <Notice title={t(imported === 1 ? 'account.importedOne' : 'account.importedOther', { count: imported })}>
+              <p>
+                <a href="/">{t('nav.home')}</a>
+              </p>
+            </Notice>
+          )}
+          {params.get('erased') === '1' && (
+            <Notice title={t('account.erased')}>
+              <p>
+                <a href="/">{t('nav.home')}</a>
+              </p>
+            </Notice>
+          )}
+          {error === 'confirm' && (
+            <Notice tone="warning" title={t('account.confirmMissing')}>
+              <p>{t('account.confirmMissingBody')}</p>
+            </Notice>
+          )}
+          {error === 'expired' && (
+            <Notice tone="warning" title={t('account.importExpired')}>
+              <p>{t('account.importExpiredBody')}</p>
+            </Notice>
+          )}
+          {offerImport && <LocalImportOffer />}
+
+          <section class="card stack" aria-labelledby="export-heading">
+            <h2 id="export-heading">{t('account.exportTitle')}</h2>
+            <p>{t('account.exportBody')}</p>
+            <p>
+              <a class="button button--primary" href="/api/account/export" download="progress.json">
+                {t('account.exportButton')}
+              </a>
+            </p>
+          </section>
+
+          <section class="card stack" aria-labelledby="import-heading">
+            <h2 id="import-heading">{t('account.importTitle')}</h2>
+            <p>{t('account.importBody')}</p>
+            <form class="stack" method="post" action="/account/import" enctype="multipart/form-data" style="--stack-space: var(--space-3)">
+              <label class="stack" style="--stack-space: var(--space-2)">
+                <span class="account-label">{t('account.importFileLabel')}</span>
+                <input type="file" name="file" accept=".json,application/json" required />
+              </label>
+              <p>
+                <button class="button" type="submit">
+                  {t('account.importButton')}
+                </button>
+              </p>
+            </form>
+          </section>
+
+          <section class="card stack" aria-labelledby="delete-heading">
+            <h2 id="delete-heading">{t(oauth ? 'account.deleteTitleOauth' : 'account.deleteTitleNone')}</h2>
+            <p>{t(oauth ? 'account.deleteBodyOauth' : 'account.deleteBodyNone')}</p>
+            <form class="stack" method="post" action="/api/account/delete" style="--stack-space: var(--space-3)">
+              <label class="stack" style="--stack-space: var(--space-2)">
+                <span class="account-label">{t('account.deleteConfirmLabel')}</span>
+                <input class="account-input" type="text" name="confirm" autocomplete="off" required pattern="[Dd][Ee][Ll][Ee][Tt][Ee]" />
+              </label>
+              <p>
+                <button class="button button--warning" type="submit">
+                  {t(oauth ? 'account.deleteButtonOauth' : 'account.deleteButtonNone')}
+                </button>
+              </p>
+            </form>
+          </section>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .account-page {
+    max-width: 44rem;
+  }
+
+  .account-lead {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .account-label {
+    font-weight: var(--weight-semibold);
+  }
+
+  .account-input {
+    max-width: 16rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+  }
+</style>

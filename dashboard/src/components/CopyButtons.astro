@@ -1,0 +1,85 @@
+---
+import { t } from '../i18n/en';
+---
+
+<!--
+  Adds a Copy button to every text box the learner may want to paste somewhere:
+  each <pre> block (commands, addresses, config) and each phrase marked data-copy
+  (what to say to the tutor). Progressive enhancement: without JavaScript the
+  boxes stay as they are. The styles live in global.css (.copy-*).
+-->
+<div
+  hidden
+  data-copy-labels
+  data-label={t('copy.button')}
+  data-label-done={t('copy.done')}
+  data-label-failed={t('copy.failed')}
+  data-label-phrase={t('copy.phrase')}
+>
+</div>
+<p class="visually-hidden" aria-live="polite" data-copy-status></p>
+
+<script>
+  const labels = document.querySelector<HTMLElement>('[data-copy-labels]')?.dataset ?? {};
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+
+  async function copyText(text: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // No Clipboard API (plain http on another computer): fall back to a hidden textarea.
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.append(area);
+      area.select();
+      let copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch {
+        copied = false;
+      }
+      area.remove();
+      return copied;
+    }
+  }
+
+  function makeButton(getText: () => string, variant: 'box' | 'phrase', label: string): HTMLButtonElement {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `copy-button copy-button--${variant}`;
+    button.textContent = labels.label ?? 'Copy';
+    button.setAttribute('aria-label', label);
+    let timer: number | undefined;
+    button.addEventListener('click', async () => {
+      const copied = await copyText(getText());
+      const message = (copied ? labels.labelDone : labels.labelFailed) ?? '';
+      button.textContent = message;
+      button.dataset.state = copied ? 'done' : 'failed';
+      if (status) status.textContent = message;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        button.textContent = labels.label ?? 'Copy';
+        delete button.dataset.state;
+      }, 2000);
+    });
+    return button;
+  }
+
+  for (const pre of document.querySelectorAll<HTMLPreElement>('main pre')) {
+    if (pre.parentElement?.classList.contains('copy-box')) continue;
+    const box = document.createElement('div');
+    box.className = 'copy-box';
+    pre.replaceWith(box);
+    box.append(pre, makeButton(() => pre.innerText.trim(), 'box', labels.label ?? 'Copy'));
+  }
+
+  for (const phrase of document.querySelectorAll<HTMLElement>('[data-copy]')) {
+    const text = () => (phrase.dataset.copy || phrase.textContent || '').trim();
+    const label = (labels.labelPhrase ?? 'Copy “{text}”').replace('{text}', text());
+    phrase.after(makeButton(text, 'phrase', label));
+  }
+</script>

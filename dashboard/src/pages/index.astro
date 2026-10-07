@@ -14,6 +14,8 @@ import { inspectCatalog } from '@lessonfolk/core';
 import { getPaths } from '../lib/paths';
 import { signInHref } from '../lib/auth/redirect';
 import { loadProgress } from '../lib/store';
+import { offerLocalImport } from '../lib/account';
+import LocalImportOffer from '../components/account/LocalImportOffer.astro';
 
 // Home is the learner's own progress: signed out (LESSONFOLK_AUTH=oauth), sign in first.
 const { user } = Astro.locals;
@@ -21,11 +23,14 @@ if (!user) return Astro.redirect(signInHref(Astro.url), 303);
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');
+const progressResult = await loadProgress(user.id);
 const { view, name, level, interests, path, suggestPath, lessons, courses, themes, progressError, progressWarnings } = getHomeView(
   catalog.courses,
-  await loadProgress(user.id),
+  progressResult,
   catalog.themes,
 );
+// First run without sign-in: nothing in the database yet, but the tutor's progress file exists.
+const offerImport = offerLocalImport(Astro.locals.authMode, progressResult.state);
 
 const MAX_ISSUES = 5;
 const { root } = getPaths();
@@ -37,6 +42,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
 
 <BaseLayout>
   <div class="stack" style="--stack-space: var(--space-6)">
+    {offerImport && <LocalImportOffer />}
     {
       progressError && (
         <Notice tone="warning" title={t('home.invalidProgressTitle')}>
