@@ -67,7 +67,7 @@ your progress — the AI tutor is the only thing that writes it.
 | `npm run dashboard` | Start the dashboard in development mode |
 | `npm run dashboard:build` | Build the production server |
 | `npm run dashboard:start` | Run the built server |
-| `npm test` | Run the dashboard tests |
+| `npm test` | Run the tests (core package and dashboard) |
 
 Set `LESSONFOLK_COURSES_DIR` or `LESSONFOLK_PROGRESS_DIR` to point the dashboard at other folders
 (useful for testing with sample progress files). See [`docs/testing.md`](docs/testing.md) for the

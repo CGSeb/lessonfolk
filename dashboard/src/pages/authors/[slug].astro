@@ -5,8 +5,8 @@ import Notice from '../../components/Notice.astro';
 import AuthorAvatar from '../../components/authors/AuthorAvatar.astro';
 import { courseAuthors, getAuthorView } from '../../components/authors/authorView';
 import { t } from '../../i18n/en';
-import { authorsFilePath, inspectCatalog } from '../../lib/courses';
-import { getPathCourseIds, progressOrEmpty, readProgress } from '../../lib/progress';
+import { authorsFilePath, getPathCourseIds, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
+import { readProgress } from '../../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const slug = Astro.params.slug ?? '';

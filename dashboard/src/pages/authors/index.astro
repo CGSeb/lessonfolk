@@ -4,7 +4,7 @@ import Notice from '../../components/Notice.astro';
 import AuthorAvatar from '../../components/authors/AuthorAvatar.astro';
 import { getAuthorList } from '../../components/authors/authorView';
 import { t } from '../../i18n/en';
-import { authorsFilePath, inspectCatalog } from '../../lib/courses';
+import { authorsFilePath, inspectCatalog } from '@lessonfolk/core';
 
 // Read on every request so the page reflects the latest course files.
 const { catalog, issues } = inspectCatalog('en');

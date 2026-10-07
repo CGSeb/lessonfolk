@@ -5,11 +5,10 @@
  * Drift from the writing guidelines is printed as warnings and does not fail.
  */
 import { resolve } from 'node:path';
-import { formatCourseIssues, inspectAllCourses, listLanguages } from '../src/lib/courses.ts';
-import { getPaths } from '../src/lib/paths.ts';
+import { formatCourseIssues, getCoursesDir, inspectAllCourses, listLanguages } from '@lessonfolk/core';
 
 const arg = process.argv[2];
-const coursesDir = arg ? resolve(process.env.INIT_CWD ?? process.cwd(), arg) : getPaths().courses;
+const coursesDir = arg ? resolve(process.env.INIT_CWD ?? process.cwd(), arg) : getCoursesDir();
 const { issues, warnings } = inspectAllCourses(coursesDir);
 
 if (warnings.length) {

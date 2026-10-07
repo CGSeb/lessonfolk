@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { t } from '../i18n/en';
-import { emptyProgress, type Progress } from '../lib/progress';
+import { emptyProgress, type Progress } from '@lessonfolk/core';
 import { lessonDisplayStatus, statusDisplay } from './status-badge';
 
 describe('statusDisplay', () => {

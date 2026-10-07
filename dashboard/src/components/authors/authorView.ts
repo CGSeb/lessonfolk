@@ -1,4 +1,4 @@
-import { getStats, type CourseRef, type CourseStats, type Progress } from '../../lib/progress';
+import { getStats, type CourseRef, type CourseStats, type Progress } from '@lessonfolk/core';
 
 /** An author with their courses, as returned by the catalog loader (`Catalog.authors`). */
 export interface AuthorRef<C extends CourseRef> {

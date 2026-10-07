@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emptyProgress, type CourseRef, type LessonStatus, type Progress } from '../../lib/progress';
+import { emptyProgress, type CourseRef, type LessonStatus, type Progress } from '@lessonfolk/core';
 import { getCatalogSections, type ThemeRef } from './catalogView';
 
 const course = (id: string, lessonCount: number): CourseRef => ({

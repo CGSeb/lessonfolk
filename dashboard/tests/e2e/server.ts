@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { inject } from 'vitest';
 
 /** Pinned copy of the catalog (AI Foundations only), so new courses do not change test expectations. */
-export const COURSES_DIR = fileURLToPath(new URL('../fixtures/courses-valid', import.meta.url));
+export const COURSES_DIR = fileURLToPath(new URL('../../../packages/core/tests/fixtures/courses-valid', import.meta.url));
 /** Progress fixtures, one folder per learner state. */
 export const PROGRESS_FIXTURES = fileURLToPath(new URL('../fixtures/progress', import.meta.url));
 

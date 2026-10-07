@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { z } from 'zod';
 import { checkLessonBody } from './lesson-body.ts';
-import { getPaths } from './paths.ts';
+import { getCoursesDir } from './paths.ts';
 import {
   authorsSchema,
   courseFileSchema,
@@ -163,7 +163,7 @@ function isDir(path: string): boolean {
  */
 export function inspectCatalog(
   lang = 'en',
-  coursesDir: string = getPaths().courses,
+  coursesDir: string = getCoursesDir(),
 ): { catalog: Catalog; issues: CourseIssue[]; warnings: CourseIssue[] } {
   const issues: CourseIssue[] = [];
   const warnings: CourseIssue[] = [];
@@ -225,12 +225,12 @@ export const AUTHORS_DIR = 'authors';
 export const MAX_AVATAR_BYTES = 512 * 1024;
 
 /** Absolute path of an author's avatar image (`avatar` from `authors.yaml`). */
-export function authorAvatarPath(avatar: string, coursesDir: string = getPaths().courses): string {
+export function authorAvatarPath(avatar: string, coursesDir: string = getCoursesDir()): string {
   return join(coursesDir, AUTHORS_DIR, avatar);
 }
 
 /** `courses/authors.yaml`: one file for every language. */
-export function authorsFilePath(coursesDir: string = getPaths().courses): string {
+export function authorsFilePath(coursesDir: string = getCoursesDir()): string {
   return join(coursesDir, 'authors.yaml');
 }
 
@@ -433,7 +433,7 @@ function loadCourseDir(
  * `course.yaml` order. Files are read on every call (no caching), so edits show
  * up without a restart. Throws CourseValidationError naming each faulty file.
  */
-export function loadCatalog(lang = 'en', coursesDir: string = getPaths().courses): Course[] {
+export function loadCatalog(lang = 'en', coursesDir: string = getCoursesDir()): Course[] {
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.courses;
@@ -443,7 +443,7 @@ export function loadCatalog(lang = 'en', coursesDir: string = getPaths().courses
  * Load the themes of a language in `themes.yaml` order, each with its courses in
  * `index.yaml` order. Empty themes are included. Throws like `loadCatalog`.
  */
-export function loadThemes(lang = 'en', coursesDir: string = getPaths().courses): Theme[] {
+export function loadThemes(lang = 'en', coursesDir: string = getCoursesDir()): Theme[] {
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.themes;
@@ -453,7 +453,7 @@ export function loadThemes(lang = 'en', coursesDir: string = getPaths().courses)
  * Load the authors in `authors.yaml` order, each with their courses of this
  * language in `index.yaml` order. Authors with no course are included. Throws like `loadCatalog`.
  */
-export function loadAuthors(lang = 'en', coursesDir: string = getPaths().courses): Author[] {
+export function loadAuthors(lang = 'en', coursesDir: string = getCoursesDir()): Author[] {
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.authors;
@@ -463,7 +463,7 @@ export function loadAuthors(lang = 'en', coursesDir: string = getPaths().courses
 export function loadCourse(
   courseId: string,
   lang = 'en',
-  coursesDir: string = getPaths().courses,
+  coursesDir: string = getCoursesDir(),
 ): Course | undefined {
   return loadCatalog(lang, coursesDir).find((c) => c.id === courseId);
 }
@@ -472,7 +472,7 @@ export function loadCourse(
 export function findLesson(
   lessonId: string,
   lang = 'en',
-  coursesDir: string = getPaths().courses,
+  coursesDir: string = getCoursesDir(),
 ): { course: Course; lesson: Lesson } | undefined {
   for (const course of loadCatalog(lang, coursesDir)) {
     const lesson = course.lessons.find((l) => l.id === lessonId);
@@ -482,7 +482,7 @@ export function findLesson(
 }
 
 /** Language codes that have a folder under the courses directory. */
-export function listLanguages(coursesDir: string = getPaths().courses): string[] {
+export function listLanguages(coursesDir: string = getCoursesDir()): string[] {
   if (!isDir(coursesDir)) return [];
   return readdirSync(coursesDir)
     .filter((name) => name !== AUTHORS_DIR && isDir(join(coursesDir, name)))
@@ -490,7 +490,7 @@ export function listLanguages(coursesDir: string = getPaths().courses): string[]
 }
 
 /** Check every language; `issues` are errors, `warnings` are drift from the writing guidelines. */
-export function inspectAllCourses(coursesDir: string = getPaths().courses): {
+export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
   issues: CourseIssue[];
   warnings: CourseIssue[];
 } {
@@ -530,6 +530,6 @@ function uniqueIssues(issues: CourseIssue[]): CourseIssue[] {
 }
 
 /** Validate every language; returns all errors (empty when everything is valid). */
-export function validateAllCourses(coursesDir: string = getPaths().courses): CourseIssue[] {
+export function validateAllCourses(coursesDir: string = getCoursesDir()): CourseIssue[] {
   return inspectAllCourses(coursesDir).issues;
 }

@@ -21,13 +21,13 @@ import {
   loadCourse,
   loadThemes,
   validateAllCourses,
-} from './courses';
-import { getPaths } from './paths';
+} from './courses.ts';
+import { getCoursesDir } from './paths.ts';
 
-const invalidDir = resolve(__dirname, '../../tests/fixtures/courses-invalid');
-const realDir = getPaths().courses;
+const invalidDir = resolve(__dirname, '../tests/fixtures/courses-invalid');
+const realDir = getCoursesDir();
 /** Pinned copy of the catalog (AI Foundations only), so new courses do not change test expectations. */
-const validDir = resolve(__dirname, '../../tests/fixtures/courses-valid');
+const validDir = resolve(__dirname, '../tests/fixtures/courses-valid');
 
 function issuesFor(dir: string) {
   return inspectCatalog('en', dir).issues.map((i) => ({

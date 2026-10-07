@@ -9,20 +9,22 @@ From the repository root:
 
 ```bash
 npm ci                 # once
-npm test               # all dashboard tests (unit + end-to-end), about 10 s
+npm test               # tests of every workspace (core + dashboard unit and end-to-end), about 10 s
 npm run check:courses  # validate every course and lesson file
 npm run check -w dashboard  # type-check the dashboard
+npm run check -w packages/core  # type-check the core package
 ```
 
-`npm test` runs [Vitest](https://vitest.dev) in `dashboard/`:
+`npm test` runs [Vitest](https://vitest.dev) in every workspace: `packages/core/` (course loading,
+schemas and progress logic, `@lessonfolk/core`) and `dashboard/`:
 
-- **Unit tests** sit next to the code (`dashboard/src/**/*.test.ts`).
+- **Unit tests** sit next to the code (`packages/core/src/**/*.test.ts`, `dashboard/src/**/*.test.ts`).
 - **End-to-end tests** live in `dashboard/tests/e2e/`. Before they run, a global setup builds the
   production server into `dashboard/node_modules/.cache/lessonfolk-e2e/` (your own `dashboard/dist`
   is never touched). Each test file then starts that server as a real Node process on a free
   port, pointed at the pinned course fixture and at one progress fixture, and fetches pages over
   HTTP. Servers and temporary folders are removed when the tests finish.
-- **Course fixtures** live in `dashboard/tests/fixtures/`: `courses-valid/` is a pinned copy of the
+- **Course fixtures** live in `packages/core/tests/fixtures/`: `courses-valid/` is a pinned copy of the
   catalog with only AI Foundations, used by every test that expects an exact catalog (themes,
   authors, personalization scenarios, e2e pages), so adding a course to `courses/` never breaks
   them; `courses-invalid/` holds broken courses for the validation tests. The real `courses/`

@@ -14,9 +14,9 @@ import {
 } from '../../components/catalog/catalogFilter';
 import { themeToneClass } from '../../components/theme-tone';
 import { t } from '../../i18n/en';
-import { inspectCatalog } from '../../lib/courses';
+import { getPathCourseIds, getStats, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
-import { getPathCourseIds, getStats, progressOrEmpty, readProgress } from '../../lib/progress';
+import { readProgress } from '../../lib/progress';
 
 // Read on every request so the page reflects the tutor's latest writes.
 const { catalog, issues } = inspectCatalog('en');

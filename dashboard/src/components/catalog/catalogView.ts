@@ -1,4 +1,4 @@
-import { getStats, isFinished, type CourseRef, type CourseStats, type Progress } from '../../lib/progress';
+import { getStats, isFinished, type CourseRef, type CourseStats, type Progress } from '@lessonfolk/core';
 
 /** A theme with its courses, as returned by the catalog loader (`Catalog.themes`). */
 export interface ThemeRef<C extends CourseRef> {
