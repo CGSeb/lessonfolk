@@ -76,12 +76,12 @@ describe('loadCatalog (real courses)', () => {
     expect(warnings.filter((m) => !/^theme "[a-z-]+" has no course yet$/.test(m))).toEqual([]);
   });
 
-  it('credits AI Foundations to the apprentice author', () => {
-    expect(loadCourse('ai-foundations')?.authors).toEqual(['apprentice']);
-    const apprentice = loadAuthors().find((a) => a.slug === 'apprentice');
-    expect(apprentice).toMatchObject({ name: 'Apprentice' });
-    expect(apprentice?.bio).toBeTruthy();
-    expect(apprentice?.courses.map((c) => c.id)).toContain('ai-foundations');
+  it('credits AI Foundations to the lessonfolk author', () => {
+    expect(loadCourse('ai-foundations')?.authors).toEqual(['lessonfolk']);
+    const lessonfolk = loadAuthors().find((a) => a.slug === 'lessonfolk');
+    expect(lessonfolk).toMatchObject({ name: 'LessonFolk' });
+    expect(lessonfolk?.bio).toBeTruthy();
+    expect(lessonfolk?.courses.map((c) => c.id)).toContain('ai-foundations');
   });
 
   it('assigns AI Foundations to a theme and groups themes in themes.yaml order', () => {
@@ -165,7 +165,7 @@ describe('loadCatalog (invalid fixture)', () => {
 describe('themes', () => {
   /** Copy of the pinned courses with `themes.yaml` replaced (or removed when `undefined`). */
   function withThemes(themesYaml: string | undefined, extraCourses: string[] = []) {
-    const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-courses-'));
     cpSync(validDir, dir, { recursive: true });
     const themesFile = join(dir, 'en', 'themes.yaml');
     if (themesYaml === undefined) rmSync(themesFile);
@@ -247,7 +247,7 @@ describe('themes', () => {
 describe('authors', () => {
   /** Copy of the pinned courses with `authors.yaml` replaced (or removed when `undefined`). */
   function withAuthors(authorsYaml: string | undefined, courseAuthors?: string) {
-    const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-courses-'));
     cpSync(validDir, dir, { recursive: true });
     const authorsFile = join(dir, 'authors.yaml');
     if (authorsYaml === undefined) rmSync(authorsFile);
@@ -281,7 +281,7 @@ describe('authors', () => {
       file: 'en/missing-field/course.yaml',
       message: 'authors: missing required field (expected array)',
     });
-    expect(allIssues(withAuthors(authorsYaml('apprentice'), 'authors: []'))).toEqual([
+    expect(allIssues(withAuthors(authorsYaml('lessonfolk'), 'authors: []'))).toEqual([
       {
         file: 'en/ai-foundations/course.yaml',
         message: 'authors: must list at least one author slug from authors.yaml',
@@ -290,9 +290,9 @@ describe('authors', () => {
   });
 
   it('reports an author listed twice in a course', () => {
-    const dir = withAuthors(authorsYaml('apprentice'), 'authors: [apprentice, apprentice]');
+    const dir = withAuthors(authorsYaml('lessonfolk'), 'authors: [lessonfolk, lessonfolk]');
     expect(issuesFor(dir)).toEqual([
-      { file: 'en/ai-foundations/course.yaml', message: 'author "apprentice" is listed more than once' },
+      { file: 'en/ai-foundations/course.yaml', message: 'author "lessonfolk" is listed more than once' },
     ]);
   });
 
@@ -315,8 +315,8 @@ describe('authors', () => {
   });
 
   it('reports duplicate author slugs', () => {
-    expect(allIssues(withAuthors(authorsYaml('apprentice', 'apprentice')))).toEqual([
-      { file: 'authors.yaml', message: 'author "apprentice" is listed more than once' },
+    expect(allIssues(withAuthors(authorsYaml('lessonfolk', 'lessonfolk')))).toEqual([
+      { file: 'authors.yaml', message: 'author "lessonfolk" is listed more than once' },
     ]);
   });
 
@@ -326,7 +326,7 @@ describe('authors', () => {
     expect(warnings.filter((w) => w.file.endsWith('authors.yaml')).map((w) => w.message)).toEqual([
       'author "unused" has no course yet',
     ]);
-    const dir = withAuthors(authorsYaml('apprentice', 'idle'));
+    const dir = withAuthors(authorsYaml('lessonfolk', 'idle'));
     expect(inspectAllCourses(dir).warnings.map((w) => w.message)).toContain(
       'author "idle" has no course yet',
     );
@@ -338,11 +338,11 @@ describe('authors', () => {
 
   it('accepts optional bio and links, and lists authors in authors.yaml order', () => {
     const dir = withAuthors(
-      `${authorsYaml('idle', 'apprentice')}    bio: B.\n    github: some-one\n    url: https://example.com/me\n`,
+      `${authorsYaml('idle', 'lessonfolk')}    bio: B.\n    github: some-one\n    url: https://example.com/me\n`,
     );
     expect(loadAuthors('en', dir).map((a) => [a.slug, a.courses.map((c) => c.id)])).toEqual([
       ['idle', []],
-      ['apprentice', ['ai-foundations']],
+      ['lessonfolk', ['ai-foundations']],
     ]);
     expect(loadAuthors('en', dir)[1]).toMatchObject({
       bio: 'B.',
@@ -352,11 +352,11 @@ describe('authors', () => {
   });
 
   describe('avatars', () => {
-    const withAvatar = (avatar: string) => withAuthors(`${authorsYaml('apprentice')}    avatar: ${avatar}\n`);
+    const withAvatar = (avatar: string) => withAuthors(`${authorsYaml('lessonfolk')}    avatar: ${avatar}\n`);
 
     it('keeps an avatar whose image is in courses/authors/', () => {
-      expect(loadAuthors('en', validDir)[0].avatar).toBe('apprentice.svg');
-      expect(allIssues(withAvatar('apprentice.svg'))).toEqual([]);
+      expect(loadAuthors('en', validDir)[0].avatar).toBe('lessonfolk.svg');
+      expect(allIssues(withAvatar('lessonfolk.svg'))).toEqual([]);
     });
 
     it('never treats the avatars folder as a language', () => {
@@ -366,7 +366,7 @@ describe('authors', () => {
     it('reports a missing image and drops the avatar', () => {
       const dir = withAvatar('nobody.png');
       expect(allIssues(dir)).toEqual([
-        { file: 'authors.yaml', message: 'author "apprentice": avatar "nobody.png" not found in authors/' },
+        { file: 'authors.yaml', message: 'author "lessonfolk": avatar "nobody.png" not found in authors/' },
       ]);
       expect(inspectCatalog('en', dir).catalog.authors[0].avatar).toBeUndefined();
     });
@@ -375,7 +375,7 @@ describe('authors', () => {
       const dir = withAvatar('big.png');
       writeFileSync(join(dir, 'authors', 'big.png'), Buffer.alloc(512 * 1024 + 1));
       expect(allIssues(dir)).toEqual([
-        { file: 'authors.yaml', message: 'author "apprentice": avatar "big.png" is larger than 512 KB' },
+        { file: 'authors.yaml', message: 'author "lessonfolk": avatar "big.png" is larger than 512 KB' },
       ]);
     });
 
@@ -439,7 +439,7 @@ describe('lesson sections (invalid fixture)', () => {
 
 describe('loadCatalog (live edits)', () => {
   it('reads files at call time, without caching', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-courses-'));
     cpSync(validDir, dir, { recursive: true });
     const courseFile = join(dir, 'en', 'ai-foundations', 'course.yaml');
     expect(loadCourse('ai-foundations', 'en', dir)?.title).toBe('AI Foundations');
@@ -452,7 +452,7 @@ describe('loadCatalog (live edits)', () => {
   });
 
   it('accepts Windows line endings in frontmatter', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'apprentice-courses-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-courses-'));
     cpSync(validDir, dir, { recursive: true });
     const lessonFile = join(dir, 'en', 'ai-foundations', '01-what-is-ai.md');
     writeFileSync(lessonFile, readFileSync(lessonFile, 'utf8').replace(/\r?\n/g, '\r\n'));

@@ -1,5 +1,5 @@
 name: Task
-description: A unit of work for Apprentice — feature, course, tutor improvement, docs or infra.
+description: A unit of work for LessonFolk — feature, course, tutor improvement, docs or infra.
 title: "[Task] "
 projects: ["CGSeb/3"]
 body:

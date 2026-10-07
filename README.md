@@ -1,13 +1,13 @@
 <h1 align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo-dark.svg">
-    <img src="assets/brand/logo.svg" alt="Apprentice" width="320">
+    <img src="assets/brand/logo.svg" alt="LessonFolk" width="320">
   </picture>
 </h1>
 
 <p align="center"><strong>Learn AI from zero to advanced, with an AI as your tutor.</strong></p>
 
-Apprentice is a collection of open-source AI courses designed to be taught *by* an AI coding
+LessonFolk is a collection of open-source AI courses designed to be taught *by* an AI coding
 agent — [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex), or any
 agent that reads `AGENTS.md`. You open the agent in this folder, say "let's start", and it guides
 you through lessons in a conversation: explaining, asking questions, adapting to your level,
@@ -18,8 +18,8 @@ Courses are versioned here. Your progress stays on your computer (`.progress/`, 
 ## Quick start
 
 ```bash
-git clone https://github.com/CGSeb/apprentice.git
-cd apprentice
+git clone https://github.com/CGSeb/lessonfolk.git
+cd lessonfolk
 claude      # or: codex
 ```
 
@@ -69,7 +69,7 @@ your progress — the AI tutor is the only thing that writes it.
 | `npm run dashboard:start` | Run the built server |
 | `npm test` | Run the dashboard tests |
 
-Set `APPRENTICE_COURSES_DIR` or `APPRENTICE_PROGRESS_DIR` to point the dashboard at other folders
+Set `LESSONFOLK_COURSES_DIR` or `LESSONFOLK_PROGRESS_DIR` to point the dashboard at other folders
 (useful for testing with sample progress files). See [`docs/testing.md`](docs/testing.md) for the
 automated tests and the manual end-to-end checklist with a real tutor.
 The logo, colours and type used by the dashboard are described in [`docs/brand.md`](docs/brand.md).
@@ -121,7 +121,7 @@ and warns about guideline drift. The full specification is in
 
 ## License
 
-Apprentice is developed by CG Seb.
+LessonFolk is developed by CG Seb.
 
 - **Code** (dashboard, tooling, tutor instructions): [MIT](LICENSE)
 - **Course content** (`courses/`): [CC BY 4.0](courses/LICENSE). You may share and adapt the

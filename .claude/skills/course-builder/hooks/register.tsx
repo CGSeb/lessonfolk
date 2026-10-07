@@ -71,7 +71,7 @@ export const register: Register = on => {
     await $.tool.register({
       name: 'progress',
       description:
-        'Updates the Course builder pane while you run the create-course skill of Apprentice. ' +
+        'Updates the Course builder pane while you run the create-course skill of LessonFolk. ' +
         'Call it whenever a step of the "Create a course" procedure starts or finishes ' +
         '(prepare, interview, outline, write, register, validate, handback), and as soon as ' +
         'the course title, id, level, theme or lesson list is known or changes (for example ' +

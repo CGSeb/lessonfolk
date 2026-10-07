@@ -82,7 +82,7 @@ describe('live updates during a tutoring session', () => {
   let events: Awaited<ReturnType<typeof openEvents>>;
 
   beforeAll(async () => {
-    tempRoot = mkdtempSync(join(tmpdir(), 'apprentice-e2e-'));
+    tempRoot = mkdtempSync(join(tmpdir(), 'lessonfolk-e2e-'));
     // Like a fresh clone: .progress/ has no progress.json yet.
     progressDir = join(tempRoot, '.progress');
     mkdirSync(progressDir);
@@ -100,7 +100,7 @@ describe('live updates during a tutoring session', () => {
 
   it('starts as a first visit', async () => {
     const home = await getPage(server, '/');
-    expect(home.text).toContain('Welcome to Apprentice');
+    expect(home.text).toContain('Welcome to LessonFolk');
   });
 
   it('announces onboarding and shows lesson 1 in progress', async () => {
@@ -172,6 +172,6 @@ describe('live updates during a tutoring session', () => {
     await events.waitFor(PROGRESS_CHANGE);
 
     const home = await getPage(server, '/');
-    expect(home.text).toContain('Welcome to Apprentice');
+    expect(home.text).toContain('Welcome to LessonFolk');
   });
 });

@@ -36,7 +36,7 @@ prerequisites:
    workflow on everyone does not.
 
 ## Teaching notes
-- Live example: the Apprentice repository is a full small setup. `AGENTS.md` is shared,
+- Live example: the LessonFolk repository is a full small setup. `AGENTS.md` is shared,
   `CLAUDE.md` imports it and adds a test rule, skills live in `.claude/skills/`, the commit
   format is agreed in `AGENTS.md`, and `.progress/` stays personal and gitignored. Ask the
   learner to point out each piece, then what is missing (for example enforcement of the test

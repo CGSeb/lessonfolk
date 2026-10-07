@@ -2,7 +2,7 @@ id: ai-for-everyday-work
 title: AI for Everyday Work
 level: beginner
 theme: using-ai
-authors: [apprentice]
+authors: [lessonfolk]
 description: Turn AI into everyday habits — summarise and draft, research and learn, work with documents, brainstorm, save time on repetitive tasks and build a routine that suits you. No code needed.
 estimatedHours: 2
 prerequisites: [prompting-basics, ai-safety]

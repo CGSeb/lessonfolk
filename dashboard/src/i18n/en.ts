@@ -9,15 +9,15 @@
  */
 export const en = {
   site: {
-    name: 'Apprentice',
-    title: 'Apprentice',
+    name: 'LessonFolk',
+    title: 'LessonFolk',
     description: 'Learn AI from zero to advanced, with an AI tutor in your chat. See your courses and progress.',
-    titleTemplate: '{page} · Apprentice',
+    titleTemplate: '{page} · LessonFolk',
   },
   a11y: {
     skipToContent: 'Skip to main content',
     mainNav: 'Main',
-    homeLink: 'Apprentice, home',
+    homeLink: 'LessonFolk, home',
     themeToDark: 'Switch to dark theme',
     themeToLight: 'Switch to light theme',
   },
@@ -86,7 +86,7 @@ export const en = {
     linkTitle: 'See all courses by {author}',
     listTitle: 'Authors',
     listHeading: 'Authors',
-    listIntro: 'The people and projects who write Apprentice courses. Open an author to see all of their courses.',
+    listIntro: 'The people and projects who write LessonFolk courses. Open an author to see all of their courses.',
     listEmpty: 'No authors to show yet.',
     courseCountOne: '{count} course',
     courseCountOther: '{count} courses',
@@ -142,16 +142,16 @@ export const en = {
     backToCourses: 'See all courses',
   },
   footer: {
-    about: 'Apprentice is an open-source app developed by CG Seb. It teaches AI to anyone, through a conversation with an AI tutor.',
+    about: 'LessonFolk is an open-source app developed by CG Seb. It teaches AI to anyone, through a conversation with an AI tutor.',
     privacy: 'Your progress is saved only on this computer.',
     license: 'Code under the MIT license, courses under CC BY 4.0.',
   },
   home: {
     title: 'Home',
-    heading: 'Welcome to Apprentice',
+    heading: 'Welcome to LessonFolk',
     intro: 'Learn AI from zero, one short lesson at a time, with an AI tutor that chats with you.',
     startTitle: 'How to start',
-    startStepOpen: 'Open Claude Code or Codex in this folder (the Apprentice folder on your computer).',
+    startStepOpen: 'Open Claude Code or Codex in this folder (the LessonFolk folder on your computer).',
     startStepSay: 'Type this message and send it:',
     startPhrase: "Let's start learning AI",
     startStepTutor:
@@ -227,7 +227,7 @@ const strings: UiStrings = en;
  * Look up a UI string by dotted key and fill `{placeholders}`.
  *
  * @example t('nav.home') // "Home"
- * @example t('site.titleTemplate', { page: 'Courses' }) // "Courses · Apprentice"
+ * @example t('site.titleTemplate', { page: 'Courses' }) // "Courses · LessonFolk"
  */
 export function t(key: UiKey, params?: Record<string, string | number>): string {
   const value = key

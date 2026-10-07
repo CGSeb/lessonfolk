@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createChangeHub, directorySignature, watchApprentice, watchDirectory, type ChangeArea } from './watch';
+import { createChangeHub, directorySignature, watchLessonFolk, watchDirectory, type ChangeArea } from './watch';
 
 const DEBOUNCE = 100;
 const POLL = 50;
@@ -10,7 +10,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const temps: string[] = [];
 function tempDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'apprentice-watch-'));
+  const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-watch-'));
   temps.push(dir);
   return dir;
 }
@@ -105,12 +105,12 @@ describe.each([
   });
 });
 
-describe('watchApprentice', () => {
+describe('watchLessonFolk', () => {
   it('reports which area changed', async () => {
     const progressDir = tempDir();
     const coursesDir = tempDir();
     const areas: ChangeArea[] = [];
-    stops.push(watchApprentice({ progressDir, coursesDir, debounceMs: DEBOUNCE, pollMs: POLL }, (a) => areas.push(a)));
+    stops.push(watchLessonFolk({ progressDir, coursesDir, debounceMs: DEBOUNCE, pollMs: POLL }, (a) => areas.push(a)));
     await sleep(POLL * 2);
 
     writeFileSync(join(progressDir, 'progress.json'), '{}');

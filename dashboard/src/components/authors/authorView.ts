@@ -17,7 +17,7 @@ export interface AuthorRef<C extends CourseRef> {
 export interface AuthorLink {
   slug: string;
   name: string;
-  /** Author page, e.g. `/authors/apprentice`. */
+  /** Author page, e.g. `/authors/lessonfolk`. */
   href: string;
   /** Avatar image URL; `undefined` shows the initials instead. */
   avatar?: string;
@@ -56,7 +56,7 @@ const toLink = ({ slug, name, avatar }: { slug: string; name: string; avatar?: s
 
 /**
  * Up to two initials for the avatar fallback: the first letters of the first
- * and last words ("Ada Lovelace" → "AL", "Apprentice" → "A").
+ * and last words ("Ada Lovelace" → "AL", "LessonFolk" → "L").
  */
 export function authorInitials(name: string): string {
   const words = name.trim().split(/[\s-]+/).filter(Boolean);

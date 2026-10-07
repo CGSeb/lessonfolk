@@ -1,6 +1,6 @@
 # Course format
 
-Apprentice courses are plain files, versioned in git and taught by an AI agent
+LessonFolk courses are plain files, versioned in git and taught by an AI agent
 (Claude Code, Codex, …) in chat. A lesson is a **script for a tutor**, not a page to read:
 it gives the content, how to teach it, and how to check understanding.
 
@@ -88,18 +88,18 @@ one-sentence description) in your pull request only when none of the existing on
 
 ```yaml
 authors:
-  - slug: apprentice      # kebab-case, unique; used in course.yaml and in the author page URL
-    name: Apprentice
+  - slug: lessonfolk      # kebab-case, unique; used in course.yaml and in the author page URL
+    name: LessonFolk
     bio: One or two sentences about the author.   # optional
     github: some-username # optional, GitHub username (not a URL)
     url: https://example.com   # optional, personal website (http or https)
-    avatar: apprentice.svg     # optional, image file name in courses/authors/
+    avatar: lessonfolk.svg     # optional, image file name in courses/authors/
 ```
 
 `courses/authors.yaml` is shared by every language. Each author gets a page in the dashboard
 (`/authors/<slug>`) listing their courses, with their links when set. Only add `github` or `url`
 when the author gives them; never guess. Courses written by the project's maintainers use
-the `apprentice` author.
+the `lessonfolk` author.
 
 `avatar` is the file name of an image in `courses/authors/` (lower-case kebab-case, `.png`,
 `.jpg`, `.webp` or `.svg`, at most 512 KB), usually named after the slug. The dashboard shows it
@@ -114,7 +114,7 @@ id: ai-foundations
 title: AI Foundations
 level: beginner           # beginner | intermediate | advanced
 theme: understanding-ai   # one theme id from themes.yaml
-authors: [apprentice]     # one or more author slugs from authors.yaml
+authors: [lessonfolk]     # one or more author slugs from authors.yaml
 description: One or two sentences shown in the course list.
 estimatedHours: 2
 prerequisites: []         # course ids

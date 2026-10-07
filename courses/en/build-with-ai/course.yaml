@@ -2,7 +2,7 @@ id: build-with-ai
 title: "Build with AI: Your First AI App"
 level: intermediate
 theme: building-with-ai
-authors: [apprentice]
+authors: [lessonfolk]
 description: Go from using AI to building with it — call a model from Python, shape its behaviour, get structured output, manage conversations and ship a small chatbot, all with free tools.
 estimatedHours: 2.5
 prerequisites: [prompting-basics]

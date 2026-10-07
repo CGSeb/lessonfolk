@@ -37,7 +37,7 @@ prerequisites:
    runs with your access, so treat it like a dependency (lesson 6).
 
 ## Teaching notes
-- Live example: open `.claude/skills/` in the Apprentice repository with the learner. Each
+- Live example: open `.claude/skills/` in the LessonFolk repository with the learner. Each
   folder (`learn`, `progress`, `review`, `create-course`, `edit-course`) has a short
   `SKILL.md` whose description says when to use it, and whose body points to a procedure in
   `AGENTS.md`. Show how this keeps the procedures in one shared file (lesson 3) while giving

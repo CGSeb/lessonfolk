@@ -33,7 +33,7 @@ prerequisites:
    in the tool's own file.
 
 ## Teaching notes
-- Live example: Apprentice does exactly idea 4. `AGENTS.md` holds the shared rules, and
+- Live example: LessonFolk does exactly idea 4. `AGENTS.md` holds the shared rules, and
   `CLAUDE.md` starts with `@AGENTS.md` (Claude Code's import syntax), then adds one extra
   section (running the tests on code branches). Show both files.
 - Analogy that works: **company policy, office rules and your own desk**. The company handbook

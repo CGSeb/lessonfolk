@@ -12,7 +12,7 @@ import { COURSES_DIR, getPage, PROGRESS_FIXTURES, startDashboard, type Dashboard
 const LESSONS = ['What is AI?', 'How do machines learn?', 'What is a large language model?'];
 
 interface Expectations {
-  /** Folder passed as APPRENTICE_PROGRESS_DIR. */
+  /** Folder passed as LESSONFOLK_PROGRESS_DIR. */
   progressDir: string;
   home: { include: string[]; exclude: string[] };
   catalog: { include: string[]; exclude: string[] };
@@ -34,7 +34,7 @@ const fixtures: Record<string, Expectations> = {
     progressDir: join(PROGRESS_FIXTURES, 'new-learner-does-not-exist'),
     home: {
       include: [
-        'Welcome to Apprentice',
+        'Welcome to LessonFolk',
         'How to start',
         "Let's start learning AI",
         'questions about you and what you already know',
@@ -63,7 +63,7 @@ const fixtures: Record<string, Expectations> = {
         'Get a path made for you',
         'recommend a path',
       ],
-      exclude: ['Welcome to Apprentice', 'Your path', 'Level:', 'Your interests:', INVALID_HOME],
+      exclude: ['Welcome to LessonFolk', 'Your path', 'Level:', 'Your interests:', INVALID_HOME],
     },
     catalog: { include: ['Not started', '0 of 3 lessons'], exclude: [INVALID_CATALOG, 'Recommended for you'] },
     course: { include: ['Not started', '0 of 3 lessons', 'Next up', ...LESSONS], exclude: ['Status: Done', INVALID_HOME] },
@@ -83,7 +83,7 @@ const fixtures: Record<string, Expectations> = {
         '1 of 3 lessons',
         ...SUGGEST_PATH,
       ],
-      exclude: ['Welcome to Apprentice', 'Your path', 'Level:', 'Your interests:', PATH_WARNING, INVALID_HOME],
+      exclude: ['Welcome to LessonFolk', 'Your path', 'Level:', 'Your interests:', PATH_WARNING, INVALID_HOME],
     },
     catalog: { include: ['In progress', '1 of 3 lessons'], exclude: [INVALID_CATALOG] },
     course: {
@@ -152,7 +152,7 @@ const fixtures: Record<string, Expectations> = {
         LESSONS[0],
         '0 of 3 lessons finished',
       ],
-      exclude: ['Welcome to Apprentice', 'after your level check', ...SUGGEST_PATH, PATH_WARNING, INVALID_HOME],
+      exclude: ['Welcome to LessonFolk', 'after your level check', ...SUGGEST_PATH, PATH_WARNING, INVALID_HOME],
     },
     catalog: {
       include: ['Recommended for you', 'In progress', '0 of 3 lessons'],
@@ -235,7 +235,7 @@ const fixtures: Record<string, Expectations> = {
     progressDir: join(PROGRESS_FIXTURES, 'invalid-json'),
     home: {
       // Shown as a first visit, with a warning and the parse error.
-      include: [INVALID_HOME, 'Invalid JSON in', 'Welcome to Apprentice', 'Where beginners start', LESSONS[0]],
+      include: [INVALID_HOME, 'Invalid JSON in', 'Welcome to LessonFolk', 'Where beginners start', LESSONS[0]],
       exclude: ['Welcome back'],
     },
     catalog: { include: [INVALID_CATALOG, 'Not started', '0 of 3 lessons'], exclude: [] },
@@ -243,7 +243,7 @@ const fixtures: Record<string, Expectations> = {
   },
   'invalid shape': {
     progressDir: join(PROGRESS_FIXTURES, 'invalid-shape'),
-    home: { include: [INVALID_HOME, 'Unexpected shape in', 'Welcome to Apprentice'], exclude: ['Welcome back'] },
+    home: { include: [INVALID_HOME, 'Unexpected shape in', 'Welcome to LessonFolk'], exclude: ['Welcome back'] },
     catalog: { include: [INVALID_CATALOG, 'Not started', '0 of 3 lessons'], exclude: [] },
     course: { include: [INVALID_HOME, 'Unexpected shape in', '0 of 3 lessons'], exclude: ['Status: Done'] },
   },
@@ -361,42 +361,42 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(lessons.filter((lesson) => lesson.includes(PLACEMENT))).toHaveLength(fixture.placementLessons ?? 0);
   });
 
-  it('credits AI Foundations to Apprentice on the catalog and the course page', async () => {
+  it('credits AI Foundations to LessonFolk on the catalog and the course page', async () => {
     for (const path of ['/courses', '/courses/ai-foundations']) {
       const page = await getPage(server, path);
-      expect(page.text).toContain('By Apprentice');
-      expect(page.html).toMatch(/<a href="\/authors\/apprentice"[^>]*>\s*Apprentice\s*<\/a>/);
+      expect(page.text).toContain('By LessonFolk');
+      expect(page.html).toMatch(/<a href="\/authors\/lessonfolk"[^>]*>\s*LessonFolk\s*<\/a>/);
     }
   });
 
   it('renders the authors list', async () => {
     const page = await getPage(server, '/authors');
     expect(page.status).toBe(200);
-    expect(page.html).toMatch(/<a href="\/authors\/apprentice"[^>]*>Apprentice<\/a>/);
+    expect(page.html).toMatch(/<a href="\/authors\/lessonfolk"[^>]*>LessonFolk<\/a>/);
     expect(page.text).toContain('1 course');
     // Decorative avatar from courses/authors/: the name sits next to it.
-    expect(page.html).toMatch(/<img class="author-avatar[^"]*" src="\/api\/authors\/apprentice\/avatar" alt=""/);
+    expect(page.html).toMatch(/<img class="author-avatar[^"]*" src="\/api\/authors\/lessonfolk\/avatar" alt=""/);
   });
 
   it('serves author avatars from courses/authors/', async () => {
-    const avatar = await fetch(`${server.url}/api/authors/apprentice/avatar`);
+    const avatar = await fetch(`${server.url}/api/authors/lessonfolk/avatar`);
     expect(avatar.status).toBe(200);
     expect(avatar.headers.get('content-type')).toBe('image/svg+xml');
     expect(avatar.headers.get('content-security-policy')).toContain('sandbox');
     expect(await avatar.text()).toContain('<svg');
     // Revalidation answers 304 while the file is unchanged.
-    const again = await fetch(`${server.url}/api/authors/apprentice/avatar`, {
+    const again = await fetch(`${server.url}/api/authors/lessonfolk/avatar`, {
       headers: { 'If-None-Match': avatar.headers.get('etag') ?? '' },
     });
     expect(again.status).toBe(304);
     expect((await fetch(`${server.url}/api/authors/no-such-author/avatar`)).status).toBe(404);
   });
 
-  it('renders the Apprentice author page with its courses and progress', async () => {
-    const page = await getPage(server, '/authors/apprentice');
+  it('renders the LessonFolk author page with its courses and progress', async () => {
+    const page = await getPage(server, '/authors/lessonfolk');
     expect(page.status).toBe(200);
-    expect(page.text).toContain('Courses by Apprentice');
-    expect(page.html).toMatch(/<img class="author-avatar author-avatar--lg[^"]*" src="\/api\/authors\/apprentice\/avatar"/);
+    expect(page.text).toContain('Courses by LessonFolk');
+    expect(page.html).toMatch(/<img class="author-avatar author-avatar--lg[^"]*" src="\/api\/authors\/lessonfolk\/avatar"/);
     expect(page.html).toContain('href="/courses/ai-foundations"');
     // No link is set in authors.yaml, so none is rendered.
     expect(page.html).not.toContain('target="_blank"');

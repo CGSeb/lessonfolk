@@ -40,7 +40,7 @@ prerequisites:
 - Analogy that works: **a sign versus a lock**. "Staff only" on a door is an instruction most
   people respect; a badge reader is enforcement. Use signs for preferences, locks for what
   must never happen.
-- Live example: in the Apprentice repository, `CLAUDE.md` asks the assistant to run
+- Live example: in the LessonFolk repository, `CLAUDE.md` asks the assistant to run
   `npm test` before committing. That is an instruction, not enforcement. Show it, then ask the
   learner what would make it reliable (a hook that runs the tests before the task ends, a CI
   workflow on every pull request) and which they would trust more. Check `.github/` first: do

@@ -1,4 +1,4 @@
-# Testing Apprentice
+# Testing LessonFolk
 
 Two kinds of checks keep the dashboard and the tutor in step: automated tests you run with
 one command, and a manual end-to-end session with a real AI tutor.
@@ -18,7 +18,7 @@ npm run check -w dashboard  # type-check the dashboard
 
 - **Unit tests** sit next to the code (`dashboard/src/**/*.test.ts`).
 - **End-to-end tests** live in `dashboard/tests/e2e/`. Before they run, a global setup builds the
-  production server into `dashboard/node_modules/.cache/apprentice-e2e/` (your own `dashboard/dist`
+  production server into `dashboard/node_modules/.cache/lessonfolk-e2e/` (your own `dashboard/dist`
   is never touched). Each test file then starts that server as a real Node process on a free
   port, pointed at the pinned course fixture and at one progress fixture, and fetches pages over
   HTTP. Servers and temporary folders are removed when the tests finish.
@@ -52,12 +52,12 @@ To look at a fixture in the browser, point the dashboard at it with an **absolut
 
 ```bash
 # macOS / Linux
-APPRENTICE_PROGRESS_DIR="$PWD/dashboard/tests/fixtures/progress/all-done" npm run dashboard
+LESSONFOLK_PROGRESS_DIR="$PWD/dashboard/tests/fixtures/progress/all-done" npm run dashboard
 ```
 
 ```powershell
 # Windows PowerShell
-$env:APPRENTICE_PROGRESS_DIR = "$PWD\dashboard\tests\fixtures\progress\all-done"; npm run dashboard
+$env:LESSONFOLK_PROGRESS_DIR = "$PWD\dashboard\tests\fixtures\progress\all-done"; npm run dashboard
 ```
 
 ## Manual end-to-end check with a real tutor
@@ -82,7 +82,7 @@ and repeat it after changes to `AGENTS.md`, the progress format or the dashboard
 
 ### Checklist
 
-- [ ] **First visit.** Home shows "Welcome to Apprentice", the "How to start" steps and
+- [ ] **First visit.** Home shows "Welcome to LessonFolk", the "How to start" steps and
       "What is AI?" as your first lesson. The course page shows "0 of 3 lessons" and every lesson
       "Not started".
 - [ ] **Open the tutor.** In a second terminal, in the repository folder, run `claude` (Claude Code)
