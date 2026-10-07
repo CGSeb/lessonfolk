@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { verifyOAuthQueryParams } from '@lessonfolk/mcp';
+import { getAuth } from '../../lib/auth/auth';
+import { getAuthSettings } from '../../lib/auth/current-user';
+
+export const prerender = false;
+
+/**
+ * The consent page of the MCP authorization flow: a signed-in learner allows (or not) an AI
+ * chat app to read and change their LessonFolk progress. Better Auth sends people here with
+ * the signed authorization request in the query string.
+ */
+const settings = getAuthSettings();
+if (settings.mode !== 'oauth') return Astro.redirect('/', 303);
+const here = Astro.url.pathname + Astro.url.search;
+if (!Astro.locals.user) return Astro.redirect(`/sign-in?next=${encodeURIComponent(here)}`, 303);
+
+const oauthQuery = Astro.url.search.replace(/^\?/, '');
+const params = new URLSearchParams(oauthQuery);
+const valid = oauthQuery !== '' && (await verifyOAuthQueryParams(oauthQuery, settings.secret));
+
+let clientName: string | undefined;
+let redirectHost: string | undefined;
+if (valid) {
+  try {
+    const client = (await getAuth().api.getOAuthClientPublic({
+      query: { client_id: params.get('client_id') ?? '' },
+      headers: Astro.request.headers,
+    })) as { client_name?: string };
+    clientName = client.client_name;
+  } catch {
+    clientName = undefined;
+  }
+  try {
+    redirectHost = new URL(params.get('redirect_uri') ?? '').host;
+  } catch {
+    redirectHost = undefined;
+  }
+}
+const appName = clientName || 'An AI app';
+---
+
+<BaseLayout title="Allow access">
+  <div class="stack consent" style="--stack-space: var(--space-5)">
+    {
+      valid ? (
+        <>
+          <header class="stack" style="--stack-space: var(--space-2)">
+            <h1>Allow {appName} to use LessonFolk?</h1>
+            <p class="muted">
+              Signed in as {Astro.locals.user.name}. If you allow it, this app can read your courses and your progress, and save your
+              progress (profile, path, lessons, scores and notes) while it tutors you.
+            </p>
+            {redirectHost && <p class="muted">You will then go back to {redirectHost}.</p>}
+            <p class="muted">Only allow apps you just asked to connect to LessonFolk.</p>
+          </header>
+          <form method="post" action="/oauth/consent/decide" class="consent__actions">
+            <input type="hidden" name="oauth_query" value={oauthQuery} />
+            <button class="consent__button consent__button--primary" type="submit" name="accept" value="true">
+              Allow
+            </button>
+            <button class="consent__button" type="submit" name="accept" value="false">
+              Deny
+            </button>
+          </form>
+        </>
+      ) : (
+        <header class="stack" style="--stack-space: var(--space-2)">
+          <h1>This request has expired</h1>
+          <p class="muted">Go back to your AI app and connect to LessonFolk again.</p>
+        </header>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .consent {
+    max-width: 32rem;
+  }
+
+  .consent__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .consent__button {
+    padding: var(--space-3) var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+  }
+
+  .consent__button--primary {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-surface);
+  }
+
+  .consent__button:hover {
+    border-color: var(--color-accent);
+  }
+</style>

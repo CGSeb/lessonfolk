@@ -8,12 +8,14 @@ COPY package.json package-lock.json ./
 COPY dashboard/package.json dashboard/
 COPY packages/core/package.json packages/core/
 COPY packages/db/package.json packages/db/
+COPY packages/mcp/package.json packages/mcp/
 RUN npm ci --no-audit --no-fund
 
 # --- Build: the Astro server (dashboard/dist) ---
 FROM deps AS build
 COPY packages/core packages/core
 COPY packages/db packages/db
+COPY packages/mcp packages/mcp
 COPY dashboard dashboard
 RUN npm run build --workspace dashboard
 
@@ -24,6 +26,7 @@ COPY package.json package-lock.json ./
 COPY dashboard/package.json dashboard/
 COPY packages/core/package.json packages/core/
 COPY packages/db/package.json packages/db/
+COPY packages/mcp/package.json packages/mcp/
 RUN npm ci --omit=dev --no-audit --no-fund
 
 # --- Runtime ---
@@ -43,8 +46,10 @@ COPY dashboard/src/lib/auth/settings.ts dashboard/src/lib/auth/local-learner.ts 
 COPY packages/core/package.json packages/core/
 COPY packages/core/src packages/core/src
 COPY packages/db/package.json packages/db/
+COPY packages/mcp/package.json packages/mcp/
 COPY packages/db/src packages/db/src
 COPY packages/db/drizzle packages/db/drizzle
+COPY packages/mcp/src packages/mcp/src
 COPY courses courses
 USER node
 EXPOSE 4321
