@@ -12,7 +12,7 @@ import { learner, lessonProgress, progressEvent, user } from './schema.ts';
 import { createTestDatabase, type TestDatabase } from './testing.ts';
 
 const fixtureCourses = fileURLToPath(new URL('../../core/tests/fixtures/courses-valid', import.meta.url));
-const exampleFile = fileURLToPath(new URL('../../../.progress/progress.example.json', import.meta.url));
+const exampleFile = fileURLToPath(new URL('../../../docs/progress.example.json', import.meta.url));
 
 // The pinned AI Foundations fixture (beginner, 3 lessons in a chain), plus an intermediate
 // course that needs it, to exercise paths and the level check.

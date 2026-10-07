@@ -110,85 +110,93 @@ npm run progress:import -- dashboard/tests/fixtures/progress/all-done/progress.j
 
 ## Manual end-to-end check with a real tutor
 
-Automated tests write `progress.json` themselves. This checklist proves that a real AI tutor
-writes it the way the dashboard expects. Run it once in **Claude Code** and once in **Codex**,
-and repeat it after changes to `AGENTS.md`, the progress format or the dashboard.
+Automated tests write progress through the store themselves. This checklist proves that a real
+AI tutor, opened in the LessonFolk folder as the README says, saves progress through the MCP
+server the way the dashboard expects. Run it once in **Claude Code** and once in **Codex**, and
+repeat it after changes to `AGENTS.md`, the skills, `.mcp.json`, `packages/mcp/prompts/`, the
+progress format or the dashboard.
+
+To read the saved progress at any step, use **Download progress.json** on the **Your data**
+page (`/account`): it has the progress.json v1 shape of
+[`progress.example.json`](progress.example.json).
 
 ### Before you start
 
-1. Back up your own progress if you have any: copy `.progress/progress.json` somewhere safe.
-2. Delete `.progress/progress.json` so you start as a new learner.
-3. Install dependencies and start the dashboard in one terminal:
+1. Back up your own progress if you have any: **Download progress.json** on the **Your data**
+   page.
+2. Start LessonFolk without sign-in (`LESSONFOLK_AUTH=none`, the default) in one terminal:
 
    ```bash
-   npm install
-   npm run dashboard
+   docker compose up --build
    ```
 
+3. Start as a new learner: **Erase my progress** on the **Your data** page.
 4. Open http://127.0.0.1:4321 and keep it visible next to the chat. Also open
-   http://127.0.0.1:4321/courses/ai-foundations in a second tab.
-5. The tutor still writes `.progress/progress.json` and the dashboard reads the database: each
-   time a step below checks the dashboard, run `npm run progress:import` first, then reload the
-   page. To start as a new learner, also clear the database copy:
-   `docker compose exec db psql -U lessonfolk -c "delete from learner where user_id = 'local'"`.
+   http://127.0.0.1:4321/courses/ai-foundations in a second tab. Reload a page to see new progress.
 
 ### Checklist
 
 - [ ] **First visit.** Home shows "Welcome to LessonFolk", the "How to start" steps and
       "What is AI?" as your first lesson. The course page shows "0 of 3 lessons" and every lesson
       "Not started".
-- [ ] **Open the tutor.** In a second terminal, in the repository folder, run `claude` (Claude Code)
-      or `codex` (Codex). Say: *Let's start learning AI*.
-- [ ] **Onboarding.** The tutor asks the onboarding questions one at a time (name, experience,
+- [ ] **Connect.** In a second terminal, in the repository folder, run `claude` (Claude Code): it
+      asks to use the `lessonfolk` server of `.mcp.json`; approve it, and `/mcp` shows it
+      connected. Codex: `codex mcp add lessonfolk --url http://localhost:4321/mcp` once, then
+      `codex`.
+- [ ] **Not connected.** Stop the app (`docker compose stop app`), start a new chat and say
+      *Let's start learning AI*: the tutor does not teach from the files and tells you to start
+      LessonFolk and connect (as `AGENTS.md` says). Start the app again
+      (`docker compose start app`), then a new chat.
+- [ ] **Onboarding.** Say *Let's start learning AI* (or `/learn` in Claude Code). The tutor calls
+      `get_progress` first, then asks the onboarding questions one at a time (name, experience,
       why you want to learn, themes you are interested in, language). Answer "used ChatGPT-like
       tools" for experience: there is no level check for beginners.
 - [ ] **Path.** The tutor recommends a path (AI Foundations) and explains why in 2–3 sentences,
       then asks if it suits you. Nothing about the path is saved before you agree. Accept it.
-- [ ] **Progress file created.** `.progress/progress.json` exists, is valid JSON and matches
-      `.progress/progress.example.json`: `version: 1`, a `profile` with your answers,
+- [ ] **Progress saved.** The download has `version: 1`, a `profile` with your answers,
       `level: "beginner"`, your `interests` (theme ids), `path: ["ai-foundations"]` with
-      `pathReason` and `pathUpdatedAt`, `current: "ai-foundations/01-what-is-ai"` and that
-      lesson with `status: "in_progress"`.
-- [ ] **Dashboard after onboarding.** After the import and a reload, home greets you by name
-      ("Welcome back, …!") and shows "What is AI?" under "Pick up where you left off". The course page
-      shows lesson 1 "In progress" and the catalog shows AI Foundations "In progress".
+      `pathReason` and `pathUpdatedAt`, `current: "ai-foundations/01-what-is-ai"` and that lesson
+      with `status: "in_progress"`. No `.progress/` folder was created.
+- [ ] **Dashboard after onboarding.** Home greets you by name ("Welcome back, …!") and shows
+      "What is AI?" under "Pick up where you left off". The course page shows lesson 1 "In
+      progress" and the catalog shows AI Foundations "In progress".
 - [ ] **Teach lesson 1.** Work through the lesson, answer the checks, finish it.
-- [ ] **Lesson completed in the file.** Lesson 1 has `status: "done"`, a `completedAt` date, a
-      `score` between 0 and 1 and short `notes`; `current` is cleared (`null` or absent).
+- [ ] **Lesson completed.** Lesson 1 has `status: "done"`, a `completedAt` date, a `score` between
+      0 and 1 and short `notes`; `current` is cleared (`null` or absent).
 - [ ] **Dashboard reflects it.** Home shows "1 of 3 lessons finished" and "How do machines learn?"
       under "Next up". The course page shows lesson 1 "Done" with its score, finish date and tutor notes,
       lesson 2 marked "Next up", and "1 of 3 lessons". The catalog shows "1 of 3 lessons".
-- [ ] **No warnings.** `progress:import` reports no problem, and no page shows "Your progress could not be loaded" or course file problems.
-- [ ] **Commands.** Say *show my progress*: the tutor's summary matches the dashboard.
-- [ ] **Not committed.** `git status` does not list anything in `.progress/` other than the example.
+- [ ] **No warnings.** No page shows "Your progress could not be loaded" or course file problems.
+- [ ] **Commands.** Say *show my progress* (or `/progress`): the tutor's summary matches the
+      dashboard. *Quiz me* (or `/review`) asks about lesson 1.
+- [ ] **Nothing to commit.** `git status` shows no change.
 
 Repeat the whole checklist in the other agent (Claude Code, then Codex, or the reverse), starting
-again from a deleted `progress.json`.
+again from an erased progress.
 
 ### Personalization scenarios
 
 Three more runs check that the tutor and the dashboard agree on levels, level checks and
 paths. The automated tests cover the same three learners with fixtures (`beginner-onboarded`,
 `level-check-passed` and `placement-path`, `mid-course`), but only a real session proves that
-the tutor writes what the dashboard reads. Run all three in **Claude Code**, and at least
-scenario 1 in **Codex**. Back up your own `progress.json` first (see [Before you start](#before-you-start)).
+the tutor saves what the dashboard reads. Run all three in **Claude Code**, and at least
+scenario 1 in **Codex**. Back up your own progress first (see [Before you start](#before-you-start)).
 
-**Scenario 1 — beginner, fresh start.** Delete `.progress/progress.json`, say *Let's start
-learning AI*.
+**Scenario 1 — beginner, fresh start.** Erase your progress, say *Let's start learning AI*.
 
 - [ ] The tutor asks name, experience, goal, interests (theme titles, empty themes marked
       "coming soon") and language, one question at a time. Answer "none" for experience.
 - [ ] No level check is offered. The tutor recommends AI Foundations with a 2–3 sentence reason
       and asks if it suits you. Accept.
-- [ ] `progress.json` has `profile.level: "beginner"`, `profile.interests` (theme ids, not titles),
+- [ ] The download has `profile.level: "beginner"`, `profile.interests` (theme ids, not titles),
       `path: ["ai-foundations"]`, `pathReason`, `pathUpdatedAt`,
       `current: "ai-foundations/01-what-is-ai"` and that lesson `in_progress`.
 - [ ] Home shows "Level: Beginner", your interests, "Your path" with the tutor's reason under
       "Why this path", AI Foundations "In progress", and "What is AI?" under "Pick up where you
       left off". No "Some of your learning path was ignored" warning.
 
-**Scenario 2 — developer, level check.** Delete `.progress/progress.json`, start again and
-answer "developer" for experience.
+**Scenario 2 — developer, level check.** Erase your progress, start again and answer
+"developer" for experience.
 
 - [ ] The tutor offers an optional "level check" (never calls it "placement") of at most 6
       questions, one at a time, without teaching. Answer the AI Foundations questions well.
@@ -204,30 +212,32 @@ answer "developer" for experience.
 - [ ] Say *show my progress*: the tutor counts skipped lessons as finished and says they were
       skipped after the level check, matching the dashboard.
 
-**Scenario 3 — existing learner with an old progress file.** Copy
+**Scenario 3 — existing learner with an old progress file.** Erase your progress, then copy
 `dashboard/tests/fixtures/progress/mid-course/progress.json` to `.progress/progress.json`
 (no `level`, `interests` or `path`; lesson 1 done, lesson 2 in progress).
 
-- [ ] Before talking to the tutor: home shows "Welcome back, Alex!", "1 of 3 lessons finished",
-      "How do machines learn?" under "Pick up where you left off", "Get a path made for you"
-      with the phrase "recommend a path", and no warning.
+- [ ] Home offers to import the file; import it. Home then shows "Welcome back, Alex!", "1 of 3
+      lessons finished", "How do machines learn?" under "Pick up where you left off", "Get a path
+      made for you" with the phrase "recommend a path", and no warning.
 - [ ] Say *continue*. The tutor asks the experience question **once** (mentioning your saved
       experience). Answer "used ChatGPT-like tools": it saves `profile.level: "beginner"`, offers
       no level check, and recommends a path.
 - [ ] Nothing is lost: lesson 1 is still `done` with its score and notes, lesson 2 is still
-      `in_progress`, and the tutor resumes lesson 2. Home shows the same counts.
+      `in_progress`, and the tutor resumes lesson 2. Home shows the same counts. The tutor never
+      reads or changes `.progress/progress.json`.
 - [ ] If you accept the path, home shows "Your path" and stops suggesting "recommend a path".
       Say *continue* again: the tutor does not ask your level a second time.
 
 ### Reset
 
-Stop the tutor, then delete `.progress/progress.json` and clear the database copy (step 5 of
-[Before you start](#before-you-start)): the dashboard shows the first visit view again. Restore your backup if you made one. Stop the dashboard with `Ctrl+C`.
+Stop the tutor, then **Erase my progress** on the **Your data** page (and delete
+`.progress/progress.json` if you made one for scenario 3): the dashboard shows the first visit
+view again. Import your backup if you made one. Stop the app with `Ctrl+C`.
 
 ### Reporting a problem
 
-Note the agent, the step that failed, and attach `.progress/progress.json` (remove anything personal)
-plus a screenshot of the dashboard. Open an issue on GitHub.
+Note the agent, the step that failed, and attach your downloaded progress.json (remove anything
+personal) plus a screenshot of the dashboard. Open an issue on GitHub.
 
 ## Manual check: sign-in with GitHub and Google
 
@@ -274,7 +284,7 @@ After changes to these pages, with `npm run dashboard` (no sign-in) and a copy o
 
 The automated tests connect with the official MCP client. Check a real AI chat by hand after
 changes to `packages/mcp`, the OAuth setup or Better Auth upgrades. Start the app with a database
-(`docker compose up --build`), then follow [Connect your AI chat with MCP](using-lessonfolk.md#connect-your-ai-chat-with-mcp).
+(`docker compose up --build`), then follow [Connect your AI chat with MCP](using-lessonfolk.md#connect-your-ai-chat).
 
 - [ ] **`none` mode.** `claude mcp add --transport http lessonfolk http://localhost:4321/mcp`, start
       `claude`: `/mcp` shows `lessonfolk` connected with its tools. Say *Let's start learning AI*:

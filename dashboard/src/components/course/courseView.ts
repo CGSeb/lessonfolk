@@ -20,7 +20,7 @@ export interface LessonRow {
   completedOn: string | null;
   /** Tutor's notes, or null when absent, blank or just the placement marker. */
   notes: string | null;
-  /** The lesson the tutor would teach next ("Start or resume" in AGENTS.md). */
+  /** The lesson the tutor would teach next ("Start or resume" in packages/mcp/prompts/learn.md). */
   isNext: boolean;
 }
 

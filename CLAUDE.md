@@ -2,7 +2,7 @@
 
 ## Tests on code branches
 
-When a branch changes code (anything outside `courses/`, `.progress/` and plain docs: the
+When a branch changes code (anything outside `courses/` and plain docs: the
 dashboard, scripts, tests, fixtures, configuration, dependencies), you must run the tests
 yourself before you commit, open a pull request or hand the work back:
 

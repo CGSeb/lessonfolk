@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { levelSchema, type Level } from './schemas.ts';
 
 // ---------------------------------------------------------------------------
-// Schema (mirrors .progress/progress.example.json)
+// Schema (mirrors docs/progress.example.json)
 // ---------------------------------------------------------------------------
 
 export const lessonStatusSchema = z.enum(['in_progress', 'done', 'skipped']);
@@ -183,7 +183,7 @@ export function getProgressWarnings(
 }
 
 // ---------------------------------------------------------------------------
-// Next lesson ("Start or resume" in AGENTS.md)
+// Next lesson ("Start or resume" in packages/mcp/prompts/learn.md)
 // ---------------------------------------------------------------------------
 
 export interface NextLesson<C extends CourseRef> {
@@ -194,7 +194,7 @@ export interface NextLesson<C extends CourseRef> {
 }
 
 /**
- * Implements "Start or resume" from AGENTS.md:
+ * Implements "Start or resume" (packages/mcp/prompts/learn.md):
  * 1. If `current` is set and that lesson is not done (or skipped), resume it.
  * 2. Otherwise walk courses in order (see `orderCourses`: `path` first, then the rest in
  *    catalog order), then lessons in order, and pick the first lesson that is not

@@ -7,38 +7,50 @@
 
 <p align="center"><strong>Learn AI from zero to advanced, with an AI as your tutor.</strong></p>
 
-LessonFolk is a collection of open-source AI courses designed to be taught *by* an AI coding
-agent — [Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex), or any
-agent that reads `AGENTS.md`. You open the agent in this folder, say "let's start", and it guides
-you through lessons in a conversation: explaining, asking questions, adapting to your level,
-and tracking your progress.
+LessonFolk is a collection of open-source AI courses designed to be taught *by* an AI. Connect
+your AI chat ([Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex),
+Claude Desktop, Cursor…) to LessonFolk, say "let's start", and it guides you through lessons in a
+conversation: explaining, asking questions, adapting to your level, and saving your progress.
 
 ## How it works
 
-| What | Where | Versioned? |
-|---|---|---|
-| Tutor instructions | `AGENTS.md` (Claude Code reads it via `CLAUDE.md`) | yes |
-| Courses | `courses/<lang>/<course>/` | yes |
-| Your progress | `.progress/progress.json` | **no**, it stays on your computer |
+LessonFolk is a website and an [MCP](https://modelcontextprotocol.io) server (Model Context
+Protocol, a standard way for AI apps to use tools). Your AI chat connects to it: it gets the
+courses and the tutor's instructions, and saves your progress there. The website shows your
+courses, your path and your progress.
 
 The tutor asks about your level and interests, recommends a path of courses, and teaches one
-short lesson at a time. An optional local dashboard shows your courses and progress.
-
-Courses are grouped by theme: *Understanding AI*, *Using AI tools*, *Building with AI* and
-*AI and society*. The full list, in the recommended order, is
+short lesson at a time. Courses are grouped by theme: *Understanding AI*, *Using AI tools*,
+*Building with AI* and *AI and society*. The full list, in the recommended order, is
 [`courses/en/index.yaml`](courses/en/index.yaml), or ask your tutor *"what can I learn?"*.
 
 ## Quick start
 
+Pick one of two ways:
+
+**Hosted** (coming soon): sign in on the hosted LessonFolk with GitHub or Google, open its
+**Connect** page and add LessonFolk to your AI chat. Your progress is saved with your account.
+
+**Self-hosted**: private, on your computer, no data sent to us. With
+[Docker](https://docs.docker.com/get-docker/) running:
+
 ```bash
 git clone https://github.com/CGSeb/lessonfolk.git
 cd lessonfolk
-claude      # or: codex
+docker compose up -d --build
 ```
+
+Open http://127.0.0.1:4321 to see the dashboard. Then start your AI chat **in this folder**:
+
+- **Claude Code:** run `claude` and approve the `lessonfolk` MCP server when asked.
+- **Codex:** run `codex mcp add lessonfolk --url http://localhost:4321/mcp` once, then `codex`.
+- **Other apps:** follow the dashboard's **Connect** page.
 
 Then say:
 
 > Let's start learning AI.
+
+The [learner guide](docs/using-lessonfolk.md) has the details.
 
 ## Documentation
 

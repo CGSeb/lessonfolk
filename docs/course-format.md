@@ -64,7 +64,7 @@ Themes are used in three places:
   theme. The course `level` matters too: the optional level check only asks about courses below
   the learner's level.
 
-Theme ids end up in learners' local `progress.json`, so never rename or remove a theme id once
+Theme ids end up in learners' saved progress, so never rename or remove a theme id once
 it is published; change its title or description instead. Unknown ids are ignored with a
 warning on the dashboard, never fatal.
 
