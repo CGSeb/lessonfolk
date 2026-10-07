@@ -1,0 +1,50 @@
+# LessonFolk dashboard server, with the courses bundled in the image.
+# Built and started by docker-compose.yml (`docker compose up --build`).
+
+# --- Dependencies: every workspace, dev dependencies included (needed to build) ---
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY dashboard/package.json dashboard/
+COPY packages/core/package.json packages/core/
+COPY packages/db/package.json packages/db/
+RUN npm ci --no-audit --no-fund
+
+# --- Build: the Astro server (dashboard/dist) ---
+FROM deps AS build
+COPY packages/core packages/core
+COPY dashboard dashboard
+RUN npm run build --workspace dashboard
+
+# --- Production dependencies only ---
+FROM node:22-alpine AS prod-deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY dashboard/package.json dashboard/
+COPY packages/core/package.json packages/core/
+COPY packages/db/package.json packages/db/
+RUN npm ci --omit=dev --no-audit --no-fund
+
+# --- Runtime ---
+FROM node:22-alpine
+WORKDIR /app
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=4321 \
+    LESSONFOLK_ROOT=/app
+COPY package.json ./
+COPY --from=prod-deps /app/node_modules node_modules
+COPY dashboard/package.json dashboard/
+COPY --from=build /app/dashboard/dist dashboard/dist
+COPY packages/core/package.json packages/core/
+COPY packages/core/src packages/core/src
+COPY packages/db/package.json packages/db/
+COPY packages/db/src packages/db/src
+COPY packages/db/drizzle packages/db/drizzle
+COPY courses courses
+# Learner progress is still read from .progress/ (mounted by docker-compose.yml).
+RUN mkdir -p .progress && chown node:node .progress
+USER node
+EXPOSE 4321
+# Apply pending database migrations, then start the dashboard.
+CMD ["sh", "-c", "node --experimental-strip-types --disable-warning=ExperimentalWarning packages/db/src/migrate-cli.ts && exec node dashboard/dist/server/entry.mjs"]

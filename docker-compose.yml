@@ -1,0 +1,42 @@
+# LessonFolk with Postgres, for self-hosting, development and the tests.
+#
+#   docker compose up --build   # Postgres + dashboard on http://127.0.0.1:4321
+#   docker compose up -d db     # Postgres only (127.0.0.1:5432), for `npm test`
+#
+# Ports only listen on 127.0.0.1. Change them in .env (see .env.example).
+name: lessonfolk
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: lessonfolk
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lessonfolk}
+      POSTGRES_DB: lessonfolk
+    ports:
+      - "127.0.0.1:${LESSONFOLK_DB_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lessonfolk -d lessonfolk"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD:-lessonfolk}@db:5432/lessonfolk
+    ports:
+      - "127.0.0.1:${LESSONFOLK_PORT:-4321}:4321"
+    volumes:
+      # Progress is still read from .progress/progress.json until the Postgres store lands.
+      - ./.progress:/app/.progress:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:
