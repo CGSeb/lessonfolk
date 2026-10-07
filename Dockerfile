@@ -50,6 +50,8 @@ COPY packages/mcp/package.json packages/mcp/
 COPY packages/db/src packages/db/src
 COPY packages/db/drizzle packages/db/drizzle
 COPY packages/mcp/src packages/mcp/src
+# The tutor prompts (also bundled in dashboard/dist by the build), kept next to their loader.
+COPY packages/mcp/prompts packages/mcp/prompts
 COPY courses courses
 USER node
 EXPOSE 4321

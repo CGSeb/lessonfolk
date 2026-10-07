@@ -1,3 +1,4 @@
+export { INSTRUCTIONS, PROMPTS, promptText, type TutorPrompt } from './prompts.ts';
 export { createLessonfolkServer, describeError, SERVER_INFO, type LessonfolkServerOptions } from './server.ts';
 export { createMcpEndpoint, localGate, type McpEndpoint, type McpEndpointOptions, type McpGate, type McpIdentity } from './endpoint.ts';
 export { createRateLimiter, DEFAULT_WRITE_LIMIT, type RateLimiter, type RateLimitOptions } from './rate-limit.ts';

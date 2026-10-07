@@ -1,5 +1,6 @@
 /**
- * The LessonFolk MCP server: course and progress tools and course resources for one user.
+ * The LessonFolk MCP server: course and progress tools, course resources and the tutor
+ * prompts (instructions, `learn`, `review`, `progress`) for one user.
  *
  * A fresh server is built for every request (stateless serving), bound to the user id the
  * endpoint got from the access token or the auth mode. No tool takes a user id: a client can
@@ -17,6 +18,7 @@ import {
 import { McpServer, ResourceTemplate, type CallToolResult } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { DEFAULT_LANG, courseSummary, findLesson, lessonStatus, readCatalog, readCourses, readLessonText } from './catalog.ts';
+import { INSTRUCTIONS, registerPrompts } from './prompts.ts';
 import type { RateLimiter } from './rate-limit.ts';
 
 export const SERVER_INFO = { name: 'lessonfolk', version: '0.1.0' } as const;
@@ -31,13 +33,6 @@ export interface LessonfolkServerOptions {
   /** Kept in the progress change log, e.g. `mcp` or `mcp:<oauth client id>`. */
   client?: string;
 }
-
-const INSTRUCTIONS = [
-  'LessonFolk teaches AI through a conversation: you are the tutor.',
-  'Call get_progress first. If the learner has no profile yet, onboard them (name, experience, goal, interests, language) and save it with set_profile.',
-  'To teach: get_next_lesson, then start_lesson, then get_lesson and teach it in small chunks in your own words (never paste the lesson; its "Teaching notes" are for you).',
-  'Finish with complete_lesson (score 0-1 and notes on what was easy or hard). Progress is saved only through these tools.',
-].join(' ');
 
 const lessonId = z.string().min(1).describe('Lesson id: "<course-id>/<lesson file name>", e.g. "ai-foundations/01-what-is-ai".');
 const lang = z.string().min(2).optional().describe('Course language code (default "en"); falls back to "en" when there is no translation.');
@@ -349,6 +344,10 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     },
     ({ progress }) => write('Progress imported.', () => store.importProgress(userId, progress, writeOptions)),
   );
+
+  // --- Prompts: the tutor procedures (prompts/*.md) ---------------------------------
+
+  registerPrompts(server);
 
   // --- Resources ----------------------------------------------------------------
 
