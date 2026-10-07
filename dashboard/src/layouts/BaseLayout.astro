@@ -59,12 +59,12 @@ const signInLink = signInHref(Astro.url);
             <rect class="wordmark__tile" width="64" height="64" rx="16"></rect>
             <path
               class="wordmark__letter"
-              d="M24 15 L24 48 L45 48"
+              d="M22 14 L22 46 L42 46"
               fill="none"
-              stroke-width="6"
+              stroke-width="7"
               stroke-linecap="round"
               stroke-linejoin="round"></path>
-            <circle class="wordmark__spark" cx="36" cy="37" r="4.5"></circle>
+            <path class="wordmark__spark" d="M43 13Q44.6 22.4 54 24Q44.6 25.6 43 35Q41.4 25.6 32 24Q41.4 22.4 43 13Z"></path>
           </svg>
           <span class="wordmark__text">{t('site.name')}</span>
         </a>
@@ -201,11 +201,6 @@ const signInLink = signInHref(Astro.url);
 
   .wordmark__spark {
     fill: var(--brand-amber);
-  }
-
-  /* The wordmark is lowercase by design; the i18n name stays "LessonFolk". */
-  .wordmark__text {
-    text-transform: lowercase;
   }
 
   .site-header__actions {
