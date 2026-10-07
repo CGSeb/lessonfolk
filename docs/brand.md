@@ -14,8 +14,8 @@ tokens, never raw values.
 | [`assets/brand/logo-dark.svg`](../assets/brand/logo-dark.svg) | Mark + wordmark, light text, for dark backgrounds |
 | [`dashboard/public/favicon.svg`](../dashboard/public/favicon.svg), `favicon-32.png` | Browser tab icon |
 
-The mark is an indigo rounded square (corner radius 16 on 64, so 25%) with a white, round-capped
-"L" and an amber dot: the spark of understanding. The wordmark is **lessonfolk** in lowercase,
+The mark is an indigo rounded square (corner radius 16 on 64, so 25%) with a heavy white,
+round-capped "L" and a large amber four-point sparkle in its corner: the spark of understanding. The wordmark is **lessonfolk** in lowercase,
 Inter Medium. The mark looks the same in light and dark themes; only the wordmark colour changes.
 
 - **Minimum size:** mark 16 px (favicon); full logo 120 px wide. Below that, use the mark alone.
@@ -25,7 +25,7 @@ Inter Medium. The mark looks the same in light and dark themes; only the wordmar
 - In the dashboard header the mark is inline SVG coloured with the brand tokens
   `--brand-indigo`, `--brand-white` and `--brand-amber`.
 
-**Don't** recolour the mark, swap the dot for another colour, stretch or rotate it, add shadows
+**Don't** recolour the mark, swap the sparkle for another colour or shape, stretch or rotate it, add shadows
 or outlines, put it on a busy photo, or set the wordmark in another font or in capitals.
 
 ## Colour
@@ -114,7 +114,7 @@ The mark's soft 25% corner and round stroke caps set the tone: **rounded, never 
 
 - Radius: `--radius-sm` 8 px (code), `--radius-md` 12 px (notices, inner panels),
   `--radius-lg` 20 px (cards), `--radius-pill` for badges, nav links, phrase chips and progress bars.
-- Round dots and rings (objective bullets, step counters, the spark dot) echo the mark's dot.
+- Round dots and rings (objective bullets, step counters, the spark dot) echo the mark's spark.
 - Spacing: a 4 px based scale, `--space-1` (4 px) to `--space-8` (64 px). Cards use
   `--space-5` padding; sections are separated by `--space-5` to `--space-6`.
 - Shadows are soft and slightly indigo-tinted (`--shadow-card`, `--shadow-raised` on hover).

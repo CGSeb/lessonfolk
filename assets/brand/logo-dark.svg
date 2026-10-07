@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 268 64" role="img" aria-label="LessonFolk">
   <rect width="64" height="64" rx="16" fill="#4F46E5"/>
-  <path d="M24 15 L24 48 L45 48" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="36" cy="37" r="4.5" fill="#FBBF24"/>
+  <path d="M22 14 L22 46 L42 46" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M43 13Q44.6 22.4 54 24Q44.6 25.6 43 35Q41.4 25.6 32 24Q41.4 22.4 43 13Z" fill="#FBBF24"/>
   <text x="80" y="44" fill="#F9FAFB" font-family="Inter, 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="36" font-weight="500" letter-spacing="-0.7">lessonfolk</text>
 </svg>
