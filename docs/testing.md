@@ -13,7 +13,7 @@ then Postgres with `docker compose up -d db`), then run `npm test` and, for cour
 `npm test` runs `npm test` in every workspace that has one, each with [Vitest](https://vitest.dev):
 `packages/core/` (course loading, schemas, progress logic and the tutor rules, `@lessonfolk/core`),
 `packages/db/` (Postgres schema, migrations and the progress store, `@lessonfolk/db`),
-`packages/mcp/` (the MCP server's tools and resources through the official MCP client, against
+`packages/mcp/` (the MCP server's tools, resources and tutor prompts through the official MCP client, against
 Postgres, `@lessonfolk/mcp`) and `dashboard/`.
 
 ### Database tests (Postgres)
@@ -271,3 +271,31 @@ changes to `packages/mcp`, the OAuth setup or Better Auth upgrades. Start the ap
       "Allow Claude Code to use LessonFolk?". Allow: Claude Code connects and the tools act on your
       signed-in user. Deny once: Claude Code reports the authorization failed.
 - [ ] **Codex.** Repeat the `none` and `oauth` checks with Codex's MCP settings for the same URL.
+
+## Manual check: tutoring over MCP
+
+The automated tests check that the instructions and the `learn`, `review` and `progress` prompts
+are served and only name real tools. Check that real AI chats follow them after changes to
+`packages/mcp/prompts/` or the tool descriptions, in **Claude Code and at least one other client**
+(e.g. Codex). Use a fresh learner (`LESSONFOLK_AUTH=none` with an empty database, or a new
+account in `oauth` mode) and open each client **outside** the LessonFolk folder, so it cannot read
+`AGENTS.md` (in Claude Code, add the server there or with `--scope user`).
+
+- [ ] **Instructions alone.** Say *Let's start learning AI*: the tutor calls `get_progress` first
+      and onboards you one question at a time (name, experience, goal, themes from `list_themes`,
+      language), then saves them with `set_profile` (level set from your experience).
+- [ ] **Level check.** Answer "developer": the tutor offers an optional level check (never called
+      "placement"), asks at most 6 questions, and calls `level_check_skip_course` for a course you
+      pass. The dashboard shows its lessons as "Skipped after level check".
+- [ ] **Path.** The tutor proposes a path with its themes and why, and calls `set_path` only after
+      you agree. The dashboard shows the path and its reason.
+- [ ] **Lesson.** The tutor calls `get_next_lesson`, `start_lesson`, `get_lesson`, then teaches one
+      key idea at a time without pasting the lesson, asks a question after each and waits. A
+      reference to a course you skipped is not "as you saw". After the checks it calls
+      `complete_lesson` with a score and notes; the dashboard shows the lesson done with them.
+- [ ] **Prompts.** In a new chat, use the `learn` prompt (Claude Code: `/mcp__lessonfolk__learn`;
+      in clients without prompts, skip this): the tutor resumes from the saved progress. The
+      `review` prompt quizzes a done lesson and calls `record_review_score`; `progress` summarises
+      per course and names the lessons skipped after the level check.
+- [ ] **Mid-lesson stop.** Say you have to go during a lesson: the tutor calls `save_lesson_notes`;
+      a new chat resumes there.

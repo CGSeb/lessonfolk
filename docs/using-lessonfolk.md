@@ -240,6 +240,11 @@ claude mcp add --transport http lessonfolk http://localhost:4321/mcp
   Your browser opens: sign in, then **Allow** the app to use LessonFolk. Every learner signs in
   as themselves and only ever sees their own progress.
 
+**Start learning** from any folder: say *Let's start learning AI*, or use the server's `learn`
+prompt (in Claude Code: `/mcp__lessonfolk__learn`). The `review` prompt quizzes you and
+`progress` shows where you are. The tutor works as in [Your first session](#your-first-session),
+but saves to the database instead of `.progress/progress.json`.
+
 ## Troubleshooting
 
 **"Port 4321 is already in use" (or the dashboard opens on another port).** Another program,
