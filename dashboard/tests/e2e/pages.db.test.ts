@@ -1,19 +1,18 @@
 /**
- * End-to-end page checks: the built dashboard, served over HTTP, against the real
- * AI Foundations course and one progress fixture per learner state.
+ * End-to-end page checks: the built dashboard (LESSONFOLK_AUTH=none), served over
+ * HTTP, against the pinned AI Foundations course, with the local learner's progress
+ * seeded in Postgres from one progress fixture per learner state.
  */
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { getNextLesson, loadCatalog, progressOrEmpty } from '@lessonfolk/core';
-import { readProgress } from '../../src/lib/progress';
-import { COURSES_DIR, getPage, PROGRESS_FIXTURES, startDashboard, type DashboardServer } from './server';
+import { getNextLesson, loadCatalog, type Progress } from '@lessonfolk/core';
+import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
+import { COURSES_DIR, getPage, seedProgress, startDashboard, type DashboardServer } from './server';
 
 const LESSONS = ['What is AI?', 'How do machines learn?', 'What is a large language model?'];
 
 interface Expectations {
-  /** Folder passed as LESSONFOLK_PROGRESS_DIR. */
-  progressDir: string;
+  /** Progress fixture imported for the local learner (`null`: nothing saved yet). */
+  fixture: string | null;
   home: { include: string[]; exclude: string[] };
   catalog: { include: string[]; exclude: string[] };
   course: { include: string[]; exclude: string[] };
@@ -21,17 +20,16 @@ interface Expectations {
   placementLessons?: number;
 }
 
-const INVALID_HOME = 'Your progress file could not be read';
+const INVALID_HOME = 'Your progress could not be loaded';
 const PATH_WARNING = 'Some of your learning path was ignored';
 const SUGGEST_PATH = ['Get a path made for you', 'recommend a path'];
 const PLACEMENT = 'Skipped after level check';
-const INVALID_CATALOG = 'Your progress file could not be read, so every course is shown as not started.';
+const INVALID_CATALOG = 'Your progress could not be loaded, so every course is shown as not started.';
 const COURSE_ISSUES = ['Some course files have problems', 'Some files of this course have problems'];
 
 const fixtures: Record<string, Expectations> = {
-  'new learner (no progress file)': {
-    // Never created: the tutor writes progress.json during onboarding.
-    progressDir: join(PROGRESS_FIXTURES, 'new-learner-does-not-exist'),
+  'new learner (nothing saved yet)': {
+    fixture: null,
     home: {
       include: [
         'Welcome to LessonFolk',
@@ -50,7 +48,7 @@ const fixtures: Record<string, Expectations> = {
     },
   },
   'onboarded, no lesson yet (minimal)': {
-    progressDir: join(PROGRESS_FIXTURES, 'minimal'),
+    fixture: 'minimal',
     home: {
       include: [
         'Welcome back!',
@@ -71,7 +69,7 @@ const fixtures: Record<string, Expectations> = {
   // Scenario 3: an old progress file, written before levels and paths (no level, interests or
   // path). It loads without warnings, keeps every lesson, and suggests asking for a path.
   'mid-course (old progress file)': {
-    progressDir: join(PROGRESS_FIXTURES, 'mid-course'),
+    fixture: 'mid-course',
     home: {
       include: [
         'Welcome back, Alex!',
@@ -103,7 +101,7 @@ const fixtures: Record<string, Expectations> = {
     },
   },
   'all done (done and skipped)': {
-    progressDir: join(PROGRESS_FIXTURES, 'all-done'),
+    fixture: 'all-done',
     home: {
       include: [
         'Welcome back, Sam!',
@@ -135,7 +133,7 @@ const fixtures: Record<string, Expectations> = {
   },
   // Scenario 1: a beginner right after onboarding and accepting the recommended path.
   'beginner right after onboarding': {
-    progressDir: join(PROGRESS_FIXTURES, 'beginner-onboarded'),
+    fixture: 'beginner-onboarded',
     home: {
       include: [
         'Welcome back, Robin!',
@@ -166,7 +164,7 @@ const fixtures: Record<string, Expectations> = {
   // Scenario 2: a developer who passed the level check for AI Foundations. Their path was set
   // before (e.g. before saying "change my level"), so home lists that course as skipped.
   'a developer who passed the level check': {
-    progressDir: join(PROGRESS_FIXTURES, 'level-check-passed'),
+    fixture: 'level-check-passed',
     home: {
       include: [
         'Welcome back, Casey!',
@@ -195,7 +193,7 @@ const fixtures: Record<string, Expectations> = {
   },
   // Scenario 2, partly: one lesson skipped by the level check, one skipped by hand.
   'a personal path with placement skips': {
-    progressDir: join(PROGRESS_FIXTURES, 'placement-path'),
+    fixture: 'placement-path',
     home: {
       include: [
         'Welcome back, Jordan!',
@@ -231,36 +229,26 @@ const fixtures: Record<string, Expectations> = {
     },
     placementLessons: 1,
   },
-  'invalid JSON': {
-    progressDir: join(PROGRESS_FIXTURES, 'invalid-json'),
-    home: {
-      // Shown as a first visit, with a warning and the parse error.
-      include: [INVALID_HOME, 'Invalid JSON in', 'Welcome to LessonFolk', 'Where beginners start', LESSONS[0]],
-      exclude: ['Welcome back'],
-    },
-    catalog: { include: [INVALID_CATALOG, 'Not started', '0 of 3 lessons'], exclude: [] },
-    course: { include: [INVALID_HOME, 'Invalid JSON in', 'Not started', '0 of 3 lessons', ...LESSONS], exclude: ['Status: Done'] },
-  },
-  'invalid shape': {
-    progressDir: join(PROGRESS_FIXTURES, 'invalid-shape'),
-    home: { include: [INVALID_HOME, 'Unexpected shape in', 'Welcome to LessonFolk'], exclude: ['Welcome back'] },
-    catalog: { include: [INVALID_CATALOG, 'Not started', '0 of 3 lessons'], exclude: [] },
-    course: { include: [INVALID_HOME, 'Unexpected shape in', '0 of 3 lessons'], exclude: ['Status: Done'] },
-  },
 };
 
-it('the new-learner fixture folder does not exist', () => {
-  expect(existsSync(fixtures['new learner (no progress file)'].progressDir)).toBe(false);
+let testDb: TestDatabase;
+let server: DashboardServer;
+
+beforeAll(async () => {
+  testDb = await createTestDatabase();
+  // One server for every learner state: progress is read from the database on each request.
+  server = await startDashboard({ DATABASE_URL: testDb.url });
+});
+afterAll(async () => {
+  await server?.stop();
+  await testDb?.drop();
 });
 
 describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) => {
-  let server: DashboardServer;
+  let progress: Progress;
 
   beforeAll(async () => {
-    server = await startDashboard(fixture.progressDir);
-  });
-  afterAll(async () => {
-    await server?.stop();
+    progress = await seedProgress(testDb.db, 'local', fixture.fixture);
   });
 
   function expectText(text: string, { include, exclude }: { include: string[]; exclude: string[] }) {
@@ -335,16 +323,15 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
   });
 
   it('shows the lesson getNextLesson picks, on home and on the course page', async () => {
-    // Same rule as the tutor's "Start or resume" (AGENTS.md), computed from the fixture itself.
-    const result = readProgress(join(fixture.progressDir, 'progress.json'));
-    const next = getNextLesson(loadCatalog('en', COURSES_DIR), progressOrEmpty(result));
+    // Same rule as the tutor's "Start or resume" (AGENTS.md), computed from the seeded progress.
+    const next = getNextLesson(loadCatalog('en', COURSES_DIR), progress);
 
     const home = await getPage(server, '/');
     const card = /id="next-lesson-heading"[^>]*>([^<]*)<\/h2>\s*<div[^>]*>\s*<h3[^>]*>([^<]*)<\/h3>/.exec(home.html);
     if (!next) {
       expect(card).toBeNull();
     } else {
-      const label = result.state !== 'ok' ? 'Where beginners start' : next.kind === 'resume' ? 'Pick up where you left off' : 'Next up';
+      const label = fixture.fixture === null ? 'Where beginners start' : next.kind === 'resume' ? 'Pick up where you left off' : 'Next up';
       expect(card?.slice(1).map((text) => text.trim())).toEqual([label, next.lesson.title]);
     }
 

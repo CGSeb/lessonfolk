@@ -1,11 +1,14 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { fileURLToPath } from 'node:url';
+import { inspectCatalog, type Progress, type ProgressStore } from '@lessonfolk/core';
+import { createPostgresProgressStore, type Database } from '@lessonfolk/db';
 import { inject } from 'vitest';
 
 /** Pinned copy of the catalog (AI Foundations only), so new courses do not change test expectations. */
 export const COURSES_DIR = fileURLToPath(new URL('../../../packages/core/tests/fixtures/courses-valid', import.meta.url));
-/** Progress fixtures, one folder per learner state. */
+/** Progress fixtures (progress.json files), one folder per learner state, imported into Postgres by the tests. */
 export const PROGRESS_FIXTURES = fileURLToPath(new URL('../fixtures/progress', import.meta.url));
 /** The launcher that runs the sign-in startup checks, then the built server (like `npm run start`). */
 const SERVE_SCRIPT = fileURLToPath(new URL('../../scripts/serve.ts', import.meta.url));
@@ -28,7 +31,7 @@ const CONTROLLED_ENV = [
 
 export type ServerEnv = Record<string, string | undefined>;
 
-function serverProcess(progressDir: string, env: ServerEnv): ChildProcess {
+function serverProcess(env: ServerEnv): ChildProcess {
   const base: ServerEnv = { ...process.env };
   for (const name of CONTROLLED_ENV) delete base[name];
   return spawn(
@@ -41,7 +44,6 @@ function serverProcess(progressDir: string, env: ServerEnv): ChildProcess {
         PORT: '0',
         NODE_ENV: 'test',
         LESSONFOLK_COURSES_DIR: COURSES_DIR,
-        LESSONFOLK_PROGRESS_DIR: progressDir,
         NO_COLOR: '1',
         FORCE_COLOR: '0',
         ...env,
@@ -65,7 +67,7 @@ export function freePort(): Promise<number> {
 
 /** Start the server with settings it must refuse: resolves with its exit code and output. */
 export function expectStartupFailure(env: ServerEnv): Promise<{ code: number | null; output: string }> {
-  const child = serverProcess(PROGRESS_FIXTURES, env);
+  const child = serverProcess(env);
   let output = '';
   child.stdout?.on('data', (chunk: Buffer) => (output += chunk.toString()));
   child.stderr?.on('data', (chunk: Buffer) => (output += chunk.toString()));
@@ -93,11 +95,11 @@ const ANSI = /\x1b\[[0-9;]*m/g;
 
 /**
  * Start the built dashboard on a free port (PORT=0, read back from its startup
- * log) with the given progress folder. `progressDir` must be absolute. Without
- * `env`, it runs with LESSONFOLK_AUTH=none and no database.
+ * log). Without other settings it runs with LESSONFOLK_AUTH=none, which needs
+ * Postgres: pass the test database as DATABASE_URL.
  */
-export function startDashboard(progressDir: string, env: ServerEnv = {}): Promise<DashboardServer> {
-  const child = serverProcess(progressDir, env);
+export function startDashboard(env: ServerEnv = {}): Promise<DashboardServer> {
+  const child = serverProcess(env);
 
   const stop = () =>
     new Promise<void>((resolve) => {
@@ -164,4 +166,27 @@ export function visibleText(html: string): string {
     })
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/** The progress store on a test database, with the pinned courses (writes as the tutor would). */
+export function testProgressStore(db: Database): ProgressStore {
+  return createPostgresProgressStore(db, { courses: () => inspectCatalog('en', COURSES_DIR).catalog.courses });
+}
+
+/** The text of a progress fixture's progress.json. */
+export function readProgressFixture(name: string): string {
+  return readFileSync(`${PROGRESS_FIXTURES}/${name}/progress.json`, 'utf8');
+}
+
+/**
+ * Give `userId` the progress of a fixture, as the tutor would have saved it (import
+ * replaces everything), or no progress at all with `null`. The user row must exist.
+ */
+export async function seedProgress(db: Database, userId: string, fixture: string | null): Promise<Progress> {
+  const store = testProgressStore(db);
+  if (fixture === null) {
+    await store.deleteLearner(userId);
+    return store.getProgress(userId);
+  }
+  return store.importProgress(userId, readProgressFixture(fixture), { client: 'test' });
 }

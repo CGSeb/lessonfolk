@@ -1,4 +1,8 @@
 {
   "version": 1,
+  "profile": {
+    "experience": "used ChatGPT-like tools",
+    "language": "en"
+  },
   "lessons": {}
 }

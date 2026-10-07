@@ -6,13 +6,16 @@ import AuthorAvatar from '../../components/authors/AuthorAvatar.astro';
 import { courseAuthors, getAuthorView } from '../../components/authors/authorView';
 import { t } from '../../i18n/en';
 import { authorsFilePath, getPathCourseIds, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
-import { readProgress } from '../../lib/progress';
+import SignInPrompt from '../../components/SignInPrompt.astro';
+import { loadProgressFor } from '../../lib/store';
 
-// Read on every request so the page reflects the tutor's latest writes.
+// Read on every request so the page reflects the tutor's latest writes. Public page:
+// signed out (`progressResult` null), courses are shown without progress.
 const slug = Astro.params.slug ?? '';
 const { catalog, issues } = inspectCatalog('en');
-const progressResult = readProgress();
-const view = getAuthorView(catalog.courses, catalog.authors, slug, progressOrEmpty(progressResult));
+const progressResult = await loadProgressFor(Astro.locals.user);
+const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
+const view = getAuthorView(catalog.courses, catalog.authors, slug, progress);
 
 if (!view) Astro.response.status = 404;
 
@@ -20,7 +23,7 @@ if (!view) Astro.response.status = 404;
 const recommended = new Set(
   getPathCourseIds(
     catalog.courses.map((c) => c.id),
-    progressOrEmpty(progressResult),
+    progress,
   ),
 );
 const themesById = new Map(catalog.themes.map((theme) => [theme.id, theme]));
@@ -87,8 +90,10 @@ const linkText = (link: NonNullable<typeof view>['links'][number]) =>
             </div>
           </header>
 
+          <SignInPrompt />
+
           {
-            progressResult.state === 'invalid' && (
+            progressResult?.state === 'invalid' && (
               <p class="warning" role="status">
                 {t('author.progressInvalid')}
               </p>
@@ -108,6 +113,7 @@ const linkText = (link: NonNullable<typeof view>['links'][number]) =>
                         theme={themesById.get(stats.course.theme)}
                         authors={courseAuthors(stats.course, catalog.authors)}
                         recommended={recommended.has(stats.course.id)}
+                        showProgress={progressResult !== null}
                       />
                     </li>
                   ))}

@@ -46,8 +46,6 @@ COPY packages/db/package.json packages/db/
 COPY packages/db/src packages/db/src
 COPY packages/db/drizzle packages/db/drizzle
 COPY courses courses
-# Learner progress is still read from .progress/ (mounted by docker-compose.yml).
-RUN mkdir -p .progress && chown node:node .progress
 USER node
 EXPOSE 4321
 # Apply pending database migrations, then check the sign-in settings and start the dashboard.

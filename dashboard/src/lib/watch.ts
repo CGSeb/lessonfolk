@@ -1,8 +1,11 @@
 import { existsSync, readdirSync, statSync, watch, type FSWatcher } from 'node:fs';
 import { join } from 'node:path';
 
-/** Which part of the learner's files changed. */
-export type ChangeArea = 'progress' | 'courses';
+/**
+ * What changed on disk. Only the course files are watched: progress lives in Postgres
+ * and is read on every page load (pages do not refresh by themselves when it changes).
+ */
+export type ChangeArea = 'courses';
 
 export interface WatchDirOptions {
   /** Watch subdirectories too. */
@@ -50,7 +53,7 @@ export function directorySignature(dir: string, recursive: boolean): string {
  * Watch a directory and call `onChange` once per burst of changes.
  *
  * - The directory may not exist yet: it is polled for, and its appearance counts
- *   as a change (so a first-time `progress.json` is noticed).
+ *   as a change.
  * - If the directory disappears or fs.watch fails, it falls back to polling.
  * - Never throws after start; returns a function that stops everything.
  */
@@ -160,22 +163,13 @@ export function watchDirectory(dir: string, onChange: () => void, options: Watch
 }
 
 export interface LessonFolkWatchOptions extends Pick<WatchDirOptions, 'debounceMs' | 'pollMs' | 'forcePolling'> {
-  progressDir: string;
   coursesDir: string;
 }
 
-/** Watch the progress directory and the courses tree; `onChange` gets the area that changed. */
-export function watchLessonFolk(
-  options: LessonFolkWatchOptions,
-  onChange: (area: ChangeArea) => void,
-): () => void {
-  const { progressDir, coursesDir, ...rest } = options;
-  const stopProgress = watchDirectory(progressDir, () => onChange('progress'), { ...rest, recursive: false });
-  const stopCourses = watchDirectory(coursesDir, () => onChange('courses'), { ...rest, recursive: true });
-  return () => {
-    stopProgress();
-    stopCourses();
-  };
+/** Watch the courses tree; `onChange` gets the area that changed. */
+export function watchLessonFolk(options: LessonFolkWatchOptions, onChange: (area: ChangeArea) => void): () => void {
+  const { coursesDir, ...rest } = options;
+  return watchDirectory(coursesDir, () => onChange('courses'), { ...rest, recursive: true });
 }
 
 type Listener = (area: ChangeArea) => void;

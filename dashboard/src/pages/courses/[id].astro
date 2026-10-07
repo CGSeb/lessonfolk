@@ -7,19 +7,22 @@ import Notice from '../../components/Notice.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import ThemeBadge from '../../components/ThemeBadge.astro';
 import SayPhrase from '../../components/home/SayPhrase.astro';
+import SignInPrompt from '../../components/SignInPrompt.astro';
 import { courseAuthors } from '../../components/authors/authorView';
 import { getCourseView, issuesForCourse } from '../../components/course/courseView';
 import { t } from '../../i18n/en';
 import { inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
-import { readProgress } from '../../lib/progress';
+import { loadProgressFor } from '../../lib/store';
 
-// Read on every request so the page reflects the tutor's latest writes.
+// Read on every request so the page reflects the tutor's latest writes. Public page:
+// signed out (`progressResult` null), the lessons are shown without progress.
 const id = Astro.params.id ?? '';
 const lang = 'en';
 const { catalog, issues } = inspectCatalog(lang);
-const progressResult = readProgress();
-const view = getCourseView(catalog.courses, id, progressOrEmpty(progressResult));
+const progressResult = await loadProgressFor(Astro.locals.user);
+const showProgress = progressResult !== null;
+const view = getCourseView(catalog.courses, id, progressOrEmpty(progressResult ?? { state: 'missing' }));
 
 if (!view) Astro.response.status = 404;
 
@@ -52,7 +55,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
     </nav>
 
     {
-      view && progressResult.state === 'invalid' && (
+      view && progressResult?.state === 'invalid' && (
         <Notice tone="warning" title={t('course.invalidProgressTitle')}>
           <p>{t('course.invalidProgressBody')}</p>
           <details>
@@ -98,7 +101,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
             <div class="cluster" style="--cluster-space: var(--space-2)">
               <ThemeBadge theme={theme} />
               <LevelBadge level={course.level} />
-              <StatusBadge status={view.status} />
+              {showProgress && <StatusBadge status={view.status} />}
             </div>
             <p class="course-lead">{course.description}</p>
             <p class="muted course-meta">
@@ -107,14 +110,18 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
           </header>
 
           <div class="course-columns">
-            <section class="card stack" aria-labelledby="progress-heading" style="--stack-space: var(--space-3)">
-              <h2 class="course-card-title" id="progress-heading">{t('course.progressTitle')}</h2>
-              <progress class="progress-bar" value={view.finished} max={Math.max(total, 1)} aria-labelledby="progress-heading">
-                {progressText}
-              </progress>
-              <p>{progressText}</p>
-              {view.status === 'completed' && <p class="course-done">{t('course.completedMessage')}</p>}
-            </section>
+            {showProgress ? (
+              <section class="card stack" aria-labelledby="progress-heading" style="--stack-space: var(--space-3)">
+                <h2 class="course-card-title" id="progress-heading">{t('course.progressTitle')}</h2>
+                <progress class="progress-bar" value={view.finished} max={Math.max(total, 1)} aria-labelledby="progress-heading">
+                  {progressText}
+                </progress>
+                <p>{progressText}</p>
+                {view.status === 'completed' && <p class="course-done">{t('course.completedMessage')}</p>}
+              </section>
+            ) : (
+              <SignInPrompt />
+            )}
 
             <section class="card stack" aria-labelledby="prereq-heading" style="--stack-space: var(--space-3)">
               <h2 class="course-card-title" id="prereq-heading">{t('course.prerequisitesTitle')}</h2>
@@ -144,7 +151,10 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
           <section class="stack" aria-labelledby="lessons-heading" style="--stack-space: var(--space-4)">
             <h2 id="lessons-heading">{t('course.lessonsHeading')}</h2>
             <ol class="lesson-list stack" role="list" style="--stack-space: var(--space-3)">
-              {view.lessons.map((row) => (
+              {view.lessons.map((lessonRow) => {
+                // Signed out: no status, score or "next up" (nothing is known about the learner).
+                const row = showProgress ? lessonRow : { ...lessonRow, isNext: false };
+                return (
                 <li
                   class:list={['card', 'stack', 'lesson', row.isNext && 'card--spark lesson--next']}
                   style="--stack-space: var(--space-3)"
@@ -153,7 +163,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
                   {row.isNext && <p class="overline">{t('course.nextUp')}</p>}
                   <div class="lesson__head">
                     <h3 class="lesson__title">{row.lesson.title}</h3>
-                    <StatusBadge status={row.status} />
+                    {showProgress && <StatusBadge status={row.status} />}
                   </div>
                   <p class="cluster muted lesson__meta" style="--cluster-space: var(--space-1) var(--space-3)">
                     <span>{t('course.minutes', { minutes: row.lesson.estimatedMinutes })}</span>
@@ -172,7 +182,8 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
                   )}
                   {row.isNext && <SayPhrase instruction={t('course.continueHint')} phrase={t('course.continuePhrase')} />}
                 </li>
-              ))}
+                );
+              })}
             </ol>
           </section>
         </>

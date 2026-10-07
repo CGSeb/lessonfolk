@@ -24,7 +24,7 @@ this folder and teaches them to you in a conversation.
 | [Git](https://git-scm.com) | Getting the project | Or download the project as a ZIP from GitHub. |
 | An AI coding agent | The tutor | [Claude Code](https://claude.com/claude-code) or [Codex](https://openai.com/codex). Each needs an account with its provider. Any agent that reads `AGENTS.md` should work too. |
 | [Node.js](https://nodejs.org) 22 or later | The dashboard only | Optional. You can learn without it. |
-| [Docker](https://docs.docker.com/get-docker/) | Self-hosting only | Optional. Only for [Run it with Docker](#run-it-with-docker-self-hosting). |
+| [Docker](https://docs.docker.com/get-docker/) | The dashboard and self-hosting | Optional. Runs the database (Postgres) where the dashboard reads your progress. |
 
 ## Get LessonFolk and start the tutor
 
@@ -116,12 +116,17 @@ The mod lives in `.claude/skills/course-companion/`. Codex has no companion.
 The dashboard is a small website that runs on your computer and shows your courses and
 progress. It is optional. It never changes your progress: only the tutor writes it.
 
+The dashboard reads your progress from a database (Postgres), not from
+`.progress/progress.json`. Until the tutor saves to the database itself, copy your file into it
+with `npm run progress:import` (see [Import your progress](#import-your-progress)).
+
 ### Start it
 
-With Node.js 22 or later, from the LessonFolk folder:
+With Node.js 22 or later and Docker running, from the LessonFolk folder:
 
 ```bash
-npm install        # the first time, and after updating LessonFolk
+npm install              # the first time, and after updating LessonFolk
+docker compose up -d db  # the database
 npm run dashboard
 ```
 
@@ -145,8 +150,21 @@ npm run dashboard:start
 | **A course** | `/courses/<course-id>` | The course's lessons with your status, scores, finish dates and the tutor's notes, what the course builds on, and the next lesson. |
 | **Authors** | `/authors` | The people and projects who write the courses, and the courses of each author. |
 
-The pages update by themselves while you learn: you don't need to reload them. Lessons you
-skipped after the level check show as "Skipped after level check".
+Reload a page to see your latest progress (pages refresh by themselves only when course files
+change). Lessons you skipped after the level check show as "Skipped after level check".
+
+With sign-in (`LESSONFOLK_AUTH=oauth`), the courses and authors pages are open to everyone,
+without progress. Home needs you to sign in, and each person sees only their own progress.
+
+### Import your progress
+
+```bash
+npm run progress:import                           # .progress/progress.json
+npm run progress:import -- path/to/progress.json  # another file
+```
+
+It replaces the progress the database holds for the local learner (no sign-in) with the file;
+the file is not changed. Run it again after a tutoring session to see your new progress.
 
 ## Your progress and your privacy
 
@@ -154,7 +172,8 @@ skipped after the level check show as "Skipped after level check".
   tutor creates it during onboarding and saves it after every change.
 - It stays on your computer. Git ignores the `.progress/` folder, so your progress is never
   committed or shared, even if you contribute to the project.
-- The dashboard only listens on your own computer (`127.0.0.1`) and only reads the file.
+- The dashboard reads the copy you [import](#import-your-progress) into the database, which
+  runs on your computer. Without sign-in, it only listens on your own computer (`127.0.0.1`).
 - Your conversations go to your agent's provider (Anthropic for Claude Code, OpenAI for Codex),
   as with any use of that agent. Without sign-in (the default), LessonFolk itself sends
   nothing anywhere.
@@ -175,8 +194,9 @@ docker compose up --build
 - Open http://127.0.0.1:4321. The database listens on `127.0.0.1:5432`. Both only listen on your
   own computer.
 - Add `-d` (`docker compose up -d --build`) to run it in the background.
-- The dashboard reads your progress from `.progress/` in this folder, read-only. The courses are
-  copied into the app when it is built.
+- The dashboard reads your progress from the database: copy `.progress/progress.json` into it
+  with `npm run progress:import` (needs Node.js). The courses are copied into the app when it
+  is built.
 - The database keeps its data in a Docker volume called `db-data`, so it survives restarts.
 
 **Settings.** To change the defaults, copy `.env.example` to `.env` and edit it. For example,
@@ -220,20 +240,21 @@ maybe another dashboard, uses the port. Stop it, or pick another port:
 (or the Docker service) and wait until it is ready, then run the command again. Install Docker
 first if you don't have it.
 
-**The dashboard stops with "could not create the local learner".** You have a `.env` file with
-`DATABASE_URL`, but the database is not running. Start it with `docker compose up -d db`, or
-remove `DATABASE_URL` from `.env`: the dashboard runs without a database for one learner.
+**The dashboard stops with "the database … cannot be reached".** The dashboard keeps your
+progress in Postgres. Start Docker, then the database with `docker compose up -d db`, and start
+the dashboard again. With your own Postgres, set `DATABASE_URL` in `.env`.
 
 **The dashboard shows no progress.**
 
+- Did you import it? Run `npm run progress:import`, then reload the page.
 - Did onboarding finish? Check that `.progress/progress.json` exists in the LessonFolk folder.
   If not, say *"let's start"* to your tutor.
 - Was the agent opened in the LessonFolk folder? If you opened it elsewhere, the tutor saved
   nothing here. Close it and open it again in this folder.
-- "Your progress file could not be read": the file is not valid. Ask your tutor to check
+- `progress:import` says the file is not valid: ask your tutor to check
   `.progress/progress.json`. Your progress is not lost.
-- With Docker, the app must be started from the same LessonFolk folder that holds your
-  `.progress/`.
+- "Your progress could not be loaded": the database stopped. Start it again with
+  `docker compose up -d db` and reload the page.
 
 **The tutor does not act like a tutor.** Make sure the agent was started in the LessonFolk
 folder (it should mention LessonFolk when you say *"let's start"*). Then say *"let's start"*

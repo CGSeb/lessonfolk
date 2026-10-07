@@ -5,6 +5,7 @@ import '../styles/global.css';
 import { t } from '../i18n/en';
 import LiveRefresh from '../components/LiveRefresh.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import { signInHref } from '../lib/auth/redirect';
 
 interface Props {
   /** Page name shown before the site name in the tab title. Omit for the site title alone. */
@@ -24,7 +25,7 @@ const navItems = [
 ];
 // Sign in / sign out, only when people sign in (LESSONFOLK_AUTH=oauth).
 const { authMode, user } = Astro.locals;
-const signInHref = `/sign-in?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`;
+const signInLink = signInHref(Astro.url);
 ---
 
 <html lang="en">
@@ -90,7 +91,7 @@ const signInHref = `/sign-in?next=${encodeURIComponent(Astro.url.pathname + Astr
                 </form>
               ) : (
                 path !== '/sign-in' && (
-                  <a class="account__button" href={signInHref}>
+                  <a class="account__button" href={signInLink}>
                     {t('auth.signIn')}
                   </a>
                 )
@@ -108,7 +109,7 @@ const signInHref = `/sign-in?next=${encodeURIComponent(Astro.url.pathname + Astr
     <footer class="site-footer">
       <div class="container stack" style="--stack-space: var(--space-2)">
         <p>{t('footer.about')}</p>
-        <p>{t('footer.privacy')}</p>
+        <p>{t(authMode === 'oauth' ? 'footer.privacyAccount' : 'footer.privacy')}</p>
         <p>{t('footer.license')}</p>
       </div>
     </footer>
