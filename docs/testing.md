@@ -71,6 +71,10 @@ Changing the schema and generating migrations: see
   fixture)` from `tests/e2e/server.ts` (the store's `importProgress` of a progress fixture, or
   `null` for a learner with nothing saved) or with `testProgressStore(db)` to write step by step
   as the tutor would. The local learner of `LESSONFOLK_AUTH=none` has the user id `local`.
+- **Live refresh.** The store publishes a per-user event after each committed write
+  (`onChange` option of `createPostgresProgressStore`, hub in `dashboard/src/lib/watch.ts`) and
+  `/api/events` streams it to that user only. The event stream lives in the server process, so
+  e2e tests must write through MCP (`mcp-client.ts`), not through a store of the test process.
 - **Course fixtures** live in `packages/core/tests/fixtures/`: `courses-valid/` is a pinned copy of the
   catalog with only AI Foundations, used by every test that expects an exact catalog (themes,
   authors, personalization scenarios, e2e pages), so adding a course to `courses/` never breaks

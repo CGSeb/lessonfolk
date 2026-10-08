@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createChangeHub, directorySignature, watchLessonFolk, watchDirectory, type ChangeArea } from './watch';
+import { createChangeHub, createProgressHub, getProgressHub, directorySignature, watchLessonFolk, watchDirectory, type ChangeArea } from './watch';
 
 const DEBOUNCE = 100;
 const POLL = 50;
@@ -159,5 +159,52 @@ describe('directorySignature', () => {
     writeFileSync(join(dir, 'progress.json'), '{}');
     expect(directorySignature(dir, false)).not.toBe(before);
     expect(directorySignature(join(dir, 'missing'), false)).toBe('');
+  });
+});
+
+describe('createProgressHub', () => {
+  it('tells only the listeners of the user who changed', () => {
+    const hub = createProgressHub();
+    const a = vi.fn();
+    const a2 = vi.fn();
+    const b = vi.fn();
+    hub.subscribe('user-a', a);
+    hub.subscribe('user-a', a2);
+    hub.subscribe('user-b', b);
+
+    hub.publish('user-a');
+    expect(a).toHaveBeenCalledTimes(1);
+    expect(a2).toHaveBeenCalledTimes(1);
+    expect(b).not.toHaveBeenCalled();
+
+    hub.publish('nobody');
+    expect(b).not.toHaveBeenCalled();
+  });
+
+  it('stops telling a listener that unsubscribed, and forgets empty users', () => {
+    const hub = createProgressHub();
+    const listener = vi.fn();
+    const off = hub.subscribe('user-a', listener);
+    expect(hub.size('user-a')).toBe(1);
+    off();
+    off();
+    hub.publish('user-a');
+    expect(listener).not.toHaveBeenCalled();
+    expect(hub.size()).toBe(0);
+  });
+
+  it('survives a throwing listener', () => {
+    const hub = createProgressHub();
+    const after = vi.fn();
+    hub.subscribe('user-a', () => {
+      throw new Error('broken connection');
+    });
+    hub.subscribe('user-a', after);
+    expect(() => hub.publish('user-a')).not.toThrow();
+    expect(after).toHaveBeenCalledTimes(1);
+  });
+
+  it('shares one hub per server', () => {
+    expect(getProgressHub()).toBe(getProgressHub());
   });
 });

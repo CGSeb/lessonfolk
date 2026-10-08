@@ -302,3 +302,43 @@ describe('deleteLearner', () => {
     expect(await store.deleteLearner(userId)).toBe(false);
   });
 });
+
+describe('onChange', () => {
+  it('is called with the user id after each committed write, for that user only', async () => {
+    const changed: string[] = [];
+    const watched = createPostgresProgressStore(testDb.db, { courses, onChange: (id) => changed.push(id) });
+    const a = await newUser();
+    const b = await newUser();
+
+    await watched.startLesson(a, L1, at);
+    expect(changed).toEqual([a]);
+    await watched.completeLesson(a, L1, { score: 0.8, notes: 'ok' }, at);
+    await watched.setProfile(b, { name: 'Robin' }, at);
+    expect(changed).toEqual([a, a, b]);
+    expect(await watched.deleteLearner(b)).toBe(true);
+    expect(changed).toEqual([a, a, b, b]);
+  });
+
+  it('is not called for reads or for a write that fails', async () => {
+    const changed: string[] = [];
+    const watched = createPostgresProgressStore(testDb.db, { courses, onChange: (id) => changed.push(id) });
+    const id = await newUser();
+
+    await watched.getProgress(id);
+    await watched.exportProgress(id);
+    await expect(watched.completeLesson(id, L2, { score: 1 }, at)).rejects.toBeDefined();
+    expect(await watched.deleteLearner('nobody')).toBe(false);
+    expect(changed).toEqual([]);
+  });
+
+  it('does not turn a saved write into an error when the listener throws', async () => {
+    const watched = createPostgresProgressStore(testDb.db, {
+      courses,
+      onChange: () => {
+        throw new Error('listener broke');
+      },
+    });
+    const id = await newUser();
+    await expect(watched.startLesson(id, L1, at)).resolves.toMatchObject({ current: L1 });
+  });
+});

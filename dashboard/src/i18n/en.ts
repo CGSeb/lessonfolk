@@ -231,6 +231,7 @@ export const en = {
   },
   live: {
     coursesUpdated: 'The courses were updated.',
+    progressUpdated: 'Your progress was updated.',
   },
   connect: {
     title: 'Connect your AI chat',

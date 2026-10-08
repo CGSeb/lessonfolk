@@ -1,8 +1,8 @@
 /**
  * Simulates a first tutoring session against the built dashboard: the tutor saves
  * onboarding, a path and a finished lesson through the progress store (Postgres),
- * and each page shows the new state on the next load. Progress is not pushed to
- * open pages; /api/events only announces course file changes.
+ * and each page shows the new state on the next load. Writes through MCP are pushed
+ * to open pages: see mcp-none.db.test.ts.
  */
 import type { ProgressStore } from '@lessonfolk/core';
 import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
@@ -81,7 +81,7 @@ describe('progress saved during a tutoring session', () => {
     expect(home.text).toContain('Welcome to LessonFolk');
   });
 
-  it('keeps the course change stream open', async () => {
+  it('keeps the change stream open', async () => {
     const abort = new AbortController();
     const response = await fetch(`${server.url}/api/events`, { headers: { Accept: 'text/event-stream' }, signal: abort.signal });
     expect(response.status).toBe(200);

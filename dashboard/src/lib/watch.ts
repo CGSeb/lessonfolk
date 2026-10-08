@@ -2,10 +2,10 @@ import { existsSync, readdirSync, statSync, watch, type FSWatcher } from 'node:f
 import { join } from 'node:path';
 
 /**
- * What changed on disk. Only the course files are watched: progress lives in Postgres
- * and is read on every page load (pages do not refresh by themselves when it changes).
+ * What changed: the course files on disk (watched), or one learner's progress in Postgres
+ * (published by the progress store after each write, see `progressHub`).
  */
-export type ChangeArea = 'courses';
+export type ChangeArea = 'courses' | 'progress';
 
 export interface WatchDirOptions {
   /** Watch subdirectories too. */
@@ -173,6 +173,53 @@ export function watchLessonFolk(options: LessonFolkWatchOptions, onChange: (area
 }
 
 type Listener = (area: ChangeArea) => void;
+
+/**
+ * Per-user change events for progress, in process: the store publishes after each committed
+ * write (including the ones made through MCP, which runs in the same server) and each open
+ * event stream listens for its own user only. With more than one instance, replace the
+ * `publish` side with Postgres LISTEN/NOTIFY: the interface stays the same.
+ */
+export function createProgressHub() {
+  const listeners = new Map<string, Set<() => void>>();
+  return {
+    subscribe(userId: string, listener: () => void): () => void {
+      let set = listeners.get(userId);
+      if (!set) listeners.set(userId, (set = new Set()));
+      set.add(listener);
+      return () => {
+        set.delete(listener);
+        if (set.size === 0 && listeners.get(userId) === set) listeners.delete(userId);
+      };
+    },
+    publish(userId: string): void {
+      for (const listener of [...(listeners.get(userId) ?? [])]) {
+        try {
+          listener();
+        } catch {
+          // One broken connection must not affect the others.
+        }
+      }
+    },
+    /** Number of listeners for `userId`, or in total. */
+    size(userId?: string): number {
+      if (userId !== undefined) return listeners.get(userId)?.size ?? 0;
+      let total = 0;
+      for (const set of listeners.values()) total += set.size;
+      return total;
+    },
+  };
+}
+
+export type ProgressHub = ReturnType<typeof createProgressHub>;
+
+const HUB_KEY = Symbol.for('lessonfolk.progressHub');
+
+/** The server's one progress hub (shared by the store and the event stream, whatever chunk they are bundled in). */
+export function getProgressHub(): ProgressHub {
+  const holder = globalThis as unknown as Record<symbol, ProgressHub | undefined>;
+  return (holder[HUB_KEY] ??= createProgressHub());
+}
 
 /**
  * Shares one set of file watchers between every connected page. Watchers start
