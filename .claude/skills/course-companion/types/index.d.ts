@@ -5,7 +5,7 @@ export type LessonState = {
 }
 
 export type View = {
-  state: 'no-progress' | 'invalid' | 'all-done' | 'lesson' | 'between'
+  state: 'no-progress' | 'offline' | 'all-done' | 'lesson' | 'between'
   courseId?: string
   courseTitle?: string
   themeTitle?: string
@@ -15,7 +15,7 @@ export type View = {
   next?: { id: string; title: string; courseTitle?: string }
 }
 
-// Lesson statuses as last read from progress.json, to spot what a save changed.
+// Lesson statuses as last read from the server, to spot what a save changed.
 export type Snapshot = { current?: string; statuses: Record<string, string> }
 
 // Key ideas of `lessonId` the tutor reported: 1-based numbers.
@@ -28,14 +28,12 @@ export type Choices = {
   picked: number[]
 }
 
-// The local dashboard this session started: its address once the server says it listens.
-export type Dashboard = { status: 'off' | 'starting' | 'running'; url?: string }
 
 declare module 'claude-code' {
   interface PluginState {
     'course-companion': {
       isActive: boolean
-      dashboard: Dashboard
+      instance: string
       choices: Choices | null
       view: View
       snapshot: Snapshot | null

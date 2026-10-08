@@ -1,16 +1,17 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Choices, Dashboard, IdeaMarks, LessonState, View } from '../types'
+import type { Choices, IdeaMarks, LessonState, View } from '../types'
 import {
   changes,
-  dashboardUrl,
-  isProgressFile,
-  PROGRESS,
+  DEFAULT_INSTANCE,
+  instanceUrl,
   load,
   markIdea,
   parseChoices,
   replyOf,
+  SERVER,
+  TOOL_PREFIX,
   togglePick,
 } from './companion'
 
@@ -26,7 +27,8 @@ const choices = atom({ plugin: 'course-companion', key: 'choices' } as const, nu
 const view = atom({ plugin: 'course-companion', key: 'view' } as const, { state: 'no-progress' } as View)
 const snapshot = atom({ plugin: 'course-companion', key: 'snapshot' } as const, null)
 const ideas = atom({ plugin: 'course-companion', key: 'ideas' } as const, NO_IDEAS)
-const dashboard = atom({ plugin: 'course-companion', key: 'dashboard' } as const, { status: 'off' } as Dashboard)
+// The LessonFolk instance the Dashboard button opens (local or hosted).
+const instance = atom({ plugin: 'course-companion', key: 'instance' } as const, DEFAULT_INSTANCE)
 
 // The learner commands of AGENTS.md, offered as buttons above the prompt.
 const COMMANDS = [
@@ -38,11 +40,34 @@ const COMMANDS = [
 
 const isSkill = (name: string | undefined, skill: string) => name === skill || name?.endsWith(`:${skill}`)
 
-// Re-reads progress.json and the course files; toasts what changed since the last read.
+// The server's name as this session knows it: `lessonfolk` from `.mcp.json`, or the name of the
+// connector a hosted instance was added under, learned from the tutor's first call to it.
+let server = SERVER
+
+const isLessonfolkTool = (tool: string) =>
+  tool.startsWith(TOOL_PREFIX) || (/^mcp__[^_].*lessonfolk.*?__/i.test(tool) && !tool.startsWith('mcp__course-'))
+
+// Calls a tool of the LessonFolk MCP server with the session's own connection (and sign-in),
+// so it reads the same progress as the tutor, from a local or a hosted instance.
+const callServer = ($: EngineInterface) => async (tool: string, args?: Record<string, unknown>) => {
+  try {
+    const { content, isError } = await $.mcp.call(server, tool, args)
+    if (isError) return undefined
+
+    return content.flatMap(block => (block.type === 'text' ? [block.text] : [])).join('\n')
+  } catch {
+    return undefined
+  }
+}
+
+// Re-reads the progress and the courses from the server; toasts what changed since the last read.
 async function refresh($: EngineInterface, isQuiet = false) {
   // A relative path would resolve against the mod's own folder: read from the session's.
   const root = (await $.session.cwd()).replace(/\\/g, '/')
-  const loaded = await load(path => $.fs.read(`${root}/${path}`).then(text => text, () => undefined))
+  const config = await $.fs.read(`${root}/.mcp.json`).then(text => text, () => undefined)
+  await update($, instance, () => instanceUrl(config))
+
+  const loaded = await load(callServer($))
   const before = await read($, snapshot)
   const previous = before ? { snapshot: before, view: await read($, view) } : undefined
   await update($, view, () => loaded.view)
@@ -75,48 +100,6 @@ async function activate($: EngineInterface) {
   if (!hasOpened) void openPane($)
 }
 
-// Starts the dashboard (`astro dev` in dashboard/, what `npm run dashboard` runs) for the
-// session's life: node runs Astro's CLI directly, since there is no shell to find npm with.
-// The server stops with the app, or when the mod reloads.
-async function startDashboard($: EngineInterface) {
-  if ((await read($, dashboard)).status !== 'off') return
-  await update($, dashboard, () => ({ status: 'starting' as const }))
-
-  const root = (await $.session.cwd()).replace(/\\/g, '/')
-  const astro = [`${root}/node_modules/astro/bin/astro.mjs`, `${root}/dashboard/node_modules/astro/bin/astro.mjs`]
-  const cli = (await Promise.all(astro.map(path => $.fs.exists(path)))).findIndex(Boolean)
-  if (cli < 0) {
-    await update($, dashboard, () => ({ status: 'off' as const }))
-    $.ui.toast('Dashboard: run npm install first, then press Dashboard again.')
-
-    return
-  }
-
-  let output = ''
-  try {
-    const server = $.process.spawn({ argv: ['node', astro[cli] as string, 'dev'], cwd: `${root}/dashboard` })
-    for await (const { text } of server) {
-      if ((await read($, dashboard)).status === 'running') continue
-      output = (output + text).slice(-4000)
-      const url = dashboardUrl(output)
-      if (url) {
-        await update($, dashboard, () => ({ status: 'running' as const, url }))
-        $.ui.toast(`Dashboard running at ${url}`)
-      }
-    }
-    $.ui.toast('Dashboard stopped.')
-  } catch (error) {
-    $.ui.toast(`Dashboard could not start: ${error instanceof Error ? error.message : String(error)}`)
-  }
-  await update($, dashboard, () => ({ status: 'off' as const }))
-}
-
-async function onSaved($: EngineInterface, path: string) {
-  if (!isProgressFile(path)) return
-  await refresh($)
-  await activate($)
-}
-
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -130,7 +113,7 @@ export const register: Register = on => {
         'you start teaching a key idea of the current lesson (status "active") and when the ' +
         'learner has understood it (status "done"). Key ideas are numbered from 1 in the ' +
         'order of the lesson\'s "## Key ideas" section. Lesson progress comes from ' +
-        '.progress/progress.json on its own; this tool only marks key ideas.',
+        'the LessonFolk server on its own; this tool only marks key ideas.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -179,8 +162,6 @@ export const register: Register = on => {
         required: ['options'],
       },
     })
-    // A dashboard started before the app closed or the mod reloaded stopped with it.
-    await update($, dashboard, () => ({ status: 'off' as const }))
     await refresh($, true)
     // A resumed session where the learner was already learning gets its pane back.
     if (await read($, isActive)) void openPane($)
@@ -215,7 +196,7 @@ export const register: Register = on => {
       context: [
         ...(ran.context ?? []),
         `A "${TITLE}" pane shows the learner their course, lessons and the current lesson's ` +
-          `key ideas. It follows .progress/progress.json on its own. While you teach, call ` +
+          `key ideas. It follows the LessonFolk server on its own. While you teach, call ` +
           `the ${TOOL} tool as you start each key idea (status "active") and once the learner ` +
           `has it (status "done"). After asking a question with a fixed set of answers ` +
           `(onboarding, path, continue or stop), call ${CHOICES_TOOL} so the learner can ` +
@@ -250,7 +231,7 @@ export const register: Register = on => {
 
     await update($, choices, () => offered)
     // The tutor asking the learner something means a learning session: the band stays once
-    // the question is answered, even before progress.json exists (onboarding).
+    // the question is answered, even before any progress exists (onboarding).
     await update($, isActive, () => true)
 
     return { result: 'The answers are shown as buttons above the prompt.' }
@@ -263,27 +244,21 @@ export const register: Register = on => {
     return next(e)
   })
 
-  // The tutor saving progress.json is the source of truth for lessons and courses.
-  on('tool.call', { tool: 'Write' }, async ($, e, next) => {
+  // Any call of the tutor to the LessonFolk server (a save, or reading the progress) is the
+  // moment to re-read it: that is the source of truth for lessons and courses.
+  let isRefreshing = false
+  on('tool.call', async ($, e, next) => {
+    if (!isLessonfolkTool(e.tool)) return next(e)
     const ran = await next(e)
-    if (ran.deny === undefined && !ran.isError) await onSaved($, e.file_path)
+    if (isRefreshing || ran.deny !== undefined || ran.isError) return ran
 
-    return ran
-  })
-
-  on('tool.call', { tool: 'Edit' }, async ($, e, next) => {
-    const ran = await next(e)
-    if (ran.deny === undefined && !ran.isError) await onSaved($, e.file_path)
-
-    return ran
-  })
-
-  // The tutor sometimes saves progress from a shell command (node -e, jq…): re-read after any
-  // command that names the progress file. Reading it only changes nothing, so no toast follows.
-  on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
-    const ran = await next(e)
-    if (ran.deny === undefined && /\.progress|progress\.json/.test(e.command)) {
-      await onSaved($, PROGRESS)
+    server = e.tool.split('__')[1] ?? server
+    isRefreshing = true
+    try {
+      await refresh($)
+      await activate($)
+    } finally {
+      isRefreshing = false
     }
 
     return ran
@@ -296,16 +271,11 @@ export const register: Register = on => {
 
     const { Box, Button, Link, Text } = $.ui.resolve(e)
 
-    // Always last: the pane, and the dashboard (a button to start it, a link once it runs).
-    const server = await read($, dashboard)
+    // Always last: the pane, and the dashboard of the instance the tutor works with.
     const tools = [
       <Text key="sep" dimColor>·</Text>,
       <Button key="pane" label="Companion" onPress={() => void openPane($)} />,
-      server.status === 'running' && server.url
-        ? <Link key="dashboard" href={server.url} label="Dashboard ↗" />
-        : server.status === 'starting'
-          ? <Text key="dashboard" dimColor>Dashboard starting…</Text>
-          : <Button key="dashboard" label="Dashboard" onPress={() => void startDashboard($)} />,
+      <Link key="dashboard" href={await read($, instance)} label="Dashboard ↗" />,
     ]
 
     // The tutor's question takes the band until it is answered; then the commands come back.
@@ -351,10 +321,10 @@ export const register: Register = on => {
     const v = await read($, view)
     const marks = await read($, ideas)
 
-    if (v.state === 'no-progress' || v.state === 'invalid' || v.state === 'all-done') {
+    if (v.state === 'no-progress' || v.state === 'offline' || v.state === 'all-done') {
       const lines = {
         'no-progress': ['No course started yet.', 'Say "start" to begin.'],
-        invalid: ['Your progress file could not be read.', 'Ask the tutor to check .progress/progress.json.'],
+        offline: ['Your progress could not be read.', 'Check that the LessonFolk server is connected (/mcp).'],
         'all-done': ['You have finished every course. Well done!', 'Ask the tutor what to explore next.'],
       }[v.state]
 

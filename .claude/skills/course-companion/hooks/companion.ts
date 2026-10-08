@@ -1,57 +1,30 @@
-// Pure logic of the Course companion: reads the learner's progress and the course files
-// through a `read` function, so it runs the same in the mod and in its tests.
+// Pure logic of the Course companion: reads the learner's progress and the courses from the
+// LessonFolk MCP server through a `call` function, so it runs the same in the mod and in its
+// tests, with a local or a hosted instance.
 
 import type { Choices, IdeaMarks, LessonState, Snapshot, View } from '../types'
 
-export type Reader = (path: string) => Promise<string | undefined>
+// Calls a tool of the LessonFolk MCP server: the tool's text result, or undefined when it
+// failed or the server could not be reached.
+export type Caller = (tool: string, args?: Record<string, unknown>) => Promise<string | undefined>
 
-export const PROGRESS = '.progress/progress.json'
+// The name of the server in `.mcp.json` (what `claude mcp add lessonfolk …` registers).
+export const SERVER = 'lessonfolk'
+export const TOOL_PREFIX = `mcp__${SERVER}__`
 
 type Progress = {
-  profile?: { language?: string }
+  profile?: { level?: string }
   path?: string[]
   current?: string | null
   lessons?: Record<string, { status?: string }>
 }
 
-const slash = (path: string) => path.replace(/\\/g, '/')
-
-export const isProgressFile = (path: string) => /(?:^|\/)\.progress\/progress\.json$/.test(slash(path))
-
-const unquote = (value: string) => value.trim().replace(/^["']|["']$/g, '')
-
-export const yamlField = (text: string, key: string) => {
-  const value = new RegExp(`^${key}:[ \\t]*(.+)$`, 'm').exec(text)?.[1]
-
-  return value === undefined ? undefined : unquote(value)
-}
-
-// A top-level list, inline (`key: [a, b]`) or as `- item` lines below the key.
-export const yamlList = (text: string, key: string): string[] => {
-  const lines = text.split(/\r?\n/)
-  const at = lines.findIndex(line => new RegExp(`^${key}:`).test(line))
-  if (at < 0) return []
-
-  const inline = /\[(.*)\]/.exec(lines[at] ?? '')
-  if (inline) return (inline[1] ?? '').split(',').map(unquote).filter(Boolean)
-
-  const items: string[] = []
-  for (const line of lines.slice(at + 1)) {
-    const item = /^\s*-\s*([^#]+?)\s*(?:#.*)?$/.exec(line)
-    if (item?.[1]) items.push(unquote(item[1]))
-    else if (line.trim() !== '' && !line.trim().startsWith('#')) break
-  }
-
-  return items
-}
-
-export const frontmatter = (text: string) => /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? ''
-
-export const themeTitle = (themes: string, id: string) => {
-  const entries = themes.split(/^\s*-\s+id:/m).slice(1)
-  const entry = entries.find(e => unquote(e.split(/\r?\n/)[0] ?? '') === id)
-
-  return entry ? yamlField(entry.replace(/^\s+/gm, ''), 'title') : undefined
+type CourseSummary = {
+  id: string
+  title: string
+  level?: string
+  themeTitle?: string
+  lessons: { id: string; title: string; prerequisites?: string[]; status?: string }[]
 }
 
 // The `## Key ideas` items: their bold lead when they have one, else their first words.
@@ -67,14 +40,16 @@ export const keyIdeas = (lesson: string): string[] => {
   })
 }
 
-const isFinished = (status?: string) => status === 'done' || status === 'skipped'
+// `list_courses` statuses: not_started, in_progress, done, skipped, skipped_after_level_check.
+const isFinished = (status?: string) =>
+  status === 'done' || status === 'skipped' || status === 'skipped_after_level_check'
 
 const courseOf = (lessonId: string) => lessonId.split('/')[0] ?? lessonId
 
-const parseProgress = (text?: string): Progress | undefined => {
+const parseJson = <T>(text?: string): T | undefined => {
   if (text === undefined) return undefined
   try {
-    const parsed = JSON.parse(text) as Progress
+    const parsed = JSON.parse(text) as T
 
     return parsed && typeof parsed === 'object' ? parsed : undefined
   } catch {
@@ -91,91 +66,63 @@ export type Loaded = { view: View; snapshot: Snapshot }
 
 // Builds the pane's view: the course in focus (the current lesson's, else the next lesson's),
 // its lessons, the current lesson's key ideas and the next lesson, following the order of
-// AGENTS.md "Start or resume" (the learner's path first, then index.yaml).
-export const load = async (read: Reader): Promise<Loaded> => {
-  const raw = await read(PROGRESS)
-  const progress = parseProgress(raw)
+// "Start or resume" (the learner's path first, then the catalog order of list_courses).
+export const load = async (call: Caller): Promise<Loaded> => {
+  const progress = parseJson<Progress>(await call('get_progress'))
+  const catalog = parseJson<CourseSummary[]>(await call('list_courses'))
   const statuses = statusesOf(progress)
   const snapshot: Snapshot = { current: progress?.current ?? undefined, statuses }
 
-  if (!progress) return { view: { state: raw === undefined ? 'no-progress' : 'invalid' }, snapshot }
-
-  const wanted = progress.profile?.language ?? 'en'
-  const lang = wanted !== 'en' && (await read(`courses/${wanted}/index.yaml`)) !== undefined ? wanted : 'en'
-  const base = `courses/${lang}`
-  const index = yamlList((await read(`${base}/index.yaml`)) ?? '', 'courses')
-  const order = [...(progress.path ?? []).filter(id => index.includes(id))]
-  for (const id of index) if (!order.includes(id)) order.push(id)
-
-  const courses = new Map<string, string>()
-  const course = async (id: string) => {
-    if (!courses.has(id)) courses.set(id, (await read(`${base}/${id}/course.yaml`)) ?? '')
-
-    return courses.get(id) as string
+  if (!progress || !Array.isArray(catalog)) return { view: { state: 'offline' }, snapshot }
+  if (!progress.profile?.level && Object.keys(statuses).length === 0) {
+    return { view: { state: 'no-progress' }, snapshot }
   }
-  const lessons = new Map<string, string>()
-  const lesson = async (id: string) => {
-    if (!lessons.has(id)) lessons.set(id, (await read(`${base}/${id}.md`)) ?? '')
 
-    return lessons.get(id) as string
-  }
+  const byId = new Map(catalog.map(course => [course.id, course]))
+  const order = [...(progress.path ?? []).filter(id => byId.has(id))]
+  for (const course of catalog) if (!order.includes(course.id)) order.push(course.id)
+
+  const lessonTitle = (id: string) =>
+    catalog.flatMap(course => course.lessons).find(lesson => lesson.id === id)?.title ?? id
 
   // The first unfinished lesson whose prerequisites are finished; `current` counts as finished.
-  const findNext = async () => {
-    const done = (id: string) => isFinished(statuses[id]) || id === progress.current
-    for (const id of order) {
-      for (const lessonId of yamlList(await course(id), 'lessons')) {
-        if (done(lessonId)) continue
-        const prerequisites = yamlList(frontmatter(await lesson(lessonId)), 'prerequisites')
-        if (prerequisites.every(done)) return lessonId
-      }
-    }
-
-    return undefined
-  }
+  const done = (id: string) => isFinished(statuses[id]) || id === progress.current
+  const next = order
+    .flatMap(id => byId.get(id)?.lessons ?? [])
+    .find(lesson => !done(lesson.id) && (lesson.prerequisites ?? []).every(done))?.id
 
   const current = progress.current && statuses[progress.current] !== undefined &&
     !isFinished(statuses[progress.current])
     ? progress.current
     : undefined
-  const next = await findNext()
   const focus = current ?? next
   if (!focus) return { view: { state: 'all-done' }, snapshot }
 
   const courseId = courseOf(focus)
-  const courseText = await course(courseId)
-  const themes = (await read(`${base}/themes.yaml`)) ?? ''
-  const themeId = yamlField(courseText, 'theme')
-  const lessonStates: LessonState[] = []
-  for (const id of yamlList(courseText, 'lessons')) {
-    const status = statuses[id]
-    lessonStates.push({
-      id,
-      title: yamlField(frontmatter(await lesson(id)), 'title') ?? id.split('/').pop() ?? id,
-      status: id === current ? 'current' : status === 'done' || status === 'skipped' ? status : 'todo',
-    })
-  }
-
-  const titleOf = async (id: string) => yamlField(frontmatter(await lesson(id)), 'title') ?? id
+  const course = byId.get(courseId)
+  const lessons: LessonState[] = (course?.lessons ?? []).map(lesson => ({
+    id: lesson.id,
+    title: lesson.title,
+    status: lesson.id === current
+      ? 'current'
+      : isFinished(statuses[lesson.id]) ? (statuses[lesson.id] === 'done' ? 'done' : 'skipped') : 'todo',
+  }))
+  const ideas = current ? keyIdeas((await call('get_lesson', { lessonId: current })) ?? '') : []
 
   return {
     view: {
       state: current ? 'lesson' : 'between',
       courseId,
-      courseTitle: yamlField(courseText, 'title') ?? courseId,
-      themeTitle: themeId ? themeTitle(themes, themeId) ?? themeId : undefined,
-      level: yamlField(courseText, 'level'),
-      lessons: lessonStates,
-      current: current
-        ? { id: current, title: await titleOf(current), ideas: keyIdeas(await lesson(current)) }
-        : undefined,
+      courseTitle: course?.title ?? courseId,
+      themeTitle: course?.themeTitle,
+      level: course?.level,
+      lessons,
+      current: current ? { id: current, title: lessonTitle(current), ideas } : undefined,
       next: next
         ? {
             id: next,
-            title: await titleOf(next),
-            courseTitle: courseOf(next) === courseId
-              ? undefined
-              : yamlField(await course(courseOf(next)), 'title') ?? courseOf(next),
+            title: lessonTitle(next),
+            courseTitle: courseOf(next) === courseId ? undefined : byId.get(courseOf(next))?.title ?? courseOf(next),
           }
         : undefined,
     },
@@ -183,7 +130,22 @@ export const load = async (read: Reader): Promise<Loaded> => {
   }
 }
 
-// What changed between two saves of progress.json, worth a toast.
+// The LessonFolk instance the Dashboard button opens: the origin of the `lessonfolk` url in the
+// project's `.mcp.json` (the MCP endpoint is `<instance>/mcp`), the local default otherwise.
+export const DEFAULT_INSTANCE = 'http://localhost:4321/'
+
+export const instanceUrl = (mcpJson?: string): string => {
+  try {
+    const config = JSON.parse(mcpJson ?? '{}') as { mcpServers?: Record<string, { url?: string }> }
+    const url = new URL(config.mcpServers?.[SERVER]?.url ?? '')
+
+    return url.protocol === 'http:' || url.protocol === 'https:' ? `${url.origin}/` : DEFAULT_INSTANCE
+  } catch {
+    return DEFAULT_INSTANCE
+  }
+}
+
+// What changed between two reads of the progress, worth a toast.
 export const changes = (previous: Loaded | undefined, loaded: Loaded): string[] => {
   if (!previous) return []
   const { snapshot: before } = previous
@@ -239,16 +201,6 @@ export const parseChoices = (input: Record<string, unknown>): Choices | undefine
 // What the learner sends: the picked options' replies, in the order the tutor listed them.
 export const replyOf = (choices: Choices) =>
   choices.options.filter((_, i) => choices.picked.includes(i)).map(o => o.reply).join(', ')
-
-// The address the dashboard server prints once it listens (Astro: "Local http://127.0.0.1:4321/"),
-// as a link every surface accepts (http only for localhost). Colour codes are ignored.
-export const dashboardUrl = (output: string) => {
-  const port = /https?:\/\/(?:127\.0\.0\.1|localhost|\[::1\]):(\d+)/.exec(
-    output.replace(/\u001b\[[0-9;]*m/g, ''),
-  )?.[1]
-
-  return port ? `http://localhost:${port}/` : undefined
-}
 
 export const togglePick =(choices: Choices, index: number): Choices => ({
   ...choices,
