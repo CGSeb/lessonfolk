@@ -12,6 +12,8 @@ export const prerender = false;
 // Open to everyone: it only shows how to connect, never anyone's data.
 const connection = mcpConnection(getAuthSettings(), Astro.url);
 const clients = connectClients(connection);
+// The first tool that works here opens by default.
+const selected = clients.find((client) => client.available) ?? clients[0]!;
 const host = new URL(connection.url).host;
 ---
 
@@ -58,10 +60,35 @@ const host = new URL(connection.url).host;
 
     <section class="stack" aria-labelledby="clients-heading" style="--stack-space: var(--space-4)">
       <h2 id="clients-heading">{t('connect.clientsHeading')}</h2>
-      <div class="grid" style="--grid-min: 20rem">
+      <div class="connect-tabs" data-connect-tabs>
+        <div class="connect-tablist" role="tablist" aria-label={t('connect.clientsHeading')}>
+          {
+            clients.map((client) => (
+              <a
+                class="connect-tab"
+                role="tab"
+                id={`tab-${client.id}`}
+                href={`#${client.id}`}
+                aria-controls={client.id}
+                aria-selected={client.id === selected.id ? 'true' : 'false'}
+                tabindex={client.id === selected.id ? 0 : -1}
+                data-client-tab={client.id}
+              >
+                {client.name}
+              </a>
+            ))
+          }
+        </div>
         {
           clients.map((client) => (
-            <article class="card stack connect-client" data-client={client.id} aria-labelledby={`client-${client.id}`} style="--stack-space: var(--space-3)">
+            <section
+              class="card stack connect-client"
+              role="tabpanel"
+              id={client.id}
+              data-client={client.id}
+              aria-labelledby={`tab-${client.id}`}
+              style="--stack-space: var(--space-3)"
+            >
               <div class="cluster" style="--cluster-space: var(--space-2)">
                 <h3 id={`client-${client.id}`}>{client.name}</h3>
                 {!client.available && <span class="badge">{t('connect.notAvailable')}</span>}
@@ -75,7 +102,7 @@ const host = new URL(connection.url).host;
                 ))}
               </ol>
               {client.note && <p class="muted connect-note">{client.note}</p>}
-            </article>
+            </section>
           ))
         }
       </div>
@@ -89,7 +116,90 @@ const host = new URL(connection.url).host;
   </div>
 </BaseLayout>
 
+<script>
+  // Progressive enhancement: without JavaScript every panel stays visible and the tabs are
+  // plain links to them. With it, one panel shows at a time; arrow keys move between tabs.
+  const root = document.querySelector<HTMLElement>('[data-connect-tabs]');
+  if (root) {
+    const tabs = [...root.querySelectorAll<HTMLElement>('[role="tab"]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+    const select = (tab: HTMLElement, focus = false) => {
+      for (const other of tabs) {
+        const on = other === tab;
+        other.setAttribute('aria-selected', String(on));
+        other.tabIndex = on ? 0 : -1;
+      }
+      for (const panel of panels) panel.hidden = panel.id !== tab.dataset.clientTab;
+      if (focus) tab.focus();
+    };
+    const fromHash = () => tabs.find((tab) => `#${tab.dataset.clientTab}` === location.hash);
+    root.classList.add('is-enhanced');
+    select(fromHash() ?? tabs.find((tab) => tab.getAttribute('aria-selected') === 'true') ?? tabs[0]!);
+    for (const tab of tabs) {
+      tab.addEventListener('click', (event) => {
+        event.preventDefault();
+        select(tab);
+        history.replaceState(null, '', `#${tab.dataset.clientTab}`);
+      });
+      tab.addEventListener('keydown', (event) => {
+        const i = tabs.indexOf(tab);
+        const target =
+          event.key === 'ArrowRight' ? tabs[(i + 1) % tabs.length]
+          : event.key === 'ArrowLeft' ? tabs[(i - 1 + tabs.length) % tabs.length]
+          : event.key === 'Home' ? tabs[0]
+          : event.key === 'End' ? tabs[tabs.length - 1]
+          : undefined;
+        if (!target) return;
+        event.preventDefault();
+        select(target, true);
+        history.replaceState(null, '', `#${target.dataset.clientTab}`);
+      });
+    }
+    window.addEventListener('hashchange', () => {
+      const tab = fromHash();
+      if (tab) select(tab);
+    });
+  }
+</script>
+
 <style>
+  .connect-tablist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .connect-tab {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+
+  .connect-tab:hover {
+    border-color: var(--color-accent-border);
+    background: var(--color-accent-subtle);
+  }
+
+  .connect-tab[aria-selected='true'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent-strong);
+  }
+
+  /* Without JavaScript the panels are stacked under the tab links. */
+  .connect-client[hidden] {
+    display: none;
+  }
+
+  .connect-client + .connect-client {
+    margin-top: var(--space-4);
+  }
+
   .connect-lead {
     max-width: 70ch;
     color: var(--color-text-muted);

@@ -71,6 +71,20 @@ describe('the Connect page', () => {
     expect(page.html).toContain('href="/account"');
   });
 
+  it('has one tab and one panel per app, Claude Code first, web chats marked not available', async () => {
+    const page = await getPage(server, '/connect');
+    expect(page.html).toContain('role="tablist"');
+    expect(page.html.match(/<a [^>]*role="tab"/g)).toHaveLength(6);
+    expect(page.html.match(/<section [^>]*role="tabpanel"/g)).toHaveLength(6);
+    for (const id of ['claude-code', 'codex', 'cursor', 'claude-desktop', 'claude-ai', 'chatgpt']) {
+      expect(page.html, id).toContain(`href="#${id}"`);
+      expect(page.html, id).toContain(`aria-controls="${id}"`);
+    }
+    expect(page.html).toMatch(/id="tab-claude-code"[^>]*aria-selected="true"/);
+    expect(page.html).toMatch(/id="tab-chatgpt"[^>]*aria-selected="false"/);
+    expect(page.html.match(/Not available here/g)).toHaveLength(2);
+  });
+
   it('says a token is needed when LESSONFOLK_MCP_TOKEN is set, without showing it', async () => {
     const withToken = await startDashboard({ DATABASE_URL: testDb.url, LESSONFOLK_ROOT: root, LESSONFOLK_MCP_TOKEN: 'super-secret-88' });
     try {
