@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../i18n/en';
+
+export const prerender = false;
+
+/**
+ * The privacy notice: what is collected, why, how long, how to export or delete, who to ask.
+ * Public (no sign-in). The text is in src/i18n/en.ts and must match the data map in
+ * docs/privacy.md. The contact comes from LESSONFOLK_PRIVACY_CONTACT.
+ */
+const oauth = Astro.locals.authMode === 'oauth';
+const contact = process.env.LESSONFOLK_PRIVACY_CONTACT?.trim();
+const sections = [
+  { title: 'privacy.whatTitle', body: ['privacy.whatItems', 'privacy.notCollected'] },
+  { title: 'privacy.whyTitle', body: ['privacy.why'] },
+  { title: 'privacy.howLongTitle', body: ['privacy.howLong'] },
+  { title: 'privacy.rightsTitle', body: ['privacy.rights'] },
+  { title: 'privacy.sharedTitle', body: ['privacy.shared'] },
+] as const;
+---
+
+<BaseLayout title={t('privacy.title')}>
+  <div class="stack privacy-page" style="--stack-space: var(--space-5)">
+    <header class="stack" style="--stack-space: var(--space-2)">
+      <h1>{t('privacy.heading')}</h1>
+      {!oauth && <p class="muted">{t('privacy.introNone')}</p>}
+    </header>
+    {
+      oauth && (
+        <>
+          {sections.map((section) => (
+            <section class="stack" style="--stack-space: var(--space-2)">
+              <h2>{t(section.title)}</h2>
+              {section.body.map((key) => (
+                <p>{t(key)}</p>
+              ))}
+            </section>
+          ))}
+          <section class="stack" style="--stack-space: var(--space-2)">
+            <h2>{t('privacy.contactTitle')}</h2>
+            <p>{contact ? t('privacy.contact', { contact }) : t('privacy.contactMissing')}</p>
+          </section>
+        </>
+      )
+    }
+    <p>
+      <a href="/account">{t('privacy.accountLink')}</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .privacy-page {
+    max-width: 44rem;
+  }
+</style>

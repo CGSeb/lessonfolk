@@ -106,15 +106,19 @@ export type McpAuthServer = Parameters<typeof requireMcpAuth>[0];
  * The gate of `LESSONFOLK_AUTH=oauth`: a valid access token for this endpoint (signature,
  * issuer, audience, expiry), else a 401 whose `WWW-Authenticate` header points to the
  * protected resource metadata, so the client can start the OAuth flow. The user id is the
- * token's subject.
+ * token's subject; with `userExists`, a token of a deleted account is refused at once.
  */
-export function oauthGate(auth: McpAuthServer, baseURL: string): McpGate {
+export function oauthGate(auth: McpAuthServer, baseURL: string, userExists?: (userId: string) => Promise<boolean>): McpGate {
   return (request, next) =>
     requireMcpAuth(
       auth,
-      (verified, claims) => {
+      async (verified, claims) => {
         if (typeof claims.sub !== 'string' || !claims.sub) {
           return Response.json({ error: 'invalid_token', error_description: 'The token has no user.' }, { status: 401 });
+        }
+        // Access tokens are signed JWTs, valid until they expire: refuse those of a deleted account.
+        if (userExists && !(await userExists(claims.sub))) {
+          return Response.json({ error: 'invalid_token', error_description: 'This account no longer exists.' }, { status: 401 });
         }
         const clientId = typeof claims.azp === 'string' ? claims.azp : typeof claims.client_id === 'string' ? claims.client_id : undefined;
         return next({ userId: claims.sub, client: clientId ? `mcp:${clientId}` : 'mcp' });

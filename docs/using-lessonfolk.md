@@ -199,12 +199,17 @@ without progress. Home needs you to sign in, and each person sees only their own
 The **Your data** page (`/account`) holds your progress, as a `progress.json` file (the format is
 [`progress.example.json`](progress.example.json)):
 
-- **Download** it, as a backup or to move to another LessonFolk.
+- **Download** it, as a backup or to move to another LessonFolk, or **download all your data**: one
+  JSON file with every record LessonFolk holds about you (profile, sign-in methods, sessions, the AI
+  apps you allowed, progress and its history), never passwords or tokens.
 - **Import** a `progress.json`. LessonFolk checks the file and shows what changes before you
   confirm; an invalid file is refused with the list of problems. Importing replaces the progress
   saved here.
 - **Erase** it. Without sign-in this erases the local learner's progress and its history from the
-  database (there is no account to delete). With sign-in it deletes your account and all its data.
+  database (there is no account to delete). With sign-in it deletes your account and all its data,
+  signs you out and stops your AI apps from connecting. With sign-in, downloading all your data and
+  deleting ask you to sign in again first if you signed in more than 10 minutes ago. What is stored,
+  and for how long, is on the **Privacy notice** page and in [Privacy and personal data](privacy.md).
 
 **Coming from an older LessonFolk?** Older versions of the tutor saved your progress in
 `.progress/progress.json`, in the LessonFolk folder. The tutor no longer reads that file: import

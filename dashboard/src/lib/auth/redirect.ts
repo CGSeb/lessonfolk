@@ -18,3 +18,8 @@ export function safeReturnPath(next: string | null | undefined): string {
 export function signInHref(url: URL): string {
   return `/sign-in?next=${encodeURIComponent(url.pathname + url.search)}`;
 }
+
+/** The sign-in page for someone already signed in, to prove it is them again before `next`. */
+export function reauthHref(next: string): string {
+  return `/sign-in?reauth=1&next=${encodeURIComponent(safeReturnPath(next))}`;
+}
