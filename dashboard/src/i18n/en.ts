@@ -238,16 +238,9 @@ export const en = {
     heading: 'Connect your AI chat',
     intro:
       'Your AI chat can be your LessonFolk tutor from any folder. Connect it to this LessonFolk with MCP (Model Context Protocol, a standard way for AI apps to use tools): it then reads the courses and saves your progress here.',
-    urlLabel: 'Your LessonFolk address for AI chats',
-    urlHint: 'Every app below needs this address.',
-    localTitle: 'Only apps on this computer can connect',
-    localBody:
-      'This LessonFolk runs without sign-in, on this computer only. Apps running on this computer can connect: Claude Code, Codex, Cursor and Claude Desktop. Web chats like claude.ai and ChatGPT cannot: they connect from their company’s servers, which cannot reach this computer.',
     tokenTitle: 'This LessonFolk needs a token',
     tokenBody:
       'LESSONFOLK_MCP_TOKEN is set, so every app must send it in a header: Authorization: Bearer <your token>. The steps below show where it goes. The token is in your .env file; this page never shows it.',
-    tokenOptional:
-      'Optional: to make sure only your own apps connect, set LESSONFOLK_MCP_TOKEN in your .env file and restart LessonFolk. Each app then has to send that token.',
     oauthTitle: 'Everyone signs in as themselves',
     oauthBody:
       'The first time an app connects, your browser opens: sign in, then allow the app to use LessonFolk. The app then only sees your own progress.',
@@ -255,6 +248,7 @@ export const en = {
     webBody:
       'claude.ai and ChatGPT connect from their company’s servers, so they need a public https:// address (LESSONFOLK_BASE_URL). {host} is only reachable from this computer or network.',
     clientsHeading: 'Set up your app',
+    helpLabel: 'Steps do not match what you see?',
     notAvailable: 'Not available here',
     notAvailableLocal: 'Web chats cannot reach a LessonFolk that runs on this computer. Use an app on this computer instead.',
     notAvailableWeb: 'This needs LessonFolk on a public https:// address.',
