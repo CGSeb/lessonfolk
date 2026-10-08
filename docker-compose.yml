@@ -2,6 +2,7 @@
 #
 #   docker compose up --build   # Postgres + dashboard on http://127.0.0.1:4321
 #   docker compose up -d db     # Postgres only (127.0.0.1:5432), for `npm test`
+#   docker compose --profile tools up -d cloudbeaver   # database browser on http://127.0.0.1:8978
 #
 # Ports only listen on 127.0.0.1. Change them in .env (see .env.example).
 # Sign-in: LESSONFOLK_AUTH=none (default, one local learner) or oauth (docs/auth-dev.md).
@@ -47,5 +48,25 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Optional database browser for development (profile "tools": not started by default).
+  # The LessonFolk connection is pre-configured; sign in as cbadmin / lessonfolk-dev.
+  cloudbeaver:
+    profiles: ["tools"]
+    image: dbeaver/cloudbeaver:latest
+    environment:
+      CB_SERVER_NAME: LessonFolk
+      CB_ADMIN_NAME: cbadmin
+      CB_ADMIN_PASSWORD: lessonfolk-dev
+    ports:
+      - "127.0.0.1:${LESSONFOLK_CLOUDBEAVER_PORT:-8978}:8978"
+    volumes:
+      - cloudbeaver-data:/opt/cloudbeaver/workspace
+      - ./docker/cloudbeaver/data-sources.json:/opt/cloudbeaver/conf/initial-data-sources.conf:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   db-data:
+  cloudbeaver-data:
