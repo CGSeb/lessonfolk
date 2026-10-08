@@ -1,41 +1,25 @@
 ---
 import { t } from '../../i18n/en';
 
-/** Overall progress: lessons finished (with a bar) and courses completed. */
+/** Overall progress in one line: lessons finished, with a bar. */
 interface Props {
   lessons: { finished: number; total: number };
-  courses: { completed: number; total: number };
 }
 
-const { lessons, courses } = Astro.props;
+const { lessons } = Astro.props;
 const lessonsText = t('home.progressLessons', lessons);
 ---
 
-<section class="card stack" aria-labelledby="overall-progress-heading" style="--stack-space: var(--space-3)">
-  <h2 class="overall-progress__heading" id="overall-progress-heading">{t('home.progressTitle')}</h2>
+<div class="stack" style="--stack-space: var(--space-2)">
   <p class="overall-progress__lessons">{lessonsText}</p>
-  <progress
-    class="progress-bar"
-    value={lessons.finished}
-    max={Math.max(lessons.total, 1)}
-    aria-labelledby="overall-progress-heading"
-  >
+  <progress class="progress-bar" value={lessons.finished} max={Math.max(lessons.total, 1)} aria-label={t('home.progressTitle')}>
     {lessonsText}
   </progress>
-  <p class="muted">{t('home.progressCourses', courses)}</p>
-</section>
+</div>
 
 <style>
-  .overall-progress__heading {
+  .overall-progress__lessons {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-  }
-
-  .overall-progress__lessons {
-    font-size: var(--text-xl);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-tight);
-    line-height: var(--leading-snug);
   }
 </style>

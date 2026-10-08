@@ -31,7 +31,6 @@ describe('getHomeView', () => {
     const home = getHomeView(courses, { state: 'missing' });
     expect(home.view).toMatchObject({ state: 'new', first: { kind: 'next', lesson: { id: 'basics/01' } } });
     expect(home.lessons).toEqual({ finished: 0, total: 3 });
-    expect(home.courses).toEqual({ completed: 0, total: 2 });
     expect(home.progressError).toBeUndefined();
   });
 
@@ -52,7 +51,6 @@ describe('getHomeView', () => {
     expect(home.view).toMatchObject({ state: 'in_progress', next: { kind: 'resume', course: { id: 'more' } } });
     expect(home.name).toBe('Alex');
     expect(home.lessons).toEqual({ finished: 2, total: 3 });
-    expect(home.courses).toEqual({ completed: 1, total: 2 });
   });
 
   it('treats a blank name as absent', () => {
@@ -62,7 +60,6 @@ describe('getHomeView', () => {
   it('is done when every lesson is done or skipped', () => {
     const home = getHomeView(courses, ok({ 'basics/01': 'done', 'basics/02': 'done', 'more/01': 'skipped' }));
     expect(home.view.state).toBe('done');
-    expect(home.courses).toEqual({ completed: 2, total: 2 });
   });
 
   it('is blocked when lessons remain but none has its prerequisites met', () => {
@@ -129,31 +126,5 @@ describe('getHomeView', () => {
   it('has no progress warnings for a file without path or interests', () => {
     expect(getHomeView(courses, ok({})).progressWarnings).toEqual([]);
     expect(getHomeView(courses, { state: 'missing' }).progressWarnings).toEqual([]);
-  });
-
-  describe('progress by theme', () => {
-    const theme = (id: string, members: CourseRef[]) => ({ id, title: `T ${id}`, description: 'd', courses: members });
-    const [basics, more] = courses;
-
-    it('lists non-empty themes in order with finished lessons', () => {
-      const home = getHomeView(courses, ok({ 'basics/01': 'done', 'more/01': 'skipped' }), [
-        theme('empty', []),
-        theme('second', [more]),
-        theme('first', [basics]),
-      ]);
-      expect(home.themes).toEqual([
-        { id: 'second', title: 'T second', href: '/courses?theme=second', finished: 1, total: 1, completed: true },
-        { id: 'first', title: 'T first', href: '/courses?theme=first', finished: 1, total: 2, completed: false },
-      ]);
-    });
-
-    it('leaves out courses whose theme is unknown', () => {
-      const home = getHomeView(courses, ok({}), [theme('first', [basics])]);
-      expect(home.themes.map((th) => th.id)).toEqual(['first']);
-    });
-
-    it('is empty without themes', () => {
-      expect(getHomeView(courses, ok({})).themes).toEqual([]);
-    });
   });
 });
