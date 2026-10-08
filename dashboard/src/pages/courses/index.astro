@@ -47,10 +47,19 @@ const badges = [{ id: undefined, count: catalog.courses.length }, ...themeFilter
   title: themeTitle(id),
   count,
   tone: id === undefined ? 'theme-filter--all' : themeToneClass(themesById.get(id)?.position),
-  href: coursesHref({ theme: id, q: query.q }),
+  href: coursesHref({ theme: id, q: query.q, recommended: query.recommended }),
   current: id === query.theme,
 }));
-const matches = filterCourses(catalog.courses, query, catalog.themes);
+const matches = filterCourses(catalog.courses, query, catalog.themes, recommended);
+// Offered to signed-in learners who have a path (and kept while active so it can be switched off).
+const recommendedFilter =
+  (progressResult !== null && recommended.size > 0) || query.recommended
+    ? {
+        count: recommended.size,
+        current: query.recommended,
+        href: coursesHref({ ...query, recommended: !query.recommended, page: 1 }),
+      }
+    : undefined;
 const shown = paginate(matches, query.page);
 const pages = pageNumbers(shown.page, shown.pageCount).map((page) =>
   page === null ? null : { page, href: coursesHref({ ...query, page }), current: page === shown.page },
@@ -119,6 +128,7 @@ const hiddenIssues = issues.length - shownIssues.length;
               {t('courses.searchLabel')}
             </label>
             {query.theme && <input type="hidden" name="theme" value={query.theme} />}
+            {query.recommended && <input type="hidden" name="recommended" value="1" />}
             <input
               class="catalog-search__input"
               id="catalog-search-input"
@@ -152,6 +162,20 @@ const hiddenIssues = issues.length - shownIssues.length;
                     </a>
                   </li>
                 ))}
+                {recommendedFilter && (
+                  <li>
+                    <a
+                      class="theme-filter theme-filter--recommended"
+                      href={recommendedFilter.href}
+                      aria-current={recommendedFilter.current ? 'true' : undefined}
+                    >
+                      {t('courses.recommended')}
+                      <span class="theme-filter__count">
+                        <span aria-hidden="true">{recommendedFilter.count}</span>
+                      </span>
+                    </a>
+                  </li>
+                )}
               </ul>
             </nav>
 
@@ -161,8 +185,8 @@ const hiddenIssues = issues.length - shownIssues.length;
               </p>
               {shown.total === 0 && (
                 <p class="cluster" style="--cluster-space: var(--space-4)">
-                  {query.q && <a href={coursesHref({ theme: query.theme })}>{t('courses.clearSearch')}</a>}
-                  {query.theme && <a href={coursesHref()}>{t('courses.showAll')}</a>}
+                  {query.q && <a href={coursesHref({ theme: query.theme, recommended: query.recommended })}>{t('courses.clearSearch')}</a>}
+                  {query.theme && <a href={coursesHref({ recommended: query.recommended })}>{t('courses.showAll')}</a>}
                 </p>
               )}
             </div>
@@ -263,6 +287,7 @@ const hiddenIssues = issues.length - shownIssues.length;
     const data = new FormData(form);
     return coursesHref({
       theme: String(data.get('theme') ?? '') || undefined,
+      recommended: data.get('recommended') === '1',
       q: String(data.get('q') ?? '').trim(),
     });
   }
@@ -392,6 +417,15 @@ const hiddenIssues = issues.length - shownIssues.length;
 
   .theme-filter:hover {
     border-color: var(--color-theme-fill);
+  }
+
+  /* Same amber cue as the "Recommended for you" marker on the cards. */
+  .theme-filter--recommended {
+    --color-theme-badge-border: var(--color-warning-border);
+    --color-theme-badge-bg: var(--color-spark-subtle);
+    --color-theme-badge-text: var(--color-text);
+    --color-theme-fill: var(--color-spark);
+    --color-on-theme-fill: var(--color-text);
   }
 
   .theme-filter[aria-current] {

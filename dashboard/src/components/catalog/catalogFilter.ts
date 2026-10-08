@@ -1,6 +1,6 @@
 /**
  * Theme filter, search and paging of the course catalog. The URL query
- * (`?theme=…&q=…&page=…`) is the source of truth, so filters survive reloads,
+ * (`?theme=…&q=…&recommended=1&page=…`) is the source of truth, so filters survive reloads,
  * live refreshes, the back button and shared links.
  */
 
@@ -16,6 +16,8 @@ export interface CatalogQuery {
   theme: string | undefined;
   /** Search text as typed, trimmed. */
   q: string;
+  /** Only the courses of the learner's recommended path. */
+  recommended: boolean;
   /** 1-based page number as asked; `paginate` falls back to 1 when it is out of range. */
   page: number;
 }
@@ -42,15 +44,17 @@ export function parseCatalogQuery(params: URLSearchParams, themeIds: Iterable<st
   return {
     theme: theme !== undefined && new Set(themeIds).has(theme) ? theme : undefined,
     q: (params.get('q') ?? '').trim().slice(0, MAX_QUERY_LENGTH),
+    recommended: params.get('recommended') === '1',
     page: Number.isInteger(page) && page >= 1 ? page : 1,
   };
 }
 
-/** Link to the catalog with these filters; defaults (All, no search, page 1) are left out. */
-export function coursesHref({ theme, q, page }: Partial<CatalogQuery> = {}): string {
+/** Link to the catalog with these filters; defaults (All, no search, not only recommended, page 1) are left out. */
+export function coursesHref({ theme, q, recommended, page }: Partial<CatalogQuery> = {}): string {
   const params = new URLSearchParams();
   if (theme) params.set('theme', theme);
   if (q) params.set('q', q);
+  if (recommended) params.set('recommended', '1');
   if (page && page > 1) params.set('page', String(page));
   const query = params.toString();
   return query ? `/courses?${query}` : '/courses';
@@ -81,18 +85,21 @@ function normalize(text: string): string {
 
 /**
  * Courses of the selected theme whose title, description or theme title
- * contain every word of the search. Keeps the given (`index.yaml`) order.
+ * contain every word of the search. With `recommended`, only the courses whose id is
+ * in `recommendedIds`. Keeps the given (`index.yaml`) order.
  */
 export function filterCourses<C extends FilterCourse>(
   courses: C[],
-  { theme, q }: Pick<CatalogQuery, 'theme' | 'q'>,
+  { theme, q, recommended = false }: Pick<CatalogQuery, 'theme' | 'q'> & { recommended?: boolean },
   themes: { id: string; title: string }[],
+  recommendedIds: ReadonlySet<string> = new Set(),
 ): C[] {
   const titles = new Map(themes.map((t) => [t.id, t.title]));
   const words = normalize(q).split(/\s+/).filter(Boolean);
   return courses.filter((course) => {
     const courseTheme = titles.has(course.theme) ? course.theme : OTHER_THEME;
     if (theme && courseTheme !== theme) return false;
+    if (recommended && !recommendedIds.has(course.id)) return false;
     if (!words.length) return true;
     const text = normalize([course.title, course.description, titles.get(course.theme) ?? ''].join(' '));
     return words.every((word) => text.includes(word));
