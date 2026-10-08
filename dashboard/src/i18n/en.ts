@@ -155,6 +155,7 @@ export const en = {
     about: 'LessonFolk is an open-source app developed by CG Seb. It teaches AI to anyone, through a conversation with an AI tutor.',
     privacy: 'Your progress is saved only on this computer.',
     privacyAccount: 'Your progress is saved on this LessonFolk server, with your account.',
+    privacyLink: 'Privacy notice',
     license: 'Code under the MIT license, courses under CC BY 4.0.',
   },
   home: {
@@ -220,6 +221,8 @@ export const en = {
     signInTitle: 'Sign in',
     signInHeading: 'Sign in to LessonFolk',
     signInIntro: 'Sign in to keep your progress with your account.',
+    reauthHeading: 'Sign in again to continue',
+    reauthIntro: 'To download all your data or delete your account, sign in again first. It confirms it is you.',
     signInWith: 'Sign in with {provider}',
     providersLabel: 'Sign-in options',
     signInError: 'Signing in did not work. Please try again.',
@@ -299,12 +302,41 @@ export const en = {
       note: 'Developer mode is not available on every ChatGPT plan.',
     },
   },
+  privacy: {
+    title: 'Privacy notice',
+    heading: 'Privacy notice',
+    introNone:
+      'LessonFolk runs on your computer without sign-in. Your progress is saved in the database on this computer and nothing is sent to us.',
+    whatTitle: 'What is collected',
+    whatItems:
+      'Your name, email address and profile picture from the sign-in provider (GitHub or Google). Your progress: your profile, path, lessons, scores, the tutor’s notes and a history of changes. The AI apps you allowed to use LessonFolk. Your sessions, with IP address and browser.',
+    notCollected: 'Not collected: passwords (there are none), your conversations with your AI app, analytics or advertising cookies.',
+    whyTitle: 'Why',
+    why: 'To sign you in and to save your progress. Nothing else. Legal basis: providing the service you asked for.',
+    howLongTitle: 'How long',
+    howLong:
+      'Your data is kept until you delete your account. Sessions expire after 7 days. Server logs are kept for at most 30 days. Backups are kept for at most 35 days, so deleted data leaves them within 35 days.',
+    rightsTitle: 'Your rights',
+    rights:
+      'On the Your data page you can download all your data, and delete your account and everything linked to it, at any time. You can also ask the contact below to correct your data or answer a question.',
+    sharedTitle: 'Who sees it',
+    shared: 'Only you, and the person who runs this LessonFolk. Your data is not sold or shared with advertisers. It is stored by the hosting provider of this server.',
+    contactTitle: 'Contact',
+    contact: 'Write to {contact}.',
+    contactMissing: 'Ask the person who runs this LessonFolk.',
+    accountLink: 'Go to Your data',
+  },
   account: {
     title: 'Your data',
     heading: 'Your data',
     introNone:
       'LessonFolk runs without sign-in here: your progress belongs to the one local learner and is saved in the database on this computer.',
     introOauth: 'Signed in as {name} ({email}). Your progress is saved on this LessonFolk server, with your account.',
+    exportAllTitle: 'Download all your data',
+    exportAllBody:
+      'Get every record LessonFolk holds about you as one JSON file: your profile, sign-in methods, sessions, the AI apps you allowed, your progress and its history. Passwords, tokens and keys are never included. On the hosted version you may be asked to sign in again first.',
+    exportAllButton: 'Download all my data',
+    privacyNote: 'What we keep, why and for how long: read the privacy notice.',
     exportTitle: 'Download your progress',
     exportBody:
       'Get your progress as a progress.json file: your profile, path, lessons, scores and the tutor’s notes. Keep it as a backup, or import it into another LessonFolk.',

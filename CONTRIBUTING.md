@@ -97,6 +97,7 @@ never committed). Variables already set in your shell win over `.env`.
 | `BETTER_AUTH_SECRET` | (none) | `oauth` only, required: a random secret of 32 characters or more that signs the session cookies. |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | (none) | `oauth`: your GitHub OAuth app. Set both or neither. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | (none) | `oauth`: your Google OAuth client. Set both or neither. |
+| `LESSONFOLK_PRIVACY_CONTACT` | (none) | `oauth`: who learners write to about their data (an email address or a page), shown on the `/privacy` page. |
 | `LESSONFOLK_MCP_TOKEN` | (none) | `none` only: when set, the MCP server at `/mcp` requires `Authorization: Bearer <token>`. Without it, `/mcp` only answers this computer. (`oauth` uses OAuth access tokens instead.) |
 
 **Dashboard server and folders**
@@ -157,6 +158,10 @@ To change it:
    `npm run migrate -w @lessonfolk/db`.
 4. Run `npm test`: every database test file starts from a fresh database with all migrations.
 5. Commit the schema change and the generated files together.
+
+A table that holds personal data must reference `user` with `on delete cascade`, be added to the
+full export (`dashboard/src/lib/personal-data.ts`) and to the data map in
+[`docs/privacy.md`](docs/privacy.md). The account deletion test fails if a row is left behind.
 
 **Never edit or delete a migration that is already on `main`.** It may already have run on
 someone's database, and migrations run in order. To fix one, generate a new migration.

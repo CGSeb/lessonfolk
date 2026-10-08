@@ -73,6 +73,19 @@ const oauth = authMode === 'oauth';
           )}
           {offerImport && <LocalImportOffer />}
 
+          <section class="card stack" aria-labelledby="export-all-heading">
+            <h2 id="export-all-heading">{t('account.exportAllTitle')}</h2>
+            <p>{t('account.exportAllBody')}</p>
+            <p>
+              <a class="button button--primary" href="/api/account/export-all">
+                {t('account.exportAllButton')}
+              </a>
+            </p>
+            <p class="muted">
+              <a href="/privacy">{t('account.privacyNote')}</a>
+            </p>
+          </section>
+
           <section class="card stack" aria-labelledby="export-heading">
             <h2 id="export-heading">{t('account.exportTitle')}</h2>
             <p>{t('account.exportBody')}</p>

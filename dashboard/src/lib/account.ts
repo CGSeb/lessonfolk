@@ -5,7 +5,7 @@
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import {
   findRepoRoot,
   getLevel,
@@ -17,7 +17,7 @@ import {
   type Progress,
   type ProgressStore,
 } from '@lessonfolk/core';
-import { user, type Database } from '@lessonfolk/db';
+import { user, verification, type Database } from '@lessonfolk/db';
 import { ensureLocalLearner } from './auth/local-learner.ts';
 import type { AuthMode } from './auth/settings.ts';
 
@@ -122,14 +122,22 @@ export function previewImport(text: string, current: Progress, courses: readonly
  * Delete the learner's data.
  *
  * - `oauth`: the user and everything that hangs off it (sign-in accounts, sessions, learner,
- *   lesson progress, change log, MCP apps and tokens), through the `on delete cascade` keys.
+ *   lesson progress, change log, MCP apps, consents and tokens), through the `on delete cascade`
+ *   keys, plus any pending `verification` value keyed by their email or id, in one transaction.
+ *   Their sessions and tokens stop working at once (the rows are gone; the MCP gate also checks
+ *   that the user still exists). The test in tests/e2e/account-oauth.db.test.ts checks that no
+ *   table keeps a row for the user.
  * - `none`: there is no account, only the local learner. Its progress and change log are
  *   deleted and an empty learner is created again, so the dashboard starts fresh. The
  *   `.progress/progress.json` file is never touched.
  */
 export async function deleteLearnerData(mode: AuthMode, userId: string, db: Database, store: ProgressStore): Promise<void> {
   if (mode === 'oauth') {
-    await db.delete(user).where(eq(user.id, userId));
+    await db.transaction(async (tx) => {
+      const [row] = await tx.select({ email: user.email }).from(user).where(eq(user.id, userId));
+      if (row) await tx.delete(verification).where(inArray(verification.identifier, [row.email, userId]));
+      await tx.delete(user).where(eq(user.id, userId));
+    });
     return;
   }
   await store.deleteLearner(userId);

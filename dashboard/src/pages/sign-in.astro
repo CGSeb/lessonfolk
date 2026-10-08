@@ -10,8 +10,10 @@ export const prerender = false;
 
 const settings = getAuthSettings();
 const next = safeReturnPath(Astro.url.searchParams.get('next'));
+// `?reauth=1`: already signed in, but asked to sign in again before exporting or deleting data.
+const reauth = Astro.url.searchParams.get('reauth') === '1' && Astro.locals.user !== null;
 // Nothing to sign in to without OAuth, and nothing to do when already signed in.
-if (settings.mode !== 'oauth' || Astro.locals.user) return Astro.redirect(next, 303);
+if (settings.mode !== 'oauth' || (Astro.locals.user && !reauth)) return Astro.redirect(next, 303);
 
 const PROVIDER_NAMES: Record<ProviderId, string> = { github: 'GitHub', google: 'Google', fake: 'Test provider' };
 const providers = enabledProviders(settings).map((id) => ({
@@ -25,8 +27,8 @@ const error = Astro.url.searchParams.get('error');
 <BaseLayout title={t('auth.signInTitle')}>
   <div class="stack sign-in" style="--stack-space: var(--space-5)">
     <header class="stack" style="--stack-space: var(--space-2)">
-      <h1>{t('auth.signInHeading')}</h1>
-      <p class="muted">{t('auth.signInIntro')}</p>
+      <h1>{t(reauth ? 'auth.reauthHeading' : 'auth.signInHeading')}</h1>
+      <p class="muted">{t(reauth ? 'auth.reauthIntro' : 'auth.signInIntro')}</p>
     </header>
 
     {

@@ -149,6 +149,21 @@ describe('export and import', () => {
     expect(Object.keys(exported.lessons)).toEqual(['ai-foundations/01-what-is-ai', 'ai-foundations/02-how-machines-learn']);
   });
 
+  it('downloads all the local learner’s data too, and links the privacy notice', async () => {
+    await seedProgress(testDb.db, 'local', 'mid-course');
+    const response = await fetch(`${server.url}/api/account/export-all`);
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.user.id).toBe('local');
+    expect(data.learner.profile.name).toBe('Alex');
+    expect(data.lessonProgress).toHaveLength(2);
+    expect(data.signInAccounts).toEqual([]);
+    const privacy = await getPage(server, '/privacy');
+    expect(privacy.status).toBe(200);
+    expect(privacy.text).toContain('nothing is sent to us');
+    expect((await getPage(server, '/account')).html).toContain('href="/privacy"');
+  });
+
   it('imports an uploaded file, and exports the same progress back (round trip)', async () => {
     await seedProgress(testDb.db, 'local', 'mid-course');
     const file = readProgressFixture('all-done');

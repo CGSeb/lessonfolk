@@ -61,6 +61,7 @@ The [learner guide](docs/using-lessonfolk.md) has the details.
 - [Course format](docs/course-format.md): how courses and lessons are written
 - [Testing](docs/testing.md): automated tests and manual checks
 - [Sign-in for developers](docs/auth-dev.md): GitHub and Google sign-in
+- [Privacy and personal data](docs/privacy.md): what is stored, export and deletion
 - [Brand](docs/brand.md): logo, colours and type
 - [All docs](docs/README.md)
 

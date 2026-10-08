@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { parseImportedProgress } from '@lessonfolk/core';
 import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
-import { multipartForm, previewedProgress, rowCounts } from './account-helpers';
+import { leftovers, multipartForm, previewedProgress, rowCounts } from './account-helpers';
 import { startFakeOAuth, type FakeOAuthServer, type FakeProfile } from './fake-oauth';
 import { Browser, location } from './mcp-client';
 import { freePort, readProgressFixture, seedProgress, startDashboard, testProgressStore, visibleText, type DashboardServer } from './server';
@@ -122,6 +122,95 @@ describe('signed in', () => {
     expect(parseImportedProgress(await (await sam.browser.request('/api/account/export')).text()).profile.name).toBe('Sam');
   });
 
+  /** Rows a user could have after using MCP apps: a client they registered, consent, tokens. */
+  async function seedMcpApp(userId: string) {
+    await testDb.sql`insert into oauth_client (id, client_id, client_secret, name, user_id, redirect_uris, created_at)
+      values ('c-1', 'client-robin', 'SECRET-CLIENT-VALUE', 'Robin Chat App', ${userId}, array['http://localhost:1/cb'], now())`;
+    await testDb.sql`insert into oauth_consent (id, client_id, user_id, scopes, created_at)
+      values ('co-1', 'client-robin', ${userId}, array['openid'], now())`;
+    await testDb.sql`insert into oauth_refresh_token (id, token, client_id, user_id, scopes, created_at)
+      values ('rt-1', 'SECRET-REFRESH-VALUE', 'client-robin', ${userId}, array['openid'], now())`;
+    await testDb.sql`insert into oauth_access_token (id, token, client_id, user_id, scopes, created_at)
+      values ('at-1', 'SECRET-ACCESS-VALUE', 'client-robin', ${userId}, array['openid'], now())`;
+  }
+
+  it('exports every personal record of the learner and no secret', async () => {
+    await seedMcpApp(robin.id);
+    const [{ accessToken }] = await testDb.sql`select access_token as "accessToken" from account where user_id = ${robin.id}`;
+    const [{ sessionToken }] = await testDb.sql`select token as "sessionToken" from session where user_id = ${robin.id} limit 1`;
+
+    const response = await robin.browser.request('/api/account/export-all');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-disposition')).toContain('lessonfolk-my-data.json');
+    const raw = await response.text();
+    const data = JSON.parse(raw);
+
+    expect(data).toMatchObject({ format: 'lessonfolk-personal-data', version: 1 });
+    expect(data.user).toMatchObject({ id: robin.id, name: 'Robin Tester', email: 'robin@example.test' });
+    expect(data.signInAccounts).toHaveLength(1);
+    expect(data.signInAccounts[0]).toMatchObject({ provider: 'fake', providerAccountId: 'fake-robin', hasPassword: false });
+    expect(data.sessions.length).toBeGreaterThan(0);
+    expect(data.mcp.clientsRegisteredByYou).toMatchObject([{ clientId: 'client-robin', name: 'Robin Chat App', hasClientSecret: true }]);
+    expect(data.mcp.consents).toMatchObject([{ clientId: 'client-robin', appName: 'Robin Chat App', scopes: ['openid'] }]);
+    expect(data.mcp.accessTokens).toHaveLength(1);
+    expect(data.mcp.refreshTokens).toHaveLength(1);
+    expect(data.learner.profile.name).toBe('Alex');
+    expect(data.lessonProgress).toHaveLength(2);
+    expect(data.progressEvents.length).toBeGreaterThan(0);
+
+    // No secret, whatever the field: tokens, client secret, session token.
+    for (const secret of ['SECRET-CLIENT-VALUE', 'SECRET-REFRESH-VALUE', 'SECRET-ACCESS-VALUE', sessionToken, ...(accessToken ? [accessToken] : [])]) {
+      expect(raw).not.toContain(secret);
+    }
+    expect(raw).not.toMatch(/"(password|accessToken|refreshToken|idToken|token|clientSecret)"/);
+  });
+
+  it('gives the full export to the signed-in learner only', async () => {
+    const anonymous = await new Browser(server.url).request('/api/account/export-all');
+    expect(anonymous.status).toBe(401);
+    const samData = JSON.parse(await (await sam.browser.request('/api/account/export-all')).text());
+    expect(samData.user.email).toBe('sam@example.test');
+    expect(JSON.stringify(samData)).not.toContain('robin@example.test');
+    expect(JSON.stringify(samData)).not.toContain('client-robin');
+    // The URL takes no user id: there is no way to ask for somebody else's data.
+    expect((await sam.browser.request(`/api/account/export-all?userId=${robin.id}`)).status).toBe(200);
+    expect(JSON.parse(await (await sam.browser.request(`/api/account/export-all?userId=${robin.id}`)).text()).user.id).toBe(sam.id);
+  });
+
+  it('asks for a recent sign-in before the full export and before deleting', async () => {
+    const pat = await signIn({ sub: 'fake-pat', name: 'Pat Old', email: 'pat@example.test' });
+    expect((await pat.browser.request('/api/account/export-all')).status).toBe(200);
+
+    await testDb.sql`update session set created_at = now() - interval '1 hour' where user_id = ${pat.id}`;
+    const reauth = '/sign-in?reauth=1&next=%2Faccount';
+    const exported = await pat.browser.request('/api/account/export-all');
+    expect(exported.status).toBe(303);
+    expect(location(exported)).toBe(reauth);
+    const deleted = await pat.browser.post('/api/account/delete', { confirm: 'delete' });
+    expect(deleted.status).toBe(303);
+    expect(location(deleted)).toBe(reauth);
+    expect((await rowCounts(testDb.db, pat.id)).user).toBe(1);
+
+    // The sign-in page lets a signed-in learner sign in again for this.
+    expect(await text(await pat.browser.request(reauth))).toContain('Sign in again to continue');
+    // Signing in again starts a fresh session, and both work.
+    fake.signInAs({ sub: 'fake-pat', name: 'Pat Old', email: 'pat@example.test' });
+    const start = await pat.browser.post('/sign-in/fake', { next: '/account' });
+    const approved = await fetch(location(start), { redirect: 'manual' });
+    await pat.browser.request(location(approved));
+    expect((await pat.browser.request('/api/account/export-all')).status).toBe(200);
+    expect(location(await pat.browser.post('/api/account/delete', { confirm: 'delete' }))).toBe('/account?deleted=1');
+  });
+
+  it('links the privacy notice from the footer and the account page', async () => {
+    const privacy = await text(await new Browser(server.url).request('/privacy'));
+    expect(privacy).toContain('What is collected');
+    expect(privacy).toContain('How long');
+    const account = await (await robin.browser.request('/account')).text();
+    expect(account).toContain('href="/privacy"');
+    expect(account).toContain('href="/api/account/export-all"');
+  });
+
   it('deletes the account and every row of that user, and nobody else’s', async () => {
     const before = await rowCounts(testDb.db, robin.id);
     expect(before).toMatchObject({ user: 1, account: 1, learner: 1, lessonProgress: 2 });
@@ -147,6 +236,10 @@ describe('signed in', () => {
     const me = (await (await robin.browser.request('/api/me', { headers: { Accept: 'application/json' } })).json()) as { user: unknown };
     expect(me.user).toBeNull();
     expect(await text(await robin.browser.request('/account?deleted=1'))).toContain('Your account and all your data were deleted.');
+
+    // Nothing mentions the user any more, in any table, not even the MCP apps they registered or allowed.
+    expect(await leftovers(testDb.sql, [robin.id, 'robin@example.test'])).toEqual({});
+    expect(await testDb.sql`select 1 from oauth_client where client_id = 'client-robin'`).toHaveLength(0);
 
     const samRows = await rowCounts(testDb.db, sam.id);
     expect(samRows).toMatchObject({ user: 1, learner: 1, lessonProgress: 3 });

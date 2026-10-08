@@ -214,6 +214,23 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
     expect((await authorize(d, clientId, false)).error).toBe('access_denied');
   });
 
+  it('refuses the access token of a deleted account at once', async () => {
+    const d = await discover();
+    const clientId = await register(d);
+    fake.signInAs({ sub: 'fake-gone', name: 'Gone Soon', email: 'gone@example.test' });
+    const gone = await authorize(d, clientId);
+    const call = () =>
+      fetch(`${baseURL}/mcp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream', Authorization: `Bearer ${gone.access_token}` },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+      });
+    expect((await call()).status).toBe(200);
+    // What deleting the account does (see deleteLearnerData): the signed token itself is still unexpired.
+    await testDb.sql`delete from "user" where email = 'gone@example.test'`;
+    expect((await call()).status).toBe(401);
+  });
+
   it('refuses a forged or foreign token', async () => {
     const d = await discover();
     const forged = `${Buffer.from('{"alg":"none"}').toString('base64url')}.${Buffer.from(JSON.stringify({ sub: 'fake-robin', aud: d.resource })).toString('base64url')}.`;

@@ -113,7 +113,10 @@ const signInLink = signInHref(Astro.url);
     <footer class="site-footer">
       <div class="container stack" style="--stack-space: var(--space-2)">
         <p>{t('footer.about')}</p>
-        <p>{t(authMode === 'oauth' ? 'footer.privacyAccount' : 'footer.privacy')}</p>
+        <p>
+          {t(authMode === 'oauth' ? 'footer.privacyAccount' : 'footer.privacy')}
+          <a href="/privacy">{t('footer.privacyLink')}</a>
+        </p>
         <p>{t('footer.license')}</p>
       </div>
     </footer>
