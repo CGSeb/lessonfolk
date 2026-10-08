@@ -58,6 +58,14 @@ describe('signed out', () => {
     expect(page).not.toContain('LESSONFOLK_MCP_TOKEN');
   });
 
+  it('keeps the six app tabs, with the web chats unavailable on a non-public address', async () => {
+    const html = await (await new Browser(server.url).request('/connect')).text();
+    expect(html.match(/<a [^>]*role="tab"/g)).toHaveLength(6);
+    expect(html.match(/<section [^>]*role="tabpanel"/g)).toHaveLength(6);
+    expect(html).toMatch(/id="tab-claude-code"[^>]*aria-selected="true"/);
+    expect(html.match(/Not available here/g)).toHaveLength(2);
+  });
+
   it('keeps the account pages and data routes for signed-in users', async () => {
     const browser = new Browser(server.url);
     const account = await browser.request('/account');

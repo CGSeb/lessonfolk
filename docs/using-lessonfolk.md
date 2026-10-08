@@ -74,8 +74,9 @@ Without Docker, with [Node.js](https://nodejs.org) 22 or later and your own Post
 
 ## Connect your AI chat
 
-The dashboard's **Connect** page (`/connect`) shows your exact address and short steps for Claude
-Code, Codex, Cursor, Claude Desktop, claude.ai and ChatGPT. Web chats (claude.ai, ChatGPT)
+The dashboard's **Connect** page (`/connect`) shows your exact address, then one tab per app
+(Claude Code, Codex, Cursor, Claude Desktop, claude.ai, ChatGPT) with the short steps for the one
+you pick. A tab can be linked to, e.g. `/connect#codex`. Web chats (claude.ai, ChatGPT)
 connect from their company's servers, so they cannot reach LessonFolk on your computer: when
 self-hosting without sign-in, use an app that runs on your computer.
 
