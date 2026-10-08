@@ -25,6 +25,11 @@ export function getCourseStatus(counts: Counts): CourseStatus {
   return 'not_started';
 }
 
+/** Finished by the learner or by the level check: the card gets a green check. */
+export function isCourseDone(status: CourseStatus): boolean {
+  return status === 'completed' || status === 'skipped_placement';
+}
+
 const display: Record<CourseStatus, { key: UiKey; variant: BadgeVariant }> = {
   not_started: { key: 'status.notStarted', variant: undefined },
   in_progress: { key: 'status.inProgress', variant: 'info' },

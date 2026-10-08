@@ -2,10 +2,11 @@
 import { t } from '../i18n/en';
 import type { Course, CourseStats } from '@lessonfolk/core';
 import CourseAuthors from './CourseAuthors.astro';
+import DoneCheck from './DoneCheck.astro';
 import LevelBadge from './LevelBadge.astro';
 import ThemeBadge from './ThemeBadge.astro';
 import type { AuthorLink } from './authors/authorView';
-import { courseStatusDisplay, finishedLessons, getCourseStatus } from './course-status';
+import { courseStatusDisplay, finishedLessons, getCourseStatus, isCourseDone } from './course-status';
 
 interface Props {
   /** One entry of `getStats(courses, progress).courses`. */
@@ -25,7 +26,8 @@ interface Props {
 const { stats, headingLevel = 2, theme, authors = [], recommended = false, showProgress = true } = Astro.props;
 const { course, total } = stats;
 const finished = finishedLessons(stats);
-const status = courseStatusDisplay(getCourseStatus(stats));
+const courseStatus = getCourseStatus(stats);
+const status = courseStatusDisplay(courseStatus);
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
 const hours = course.estimatedHours;
 const progressText = t('courses.lessonsProgress', { done: finished, total });
@@ -39,6 +41,11 @@ const progressId = `course-progress-${course.id}`;
 <article class="card stack course-card" style="--stack-space: var(--space-3)">
   <Heading class="course-card__title">
     <a href={`/courses/${course.id}`}>{course.title}</a>
+    {
+      showProgress && isCourseDone(courseStatus) && (
+        <DoneCheck variant={courseStatus === 'completed' ? 'done' : 'skipped'} />
+      )
+    }
   </Heading>
 
   <CourseAuthors authors={authors} />
@@ -54,7 +61,7 @@ const progressId = `course-progress-${course.id}`;
     <ThemeBadge theme={theme} />
     <LevelBadge level={course.level} />
     {
-      showProgress && (
+      showProgress && !isCourseDone(courseStatus) && (
         <span class:list={['badge', status.variant && `badge--${status.variant}`]}>
           <span class="visually-hidden">{t('status.label')}:</span> {t(status.key)}
         </span>
@@ -98,6 +105,9 @@ const progressId = `course-progress-${course.id}`;
   }
 
   .course-card__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     font-size: var(--text-xl);
   }
 

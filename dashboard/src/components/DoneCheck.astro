@@ -1,0 +1,60 @@
+---
+import { t } from '../i18n/en';
+
+interface Props {
+  /** `done`: green check; `skipped`: neutral "skip" arrows (skipped after the level check). */
+  variant?: 'done' | 'skipped';
+}
+
+const { variant = 'done' } = Astro.props;
+const label = t(variant === 'done' ? 'status.completed' : 'status.skippedPlacement');
+---
+
+<span class:list={['done-check', `done-check--${variant}`]} title={label}>
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    {
+      variant === 'done' ? (
+        <path d="M5 12.5l4.5 4.5L19 7.5" />
+      ) : (
+        <path d="M5 7l5 5-5 5M13 7l5 5-5 5" />
+      )
+    }
+  </svg>
+  <span class="visually-hidden">{t('status.label')}: {label}</span>
+</span>
+
+<style>
+  /* Small icon in a circle; the status is the tooltip and the text for screen readers. */
+  .done-check {
+    /* Above the card's full-size title link overlay, so the tooltip shows on hover. */
+    position: relative;
+    z-index: 1;
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .done-check--done {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+  }
+
+  .done-check--skipped {
+    border: 1px dashed var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+  }
+
+  .done-check svg {
+    width: 0.8rem;
+    height: 0.8rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
