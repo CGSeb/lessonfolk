@@ -66,6 +66,12 @@ other settings, copy `.env.example` to `.env` and change it (see
 When you are done, `docker compose stop db` stops Postgres and keeps its data;
 `docker compose down -v` removes it with its data.
 
+To look into the database, start [CloudBeaver](https://dbeaver.com/docs/cloudbeaver/) (a web database
+browser, development only) with `docker compose --profile tools up -d cloudbeaver`, open
+http://127.0.0.1:8978 and sign in as `cbadmin` / `lessonfolk-dev`. The **LessonFolk (local)**
+connection is already set up (it assumes the default `POSTGRES_PASSWORD`; see
+`docker/cloudbeaver/data-sources.json`).
+
 To run the dashboard while you work, `npm run dashboard` (http://127.0.0.1:4321), with Postgres
 running. It reloads as you edit. To see a progress fixture, import it:
 `npm run progress:import -- dashboard/tests/fixtures/progress/all-done/progress.json`. The [learner guide](docs/using-lessonfolk.md#the-dashboard) describes its pages.
@@ -85,6 +91,7 @@ never committed). Variables already set in your shell win over `.env`.
 | `POSTGRES_PASSWORD` | `lessonfolk` | Docker Compose: the password of the `db` service. Change `DATABASE_URL` to match. |
 | `LESSONFOLK_PORT` | `4321` | Docker Compose: the port of the app on your computer. |
 | `LESSONFOLK_DB_PORT` | `5432` | Docker Compose: the port of Postgres on your computer. Change `DATABASE_URL` to match. |
+| `LESSONFOLK_CLOUDBEAVER_PORT` | `8978` | Docker Compose, `tools` profile: the port of CloudBeaver on your computer. |
 | `LESSONFOLK_BIND` | `127.0.0.1` | Docker Compose: the address the app port is published on. With `LESSONFOLK_AUTH=none`, the app refuses to start unless it is `127.0.0.1`. |
 | `LESSONFOLK_MIGRATE_ATTEMPTS` | `30` | How many times `migrate` retries, one second apart, while Postgres starts up. |
 

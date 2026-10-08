@@ -1,0 +1,21 @@
+{
+  "folders": {},
+  "connections": {
+    "postgres-lessonfolk": {
+      "provider": "postgresql",
+      "driver": "postgres-jdbc",
+      "name": "LessonFolk (local)",
+      "save-password": true,
+      "configuration": {
+        "host": "db",
+        "port": "5432",
+        "database": "lessonfolk",
+        "url": "jdbc:postgresql://db:5432/lessonfolk",
+        "type": "dev",
+        "auth-model": "native",
+        "user": "lessonfolk",
+        "password": "lessonfolk"
+      }
+    }
+  }
+}
