@@ -68,6 +68,8 @@ describe('the Connect page', () => {
     expect(page.text).toContain(`claude mcp add --transport http lessonfolk ${server.url}/mcp`);
     expect(page.text).toContain('Web chats cannot reach a LessonFolk that runs on this computer');
     expect(page.text).not.toContain('Optional: to make sure only your own apps connect');
+    expect(page.text).toContain('How to install the Course companion');
+    expect(page.html).toContain('docs/using-lessonfolk.md#the-course-companion-claude-code');
     expect(page.html).toContain('href="/connect"');
     expect(page.html).toContain('href="/account"');
   });

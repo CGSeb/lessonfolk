@@ -97,6 +97,15 @@ const host = new URL(connection.url).host;
                 ))}
               </ol>
               {client.note && <p class="muted connect-note">{client.note}</p>}
+              {client.extra && (
+                <aside class="connect-extra stack" style="--stack-space: var(--space-1)">
+                  <h4>{client.extra.title}</h4>
+                  <p class="muted">{client.extra.text}</p>
+                  <p>
+                    <a href={client.extra.href} target="_blank" rel="noopener">{client.extra.linkText}</a>
+                  </p>
+                </aside>
+              )}
             </section>
           ))
         }
@@ -262,6 +271,14 @@ const host = new URL(connection.url).host;
   .connect-steps pre {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+
+  .connect-extra {
+    padding: var(--space-3) var(--space-4);
+    border-left: var(--border-accent) solid var(--color-accent-border);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-subtle);
+    font-size: var(--text-sm);
   }
 
   .connect-note {

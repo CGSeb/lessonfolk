@@ -19,7 +19,12 @@ export interface ConnectClient {
   available: boolean;
   steps: ClientStep[];
   note?: string;
+  /** An optional extra for this app, shown under the steps with a link. */
+  extra?: { title: string; text: string; href: string; linkText: string };
 }
+
+/** Where the Course companion is explained and set up. */
+const COMPANION_DOCS = 'https://github.com/CGSeb/lessonfolk/blob/main/docs/using-lessonfolk.md#the-course-companion-claude-code';
 
 const TOKEN_HEADER = 'Authorization: Bearer <your token>';
 
@@ -30,6 +35,13 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
   const oauth = mode === 'oauth';
   // The web-chat answer when this address is not public.
   const unavailable = t(mode === 'none' ? 'connect.notAvailableLocal' : 'connect.notAvailableWeb');
+
+  const companion: ConnectClient['extra'] = {
+    title: t('connect.companion.title'),
+    text: t('connect.companion.text'),
+    href: COMPANION_DOCS,
+    linkText: t('connect.companion.link'),
+  };
 
   const claudeCode: ConnectClient = {
     id: 'claude-code',
@@ -42,6 +54,7 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
       },
       { text: t(oauth ? 'connect.claudeCode.checkOauth' : 'connect.claudeCode.checkNone') },
     ],
+    extra: companion,
   };
 
   const codex: ConnectClient = {
@@ -82,6 +95,7 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
         available: true,
         steps: [{ text: t('connect.claudeDesktop.connector') }],
         note: t('connect.claudeDesktop.connectorNote'),
+        extra: companion,
       }
     : {
         id: 'claude-desktop',
@@ -94,6 +108,7 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
           },
         ],
         note: t('connect.claudeDesktop.localNote'),
+        extra: companion,
       };
 
   const claudeAi: ConnectClient = {

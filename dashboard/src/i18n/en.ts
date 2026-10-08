@@ -257,6 +257,11 @@ export const en = {
     thenPhrase: "Let's start learning AI",
     menusChange:
       'Apps change their menus from time to time. If a step does not match what you see, look for “MCP” or “connectors” in the app’s settings or help pages.',
+    companion: {
+      title: 'Course companion',
+      text: 'In Claude Code and Claude Desktop, an optional side pane shows your course and lessons, with buttons for Continue, Quiz me and Skip.',
+      link: 'How to install the Course companion',
+    },
     claudeCode: {
       add: 'In a terminal, run:',
       checkNone: 'Start Claude Code (claude) and type /mcp: lessonfolk shows as connected.',
