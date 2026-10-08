@@ -155,7 +155,7 @@ The full rules the tutor follows are in
 
 ## The Course companion (Claude Code)
 
-In Claude Code, an optional **mod** (a small add-on that loads with the project) helps you
+In Claude Code (also in Claude Desktop), an optional **mod** (a small add-on that loads with the project) helps you
 follow along. It starts on its own once you begin learning:
 
 - **A side pane** shows your course, its lessons (done, current, to do) and the key ideas of the
