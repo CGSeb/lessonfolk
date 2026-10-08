@@ -1,5 +1,6 @@
 ---
 import { t } from '../../i18n/en';
+import DoneCheck from '../DoneCheck.astro';
 import type { ThemeProgress } from './homeView';
 
 /** Progress per theme: one row per non-empty theme, linking to the catalog filtered to it. */
@@ -22,14 +23,7 @@ const { themes } = Astro.props;
             <p class="theme-progress__row" id={labelId}>
               <span class="theme-progress__name">
                 <a href={href}>{title}</a>
-                {completed && (
-                  <span class="theme-progress__done">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                      <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-                    </svg>
-                    <span class="visually-hidden">{t('status.label')}: {t('status.completed')}</span>
-                  </span>
-                )}
+                {completed && <DoneCheck />}
               </span>
               <span class="muted">{text}</span>
             </p>
@@ -68,27 +62,6 @@ const { themes } = Astro.props;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-1) var(--space-2);
-  }
-
-  /* Small check in a success circle; the status is spelled out for screen readers. */
-  .theme-progress__done {
-    display: inline-grid;
-    place-items: center;
-    width: 1.125rem;
-    height: 1.125rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-success-bg);
-    color: var(--color-success);
-  }
-
-  .theme-progress__done svg {
-    width: 0.8rem;
-    height: 0.8rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
 
   .theme-progress__row a {
