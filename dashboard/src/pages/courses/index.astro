@@ -47,10 +47,15 @@ const badges = [{ id: undefined, count: catalog.courses.length }, ...themeFilter
   title: themeTitle(id),
   count,
   tone: id === undefined ? 'theme-filter--all' : themeToneClass(themesById.get(id)?.position),
-  href: coursesHref({ theme: id, q: query.q }),
+  href: coursesHref({ theme: id, q: query.q, recommended: query.recommended }),
   current: id === query.theme,
 }));
-const matches = filterCourses(catalog.courses, query, catalog.themes);
+const matches = filterCourses(catalog.courses, query, catalog.themes, recommended);
+// A checkbox next to the search, for signed-in learners who have a path (kept while active so it can be switched off).
+const recommendedFilter =
+  (progressResult !== null && recommended.size > 0) || query.recommended
+    ? { count: recommended.size, current: query.recommended }
+    : undefined;
 const shown = paginate(matches, query.page);
 const pages = pageNumbers(shown.page, shown.pageCount).map((page) =>
   page === null ? null : { page, href: coursesHref({ ...query, page }), current: page === shown.page },
@@ -119,6 +124,7 @@ const hiddenIssues = issues.length - shownIssues.length;
               {t('courses.searchLabel')}
             </label>
             {query.theme && <input type="hidden" name="theme" value={query.theme} />}
+            <div class="catalog-search__field">
             <input
               class="catalog-search__input"
               id="catalog-search-input"
@@ -132,6 +138,14 @@ const hiddenIssues = issues.length - shownIssues.length;
             <button class="catalog-search__button" type="submit">
               {t('courses.searchButton')}
             </button>
+            </div>
+            {recommendedFilter && (
+              <label class="catalog-search__recommended">
+                <input type="checkbox" name="recommended" value="1" checked={recommendedFilter.current} />
+                {t('courses.recommended')}
+                <span class="muted">({recommendedFilter.count})</span>
+              </label>
+            )}
           </form>
 
           {/* Announces the result count when the search updates in place. */}
@@ -161,8 +175,8 @@ const hiddenIssues = issues.length - shownIssues.length;
               </p>
               {shown.total === 0 && (
                 <p class="cluster" style="--cluster-space: var(--space-4)">
-                  {query.q && <a href={coursesHref({ theme: query.theme })}>{t('courses.clearSearch')}</a>}
-                  {query.theme && <a href={coursesHref()}>{t('courses.showAll')}</a>}
+                  {query.q && <a href={coursesHref({ theme: query.theme, recommended: query.recommended })}>{t('courses.clearSearch')}</a>}
+                  {query.theme && <a href={coursesHref({ recommended: query.recommended })}>{t('courses.showAll')}</a>}
                 </p>
               )}
             </div>
@@ -263,6 +277,7 @@ const hiddenIssues = issues.length - shownIssues.length;
     const data = new FormData(form);
     return coursesHref({
       theme: String(data.get('theme') ?? '') || undefined,
+      recommended: data.get('recommended') === '1',
       q: String(data.get('q') ?? '').trim(),
     });
   }
@@ -302,6 +317,14 @@ const hiddenIssues = issues.length - shownIssues.length;
     timer = setTimeout(() => void update(searchUrl(form)), DEBOUNCE_MS);
   });
 
+  // The recommended checkbox applies at once, like the search.
+  document.addEventListener('change', (event) => {
+    const form = searchForm(event);
+    if (!form) return;
+    clearTimeout(timer);
+    void update(searchUrl(form));
+  });
+
   document.addEventListener('submit', (event) => {
     const form = searchForm(event);
     if (!form) return;
@@ -329,6 +352,70 @@ const hiddenIssues = issues.length - shownIssues.length;
 
   .catalog-search {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    max-width: 48rem;
+  }
+
+  /* Toggle next to the search: a square box that fills amber (the "Recommended" cue of the cards) with a check. */
+  .catalog-search__recommended {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .catalog-search__recommended input {
+    appearance: none;
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .catalog-search__recommended input::after {
+    content: '';
+    width: 0.3rem;
+    height: 0.6rem;
+    margin-top: -0.1rem;
+    border: solid var(--color-text);
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.15s ease;
+  }
+
+  .catalog-search__recommended input:hover {
+    border-color: var(--color-spark);
+  }
+
+  .catalog-search__recommended input:checked {
+    border-color: var(--color-spark);
+    background: var(--color-spark);
+  }
+
+  .catalog-search__recommended input:checked::after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  .catalog-search__recommended input:focus-visible {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .catalog-search__field {
+    display: flex;
+    flex: 1 1 20rem;
     gap: var(--space-2);
     max-width: 32rem;
   }

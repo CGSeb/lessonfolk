@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { t } from '../i18n/en';
-import { courseStatusDisplay, finishedLessons, getCourseStatus } from './course-status';
+import { courseStatusDisplay, finishedLessons, getCourseStatus, isCourseDone } from './course-status';
 
 const counts = (over: Partial<Parameters<typeof getCourseStatus>[0]> = {}) => ({
   done: 0,
@@ -55,5 +55,14 @@ describe('courseStatusDisplay', () => {
     expect(courseStatusDisplay('in_progress')).toEqual({ key: 'status.inProgress', variant: 'info' });
     expect(courseStatusDisplay('completed')).toEqual({ key: 'status.completed', variant: 'success' });
     expect(courseStatusDisplay('skipped_placement')).toEqual({ key: 'status.skippedPlacement', variant: 'placement' });
+  });
+});
+
+describe('isCourseDone', () => {
+  it('is true for completed and level-check-skipped courses only', () => {
+    expect(isCourseDone('completed')).toBe(true);
+    expect(isCourseDone('skipped_placement')).toBe(true);
+    expect(isCourseDone('in_progress')).toBe(false);
+    expect(isCourseDone('not_started')).toBe(false);
   });
 });

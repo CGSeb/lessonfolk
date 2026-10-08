@@ -34,11 +34,11 @@ describe('parseCatalogQuery', () => {
   const parse = (query: string) => parseCatalogQuery(new URLSearchParams(query), ['using', OTHER_THEME]);
 
   it('defaults to All, no search, page 1', () => {
-    expect(parse('')).toEqual({ theme: undefined, q: '', page: 1 });
+    expect(parse('')).toEqual({ theme: undefined, q: '', recommended: false, page: 1 });
   });
 
   it('reads a known theme, the trimmed search and the page', () => {
-    expect(parse('theme=using&q=%20prompt%20&page=3')).toEqual({ theme: 'using', q: 'prompt', page: 3 });
+    expect(parse('theme=using&q=%20prompt%20&page=3')).toEqual({ theme: 'using', q: 'prompt', recommended: false, page: 3 });
     expect(parse(`theme=${OTHER_THEME}`).theme).toBe(OTHER_THEME);
   });
 
@@ -141,5 +141,26 @@ describe('pageNumbers', () => {
 
   it('shows a single left-out page as its number', () => {
     expect(pageNumbers(4, 10)).toEqual([1, 2, 3, 4, 5, null, 10]);
+  });
+});
+
+describe('recommended filter', () => {
+  const courses = [
+    { id: 'a', title: 'A', description: '', theme: 't' },
+    { id: 'b', title: 'B', description: '', theme: 't' },
+  ];
+  const themes = [{ id: 't', title: 'T' }];
+
+  it('reads recommended=1 from the URL and writes it back', () => {
+    expect(parseCatalogQuery(new URLSearchParams('recommended=1'), []).recommended).toBe(true);
+    expect(parseCatalogQuery(new URLSearchParams('recommended=yes'), []).recommended).toBe(false);
+    expect(coursesHref({ recommended: true })).toBe('/courses?recommended=1');
+    expect(coursesHref({ recommended: false })).toBe('/courses');
+  });
+
+  it('keeps only the courses of the path, in catalog order', () => {
+    const only = filterCourses(courses, { theme: undefined, q: '', recommended: true }, themes, new Set(['b']));
+    expect(only.map((c) => c.id)).toEqual(['b']);
+    expect(filterCourses(courses, { theme: undefined, q: '' }, themes, new Set(['b']))).toHaveLength(2);
   });
 });
