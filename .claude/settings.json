@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "allow": ["mcp__lessonfolk__get_progress", "mcp__lessonfolk__list_courses"]
+  }
+}

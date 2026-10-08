@@ -174,6 +174,21 @@ your progress could not be read. If your Claude Code does not show the pane, not
 everything works in the chat. The mod lives in `.claude/skills/course-companion/`. Codex has no
 companion.
 
+The pane's own calls (`get_progress` and `list_courses`) need a permission like any tool call.
+The project's `.claude/settings.json` allows them. If the pane still says your progress could
+not be read although `/mcp` shows `lessonfolk` as connected (typically in auto permission mode, or
+if you replaced the project settings), allow them yourself:
+
+```json
+{
+  "permissions": {
+    "allow": ["mcp__lessonfolk__get_progress", "mcp__lessonfolk__list_courses"]
+  }
+}
+```
+
+Put it in `.claude/settings.json` (shared) or `.claude/settings.local.json` (only you).
+
 ## The dashboard
 
 The dashboard shows your courses and progress. Only the tutor writes your progress, except on
