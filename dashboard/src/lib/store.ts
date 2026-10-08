@@ -2,11 +2,13 @@
  * The dashboard's database connection and progress store, shared by every page,
  * API route and Better Auth. Created on first use from DATABASE_URL.
  *
- * The dashboard only reads progress (getProgress); the tutor writes it.
+ * The dashboard mostly reads progress (getProgress); the tutor writes it (through MCP, in this
+ * same server). Every committed write publishes a per-user change event for live refresh.
  */
 import { inspectCatalog, type Progress, type ProgressResult, type ProgressStore } from '@lessonfolk/core';
 import { connect, createPostgresProgressStore, databaseUrl, type Database } from '@lessonfolk/db';
 import type { CurrentUser } from './auth/current-user';
+import { getProgressHub } from './watch';
 
 let database: Database | undefined;
 let store: ProgressStore | undefined;
@@ -19,7 +21,11 @@ export function getDatabase(): Database {
 
 /** The shared progress store. */
 export function getProgressStore(): ProgressStore {
-  store ??= createPostgresProgressStore(getDatabase(), { courses: () => inspectCatalog('en').catalog.courses });
+  store ??= createPostgresProgressStore(getDatabase(), {
+    courses: () => inspectCatalog('en').catalog.courses,
+    // Open dashboard pages of this learner refresh (see pages/api/events.ts).
+    onChange: (userId) => getProgressHub().publish(userId),
+  });
   return store;
 }
 

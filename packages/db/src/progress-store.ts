@@ -44,6 +44,12 @@ export interface PostgresProgressStoreOptions {
    * function is called on every write, so a reloaded catalog is picked up.
    */
   courses: readonly TutorCourseRef[] | (() => readonly TutorCourseRef[]);
+  /**
+   * Called with the user id after a write has been committed (never for a write that rolled
+   * back, never for a read). The dashboard uses it to refresh that learner's open pages.
+   * A throwing callback is ignored: it cannot fail a write that is already saved.
+   */
+  onChange?: (userId: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -163,6 +169,13 @@ interface Change {
 
 export function createPostgresProgressStore(db: Database, options: PostgresProgressStoreOptions): ProgressStore {
   const catalog = () => (typeof options.courses === 'function' ? options.courses() : options.courses);
+  const notify = (userId: string) => {
+    try {
+      options.onChange?.(userId);
+    } catch {
+      // The write is saved: a broken listener must not turn it into an error.
+    }
+  };
   const dates = (opts?: WriteOptions) => (opts?.today ? { today: opts.today } : {});
 
   /** Run one write: lock the learner, apply `change` to the saved progress, save it and log it. */
@@ -171,7 +184,7 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
     opts: WriteOptions | undefined,
     change: (progress: Progress, courses: readonly TutorCourseRef[]) => Change,
   ): Promise<Progress> {
-    return db.transaction(async (tx) => {
+    const saved = await db.transaction(async (tx) => {
       const [found] = await tx.select({ id: user.id }).from(user).where(eq(user.id, userId));
       if (!found) throw new ProgressStoreError('unknown_user', `No user with id "${userId}".`, { userId });
       await tx.insert(learner).values({ userId }).onConflictDoNothing();
@@ -189,6 +202,8 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
       // Read back what was stored (e.g. without fields progress.json allows but the tables do not keep).
       return (await readProgress(tx, userId))!;
     });
+    notify(userId);
+    return saved;
   }
 
   const unwrap = unwrapTutorResult;
@@ -286,6 +301,7 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
 
     async deleteLearner(userId) {
       const deleted = await db.delete(learner).where(eq(learner.userId, userId)).returning({ userId: learner.userId });
+      if (deleted.length > 0) notify(userId);
       return deleted.length > 0;
     },
   };

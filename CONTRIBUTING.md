@@ -181,6 +181,17 @@ code, or fix the test only if the test itself is wrong, and say why in the pull 
 The Course companion mod has its own tests in `.claude/skills/course-companion/tests/`; they
 are not part of `npm test`.
 
+### Live refresh
+
+Open dashboard pages refresh by themselves when the tutor saves progress. The Postgres store
+takes an `onChange(userId)` option, called after each committed write; the dashboard passes a
+publisher of the in-process hub in
+[`dashboard/src/lib/watch.ts`](dashboard/src/lib/watch.ts), and `/api/events` (Server-Sent
+Events, signed-in users only) streams `progress` events of the signed-in user alone to
+[`LiveRefresh.astro`](dashboard/src/components/LiveRefresh.astro), which swaps the page's
+`<main>`. MCP runs in the same server, so its writes arrive without extra setup. With several
+instances, publish through Postgres `LISTEN/NOTIFY` instead (same hub interface).
+
 ## Contributing a course
 
 A lesson is a Markdown file with key ideas, teaching notes for the tutor, questions to check

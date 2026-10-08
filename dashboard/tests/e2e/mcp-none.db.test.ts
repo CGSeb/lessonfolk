@@ -44,6 +44,33 @@ describe('MCP with LESSONFOLK_AUTH=none, no token', () => {
     }
   });
 
+  it('pushes a progress event to the open dashboard when the tutor saves progress', async () => {
+    const abort = new AbortController();
+    const response = await fetch(`${server.url}/api/events`, { headers: { Accept: 'text/event-stream' }, signal: abort.signal });
+    expect(response.status).toBe(200);
+    const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
+    let text = '';
+    const readUntil = async (needle: string) => {
+      while (!text.includes(needle)) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        text += chunk.value;
+      }
+    };
+    await readUntil(': connected');
+
+    const client = await connectMcp(server.url);
+    try {
+      await callJson(client, 'complete_lesson', { lessonId: 'ai-foundations/01-what-is-ai', score: 0.9, notes: 'Easy.' });
+    } finally {
+      await client.close();
+    }
+    await readUntil('data: progress');
+    expect(text).toContain('event: change\ndata: progress');
+    abort.abort();
+    await reader.cancel().catch(() => {});
+  });
+
   it('refuses requests from web pages on other sites', async () => {
     expect((await jsonRpc(server.url, { Origin: 'https://evil.example' })).status).toBe(403);
   });

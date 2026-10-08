@@ -183,8 +183,8 @@ the **Your data** page (import, export, erase).
 | **Connect** | `/connect` | Your LessonFolk address for AI chats and the setup steps for each app (see [Connect your AI chat](#connect-your-ai-chat)). |
 | **Your data** | `/account` | Download, import or erase your progress (see [Your data](#your-data-import-export-erase)). |
 
-Reload a page to see your latest progress (pages refresh by themselves only when course files
-change). Lessons you skipped after the level check show as "Skipped after level check".
+Pages update by themselves within a few seconds when your tutor saves progress (no reload
+needed; the page keeps your scroll position and open sections). Lessons you skipped after the level check show as "Skipped after level check".
 
 With sign-in (`LESSONFOLK_AUTH=oauth`), the courses and authors pages are open to everyone,
 without progress. Home needs you to sign in, and each person sees only their own progress.
