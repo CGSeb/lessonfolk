@@ -62,11 +62,12 @@ describe('the Connect page', () => {
     expect(page.status).toBe(200);
     expect(page.text).toContain('Connect your AI chat');
     expect(page.text).toContain(`${server.url}/mcp`);
-    expect(page.text).toContain('Only apps on this computer can connect');
+    expect(page.text).not.toContain('Your LessonFolk address');
+    expect(page.text).not.toContain('Only apps on this computer can connect');
     for (const app of ['Claude Code', 'Codex', 'Cursor', 'Claude Desktop', 'claude.ai', 'ChatGPT']) expect(page.text).toContain(app);
     expect(page.text).toContain(`claude mcp add --transport http lessonfolk ${server.url}/mcp`);
     expect(page.text).toContain('Web chats cannot reach a LessonFolk that runs on this computer');
-    expect(page.text).toContain('Optional: to make sure only your own apps connect, set LESSONFOLK_MCP_TOKEN');
+    expect(page.text).not.toContain('Optional: to make sure only your own apps connect');
     expect(page.html).toContain('href="/connect"');
     expect(page.html).toContain('href="/account"');
   });
@@ -83,6 +84,7 @@ describe('the Connect page', () => {
     expect(page.html).toMatch(/id="tab-claude-code"[^>]*aria-selected="true"/);
     expect(page.html).toMatch(/id="tab-chatgpt"[^>]*aria-selected="false"/);
     expect(page.html.match(/Not available here/g)).toHaveLength(2);
+    expect(page.html.match(/class="badge badge--warning"[^>]*>Not available here/g)).toHaveLength(2);
   });
 
   it('says a token is needed when LESSONFOLK_MCP_TOKEN is set, without showing it', async () => {

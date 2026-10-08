@@ -24,24 +24,13 @@ const host = new URL(connection.url).host;
       <p class="connect-lead">{t('connect.intro')}</p>
     </header>
 
-    <section class="card stack" aria-labelledby="url-heading" style="--stack-space: var(--space-3)">
-      <h2 id="url-heading" class="connect-url__label">{t('connect.urlLabel')}</h2>
-      <pre class="connect-url"><code data-mcp-url>{connection.url}</code></pre>
-      <p class="muted">{t('connect.urlHint')}</p>
-    </section>
-
     {
       connection.mode === 'none' ? (
         <>
-          <Notice title={t('connect.localTitle')}>
-            <p>{t('connect.localBody')}</p>
-          </Notice>
-          {connection.tokenRequired ? (
+          {connection.tokenRequired && (
             <Notice title={t('connect.tokenTitle')}>
               <p>{t('connect.tokenBody')}</p>
             </Notice>
-          ) : (
-            <p class="muted">{t('connect.tokenOptional')}</p>
           )}
         </>
       ) : (
@@ -59,7 +48,13 @@ const host = new URL(connection.url).host;
     }
 
     <section class="stack" aria-labelledby="clients-heading" style="--stack-space: var(--space-4)">
-      <h2 id="clients-heading">{t('connect.clientsHeading')}</h2>
+      <div class="connect-heading">
+        <h2 id="clients-heading">{t('connect.clientsHeading')}</h2>
+        <span class="connect-help">
+          <button type="button" class="connect-help__button" aria-label={t('connect.helpLabel')} aria-describedby="menus-change">?</button>
+          <span class="connect-help__tip" role="tooltip" id="menus-change">{t('connect.menusChange')}</span>
+        </span>
+      </div>
       <div class="connect-tabs" data-connect-tabs>
         <div class="connect-tablist" role="tablist" aria-label={t('connect.clientsHeading')}>
           {
@@ -91,7 +86,7 @@ const host = new URL(connection.url).host;
             >
               <div class="cluster" style="--cluster-space: var(--space-2)">
                 <h3 id={`client-${client.id}`}>{client.name}</h3>
-                {!client.available && <span class="badge">{t('connect.notAvailable')}</span>}
+                {!client.available && <span class="badge badge--warning">{t('connect.notAvailable')}</span>}
               </div>
               <ol class="stack connect-steps" style="--stack-space: var(--space-3)">
                 {client.steps.map((step) => (
@@ -106,7 +101,6 @@ const host = new URL(connection.url).host;
           ))
         }
       </div>
-      <p class="muted">{t('connect.menusChange')}</p>
     </section>
 
     <section class="card stack" aria-labelledby="then-heading">
@@ -163,6 +157,61 @@ const host = new URL(connection.url).host;
 </script>
 
 <style>
+  .connect-heading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .connect-help {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .connect-help__button {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+    cursor: help;
+  }
+
+  .connect-help__button:hover,
+  .connect-help__button:focus-visible {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* Shown on hover and keyboard focus; the button points to it with aria-describedby. */
+  .connect-help__tip {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    left: 0;
+    z-index: 10;
+    display: none;
+    width: min(22rem, 80vw);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-normal);
+  }
+
+  .connect-help:hover .connect-help__tip,
+  .connect-help:focus-within .connect-help__tip {
+    display: block;
+  }
+
   .connect-tablist {
     display: flex;
     flex-wrap: wrap;
@@ -204,16 +253,6 @@ const host = new URL(connection.url).host;
     max-width: 70ch;
     color: var(--color-text-muted);
     font-size: var(--text-lg);
-  }
-
-  .connect-url__label {
-    font-size: var(--text-xl);
-  }
-
-  .connect-url {
-    font-size: var(--text-lg);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
   }
 
   .connect-steps {
