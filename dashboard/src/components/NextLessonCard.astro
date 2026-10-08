@@ -3,8 +3,8 @@ import type { Course, Lesson } from '@lessonfolk/core';
 import { t } from '../i18n/en';
 
 /**
- * The lesson the tutor will teach next: course, title, duration and objectives,
- * with a link to the course. Put how to start it (e.g. a SayPhrase) in the default slot.
+ * The lesson the tutor will teach next: title, linked course and duration, with the
+ * objectives on demand. Put how to start it (e.g. a SayPhrase) in the default slot.
  */
 interface Props {
   /** Card heading, e.g. "Next up". */
@@ -22,30 +22,29 @@ const headingId = 'next-lesson-heading';
   <div class="stack" style="--stack-space: var(--space-1)">
     <h3>{lesson.title}</h3>
     <p class="cluster muted" style="--cluster-space: var(--space-2)">
-      <span>{t('home.inCourse', { course: course.title })}</span>
+      <a href={`/courses/${encodeURIComponent(course.id)}`}>{course.title}</a>
       <span class="badge">{t('home.minutes', { minutes: lesson.estimatedMinutes })}</span>
     </p>
   </div>
-  <div class="stack" style="--stack-space: var(--space-2)">
-    <h4>{t('home.objectives')}</h4>
+  <slot />
+  <details>
+    <summary>{t('home.objectives')}</summary>
     <ul class="next-lesson__objectives">
       {lesson.objectives.map((objective) => <li>{objective}</li>)}
     </ul>
-  </div>
-  <slot />
-  <p>
-    <a href={`/courses/${encodeURIComponent(course.id)}`}>{t('home.viewCourse', { course: course.title })}</a>
-  </p>
+  </details>
 </section>
 
 <style>
-  .next-lesson h4 {
+  .next-lesson summary {
+    cursor: pointer;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
 
   .next-lesson__objectives {
     display: grid;
+    margin-top: var(--space-2);
     gap: var(--space-2);
     padding-left: 0;
     list-style: none;

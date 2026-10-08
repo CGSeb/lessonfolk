@@ -1,0 +1,107 @@
+---
+import { t } from '../../i18n/en';
+import type { Course } from '@lessonfolk/core';
+import type { PathCourse } from './pathView';
+import { pathStatusDisplay } from './pathView';
+
+/** Rows of the learner's path. `startAt` is the position of the first row in the whole path. */
+interface Props {
+  courses: PathCourse<Course>[];
+  startAt: number;
+}
+
+const { courses, startAt } = Astro.props;
+const rows = courses.map((row) => ({
+  ...row,
+  display: pathStatusDisplay(row.status),
+  lessonsText: t('path.lessons', { finished: row.finished, total: row.total }),
+  placementText:
+    row.placementSkipped > 0 && row.status !== 'skipped_placement'
+      ? t(row.placementSkipped === 1 ? 'path.placementOne' : 'path.placementOther', { count: row.placementSkipped })
+      : undefined,
+}));
+---
+
+<ol class="path-rows" role="list" aria-label={t('path.listLabel')} style={`counter-reset: path-step ${startAt - 1}`}>
+  {
+    rows.map((row) => (
+      <li
+        class:list={['path-rows__item', row.isNext && 'path-rows__item--next']}
+        aria-current={row.isNext ? 'step' : undefined}
+      >
+        <div class="path-rows__body stack" style="--stack-space: var(--space-1)">
+          <h3 class="path-rows__course">
+            <a href={`/courses/${encodeURIComponent(row.course.id)}`}>{row.course.title}</a>
+          </h3>
+          <p class="muted path-rows__meta">
+            {row.lessonsText}
+            {row.placementText && (
+              <>
+                <span aria-hidden="true"> · </span>
+                <span>{row.placementText}</span>
+              </>
+            )}
+          </p>
+        </div>
+        <span class:list={['badge', row.display.variant && `badge--${row.display.variant}`]}>
+          <span class="visually-hidden">{t('status.label')}:</span> {t(row.display.key)}
+        </span>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .path-rows {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  /* One row per course: step number, title and lessons, status badge. Wraps on narrow screens. */
+  .path-rows__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    max-width: none;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    counter-increment: path-step;
+  }
+
+  .path-rows__item::before {
+    content: counter(path-step);
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  /* The course the next lesson comes from: same spark cue as the next-lesson card. */
+  .path-rows__item--next {
+    padding: calc(var(--space-3) - var(--border-spark) + 1px);
+    border: var(--border-spark) solid var(--color-spark);
+  }
+
+  .path-rows__body {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
+  .path-rows__course {
+    font-size: var(--text-lg);
+  }
+
+  .path-rows__meta {
+    font-size: var(--text-sm);
+  }
+</style>

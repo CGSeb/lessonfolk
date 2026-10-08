@@ -195,8 +195,8 @@ scenario 1 in **Codex**. Back up your own progress first (see [Before you start]
 - [ ] The download has `profile.level: "beginner"`, `profile.interests` (theme ids, not titles),
       `path: ["ai-foundations"]`, `pathReason`, `pathUpdatedAt`,
       `current: "ai-foundations/01-what-is-ai"` and that lesson `in_progress`.
-- [ ] Home shows "Level: Beginner", your interests, "Your path" with the tutor's reason under
-      "Why this path", AI Foundations "In progress", and "What is AI?" under "Pick up where you
+- [ ] Home shows "Level: Beginner", your interests, "Your path" with AI Foundations "In progress"
+      and the tutor's reason behind "Why this path", and "What is AI?" under "Pick up where you
       left off". No "Some of your learning path was ignored" warning.
 
 **Scenario 2 — developer, level check.** Erase your progress, start again and answer

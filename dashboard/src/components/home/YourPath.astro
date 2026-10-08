@@ -2,149 +2,83 @@
 import { t } from '../../i18n/en';
 import type { Course } from '@lessonfolk/core';
 import type { PathCourse } from './pathView';
-import { pathStatusDisplay } from './pathView';
+import PathRows from './PathRows.astro';
 
-/** The learner's personal path: courses in path order with their status, and the tutor's reason. */
+/**
+ * The learner's personal path. Shows the current course and the next ones (finished courses
+ * before it and courses after the window fold away), and the tutor's reason on demand.
+ */
 interface Props {
   courses: PathCourse<Course>[];
   reason: string | undefined;
   updatedOn: string | undefined;
 }
 
+const VISIBLE = 3;
 const { courses, reason, updatedOn } = Astro.props;
-const rows = courses.map((row) => ({
-  ...row,
-  display: pathStatusDisplay(row.status),
-  lessonsText: t('path.lessons', { finished: row.finished, total: row.total }),
-  placementText:
-    row.placementSkipped > 0 && row.status !== 'skipped_placement'
-      ? t(row.placementSkipped === 1 ? 'path.placementOne' : 'path.placementOther', { count: row.placementSkipped })
-      : undefined,
-}));
+
+// The window starts at the first course that is not finished.
+const open = courses.findIndex((row) => row.status !== 'done' && row.status !== 'skipped_placement');
+const start = open === -1 ? Math.max(courses.length - VISIBLE, 0) : open;
+const before = courses.slice(0, start);
+const shown = courses.slice(start, start + VISIBLE);
+const after = courses.slice(start + VISIBLE);
 ---
 
-<section class="card stack your-path" aria-labelledby="your-path-heading" style="--stack-space: var(--space-4)">
-  <header class="stack" style="--stack-space: var(--space-1)">
-    <h2 id="your-path-heading">{t('path.title')}</h2>
-    <p class="muted your-path__intro">
-      {t('path.intro')}
-      {updatedOn && <span class="your-path__updated">{t('path.updatedOn', { date: updatedOn })}</span>}
-    </p>
-  </header>
+<section class="card stack" aria-labelledby="your-path-heading" style="--stack-space: var(--space-3)">
+  <h2 id="your-path-heading">{t('path.title')}</h2>
 
   {
-    reason && (
-      <div class="your-path__reason stack" style="--stack-space: var(--space-1)">
-        <p class="your-path__reason-label">{t('path.reasonLabel')}</p>
-        <p>{reason}</p>
-      </div>
+    before.length > 0 && (
+      <details>
+        <summary>{t('path.earlier', { count: before.length })}</summary>
+        <PathRows courses={before} startAt={1} />
+      </details>
     )
   }
-
-  <ol class="your-path__list" role="list" aria-label={t('path.listLabel')}>
-    {
-      rows.map((row) => (
-        <li
-          class:list={['your-path__item', row.isNext && 'your-path__item--next']}
-          aria-current={row.isNext ? 'step' : undefined}
-        >
-          <div class="your-path__body stack" style="--stack-space: var(--space-1)">
-            <h3 class="your-path__course">
-              <a href={`/courses/${encodeURIComponent(row.course.id)}`}>{row.course.title}</a>
-            </h3>
-            <p class="muted your-path__meta">
-              {row.lessonsText}
-              {row.placementText && (
-                <>
-                  <span aria-hidden="true"> · </span>
-                  <span>{row.placementText}</span>
-                </>
-              )}
-            </p>
-          </div>
-          <span class:list={['badge', row.display.variant && `badge--${row.display.variant}`]}>
-            <span class="visually-hidden">{t('status.label')}:</span> {t(row.display.key)}
-          </span>
-        </li>
-      ))
-    }
-  </ol>
+  <PathRows courses={shown} startAt={start + 1} />
+  {
+    after.length > 0 && (
+      <details>
+        <summary>{t('path.more', { count: after.length })}</summary>
+        <PathRows courses={after} startAt={start + shown.length + 1} />
+      </details>
+    )
+  }
+  {
+    (reason || updatedOn) && (
+      <details>
+        <summary>{t('path.reasonLabel')}</summary>
+        <div class="your-path__reason stack" style="--stack-space: var(--space-1)">
+          {reason && <p>{reason}</p>}
+          {updatedOn && <p class="muted your-path__updated">{t('path.updatedOn', { date: updatedOn })}</p>}
+        </div>
+      </details>
+    )
+  }
 </section>
 
 <style>
-  .your-path__intro {
+  summary {
+    cursor: pointer;
+    color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
 
-  .your-path__updated::before {
-    content: ' · ';
+  details > :global(ol) {
+    margin-top: var(--space-2);
   }
 
   /* The tutor's own words: a soft panel with an accent rule, like a quoted chat message. */
   .your-path__reason {
+    margin-top: var(--space-2);
     padding: var(--space-3) var(--space-4);
     border-left: var(--border-accent) solid var(--color-accent-border);
     border-radius: var(--radius-md);
     background: var(--color-accent-subtle);
   }
 
-  .your-path__reason-label {
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-  }
-
-  .your-path__list {
-    display: grid;
-    gap: var(--space-2);
-    padding: 0;
-    list-style: none;
-    counter-reset: path-step;
-  }
-
-  /* One row per course: step number, title and lessons, status badge. Wraps on narrow screens. */
-  .your-path__item {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
-    max-width: none;
-    padding: var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    counter-increment: path-step;
-  }
-
-  .your-path__item::before {
-    content: counter(path-step);
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-accent-subtle);
-    color: var(--color-accent);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-bold);
-  }
-
-  /* The course the next lesson comes from: same spark cue as the next-lesson card. */
-  .your-path__item--next {
-    padding: calc(var(--space-3) - var(--border-spark) + 1px);
-    border: var(--border-spark) solid var(--color-spark);
-  }
-
-  .your-path__body {
-    flex: 1 1 12rem;
-    min-width: 0;
-  }
-
-  .your-path__course {
-    font-size: var(--text-lg);
-  }
-
-  .your-path__meta {
+  .your-path__updated {
     font-size: var(--text-sm);
   }
 </style>

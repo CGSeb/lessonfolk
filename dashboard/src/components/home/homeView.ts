@@ -9,8 +9,7 @@ import {
   type NextLesson,
   type ProgressResult,
 } from '@lessonfolk/core';
-import { coursesHref } from '../catalog/catalogFilter';
-import { getCatalogSections, type ThemeRef } from '../catalog/catalogView';
+import type { ThemeRef } from '../catalog/catalogView';
 import { getInterestThemes, getPathView, type PathView } from './pathView';
 
 /**
@@ -45,24 +44,10 @@ export interface HomeView<C extends CourseRef> {
   suggestPath: boolean;
   /** Done or skipped lessons, out of all lessons in the catalog. */
   lessons: { finished: number; total: number };
-  courses: { completed: number; total: number };
-  /** Non-empty themes in `themes.yaml` order, with finished lessons out of the theme's lessons. */
-  themes: ThemeProgress[];
   /** Error message when the progress file exists but cannot be used. */
   progressError: string | undefined;
   /** Ids in the progress file the catalog does not know (path courses, interest themes); they are ignored. */
   progressWarnings: string[];
-}
-
-export interface ThemeProgress {
-  id: string;
-  title: string;
-  /** The catalog filtered to this theme. */
-  href: string;
-  finished: number;
-  total: number;
-  /** Every course of the theme is completed. */
-  completed: boolean;
 }
 
 /** Pure computation of the home page content from the catalog and the progress read result. */
@@ -95,14 +80,6 @@ export function getHomeView<C extends CourseRef>(
       finished: stats.overall.done + stats.overall.skipped,
       total: stats.overall.total,
     },
-    courses: {
-      completed: stats.courses.filter((c) => c.completed).length,
-      total: stats.courses.length,
-    },
-    // Courses with an unknown theme are reported as content issues, not shown here.
-    themes: getCatalogSections(courses, themes, progress).flatMap(({ theme, lessons, completed }) =>
-      theme ? [{ id: theme.id, title: theme.title, href: coursesHref({ theme: theme.id }), ...lessons, completed }] : [],
-    ),
     progressError: result.state === 'invalid' ? result.error : undefined,
     progressWarnings: getProgressWarnings(
       progress,

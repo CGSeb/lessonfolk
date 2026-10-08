@@ -55,8 +55,6 @@ const fixtures: Record<string, Expectations> = {
         'Next up',
         LESSONS[0],
         '0 of 3 lessons finished',
-        'Courses completed: 0 of 1',
-        'Your progress by theme',
         // Profile without a path: suggest asking the tutor for one.
         'Get a path made for you',
         'recommend a path',
@@ -76,8 +74,6 @@ const fixtures: Record<string, Expectations> = {
         'Pick up where you left off',
         LESSONS[1],
         '1 of 3 lessons finished',
-        'Courses completed: 0 of 1',
-        'Your progress by theme',
         '1 of 3 lessons',
         ...SUGGEST_PATH,
       ],
@@ -108,7 +104,6 @@ const fixtures: Record<string, Expectations> = {
         'You finished every lesson. Congratulations!',
         'quiz me',
         '3 of 3 lessons finished',
-        'Courses completed: 1 of 1',
       ],
       // Nothing left to recommend: the tutor would say the catalog is covered.
       exclude: ['Next up', 'Pick up where you left off', ...SUGGEST_PATH, INVALID_HOME],
@@ -174,7 +169,6 @@ const fixtures: Record<string, Expectations> = {
         '3 of 3 lessons',
         'You finished every lesson. Congratulations!',
         '3 of 3 lessons finished',
-        'Courses completed: 1 of 1',
       ],
       // The badge already says it: no "3 lessons skipped after your level check" line.
       exclude: ['after your level check', 'Next up', 'Pick up where you left off', ...SUGGEST_PATH, PATH_WARNING, INVALID_HOME],
