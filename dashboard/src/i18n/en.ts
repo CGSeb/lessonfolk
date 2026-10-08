@@ -137,6 +137,8 @@ export const en = {
     nextUp: 'Next up',
     continueHint: 'To work on it with your tutor, say this in your AI chat connected to LessonFolk:',
     continuePhrase: 'continue',
+    resetHint: 'To take this course again from its first lesson, say this in your AI chat connected to LessonFolk:',
+    resetPhrase: 'reset {title}',
     invalidProgressTitle: 'Your progress could not be loaded',
     invalidProgressBody: 'Lessons are shown as not started. Your progress is not lost: reload the page in a moment.',
     technicalDetails: 'Technical details',

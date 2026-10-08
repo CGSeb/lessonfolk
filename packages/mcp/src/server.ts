@@ -305,6 +305,19 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
   );
 
   server.registerTool(
+    'reset_course',
+    {
+      title: 'Reset a course',
+      description:
+        'Reset a course so the learner can take it again from its first lesson: all its lessons go back to not started and their scores and notes are removed. ' +
+        'Other courses and the path are not changed. Only call it after showing the learner what will be reset and getting a clear yes.',
+      inputSchema: z.object({ courseId: z.string().min(1).describe('Course id, e.g. "ai-foundations".') }),
+      annotations: { ...writes, destructiveHint: true },
+    },
+    ({ courseId }) => write(`Course ${courseId} reset.`, () => store.resetCourse(userId, courseId, writeOptions)),
+  );
+
+  server.registerTool(
     'save_lesson_notes',
     {
       title: 'Save lesson notes',

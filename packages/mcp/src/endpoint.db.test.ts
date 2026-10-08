@@ -86,6 +86,7 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
         'list_courses',
         'list_themes',
         'record_review_score',
+        'reset_course',
         'save_lesson_notes',
         'set_path',
         'set_profile',
@@ -169,6 +170,10 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     const skipReserved = await call(client, 'level_check_skip_course', { courseId: 'ai-foundations' });
     expect(skipReserved.isError).toBe(true);
     expect(text(skipReserved)).toContain('(no_level)');
+
+    const nothingToReset = await call(client, 'reset_course', { courseId: 'ai-foundations' });
+    expect(nothingToReset.isError).toBe(true);
+    expect(text(nothingToReset)).toContain('(nothing_to_reset)');
 
     const badImport = await call(client, 'import_progress', { progress: '{"version": 1, "lessons": {"x": {"status": "maybe"}}}' });
     expect(badImport.isError).toBe(true);

@@ -12,6 +12,7 @@ import {
   nextLesson,
   placementSkip,
   recommendPath,
+  resetCourse,
   setPath,
   skipLesson,
   startLesson,
@@ -622,5 +623,60 @@ describe('a full tutoring session', () => {
     expect(nextLesson(p, courses)).toMatchObject({ kind: 'resume', lesson: { id: 'safety/01-lesson' } });
     p = okProgress(completeLesson(p, courses, 'safety/01-lesson', { score: 0.9, notes: 'Solid.', today: TODAY }));
     expect(nextLesson(p, courses)).toMatchObject({ kind: 'next', lesson: { id: 'prompting/01-lesson' } });
+  });
+});
+
+describe('resetCourse', () => {
+  it('removes every lesson of a finished course, scores and notes included', () => {
+    const p: Progress = {
+      ...progressWith(all('done', 'basics', 'safety')),
+      path: ['basics', 'safety'],
+      lessons: {
+        'basics/01-lesson': { status: 'done', score: 0.4, notes: 'Hard.', completedAt: '2026-09-01' },
+        'basics/02-lesson': { status: 'done', score: 0.9 },
+        'safety/01-lesson': { status: 'done', score: 1 },
+      },
+    };
+    const next = okProgress(resetCourse(frozen(p), courses, 'basics'));
+    expect(Object.keys(next.lessons)).toEqual(['safety/01-lesson']);
+    expect(next.lessons['safety/01-lesson']).toEqual({ status: 'done', score: 1 });
+    expect(next.path).toEqual(['basics', 'safety']);
+  });
+
+  it('resets a partly finished course and clears current when it points into it', () => {
+    const p = progressWith({ 'basics/01-lesson': 'done', 'basics/02-lesson': 'in_progress' }, { current: 'basics/02-lesson' });
+    const next = okProgress(resetCourse(p, courses, 'basics'));
+    expect(next.lessons).toEqual({});
+    expect(next.current).toBeNull();
+    expect(nextLesson(next, courses)).toMatchObject({ kind: 'next', lesson: { id: 'basics/01-lesson' } });
+  });
+
+  it('keeps current when it is in another course, and other courses untouched', () => {
+    const p = progressWith({ ...all('done', 'basics'), 'research/01-lesson': 'in_progress' }, { current: 'research/01-lesson' });
+    const next = okProgress(resetCourse(p, courses, 'basics'));
+    expect(next.current).toBe('research/01-lesson');
+    expect(next.lessons).toEqual({ 'research/01-lesson': { status: 'in_progress' } });
+  });
+
+  it('does not reset the courses that depend on it', () => {
+    const p = progressWith(all('done', 'basics', 'safety', 'prompting'));
+    const next = okProgress(resetCourse(p, courses, 'basics'));
+    expect(Object.keys(next.lessons).sort()).toEqual([...lessonIds('safety'), ...lessonIds('prompting')].sort());
+  });
+
+  it('resets a course skipped after the level check', () => {
+    const p = progressWith({}, {}, { level: 'intermediate' });
+    const skipped = okProgress(placementSkip(p, courses, 'basics', { today: TODAY }));
+    expect(isPlacementSkip(skipped, 'basics/01-lesson')).toBe(true);
+    const next = okProgress(resetCourse(skipped, courses, 'basics'));
+    expect(next.lessons).toEqual({});
+    expect(isCourseFinished(next, courses[0])).toBe(false);
+  });
+
+  it('fails for an unknown course and for a course with nothing to reset', () => {
+    const p = progressWith({ 'basics/01-lesson': 'done' });
+    expect(resetCourse(p, courses, 'nope')).toMatchObject({ ok: false, error: { code: 'unknown_course', courseId: 'nope' } });
+    expect(resetCourse(p, courses, 'safety')).toMatchObject({ ok: false, error: { code: 'nothing_to_reset', courseId: 'safety' } });
+    expect(errorCode(resetCourse(null, courses, 'basics'))).toBe('nothing_to_reset');
   });
 });

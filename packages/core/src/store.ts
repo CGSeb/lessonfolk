@@ -219,6 +219,8 @@ export interface ProgressStore {
   skipLesson(userId: string, lessonId: string, notes: string, options?: WriteOptions): Promise<Progress>;
   /** Skip every unfinished lesson of a course passed in the level check (`placementSkip` rules). */
   placementSkip(userId: string, courseId: string, options?: WriteOptions): Promise<Progress>;
+  /** Reset a course: remove all its lesson entries so it can be taken again (`resetCourse` rules). */
+  resetCourse(userId: string, courseId: string, options?: WriteOptions): Promise<Progress>;
   /** Save notes on a started lesson (`saveNotes` rules). */
   saveNotes(userId: string, lessonId: string, notes: string, options?: WriteOptions): Promise<Progress>;
   /** Record a review score on a done lesson; the score only goes up (`recordReviewScore` rules). */

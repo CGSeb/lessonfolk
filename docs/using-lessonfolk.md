@@ -140,6 +140,7 @@ Talk naturally. These are the phrases the tutor recognises:
 | *"what can I learn about <theme>?"* | The courses of one theme, and where to start. |
 | *"quiz me"*, *"review"* | A few questions on lessons you found harder. |
 | *"skip this"*, *"I already know this"* | One or two questions; if you answer well, the lesson is skipped. |
+| *"reset <course>"*, *"do <course> again"* | Shows what will be reset, asks you to confirm, then removes the progress and scores of that course so you can take it again from its first lesson. Other courses are not changed. |
 | *"recommend a path"*, *"recommend a path again"* | A new personal path. |
 | *"change my level"* | Asks your experience again, then offers a new path. |
 | *"update my interests"* | Asks which themes interest you, then offers a new path. |

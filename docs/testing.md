@@ -327,5 +327,9 @@ account in `oauth` mode) and open each client **outside** the LessonFolk folder,
       in clients without prompts, skip this): the tutor resumes from the saved progress. The
       `review` prompt quizzes a done lesson and calls `record_review_score`; `progress` summarises
       per course and names the lessons skipped after the level check.
+- [ ] **Reset.** Say *reset AI Foundations* (after finishing or skipping some of it): the tutor shows
+      the lessons and scores that will be removed and asks first. After your yes it calls
+      `reset_course`; the dashboard shows the course as not started, other courses are unchanged,
+      and *continue* starts its first lesson.
 - [ ] **Mid-lesson stop.** Say you have to go during a lesson: the tutor calls `save_lesson_notes`;
       a new chat resumes there.
