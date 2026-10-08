@@ -154,6 +154,10 @@ export const en = {
     privacy: 'Your progress is saved only on this computer.',
     privacyAccount: 'Your progress is saved on this LessonFolk server, with your account.',
     privacyLink: 'Privacy notice',
+    exploreHeading: 'Explore',
+    projectHeading: 'Project',
+    github: 'GitHub',
+    copyright: '© {year} LessonFolk',
     license: 'Code under the MIT license, courses under CC BY 4.0.',
   },
   home: {

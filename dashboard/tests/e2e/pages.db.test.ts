@@ -380,7 +380,8 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(page.html).toMatch(/<img class="author-avatar author-avatar--lg[^"]*" src="\/api\/authors\/lessonfolk\/avatar"/);
     expect(page.html).toContain('href="/courses/ai-foundations"');
     // No link is set in authors.yaml, so none is rendered.
-    expect(page.html).not.toContain('target="_blank"');
+    // (The footer's GitHub link opens in a new tab, so look at the page content only.)
+    expect(page.html.split('<footer')[0]).not.toContain('target="_blank"');
     expectText(page.text, { include: fixture.catalog.include, exclude: [] });
   });
 

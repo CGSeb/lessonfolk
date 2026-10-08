@@ -111,13 +111,39 @@ const signInLink = signInHref(Astro.url);
     </main>
 
     <footer class="site-footer">
-      <div class="container stack" style="--stack-space: var(--space-2)">
-        <p>{t('footer.about')}</p>
-        <p>
-          {t(authMode === 'oauth' ? 'footer.privacyAccount' : 'footer.privacy')}
-          <a href="/privacy">{t('footer.privacyLink')}</a>
-        </p>
+      <div class="container site-footer__grid">
+        <div class="site-footer__brand stack" style="--stack-space: var(--space-2)">
+          <a class="wordmark" href="/" aria-label={t('a11y.homeLink')}>
+            <span class="wordmark__text">{t('site.name')}</span>
+          </a>
+          <p>{t('footer.about')}</p>
+        </div>
+        <nav aria-label={t('footer.exploreHeading')}>
+          <h2 class="site-footer__heading">{t('footer.exploreHeading')}</h2>
+          <ul class="site-footer__links" role="list">
+            {
+              navItems.map((item) => (
+                <li>
+                  <a href={item.href}>{item.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <nav aria-label={t('footer.projectHeading')}>
+          <h2 class="site-footer__heading">{t('footer.projectHeading')}</h2>
+          <ul class="site-footer__links" role="list">
+            <li>
+              <a href="https://github.com/CGSeb/lessonfolk" target="_blank" rel="noopener noreferrer">{t('footer.github')}</a>
+            </li>
+            <li><a href="/privacy">{t('footer.privacyLink')}</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="container site-footer__bottom">
+        <p>{t('footer.copyright', { year: String(new Date().getFullYear()) })}</p>
         <p>{t('footer.license')}</p>
+        <p>{t(authMode === 'oauth' ? 'footer.privacyAccount' : 'footer.privacy')}</p>
       </div>
     </footer>
     <LiveRefresh />
@@ -285,5 +311,55 @@ const signInLink = signInHref(Astro.url);
     background: var(--color-surface);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-6);
+  }
+
+  .site-footer__brand {
+    max-width: 28rem;
+  }
+
+  @media (min-width: 48rem) {
+    .site-footer__grid {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+  }
+
+  .site-footer__heading {
+    margin-bottom: var(--space-2);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+  }
+
+  .site-footer__links {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__links a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .site-footer__links a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .site-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
   }
 </style>
