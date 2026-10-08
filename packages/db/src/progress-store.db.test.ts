@@ -158,6 +158,23 @@ describe('writes', () => {
     expect(log.at(-1)).toMatchObject({ action: 'course.placement_skipped', payload: { courseId: 'ai-foundations', lessonIds: [L2, L3] } });
   });
 
+  it('reset a course, removing its lessons and logging what was there', async () => {
+    await store.startLesson(userId, L1, at);
+    await store.completeLesson(userId, L1, { score: 0.6, notes: 'Hard.' }, at);
+    await store.startLesson(userId, L2, at);
+    const progress = await store.resetCourse(userId, 'ai-foundations', at);
+    expect(progress.lessons).toEqual({});
+    expect(progress.current).toBeNull();
+    const log = await events(userId);
+    expect(log.at(-1)).toMatchObject({
+      action: 'course.reset',
+      payload: { courseId: 'ai-foundations', lessonIds: [L1, L2], previous: { [L1]: { status: 'done', score: 0.6 } } },
+    });
+    await expectRejected(userId, () => store.resetCourse(userId, 'ai-foundations', at), 'nothing_to_reset');
+    await expectRejected(userId, () => store.resetCourse(userId, 'nope', at), 'unknown_course');
+    await store.startLesson(userId, L1, at);
+  });
+
   it('only raise the score in a review, logging every review', async () => {
     await store.startLesson(userId, L1, at);
     await store.completeLesson(userId, L1, { score: 0.6, notes: 'Hard.' }, at);

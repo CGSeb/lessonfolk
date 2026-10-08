@@ -192,6 +192,15 @@ Events, signed-in users only) streams `progress` events of the signed-in user al
 `<main>`. MCP runs in the same server, so its writes arrive without extra setup. With several
 instances, publish through Postgres `LISTEN/NOTIFY` instead (same hub interface).
 
+## Adding a tutor action
+
+A learner action such as resetting a course touches four places: a pure rule in
+[`packages/core/src/tutor.ts`](packages/core/src/tutor.ts) (with unit tests), the `ProgressStore`
+method (`store.ts`, implemented in `packages/db/src/progress-store.ts`, which logs a
+`progress_event`), the MCP tool in `packages/mcp/src/server.ts`, and the procedure in
+`packages/mcp/prompts/learn.md` (plus its phrase in `instructions.md` and the `learn` skill).
+`reset_course` is a small example. Add the manual check to `docs/testing.md`.
+
 ## Contributing a course
 
 A lesson is a Markdown file with key ideas, teaching notes for the tutor, questions to check

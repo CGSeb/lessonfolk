@@ -24,6 +24,7 @@ import {
   parseImportedProgress,
   placementSkip,
   recordReviewScore,
+  resetCourse,
   saveNotes,
   setPath,
   skipLesson,
@@ -259,6 +260,16 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
         const course = courses.find((c) => c.id === courseId)!;
         const lessonIds = course.lessons.map((l) => l.id).filter((id) => !isFinished(progress, id));
         return { progress: next, action: 'course.placement_skipped', payload: { courseId, lessonIds } };
+      });
+    },
+
+    resetCourse(userId, courseId, opts) {
+      return write(userId, opts, (progress, courses) => {
+        const next = unwrap(resetCourse(progress, courses, courseId), userId);
+        const course = courses.find((c) => c.id === courseId)!;
+        const lessonIds = course.lessons.map((l) => l.id).filter((id) => progress.lessons[id] !== undefined);
+        const previous = Object.fromEntries(lessonIds.map((id) => [id, progress.lessons[id]]));
+        return { progress: next, action: 'course.reset', payload: { courseId, lessonIds, previous } };
       });
     },
 

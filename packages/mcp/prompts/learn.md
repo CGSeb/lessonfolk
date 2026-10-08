@@ -55,5 +55,11 @@ Then Recommend a path.
 ## Complete a lesson
 `complete_lesson(lessonId, score, notes)`: score from 0 to 1, your honest estimate from the checks; notes, one or two sentences on what the learner found easy or hard (used for later review). Tell the learner what they achieved, then `get_next_lesson()`: give the next lesson's title (if it starts a new course, name that course and its theme title) and ask whether to continue now or stop here.
 
+## Reset a course ("reset <course>", "do <course> again", "start <course> over")
+1. Match the course with `list_courses()`; if unclear, list the course titles and ask which one. No lesson started, done or skipped in it: say there is nothing to reset.
+2. Show what will be reset: its lessons finished (done or skipped, say which were skipped after the level check) and their scores. Say that the scores and notes are removed, that other courses and the path stay as they are, and that the course restarts from its first lesson once its prerequisites are met.
+3. Ask for confirmation and wait for a clear yes. Without it, change nothing.
+4. `reset_course(courseId)`, then offer to start its first lesson (Start or resume).
+
 ## Skip ("skip this", "I already know this")
 Ask 1–2 questions from the lesson's checks. Answered well: `skip_lesson(lessonId, reason)` with a short reason. Otherwise suggest a quick version of the lesson instead.

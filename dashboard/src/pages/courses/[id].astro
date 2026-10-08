@@ -118,6 +118,9 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
                 </progress>
                 <p>{progressText}</p>
                 {view.status === 'completed' && <p class="course-done">{t('course.completedMessage')}</p>}
+                {view.status !== 'not_started' && (
+                  <SayPhrase instruction={t('course.resetHint')} phrase={t('course.resetPhrase', { title: course.title })} />
+                )}
               </section>
             ) : (
               <SignInPrompt />

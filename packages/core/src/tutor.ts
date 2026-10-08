@@ -53,7 +53,9 @@ export type TutorErrorCode =
   /** A level check may only skip courses below the learner's level. */
   | 'not_below_level'
   /** The path breaks the path rules (listed in `issues`). */
-  | 'invalid_path';
+  | 'invalid_path'
+  /** None of the course's lessons has an entry in the progress: nothing to reset. */
+  | 'nothing_to_reset';
 
 export interface TutorError {
   code: TutorErrorCode;
@@ -475,4 +477,26 @@ export function placementSkip<C extends TutorCourseRef>(
   }
   const inCourse = course.lessons.some((l) => l.id === base.current);
   return { ok: true, progress: { ...base, current: inCourse ? null : base.current, lessons } };
+}
+
+/**
+ * Reset a course so the learner can take it again from its first lesson: every lesson of
+ * the course goes back to not started (its entry is removed, scores and notes included, so
+ * a reset is not a review: the online `progress_event` log keeps the history). `current` is
+ * cleared if it pointed into the course. Other courses, the profile and the path are left
+ * untouched, so the course stays where it was in the learner's path. Works for lessons done,
+ * skipped, skipped after the level check or in progress. Fails if the course is unknown, or
+ * none of its lessons has an entry (nothing to reset).
+ */
+export function resetCourse<C extends CourseRef>(progress: MaybeProgress, courses: readonly C[], courseId: string): TutorResult {
+  const base = progress ?? emptyProgress();
+  const course = courses.find((c) => c.id === courseId);
+  if (!course) return fail({ code: 'unknown_course', message: `Unknown course "${courseId}".`, courseId });
+  const ids = new Set(course.lessons.map((l) => l.id));
+  if (!course.lessons.some((l) => base.lessons[l.id] !== undefined)) {
+    return fail({ code: 'nothing_to_reset', message: `Course "${courseId}" has no progress to reset.`, courseId });
+  }
+  const lessons = Object.fromEntries(Object.entries(base.lessons).filter(([id]) => !ids.has(id)));
+  const current = base.current !== null && ids.has(base.current) ? null : base.current;
+  return { ok: true, progress: { ...base, current, lessons } };
 }
