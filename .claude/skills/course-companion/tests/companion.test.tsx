@@ -1,93 +1,44 @@
 import { describe, expect, test } from 'claude-code/testing'
 
 import {
+  type Caller,
   changes,
-  dashboardUrl,
+  instanceUrl,
   keyIdeas,
   load,
   markIdea,
   parseChoices,
   replyOf,
   togglePick,
-  yamlList,
 } from '../hooks/companion'
+import { answer, progress, type Saved } from './server'
 
-const lessonFile = (id: string, title: string, prerequisites: string[], ideas: string[]) =>
-  [
-    '---',
-    `id: ${id}`,
-    `title: ${title}`,
-    prerequisites.length ? `prerequisites:\n${prerequisites.map(p => `  - ${p}`).join('\n')}` : 'prerequisites: []',
-    '---',
-    '',
-    '## Key ideas',
-    ...ideas.map((idea, i) => `${i + 1}. ${idea}\n   More words on it.`),
-    '',
-    '## Teaching notes',
-    '1. Not a key idea.',
-  ].join('\n')
+const caller = (saved: Saved | undefined, isUp = true): Caller => async (tool, args) =>
+  isUp && saved ? answer(() => saved, tool, args) : undefined
 
-const COURSES: Record<string, string> = {
-  'courses/en/index.yaml': 'courses:\n  - basics\n  - next-steps\n',
-  'courses/en/themes.yaml':
-    'themes:\n  - id: understanding-ai\n    title: Understanding AI\n    description: What AI is.\n' +
-    '  - id: using-ai\n    title: Using AI tools\n    description: Practical skills.\n',
-  'courses/en/basics/course.yaml':
-    'id: basics\ntitle: Basics\nlevel: beginner\ntheme: understanding-ai\nprerequisites: []\n' +
-    'lessons:\n  - basics/01-one\n  - basics/02-two\n',
-  'courses/en/next-steps/course.yaml':
-    'id: next-steps\ntitle: Next Steps\nlevel: beginner\ntheme: using-ai\nprerequisites: [basics]\n' +
-    'lessons:\n  - next-steps/01-three\n',
-  'courses/en/basics/01-one.md': lessonFile('basics/01-one', 'Lesson one', [], [
-    '**What AI is.** A first idea.',
-    '**Narrow vs general**: a second idea.',
-  ]),
-  'courses/en/basics/02-two.md': lessonFile('basics/02-two', 'Lesson two', ['basics/01-one'], [
-    'Plain idea without bold',
-  ]),
-  'courses/en/next-steps/01-three.md': lessonFile('next-steps/01-three', 'Lesson three', [
-    'basics/02-two',
-  ], ['**Prompts**. Words.']),
-}
-
-const progress = (current: string | null, lessons: Record<string, string>, path?: string[]) =>
-  JSON.stringify({
-    version: 1,
-    profile: { name: 'Alex', language: 'en', level: 'beginner' },
-    ...(path ? { path } : {}),
-    current,
-    lessons: Object.fromEntries(Object.entries(lessons).map(([id, status]) => [id, { status }])),
-  })
-
-const reader = (files: Record<string, string>) => async (path: string) => files[path]
+const lessonText = (id: string) => answer(() => progress(null, {}), 'get_lesson', { lessonId: id }) ?? ''
 
 describe('parsing', () => {
-  test('lists read inline and block forms', () => {
-    expect(yamlList('prerequisites: []\n', 'prerequisites')).toEqual([])
-    expect(yamlList('prerequisites: [a, "b"]\n', 'prerequisites')).toEqual(['a', 'b'])
-    expect(yamlList('lessons:\n  - x/1 # first\n\n  - x/2\nother: 1\n', 'lessons')).toEqual(['x/1', 'x/2'])
-  })
-
   test('key ideas keep their bold lead or their text, and stop at the next section', () => {
-    expect(keyIdeas(COURSES['courses/en/basics/01-one.md'] ?? '')).toEqual(['What AI is', 'Narrow vs general'])
-    expect(keyIdeas(COURSES['courses/en/basics/02-two.md'] ?? '')).toEqual(['Plain idea without bold'])
+    expect(keyIdeas(lessonText('basics/01-one'))).toEqual(['What AI is', 'Narrow vs general'])
+    expect(keyIdeas(lessonText('basics/02-two'))).toEqual(['Plain idea without bold'])
   })
 })
 
 describe('load', () => {
-  test('without progress.json the pane invites to start', async () => {
-    const { view } = await load(reader(COURSES))
+  test('a new learner is invited to start', async () => {
+    const { view } = await load(caller({ lessons: {}, current: null }))
     expect(view.state).toBe('no-progress')
   })
 
-  test('a broken progress.json is reported', async () => {
-    const { view } = await load(reader({ ...COURSES, '.progress/progress.json': '{ nope' }))
-    expect(view.state).toBe('invalid')
+  test('a server that cannot be reached is reported', async () => {
+    const { view } = await load(caller(progress(null, {}), false))
+    expect(view.state).toBe('offline')
   })
 
   test('the current lesson shows its course, key ideas and the next lesson', async () => {
-    const files = { ...COURSES, '.progress/progress.json': progress('basics/01-one', { 'basics/01-one': 'in_progress' }) }
-    const { view } = await load(reader(files))
+    const saved = progress('basics/01-one', { 'basics/01-one': 'in_progress' })
+    const { view } = await load(caller(saved))
 
     expect(view.state).toBe('lesson')
     expect(view.courseTitle).toBe('Basics')
@@ -102,11 +53,8 @@ describe('load', () => {
   })
 
   test('between lessons the focus is the next lesson, named with its course when it changes', async () => {
-    const files = {
-      ...COURSES,
-      '.progress/progress.json': progress(null, { 'basics/01-one': 'done', 'basics/02-two': 'skipped' }),
-    }
-    const { view } = await load(reader(files))
+    const saved = progress(null, { 'basics/01-one': 'done', 'basics/02-two': 'skipped' })
+    const { view } = await load(caller(saved))
 
     expect(view.state).toBe('between')
     expect(view.courseTitle).toBe('Next Steps')
@@ -114,54 +62,47 @@ describe('load', () => {
   })
 
   test('the next lesson outside the current course carries the course title', async () => {
-    const files = {
-      ...COURSES,
-      '.progress/progress.json': progress('basics/02-two', { 'basics/01-one': 'done', 'basics/02-two': 'in_progress' }),
-    }
-    const { view } = await load(reader(files))
+    const saved = progress('basics/02-two', { 'basics/01-one': 'done', 'basics/02-two': 'in_progress' })
+    const { view } = await load(caller(saved))
 
     expect(view.lessons?.map(l => l.status)).toEqual(['done', 'current'])
     expect(view.next).toEqual({ id: 'next-steps/01-three', title: 'Lesson three', courseTitle: 'Next Steps' })
   })
 
   test('the learner path comes first', async () => {
-    const files = {
-      ...COURSES,
-      '.progress/progress.json': progress(null, {}, ['next-steps']),
-    }
+    const saved = progress(null, {}, ['next-steps'])
     // next-steps/01-three needs basics/02-two, so the first available lesson is still basics/01-one.
-    const { view } = await load(reader(files))
+    const { view } = await load(caller(saved))
     expect(view.next?.id).toBe('basics/01-one')
   })
 
+  test('lessons skipped after the level check count as finished', async () => {
+    const { view } = await load(caller(progress(null, {
+      'basics/01-one': 'skipped_after_level_check',
+      'basics/02-two': 'skipped_after_level_check',
+    })))
+    expect(view.courseTitle).toBe('Next Steps')
+  })
+
   test('everything finished', async () => {
-    const files = {
-      ...COURSES,
-      '.progress/progress.json': progress(null, {
+    const saved = progress(null, {
         'basics/01-one': 'done',
         'basics/02-two': 'done',
         'next-steps/01-three': 'skipped',
-      }),
-    }
-    const { view } = await load(reader(files))
+      })
+    const { view } = await load(caller(saved))
     expect(view.state).toBe('all-done')
   })
 })
 
 describe('changes', () => {
   test('a finished lesson and a new course each make a toast', async () => {
-    const before = await load(reader({
-      ...COURSES,
-      '.progress/progress.json': progress('basics/02-two', { 'basics/01-one': 'done', 'basics/02-two': 'in_progress' }),
-    }))
-    const after = await load(reader({
-      ...COURSES,
-      '.progress/progress.json': progress('next-steps/01-three', {
+    const before = await load(caller(progress('basics/02-two', { 'basics/01-one': 'done', 'basics/02-two': 'in_progress' })))
+    const after = await load(caller(progress('next-steps/01-three', {
         'basics/01-one': 'done',
         'basics/02-two': 'done',
         'next-steps/01-three': 'in_progress',
-      }),
-    }))
+      })))
 
     expect(changes(before, after)).toEqual([
       'Lesson complete: Lesson two',
@@ -170,10 +111,7 @@ describe('changes', () => {
   })
 
   test('the first read and an unchanged save say nothing', async () => {
-    const loaded = await load(reader({
-      ...COURSES,
-      '.progress/progress.json': progress('basics/01-one', { 'basics/01-one': 'in_progress' }),
-    }))
+    const loaded = await load(caller(progress('basics/01-one', { 'basics/01-one': 'in_progress' })))
 
     expect(changes(undefined, loaded)).toEqual([])
     expect(changes(loaded, loaded)).toEqual([])
@@ -192,11 +130,14 @@ describe('markIdea', () => {
   })
 })
 
-describe('dashboardUrl', () => {
-  test('reads the port the server prints, colours and all, as a localhost link', () => {
-    expect(dashboardUrl('  \u001b[32m┃\u001b[39m Local    \u001b[36mhttp://127.0.0.1:4321/\u001b[39m\n')).toBe('http://localhost:4321/')
-    expect(dashboardUrl('Local http://localhost:4322/')).toBe('http://localhost:4322/')
-    expect(dashboardUrl('astro  v7 ready in 812 ms')).toBeUndefined()
+describe('instanceUrl', () => {
+  test('the dashboard is the origin of the lessonfolk url in .mcp.json, local by default', () => {
+    const config = (url: string) => JSON.stringify({ mcpServers: { lessonfolk: { type: 'http', url } } })
+    expect(instanceUrl(config('http://localhost:4321/mcp'))).toBe('http://localhost:4321/')
+    expect(instanceUrl(config('https://learn.example.org/mcp'))).toBe('https://learn.example.org/')
+    expect(instanceUrl(config('not a url'))).toBe('http://localhost:4321/')
+    expect(instanceUrl('{ nope')).toBe('http://localhost:4321/')
+    expect(instanceUrl(undefined)).toBe('http://localhost:4321/')
   })
 })
 

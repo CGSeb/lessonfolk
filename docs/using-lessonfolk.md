@@ -163,13 +163,16 @@ follow along. It starts on its own once you begin learning:
 - **Buttons above the prompt** send the usual commands: **Continue**, **Quiz me**, **Skip** and
   **My progress**. When the tutor asks a question with fixed answers (during onboarding, for
   example), the buttons show those answers instead.
-- **Companion** reopens the pane (so does `/course-companion`). **Dashboard** starts the
-  [dashboard](#the-dashboard) for you and then opens it; it needs `npm install` first.
+- **Companion** reopens the pane (so does `/course-companion`). **Dashboard** opens the
+  [dashboard](#the-dashboard) of your LessonFolk instance: the address of the `lessonfolk` server
+  in the project's `.mcp.json`, or `http://localhost:4321/` when it names none.
 
-The companion still follows the old `.progress/progress.json` file, so its lesson list does not
-update yet while the tutor saves through MCP. If your Claude Code does not show the pane, nothing
-is lost: everything works in the chat. The mod lives in `.claude/skills/course-companion/`.
-Codex has no companion.
+The companion reads your progress and the courses from the LessonFolk MCP server, the same one
+the tutor uses, so it works the same with a local or a hosted instance and refreshes each time the
+tutor calls the server. It needs that server connected (`/mcp` lists it); otherwise the pane says
+your progress could not be read. If your Claude Code does not show the pane, nothing is lost:
+everything works in the chat. The mod lives in `.claude/skills/course-companion/`. Codex has no
+companion.
 
 ## The dashboard
 

@@ -179,7 +179,12 @@ commit, and fix every failure. Never skip, delete or loosen a test to make it pa
 code, or fix the test only if the test itself is wrong, and say why in the pull request.
 
 The Course companion mod has its own tests in `.claude/skills/course-companion/tests/`; they
-are not part of `npm test`.
+are not part of `npm test`: run them with `claude plugin test .claude/skills/course-companion`
+(and `claude plugin validate` on the same folder). The mod reads the progress through the
+LessonFolk MCP server with `$.mcp.call` (`get_progress`, `list_courses`, `get_lesson`), so it
+needs no file or token of its own and works with a local or a hosted instance; the tests stand in
+for the server with `tests/server.ts`. When you add or rename an MCP read tool it uses, update
+that stand-in too.
 
 ### Live refresh
 
