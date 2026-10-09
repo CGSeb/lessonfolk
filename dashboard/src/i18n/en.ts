@@ -10,9 +10,14 @@
 export const en = {
   site: {
     name: 'LessonFolk',
-    title: 'LessonFolk',
+    title: 'LessonFolk: learn AI with an AI tutor',
     description: 'Learn AI from zero to advanced, with an AI tutor in your chat. See your courses and progress.',
     titleTemplate: '{page} · LessonFolk',
+    // Meta descriptions of the public pages without a description of their own.
+    coursesDescription: 'Free AI courses from beginner to advanced, each taught by an AI tutor in your chat. Browse them in the recommended learning order.',
+    authorsDescription: 'The people who write the LessonFolk AI courses.',
+    connectDescription: 'Connect Claude, ChatGPT or another AI chat app to LessonFolk, so your AI tutor can teach the courses and save your progress.',
+    privacyDescription: 'What LessonFolk stores about you, where, and how to download or delete it.',
   },
   a11y: {
     skipToContent: 'Skip to main content',

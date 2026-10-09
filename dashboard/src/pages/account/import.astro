@@ -59,7 +59,7 @@ if (preview && !preview.ok) Astro.response.status = 422;
 else if (problem) Astro.response.status = 400;
 ---
 
-<BaseLayout title={t('account.previewTitle')}>
+<BaseLayout title={t('account.previewTitle')} noindex>
   <div class="stack import-page" style="--stack-space: var(--space-5)">
     {
       preview?.ok ? (

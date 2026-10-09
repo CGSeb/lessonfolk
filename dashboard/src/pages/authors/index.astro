@@ -18,7 +18,7 @@ const authorsFile = authorsFilePath();
 const fileIssues = issues.filter((issue) => issue.file === authorsFile);
 ---
 
-<BaseLayout title={t('author.listTitle')}>
+<BaseLayout title={t('author.listTitle')} description={t('site.authorsDescription')}>
   <div class="stack" style="--stack-space: var(--space-5)">
     <header class="stack" style="--stack-space: var(--space-2)">
       <h1>{t('author.listHeading')}</h1>

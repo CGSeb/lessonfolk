@@ -78,7 +78,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
 const hiddenIssues = issues.length - shownIssues.length;
 ---
 
-<BaseLayout title={t('courses.title')}>
+<BaseLayout title={t('courses.title')} description={t('site.coursesDescription')}>
   <div class="stack" style="--stack-space: var(--space-5)">
     <header class="stack" style="--stack-space: var(--space-2)">
       <h1>{t('courses.heading')}</h1>
