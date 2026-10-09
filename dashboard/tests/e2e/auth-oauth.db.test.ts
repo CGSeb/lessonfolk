@@ -149,12 +149,19 @@ describe('signing in and out', () => {
   let robin: Browser;
   let robinId: string;
 
-  it('sends signed-out visitors of the home page (their progress) to sign in', async () => {
+  it('shows a landing page to signed-out visitors of the home page', async () => {
     robin = browser();
     expect(await robin.me()).toEqual({ authMode: 'oauth', user: null });
     const home = await robin.request('/');
-    expect(home.status).toBe(303);
-    expect(location(home)).toBe('/sign-in?next=%2F');
+    expect(home.status).toBe(200);
+    const html = await home.text();
+    const text = visibleText(html);
+    expect(text).toContain('Learn AI by talking with an AI tutor');
+    expect(text).toContain('How it works');
+    expect(html).toContain('href="/sign-in?next=%2F"');
+    expect(html).toContain('href="/courses"');
+    // Nothing about progress: nobody is known.
+    for (const progress of ['Welcome back', 'Next up', 'Sign out']) expect(text).not.toContain(progress);
   });
 
   it('keeps the catalog, course and author pages open when signed out, without progress', async () => {

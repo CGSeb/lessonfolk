@@ -6,12 +6,14 @@
 interface Props {
   title: string;
   tone?: 'warning' | 'info';
+  /** Thicker accent border on the left (default). Turn off for a plain, evenly bordered box. */
+  accentBorder?: boolean;
 }
 
-const { title, tone = 'info' } = Astro.props;
+const { title, tone = 'info', accentBorder = true } = Astro.props;
 ---
 
-<aside class:list={['notice', `notice--${tone}`]} aria-label={title}>
+<aside class:list={['notice', `notice--${tone}`, { 'notice--plain': !accentBorder }]} aria-label={title}>
   <p class="notice__title">{title}</p>
   <div class="notice__body stack" style="--stack-space: var(--space-2)">
     <slot />
@@ -24,6 +26,10 @@ const { title, tone = 'info' } = Astro.props;
     border: 1px solid;
     border-left-width: var(--border-accent);
     border-radius: var(--radius-md);
+  }
+
+  .notice--plain {
+    border-left-width: 1px;
   }
 
   .notice--warning {
