@@ -73,59 +73,70 @@ const oauth = authMode === 'oauth';
           )}
           {offerImport && <LocalImportOffer />}
 
-          <section class="card stack" aria-labelledby="export-all-heading">
-            <h2 id="export-all-heading">{t('account.exportAllTitle')}</h2>
-            <p>{t('account.exportAllBody')}</p>
-            <p>
-              <a class="button button--primary" href="/api/account/export-all">
-                {t('account.exportAllButton')}
-              </a>
-            </p>
-            <p class="muted">
+          <section class="stack account-group" aria-labelledby="group-progress-heading" style="--stack-space: var(--space-3)">
+            <div class="stack" style="--stack-space: var(--space-1)">
+              <h2 id="group-progress-heading">{t('account.groupProgressTitle')}</h2>
+              <p class="muted">{t('account.groupProgressIntro')}</p>
+            </div>
+
+            <div class="card stack">
+              <section class="stack" aria-labelledby="export-heading">
+                <h3 id="export-heading">{t('account.exportTitle')}</h3>
+                <p class="account-small">{t('account.exportBody')}</p>
+                <p>
+                  <a class="button button--primary" href="/api/account/export" download="progress.json">
+                    {t('account.exportButton')}
+                  </a>
+                </p>
+              </section>
+
+              <hr class="account-rule" />
+
+              <section class="stack" aria-labelledby="import-heading">
+                <h3 id="import-heading">{t('account.importTitle')}</h3>
+                <p class="account-small">{t('account.importBody')}</p>
+                <form class="stack" method="post" action="/account/import" enctype="multipart/form-data" style="--stack-space: var(--space-3)">
+                  <label class="stack" style="--stack-space: var(--space-2)">
+                    <span class="account-label account-small">{t('account.importFileLabel')}</span>
+                    <input class="account-file" type="file" name="file" accept=".json,application/json" required />
+                  </label>
+                  <p>
+                    <button class="button" type="submit">
+                      {t('account.importButton')}
+                    </button>
+                  </p>
+                </form>
+              </section>
+            </div>
+
+            <p class="muted account-small">
+              <a href="/api/account/export-all">{t('account.exportAllButton')}</a>
+              · {t('account.exportAllHint')}
               <a href="/privacy">{t('account.privacyNote')}</a>
             </p>
           </section>
 
-          <section class="card stack" aria-labelledby="export-heading">
-            <h2 id="export-heading">{t('account.exportTitle')}</h2>
-            <p>{t('account.exportBody')}</p>
-            <p>
-              <a class="button button--primary" href="/api/account/export" download="progress.json">
-                {t('account.exportButton')}
-              </a>
-            </p>
-          </section>
+          <section class="stack account-group account-danger" aria-labelledby="group-delete-heading" style="--stack-space: var(--space-3)">
+            <div class="stack" style="--stack-space: var(--space-1)">
+              <h2 id="group-delete-heading">{t('account.groupDeleteTitle')}</h2>
+              <p class="muted">{t('account.groupDeleteIntro')}</p>
+            </div>
 
-          <section class="card stack" aria-labelledby="import-heading">
-            <h2 id="import-heading">{t('account.importTitle')}</h2>
-            <p>{t('account.importBody')}</p>
-            <form class="stack" method="post" action="/account/import" enctype="multipart/form-data" style="--stack-space: var(--space-3)">
-              <label class="stack" style="--stack-space: var(--space-2)">
-                <span class="account-label">{t('account.importFileLabel')}</span>
-                <input type="file" name="file" accept=".json,application/json" required />
-              </label>
-              <p>
-                <button class="button" type="submit">
-                  {t('account.importButton')}
-                </button>
-              </p>
-            </form>
-          </section>
-
-          <section class="card stack" aria-labelledby="delete-heading">
-            <h2 id="delete-heading">{t(oauth ? 'account.deleteTitleOauth' : 'account.deleteTitleNone')}</h2>
-            <p>{t(oauth ? 'account.deleteBodyOauth' : 'account.deleteBodyNone')}</p>
-            <form class="stack" method="post" action="/api/account/delete" style="--stack-space: var(--space-3)">
-              <label class="stack" style="--stack-space: var(--space-2)">
-                <span class="account-label">{t('account.deleteConfirmLabel')}</span>
-                <input class="account-input" type="text" name="confirm" autocomplete="off" required pattern="[Dd][Ee][Ll][Ee][Tt][Ee]" />
-              </label>
-              <p>
-                <button class="button button--warning" type="submit">
-                  {t(oauth ? 'account.deleteButtonOauth' : 'account.deleteButtonNone')}
-                </button>
-              </p>
-            </form>
+            <section class="card card--danger stack" aria-labelledby="delete-heading">
+              <h3 id="delete-heading">{t(oauth ? 'account.deleteTitleOauth' : 'account.deleteTitleNone')}</h3>
+              <p>{t(oauth ? 'account.deleteBodyOauth' : 'account.deleteBodyNone')}</p>
+              <form class="stack" method="post" action="/api/account/delete" style="--stack-space: var(--space-3)">
+                <label class="stack" style="--stack-space: var(--space-2)">
+                  <span class="account-label">{t('account.deleteConfirmLabel')}</span>
+                  <input class="account-input" type="text" name="confirm" autocomplete="off" required pattern="[Dd][Ee][Ll][Ee][Tt][Ee]" />
+                </label>
+                <p>
+                  <button class="button button--warning" type="submit">
+                    {t(oauth ? 'account.deleteButtonOauth' : 'account.deleteButtonNone')}
+                  </button>
+                </p>
+              </form>
+            </section>
           </section>
         </>
       )
@@ -141,6 +152,59 @@ const oauth = authMode === 'oauth';
   .account-lead {
     color: var(--color-text-muted);
     font-size: var(--text-lg);
+  }
+
+  /* Separates the destructive group from the everyday ones: a rule above, and a warning-toned card. */
+  .account-danger {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .account-rule {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .account-file {
+    padding: var(--space-3);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .account-file:hover {
+    border-color: var(--color-accent);
+  }
+
+  .account-file::file-selector-button {
+    margin-right: var(--space-3);
+    padding: var(--space-1) var(--space-4);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+  }
+
+  .account-file::file-selector-button:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .account-small {
+    font-size: var(--text-sm);
+  }
+
+  .card--danger {
+    border-color: var(--color-warning-border);
+    background: var(--color-warning-bg);
   }
 
   .account-label {

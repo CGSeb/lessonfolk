@@ -77,7 +77,7 @@ describe('signed out', () => {
       expect(response.status, path).toBe(303);
       expect(location(response), path).toMatch(/^\/sign-in/);
     }
-    // No "Your data" link for nobody's data.
+    // No "Account" link for nobody's data.
     expect(await (await browser.request('/connect')).text()).not.toContain('href="/account"');
   });
 });
@@ -96,6 +96,12 @@ describe('signed in', () => {
     const page = await text(await robin.browser.request('/account'));
     expect(page).toContain('Signed in as Robin Tester (robin@example.test)');
     expect(page).toContain('Delete your account');
+    // One progress block, a small link for all the data, the destructive group last.
+    const order = ['Your progress', 'Download your progress', 'Import a progress.json', 'Download all my data', 'Delete your account'].map((t) =>
+      page.indexOf(t),
+    );
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(page).not.toContain('We found your progress file');
   });
 
