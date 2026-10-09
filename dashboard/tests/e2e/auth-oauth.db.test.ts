@@ -119,6 +119,11 @@ describe('the sign-in page', () => {
     expect(text).not.toContain('Google');
   });
 
+  it('links to the privacy notice', async () => {
+    const html = await (await new Browser(server.url).request('/sign-in')).text();
+    expect(html).toContain('href="/privacy"');
+  });
+
   it('refuses a provider that is not configured', async () => {
     const response = await new Browser(server.url).post('/sign-in/google');
     expect(response.status).toBe(404);

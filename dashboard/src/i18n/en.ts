@@ -248,6 +248,7 @@ export const en = {
     reauthHeading: 'Sign in again to continue',
     reauthIntro: 'To download all your data or delete your account, sign in again first. It confirms it is you.',
     signInWith: 'Sign in with {provider}',
+    privacyNote: 'What we keep and why: read the privacy notice.',
     providersLabel: 'Sign-in options',
     signInError: 'Signing in did not work. Please try again.',
     signInErrorDetails: 'Error code: {code}',
@@ -340,6 +341,10 @@ export const en = {
       'On the Account page you can download all your data, and delete your account and everything linked to it, at any time. You can also ask the contact below to correct your data or answer a question.',
     sharedTitle: 'Who sees it',
     shared: 'Only you, and the person who runs this LessonFolk. Your data is not sold or shared with advertisers. It is stored by the hosting provider of this server.',
+    selfHostTitle: 'Prefer not to send your data?',
+    selfHost:
+      'LessonFolk is open source. You can run it on your own computer, with no sign-in, and nothing leaves it. The steps are in the project’s documentation on GitHub.',
+    selfHostLink: 'Run LessonFolk yourself',
     contactTitle: 'Contact',
     contact: 'Write to {contact}.',
     contactMissing: 'Ask the person who runs this LessonFolk.',

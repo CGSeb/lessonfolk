@@ -69,4 +69,8 @@ server must set log rotation to at most 30 days and backup expiry to at most 35 
 the periods stated here and in the dashboard's privacy text (`dashboard/src/i18n/en.ts`) to the
 real values. The `/privacy` page must never state a period the host does not apply.
 
+The `/privacy` page is linked from the footer, the sign-in page and the Account page, and points
+learners who would rather not send data to self-hosting ([using-lessonfolk](using-lessonfolk.md)).
+There are no separate terms of service.
+
 The contact shown on `/privacy` is the `LESSONFOLK_PRIVACY_CONTACT` environment variable.
