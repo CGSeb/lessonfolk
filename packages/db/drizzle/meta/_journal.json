@@ -22,6 +22,13 @@
       "when": 1791403909672,
       "tag": "0002_mcp_oauth",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791564512380,
+      "tag": "0003_clear_session_ip",
+      "breakpoints": true
     }
   ]
 }

@@ -29,6 +29,10 @@ export function createAuth(settings: OAuthSettings, db: Database) {
     },
     plugins: [...mcpAuthPlugins(settings.baseURL), ...(settings.fakeOAuthURL ? [fakeOAuthProvider(settings.fakeOAuthURL)] : [])],
     databaseHooks: {
+      session: {
+        // The IP address is not needed: do not keep it (the column stays because Better Auth requires it).
+        create: { before: async (created) => ({ data: { ...created, ipAddress: null } }) },
+      },
       user: {
         create: {
           // Every user gets a learner row, where their progress will go.

@@ -204,6 +204,10 @@ describe('signing in and out', () => {
     const accounts = await testDb.db.select().from(account).where(eq(account.userId, robinId));
     expect(accounts.map((a) => [a.providerId, a.accountId])).toEqual([['fake', 'fake-robin']]);
     expect(await testDb.db.select().from(learner).where(eq(learner.userId, robinId))).toHaveLength(1);
+    // The session keeps the browser but never the IP address.
+    const sessions = await testDb.db.select().from(session).where(eq(session.userId, robinId));
+    expect(sessions.length).toBeGreaterThan(0);
+    expect(sessions.map((s) => s.ipAddress)).toEqual(sessions.map(() => null));
   });
 
   it('shows who is signed in on every page', async () => {

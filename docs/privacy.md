@@ -19,7 +19,7 @@ by an `on delete cascade` key, so deleting the user row deletes it all.
 |---|---|---|---|
 | `user` | name, email, picture | yes | |
 | `account` | sign-in provider and the learner's id there, scope | yes | access, refresh and id tokens, password |
-| `session` | IP address, browser, dates | yes | session token |
+| `session` | browser, dates (the IP address is never stored; the `ip_address` column stays empty because Better Auth requires it) | yes | session token |
 | `verification` | short-lived sign-in values (minutes); deleted with the account when keyed by email or user id | no (not linked to the user) | all |
 | `oauth_client` | AI apps the learner registered: name, address, contacts | yes | client secret |
 | `oauth_consent` | which AI app the learner allowed, with which scopes | yes | |
@@ -60,7 +60,7 @@ of any table still holds the user's id or email after deletion.
 | Where | Kept | Notes |
 |---|---|---|
 | Sessions | 7 days | Better Auth's default expiry. |
-| Server and proxy logs | at most 30 days | Requests include the IP address. Set by whoever hosts the server. |
+| Server and proxy logs | at most 30 days | Requests include the IP address; it is the only place one is kept. Set by whoever hosts the server. |
 | Database backups | at most 35 days | Deleted data leaves the backups when they expire; a backup is never restored without deleting again the accounts deleted since. |
 
 **Hosts must configure the log and backup periods.** Nothing in this repository enforces them: the

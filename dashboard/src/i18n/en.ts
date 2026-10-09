@@ -329,7 +329,7 @@ export const en = {
       'LessonFolk runs on your computer without sign-in. Your progress is saved in the database on this computer and nothing is sent to us.',
     whatTitle: 'What is collected',
     whatItems:
-      'Your name, email address and profile picture from the sign-in provider (GitHub or Google). Your progress: your profile, path, lessons, scores, the tutor’s notes and a history of changes. The AI apps you allowed to use LessonFolk. Your sessions, with IP address and browser.',
+      'Your name, email address and profile picture from the sign-in provider (GitHub or Google). Your progress: your profile, path, lessons, scores, the tutor’s notes and a history of changes. The AI apps you allowed to use LessonFolk. Your sessions, with the browser you used.',
     notCollected: 'Not collected: passwords (there are none), your conversations with your AI app, analytics or advertising cookies.',
     whyTitle: 'Why',
     why: 'To sign you in and to save your progress. Nothing else. Legal basis: providing the service you asked for.',
