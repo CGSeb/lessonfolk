@@ -200,7 +200,7 @@ describe('signing in and out', () => {
     expect(robinId).not.toBe('local');
 
     const [row] = await testDb.db.select().from(user).where(eq(user.id, robinId));
-    expect(row).toMatchObject({ name: 'Robin Tester', email: 'robin@example.test', emailVerified: true });
+    expect(row).toMatchObject({ name: 'Robin Tester', email: 'robin@example.test', emailVerified: true, image: null });
     const accounts = await testDb.db.select().from(account).where(eq(account.userId, robinId));
     expect(accounts.map((a) => [a.providerId, a.accountId])).toEqual([['fake', 'fake-robin']]);
     expect(await testDb.db.select().from(learner).where(eq(learner.userId, robinId))).toHaveLength(1);

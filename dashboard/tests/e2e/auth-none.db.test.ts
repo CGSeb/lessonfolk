@@ -50,7 +50,7 @@ describe('LESSONFOLK_AUTH=none', () => {
       const me = await fetch(`${server.url}/api/me`).then((r) => r.json());
       expect(me).toEqual({
         authMode: 'none',
-        user: { id: 'local', name: 'Local learner', email: 'local@lessonfolk.localhost', image: null },
+        user: { id: 'local', name: 'Local learner', email: 'local@lessonfolk.localhost' },
       });
     });
 

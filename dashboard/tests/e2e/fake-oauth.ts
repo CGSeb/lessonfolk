@@ -96,7 +96,7 @@ export async function startFakeOAuth(): Promise<FakeOAuthServer> {
       const user = token && tokens.get(token);
       if (!user) return json(401, { error: 'invalid_token' });
       // A plain OAuth 2.0 profile (like GitHub's): the account id is `id`.
-      return json(200, { id: user.sub, name: user.name, email: user.email, email_verified: true });
+      return json(200, { id: user.sub, name: user.name, email: user.email, email_verified: true, picture: 'https://example.test/avatar.png' });
     }
 
     json(404, { error: 'not_found' });

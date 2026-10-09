@@ -34,7 +34,10 @@ export function createAuth(settings: OAuthSettings, db: Database) {
         create: { before: async (created) => ({ data: { ...created, ipAddress: null } }) },
       },
       user: {
+        // The profile picture is not needed: do not keep it (the column stays because Better Auth requires it).
+        update: { before: async (changes) => ({ data: { ...changes, image: null } }) },
         create: {
+          before: async (created) => ({ data: { ...created, image: null } }),
           // Every user gets a learner row, where their progress will go.
           after: async (created) => ensureLearner(db, created.id),
         },

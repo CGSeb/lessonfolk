@@ -17,7 +17,7 @@ by an `on delete cascade` key, so deleting the user row deletes it all.
 
 | Table | Personal data | In the full export | Secrets (never exported) |
 |---|---|---|---|
-| `user` | name, email, picture | yes | |
+| `user` | name, email (the profile picture is never stored; the `image` column stays empty because Better Auth requires it) | yes | |
 | `account` | sign-in provider and the learner's id there, scope | yes | access, refresh and id tokens, password |
 | `session` | browser, dates (the IP address is never stored; the `ip_address` column stays empty because Better Auth requires it) | yes | session token |
 | `verification` | short-lived sign-in values (minutes); deleted with the account when keyed by email or user id | no (not linked to the user) | all |
