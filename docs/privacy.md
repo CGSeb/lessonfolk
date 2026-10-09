@@ -63,4 +63,10 @@ of any table still holds the user's id or email after deletion.
 | Server and proxy logs | at most 30 days | Requests include the IP address. Set by whoever hosts the server. |
 | Database backups | at most 35 days | Deleted data leaves the backups when they expire; a backup is never restored without deleting again the accounts deleted since. |
 
+**Hosts must configure the log and backup periods.** Nothing in this repository enforces them: the
+server, proxy and database backups keep data as long as the host's own setup says. Whoever runs a
+server must set log rotation to at most 30 days and backup expiry to at most 35 days, or change
+the periods stated here and in the dashboard's privacy text (`dashboard/src/i18n/en.ts`) to the
+real values. The `/privacy` page must never state a period the host does not apply.
+
 The contact shown on `/privacy` is the `LESSONFOLK_PRIVACY_CONTACT` environment variable.
