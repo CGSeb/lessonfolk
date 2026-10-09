@@ -285,8 +285,8 @@ Course text is published under [CC BY 4.0](courses/LICENSE). Course authors are 
    `npm test` (with Postgres as a service) and `npm run check:courses` on every pull request.
    It must pass before merging.
 7. **Release.** Publishing a GitHub release runs [`release.yml`](.github/workflows/release.yml): the same
-   tests on the release's tag, then it publishes the Docker image to GHCR and deploys it to the hosted server. See
-   [Hosting](docs/hosting.md).
+   tests on the release's tag, then it publishes the Docker image to GHCR and deploys it to the hosted server (the files in
+   [`deploy/`](deploy)).
 
 Never commit `.progress/` or `.env`.
 

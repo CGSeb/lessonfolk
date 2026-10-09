@@ -1,7 +1,7 @@
 #!/bin/sh
 # Nightly database backup: a compressed pg_dump in ./backups, kept 35 days (the retention
 # stated in docs/privacy.md), then copied off the server when BACKUP_REMOTE is set.
-# Install it in cron, see docs/hosting.md.
+# Run it from cron, e.g.: 15 3 * * * /opt/lessonfolk/backup.sh >> /opt/lessonfolk/backups/backup.log 2>&1
 set -eu
 cd "$(dirname "$0")"
 if [ -f .env ]; then

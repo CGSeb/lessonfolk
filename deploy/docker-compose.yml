@@ -1,5 +1,5 @@
 # LessonFolk hosted deployment: Caddy (HTTPS) -> app -> Postgres, on one VPS.
-# Lives in /opt/lessonfolk on the server, next to its .env (see .env.example and docs/hosting.md).
+# Lives in /opt/lessonfolk on the server, next to its .env (see .env.example).
 # release.yml copies this folder to the server and runs ./deploy.sh <image tag> when a release is published.
 name: lessonfolk
 

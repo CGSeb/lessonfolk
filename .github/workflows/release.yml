@@ -1,9 +1,11 @@
 name: Release
 
 # When a GitHub release is published (not a pre-release): run the tests on the release's tag,
-# build the image and publish it to GHCR, then deploy it to the hosted server (docs/hosting.md).
-# Deploying needs the secrets of the `production` environment; without DEPLOY_HOST the image
-# is still published and the deploy is skipped.
+# build the image and publish it to GHCR, then deploy it to the hosted server (the files in deploy/).
+# Deploying needs these in the `production` environment: secrets DEPLOY_HOST, DEPLOY_USER,
+# DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS (the pinned `ssh-keyscan` output), and optionally the
+# variable DEPLOY_URL to check the site after the deploy. Without DEPLOY_HOST the image is still
+# published and the deploy is skipped.
 
 on:
   release:
