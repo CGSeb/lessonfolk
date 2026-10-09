@@ -1,0 +1,189 @@
+---
+/**
+ * Landing page of the home route, for visitors who are not signed in (LESSONFOLK_AUTH=oauth).
+ * Explains what LessonFolk is and invites people to sign in; the courses shown are public.
+ */
+import CourseCard from '../CourseCard.astro';
+import { courseAuthors } from '../authors/authorView';
+import { t } from '../../i18n/en';
+import { getStats, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
+import { signInHref } from '../../lib/auth/redirect';
+
+const FEATURED_COURSES = 3;
+const { catalog } = inspectCatalog('en');
+const allStats = getStats(catalog.courses, progressOrEmpty({ state: 'missing' })).courses;
+// Mix the levels: take the first course of each level in turn (beginner, intermediate, advanced),
+// then the next of each, until there are enough; shown in catalog order.
+const byLevel = ['beginner', 'intermediate', 'advanced'].map((level) => allStats.filter((s) => s.course.level === level));
+const picked = new Set<(typeof allStats)[number]>();
+for (let round = 0; picked.size < FEATURED_COURSES && byLevel.some((list) => round < list.length); round++) {
+  for (const list of byLevel) if (round < list.length && picked.size < FEATURED_COURSES) picked.add(list[round]);
+}
+const stats = allStats.filter((s) => picked.has(s));
+const themesById = new Map(catalog.themes.map((theme) => [theme.id, theme]));
+const signIn = signInHref(Astro.url);
+
+const steps = [
+  { title: t('landing.step1Title'), body: t('landing.step1Body'), icon: 'M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5' },
+  { title: t('landing.step2Title'), body: t('landing.step2Body'), icon: 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z' },
+  { title: t('landing.step3Title'), body: t('landing.step3Body'), icon: 'M5 21V4m0 0h11l-2 4 2 4H5' },
+];
+const reasons = [
+  { title: t('landing.reason1Title'), body: t('landing.reason1Body') },
+  { title: t('landing.reason2Title'), body: t('landing.reason2Body') },
+  { title: t('landing.reason3Title'), body: t('landing.reason3Body') },
+];
+---
+
+<div class="stack landing" style="--stack-space: var(--space-8)">
+  <header class="stack landing-hero" style="--stack-space: var(--space-4)">
+    <p class="overline">{t('landing.overline')}</p>
+    <h1>{t('landing.heading')}</h1>
+    <p class="landing-lead">{t('landing.lead')}</p>
+    <p class="landing-actions">
+      <a class="button button--primary" href={signIn}>{t('landing.ctaStart')}</a>
+      <a class="button" href="/courses">{t('landing.ctaCourses')}</a>
+    </p>
+  </header>
+
+  <section class="stack" aria-labelledby="how-heading" style="--stack-space: var(--space-4)">
+    <h2 id="how-heading">{t('landing.howTitle')}</h2>
+    <ol class="landing-steps" role="list">
+      {
+        steps.map((step) => (
+          <li class="card stack" style="--stack-space: var(--space-2)">
+            <span class="landing-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d={step.icon} /></svg>
+            </span>
+            <h3>{step.title}</h3>
+            <p class="muted">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {
+    stats.length > 0 && (
+      <section class="stack" aria-labelledby="courses-heading" style="--stack-space: var(--space-4)">
+        <div class="stack" style="--stack-space: var(--space-1)">
+          <h2 id="courses-heading">{t('landing.coursesTitle')}</h2>
+          <p class="muted">{t('landing.coursesIntro')}</p>
+        </div>
+        <ul class="grid landing-courses" role="list" style="--grid-min: 18rem">
+          {stats.map((courseStats) => (
+            <li>
+              <CourseCard
+                stats={courseStats}
+                headingLevel={3}
+                theme={themesById.get(courseStats.course.theme)}
+                authors={courseAuthors(courseStats.course, catalog.authors)}
+                showProgress={false}
+              />
+            </li>
+          ))}
+        </ul>
+        <p><a href="/courses">{t('landing.coursesAll', { count: catalog.courses.length })}</a></p>
+      </section>
+    )
+  }
+
+  <section class="stack" aria-labelledby="why-heading" style="--stack-space: var(--space-4)">
+    <h2 id="why-heading">{t('landing.whyTitle')}</h2>
+    <ul class="landing-reasons" role="list">
+      {
+        reasons.map((reason) => (
+          <li class="stack" style="--stack-space: var(--space-1)">
+            <h3>{reason.title}</h3>
+            <p class="muted">{reason.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="card card--spark stack landing-final" aria-labelledby="final-heading" style="--stack-space: var(--space-3)">
+    <h2 id="final-heading">{t('landing.finalTitle')}</h2>
+    <p>{t('landing.finalBody')}</p>
+    <p><a class="button button--primary" href={signIn}>{t('landing.ctaStart')}</a></p>
+  </section>
+</div>
+
+<style>
+  .landing {
+    max-width: 60rem;
+    margin-inline: auto;
+  }
+
+  .landing-hero {
+    padding-block: var(--space-6);
+    text-align: center;
+    align-items: center;
+  }
+
+  .landing-lead {
+    max-width: 38rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+  }
+
+  .landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+
+  .landing-steps,
+  .landing-reasons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-4);
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .landing-courses {
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .landing-courses > li {
+    display: flex;
+    max-width: none;
+  }
+
+  .landing-courses > li > :global(*) {
+    flex: 1;
+  }
+
+  .landing-steps > li {
+    max-width: none;
+  }
+
+  .landing-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+  }
+
+  .landing-icon svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .landing-final {
+    text-align: center;
+    align-items: center;
+  }
+</style>
