@@ -30,7 +30,7 @@ const error = params.get('error');
 const oauth = authMode === 'oauth';
 ---
 
-<BaseLayout title={t('account.title')}>
+<BaseLayout title={t('account.title')} noindex>
   <div class="stack account-page" style="--stack-space: var(--space-6)">
     {
       deleted || !user ? (

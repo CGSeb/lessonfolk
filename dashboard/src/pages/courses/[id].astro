@@ -14,6 +14,8 @@ import { t } from '../../i18n/en';
 import { inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
 import { loadProgressFor } from '../../lib/store';
+import { courseJsonLd } from '../../lib/seo';
+import { siteOrigin } from '../../lib/site-url';
 
 // Read on every request so the page reflects the tutor's latest writes. Public page:
 // signed out (`progressResult` null), the lessons are shown without progress.
@@ -45,7 +47,11 @@ const hoursText = course
 const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.lessonCountOther', { count: total });
 ---
 
-<BaseLayout title={course ? course.title : t('course.notFoundTitle')} description={course?.description}>
+<BaseLayout
+  title={course ? course.title : t('course.notFoundTitle')}
+  description={course?.description}
+  jsonLd={course ? courseJsonLd(siteOrigin(Astro.url), course, authors, t('nav.courses')) : undefined}
+>
   <div class="stack" style="--stack-space: var(--space-5)">
     <nav aria-label={t('course.breadcrumbLabel')}>
       <ol class="breadcrumb" role="list">
