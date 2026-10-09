@@ -59,12 +59,16 @@ described in [Environment variables](../CONTRIBUTING.md#environment-variables).
 - `oauth`: sign in with GitHub and/or Google, for several learners. This needs your own OAuth
   apps; follow [Sign-in for developers](auth-dev.md).
 
-**Update** to the latest courses and app:
+**Update** to the latest courses and app. `docker compose up -d` uses the image published on
+every release (`ghcr.io/cgseb/lessonfolk`), so no build is needed:
 
 ```bash
 git pull
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
+
+(`docker compose up -d --build` builds the app from your copy of the project instead.)
 
 **Stop** it with `docker compose stop` (or `Ctrl+C`). `docker compose down` removes the
 containers but keeps your progress; `docker compose down -v` also deletes the database volume.

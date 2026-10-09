@@ -1,0 +1,70 @@
+# LessonFolk hosted deployment: Caddy (HTTPS) -> app -> Postgres, on one VPS.
+# Lives in /opt/lessonfolk on the server, next to its .env (see .env.example and docs/hosting.md).
+# release.yml copies this folder to the server and runs ./deploy.sh <image tag> on every push to main.
+name: lessonfolk
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: lessonfolk
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: lessonfolk
+    # No published port: only the app (and the backup scripts, through `docker compose exec`) reach it.
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lessonfolk -d lessonfolk"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    logging: *logging
+    restart: unless-stopped
+
+  app:
+    image: ghcr.io/cgseb/lessonfolk:${LESSONFOLK_IMAGE_TAG:-latest}
+    environment:
+      DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD}@db:5432/lessonfolk
+      LESSONFOLK_AUTH: oauth
+      LESSONFOLK_BASE_URL: https://${LESSONFOLK_DOMAIN:?Set LESSONFOLK_DOMAIN in .env}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      LESSONFOLK_PRIVACY_CONTACT: ${LESSONFOLK_PRIVACY_CONTACT:-}
+    # No published port: Caddy reaches it on the internal network. Pending migrations are
+    # applied by the image's start command before the server starts.
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      LESSONFOLK_DOMAIN: ${LESSONFOLK_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+    logging: *logging
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:

@@ -1,7 +1,8 @@
 # LessonFolk with Postgres, for self-hosting, development and the tests.
 #
-#   docker compose up --build   # Postgres + dashboard on http://127.0.0.1:4321
-#   docker compose up -d db     # Postgres only (127.0.0.1:5432), for `npm test`
+#   docker compose up -d           # Postgres + the published dashboard image on http://127.0.0.1:4321
+#   docker compose up --build      # same, built from this checkout (development)
+#   docker compose up -d db        # Postgres only (127.0.0.1:5432), for `npm test`
 #   docker compose --profile tools up -d cloudbeaver   # database browser on http://127.0.0.1:8978
 #
 # Ports only listen on 127.0.0.1. Change them in .env (see .env.example).
@@ -27,6 +28,9 @@ services:
     restart: unless-stopped
 
   app:
+    # The image published to GHCR on every merge to main: `docker compose up -d` pulls it.
+    # `docker compose up -d --build` builds this checkout instead and tags it with the same name.
+    image: ghcr.io/cgseb/lessonfolk:${LESSONFOLK_IMAGE_TAG:-latest}
     build: .
     environment:
       DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD:-lessonfolk}@db:5432/lessonfolk

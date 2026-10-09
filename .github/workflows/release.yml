@@ -1,0 +1,104 @@
+name: Release
+
+# On every push to main: run the tests, build the image and publish it to GHCR, then deploy it
+# to the hosted server (see docs/hosting.md). Deploying needs the secrets of the `production`
+# environment; without DEPLOY_HOST the image is still published and the deploy is skipped.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: |
+          echo "tag=sha-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}:latest
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PATH: /opt/lessonfolk
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+      IMAGE_TAG: ${{ needs.publish.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the deploy secrets
+        id: configured
+        run: |
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "DEPLOY_HOST is not set in the production environment: deploy skipped."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Set up SSH
+        if: steps.configured.outputs.run == 'true'
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          # The host key is pinned (ssh-keyscan on first setup): never trust it blindly.
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Copy the deploy files and deploy
+        if: steps.configured.outputs.run == 'true'
+        run: |
+          opts="-i $HOME/.ssh/id_deploy -o StrictHostKeyChecking=yes"
+          scp $opts -r deploy/. "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+          ssh $opts "$DEPLOY_USER@$DEPLOY_HOST" "chmod +x $DEPLOY_PATH/*.sh && $DEPLOY_PATH/deploy.sh $IMAGE_TAG"
+      - name: Wait for the site to answer
+        if: steps.configured.outputs.run == 'true' && vars.DEPLOY_URL != ''
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null "$DEPLOY_URL/sign-in"; then
+              echo "Site is up."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "The site did not answer after the deploy." >&2
+          exit 1
