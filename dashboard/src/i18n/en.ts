@@ -253,6 +253,7 @@ export const en = {
     reauthHeading: 'Sign in again to continue',
     reauthIntro: 'To download all your data or delete your account, sign in again first. It confirms it is you.',
     signInWith: 'Sign in with {provider}',
+    privacyNote: 'What we keep and why: read the privacy notice.',
     providersLabel: 'Sign-in options',
     signInError: 'Signing in did not work. Please try again.',
     signInErrorDetails: 'Error code: {code}',
@@ -333,7 +334,7 @@ export const en = {
       'LessonFolk runs on your computer without sign-in. Your progress is saved in the database on this computer and nothing is sent to us.',
     whatTitle: 'What is collected',
     whatItems:
-      'Your name, email address and profile picture from the sign-in provider (GitHub or Google). Your progress: your profile, path, lessons, scores, the tutor’s notes and a history of changes. The AI apps you allowed to use LessonFolk. Your sessions, with IP address and browser.',
+      'Your name and email address from the sign-in provider (GitHub or Google). Your progress: your profile, path, lessons, scores, the tutor’s notes and a history of changes. The AI apps you allowed to use LessonFolk. Your sessions, with the browser you used.',
     notCollected: 'Not collected: passwords (there are none), your conversations with your AI app, analytics or advertising cookies.',
     whyTitle: 'Why',
     why: 'To sign you in and to save your progress. Nothing else. Legal basis: providing the service you asked for.',
@@ -345,6 +346,10 @@ export const en = {
       'On the Account page you can download all your data, and delete your account and everything linked to it, at any time. You can also ask the contact below to correct your data or answer a question.',
     sharedTitle: 'Who sees it',
     shared: 'Only you, and the person who runs this LessonFolk. Your data is not sold or shared with advertisers. It is stored by the hosting provider of this server.',
+    selfHostTitle: 'Prefer not to send your data?',
+    selfHost:
+      'LessonFolk is open source. You can run it on your own computer, with no sign-in, and nothing leaves it. The steps are in the project’s documentation on GitHub.',
+    selfHostLink: 'Run LessonFolk yourself',
     contactTitle: 'Contact',
     contact: 'Write to {contact}.',
     contactMissing: 'Ask the person who runs this LessonFolk.',

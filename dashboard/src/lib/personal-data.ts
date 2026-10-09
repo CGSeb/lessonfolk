@@ -62,7 +62,6 @@ export async function buildPersonalDataExport(db: Database, userId: string, now:
       name: profile.name,
       email: profile.email,
       emailVerified: profile.emailVerified,
-      image: profile.image,
       createdAt: iso(profile.createdAt),
       updatedAt: iso(profile.updatedAt),
     },
@@ -82,7 +81,6 @@ export async function buildPersonalDataExport(db: Database, userId: string, now:
     })),
     sessions: sessions.map((row) => ({
       id: row.id,
-      ipAddress: row.ipAddress,
       userAgent: row.userAgent,
       expiresAt: iso(row.expiresAt),
       createdAt: iso(row.createdAt),

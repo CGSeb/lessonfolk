@@ -7,12 +7,11 @@ export interface CurrentUser {
   id: string;
   name: string;
   email: string;
-  image: string | null;
   /** When this session started, i.e. the last sign-in (`null` without sign-in). */
   signedInAt: Date | null;
 }
 
-export const LOCAL_CURRENT_USER: CurrentUser = { ...LOCAL_USER, image: null, signedInAt: null };
+export const LOCAL_CURRENT_USER: CurrentUser = { ...LOCAL_USER, signedInAt: null };
 
 let settings: AuthSettings | undefined;
 
@@ -36,7 +35,7 @@ export async function getCurrentUser(request: Request, auth: AuthSettings = getA
   if (auth.mode === 'none') return LOCAL_CURRENT_USER;
   const result = await getAuth().api.getSession({ headers: request.headers });
   if (!result) return null;
-  const { id, name, email, image } = result.user;
-  return { id, name, email, image: image ?? null, signedInAt: new Date(result.session.createdAt) };
+  const { id, name, email } = result.user;
+  return { id, name, email, signedInAt: new Date(result.session.createdAt) };
 }
 
