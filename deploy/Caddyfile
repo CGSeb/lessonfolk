@@ -1,0 +1,6 @@
+# HTTPS is automatic: Caddy gets and renews a Let's Encrypt certificate for the domain
+# (its DNS record must point at this server, ports 80 and 443 open).
+{$LESSONFOLK_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:4321
+}

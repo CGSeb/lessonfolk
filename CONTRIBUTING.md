@@ -93,6 +93,7 @@ never committed). Variables already set in your shell win over `.env`.
 | `LESSONFOLK_PORT` | `4321` | Docker Compose: the port of the app on your computer. |
 | `LESSONFOLK_DB_PORT` | `5432` | Docker Compose: the port of Postgres on your computer. Change `DATABASE_URL` to match. |
 | `LESSONFOLK_CLOUDBEAVER_PORT` | `8978` | Docker Compose, `tools` profile: the port of CloudBeaver on your computer. |
+| `LESSONFOLK_IMAGE_TAG` | `latest` | Docker Compose: the tag of the published `ghcr.io/cgseb/lessonfolk` image the app runs (a release tag such as `v0.1.0`). Not used with `--build`. |
 | `LESSONFOLK_BIND` | `127.0.0.1` | Docker Compose: the address the app port is published on. With `LESSONFOLK_AUTH=none`, the app refuses to start unless it is `127.0.0.1`. |
 | `LESSONFOLK_MIGRATE_ATTEMPTS` | `30` | How many times `migrate` retries, one second apart, while Postgres starts up. |
 
@@ -283,6 +284,9 @@ Course text is published under [CC BY 4.0](courses/LICENSE). Course authors are 
 6. **CI** ([`.github/workflows/test.yml`](.github/workflows/test.yml)) runs `npm ci`,
    `npm test` (with Postgres as a service) and `npm run check:courses` on every pull request.
    It must pass before merging.
+7. **Release.** Publishing a GitHub release runs [`release.yml`](.github/workflows/release.yml): the same
+   tests on the release's tag, then it publishes the Docker image to GHCR and deploys it to the hosted server (the files in
+   [`deploy/`](deploy)).
 
 Never commit `.progress/` or `.env`.
 
