@@ -24,7 +24,7 @@ const providers = enabledProviders(settings).map((id) => ({
 const error = Astro.url.searchParams.get('error');
 ---
 
-<BaseLayout title={t('auth.signInTitle')}>
+<BaseLayout title={t('auth.signInTitle')} noindex>
   <div class="stack sign-in" style="--stack-space: var(--space-5)">
     <header class="stack" style="--stack-space: var(--space-2)">
       <h1>{t(reauth ? 'auth.reauthHeading' : 'auth.signInHeading')}</h1>
@@ -66,6 +66,8 @@ const error = Astro.url.searchParams.get('error');
         ))
       }
     </ul>
+
+    <p class="muted"><a href="/privacy">{t('auth.privacyNote')}</a></p>
   </div>
 </BaseLayout>
 

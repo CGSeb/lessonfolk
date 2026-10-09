@@ -119,6 +119,11 @@ describe('the sign-in page', () => {
     expect(text).not.toContain('Google');
   });
 
+  it('links to the privacy notice', async () => {
+    const html = await (await new Browser(server.url).request('/sign-in')).text();
+    expect(html).toContain('href="/privacy"');
+  });
+
   it('refuses a provider that is not configured', async () => {
     const response = await new Browser(server.url).post('/sign-in/google');
     expect(response.status).toBe(404);
@@ -195,10 +200,14 @@ describe('signing in and out', () => {
     expect(robinId).not.toBe('local');
 
     const [row] = await testDb.db.select().from(user).where(eq(user.id, robinId));
-    expect(row).toMatchObject({ name: 'Robin Tester', email: 'robin@example.test', emailVerified: true });
+    expect(row).toMatchObject({ name: 'Robin Tester', email: 'robin@example.test', emailVerified: true, image: null });
     const accounts = await testDb.db.select().from(account).where(eq(account.userId, robinId));
     expect(accounts.map((a) => [a.providerId, a.accountId])).toEqual([['fake', 'fake-robin']]);
     expect(await testDb.db.select().from(learner).where(eq(learner.userId, robinId))).toHaveLength(1);
+    // The session keeps the browser but never the IP address.
+    const sessions = await testDb.db.select().from(session).where(eq(session.userId, robinId));
+    expect(sessions.length).toBeGreaterThan(0);
+    expect(sessions.map((s) => s.ipAddress)).toEqual(sessions.map(() => null));
   });
 
   it('shows who is signed in on every page', async () => {

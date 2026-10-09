@@ -22,6 +22,7 @@ You can contribute in two ways, and they need different setups:
 - [Contributing a course](#contributing-a-course)
 - [Workflow](#workflow)
 - [Brand and design](#brand-and-design)
+- [Search engines and AI search](#search-engines-and-ai-search)
 
 ## Repository map
 
@@ -296,6 +297,12 @@ dashboard uses the design tokens in
 [`dashboard/src/styles/tokens.css`](dashboard/src/styles/tokens.css): use the tokens, never raw
 values. Write interface text and docs in plain, warm language: short sentences, every technical
 term defined the first time.
+
+## Search engines and AI search
+
+Public pages must stay easy for search engines and AI assistants to read: unique title and
+description per page, one `<h1>`, `alt` text on images, and a place in the sitemap (or in the
+private paths). [`docs/seo.md`](docs/seo.md) lists what the dashboard sends and how to check it.
 
 ## License
 

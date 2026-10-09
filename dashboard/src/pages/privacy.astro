@@ -20,7 +20,7 @@ const sections = [
 ] as const;
 ---
 
-<BaseLayout title={t('privacy.title')}>
+<BaseLayout title={t('privacy.title')} description={t('site.privacyDescription')}>
   <div class="stack privacy-page" style="--stack-space: var(--space-5)">
     <header class="stack" style="--stack-space: var(--space-2)">
       <h1>{t('privacy.heading')}</h1>
@@ -37,6 +37,15 @@ const sections = [
               ))}
             </section>
           ))}
+          <section class="stack" style="--stack-space: var(--space-2)">
+            <h2>{t('privacy.selfHostTitle')}</h2>
+            <p>{t('privacy.selfHost')}</p>
+            <p>
+              <a href="https://github.com/CGSeb/lessonfolk/blob/main/docs/using-lessonfolk.md" target="_blank" rel="noopener noreferrer">
+                {t('privacy.selfHostLink')}
+              </a>
+            </p>
+          </section>
           <section class="stack" style="--stack-space: var(--space-2)">
             <h2>{t('privacy.contactTitle')}</h2>
             <p>{contact ? t('privacy.contact', { contact }) : t('privacy.contactMissing')}</p>

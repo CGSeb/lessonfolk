@@ -16,7 +16,7 @@ const clients = connectClients(connection);
 const selected = clients.find((client) => client.available) ?? clients[0]!;
 ---
 
-<BaseLayout title={t('connect.title')}>
+<BaseLayout title={t('connect.title')} description={t('site.connectDescription')}>
   <div class="stack" style="--stack-space: var(--space-6)">
     <header class="stack" style="--stack-space: var(--space-2)">
       <h1>{t('connect.heading')}</h1>

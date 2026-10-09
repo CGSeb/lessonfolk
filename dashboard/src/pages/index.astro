@@ -13,6 +13,8 @@ import { inspectCatalog } from '@lessonfolk/core';
 import { getPaths } from '../lib/paths';
 import Landing from '../components/home/Landing.astro';
 import { loadProgress } from '../lib/store';
+import { websiteJsonLd } from '../lib/seo';
+import { siteOrigin } from '../lib/site-url';
 import { offerLocalImport } from '../lib/account';
 import LocalImportOffer from '../components/account/LocalImportOffer.astro';
 
@@ -38,7 +40,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
 }));
 ---
 
-<BaseLayout>
+<BaseLayout jsonLd={user ? undefined : websiteJsonLd(siteOrigin(Astro.url), t('site.description'))}>
   {!user && <Landing />}
   {user && <div class="stack home" style="--stack-space: var(--space-6)">
     {offerImport && <LocalImportOffer />}
