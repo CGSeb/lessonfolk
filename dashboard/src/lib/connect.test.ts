@@ -57,7 +57,8 @@ describe('connectClients', () => {
     const clients = byId(connectClients(mcpConnection(oauth('https://learn.example.org'), page, {})));
     expect(clients['claude-ai'].available).toBe(true);
     expect(clients['chatgpt'].available).toBe(true);
-    expect(clients['claude-desktop'].steps[0].code).toBeUndefined();
+    expect(clients['claude-desktop'].steps[0].code).toBe('https://learn.example.org/mcp');
+    expect(clients['claude-ai'].steps[0].code).toBe('https://learn.example.org/mcp');
     expect(clients['codex'].steps[1].code).toBe('codex mcp login lessonfolk');
     expect(clients['claude-code'].steps[0].code).toBe('claude mcp add --transport http lessonfolk https://learn.example.org/mcp');
   });
