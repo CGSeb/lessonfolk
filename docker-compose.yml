@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   app:
-    # The image published to GHCR on every merge to main: `docker compose up -d` pulls it.
+    # The image published to GHCR on every release: `docker compose up -d` pulls it.
     # `docker compose up -d --build` builds this checkout instead and tags it with the same name.
     image: ghcr.io/cgseb/lessonfolk:${LESSONFOLK_IMAGE_TAG:-latest}
     build: .

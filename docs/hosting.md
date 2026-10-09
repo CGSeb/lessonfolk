@@ -6,7 +6,7 @@ this page: see [Using LessonFolk](using-lessonfolk.md). It is for whoever runs t
 ## How it works
 
 ```
-merge to main ─► release.yml: tests ─► build image ─► ghcr.io/cgseb/lessonfolk ─► SSH deploy ─► VPS
+publish a release ─► release.yml: tests ─► build image ─► ghcr.io/cgseb/lessonfolk ─► SSH deploy ─► VPS
                                                                                                   │
                                               Caddy (HTTPS, :443) ─► app (:4321) ─► Postgres ◄── nightly backup
 ```
@@ -15,8 +15,9 @@ merge to main ─► release.yml: tests ─► build image ─► ghcr.io/cgseb/
   three containers with Docker Compose: **Caddy** (automatic HTTPS), the **app** (dashboard and
   MCP server) and **Postgres**. Only ports 22, 80 and 443 are open. The database has no
   published port.
-- **The image** is built and published to the GitHub Container Registry on every merge to
-  `main`, as `ghcr.io/cgseb/lessonfolk:latest` and `:sha-<commit>`. It is public: self-hosters
+- **The image** is built and published to the GitHub Container Registry when a release is
+  published, as `ghcr.io/cgseb/lessonfolk:latest`, `:<release tag>` (for example `:v1.0.0`) and
+  `:sha-<commit>`. Merging to `main` alone deploys nothing. It is public: self-hosters
   pull it with no login, and `docker compose up -d` in this repository uses it.
 - **Migrations** are applied by the image's start command, each time the app container starts.
 - **Everything the server needs** is in [`deploy/`](../deploy): the Compose file, the Caddyfile,
@@ -126,7 +127,8 @@ Until `DEPLOY_HOST` is set, the pipeline still publishes the image and skips the
 
 ### 6. First deploy and backups
 
-Merge to `main`. Check
+Publish a release (GitHub, **Releases**, **Draft a new release**, a new tag such as `v0.1.0`,
+then **Publish release**; pre-releases don't deploy). Check
 `https://<domain>`, sign in, and connect claude.ai from the dashboard's **Connect** page.
 
 Then install the nightly backup (as `deploy`, `crontab -e`):
@@ -147,8 +149,8 @@ OVHcloud's included daily VPS backup is a second layer, not a replacement.
 
 | Task | How |
 |---|---|
-| Deploy | Merge to `main`. |
-| Roll back | On the server: `/opt/lessonfolk/deploy.sh sha-<earlier commit>` (the tags are in the package's page on GitHub). The next merge deploys the new version again. |
+| Deploy | Publish a GitHub release with a new tag. Pre-releases and drafts don't deploy. |
+| Roll back | On the server: `/opt/lessonfolk/deploy.sh <earlier release tag>`, for example `v0.1.0`. The next release deploys the new version again. |
 | Look at logs | `cd /opt/lessonfolk && docker compose logs -f app` |
 | Restart | `docker compose restart app` |
 | Update Caddy and Postgres images | Each deploy pulls them. Postgres stays on major version 17; a major upgrade is a dump and restore, not a pull. |

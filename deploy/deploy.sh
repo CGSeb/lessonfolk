@@ -1,5 +1,5 @@
 #!/bin/sh
-# Deploy an image tag of LessonFolk: ./deploy.sh sha-0123456789ab   (or: latest)
+# Deploy an image tag of LessonFolk: ./deploy.sh v1.0.0   (a release tag, or: latest)
 # Run by release.yml over SSH after the image is published; run it by hand to roll back
 # to an earlier tag.
 set -eu

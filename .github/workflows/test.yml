@@ -1,7 +1,7 @@
 name: Tests
 
-# Runs on pull requests, and is called by release.yml on every push to main
-# (so the tests gate the image build and the deploy).
+# Runs on pull requests, and is called by release.yml when a release is
+# published (so the tests gate the image build and the deploy).
 on:
   pull_request:
   workflow_call:
