@@ -13,7 +13,7 @@ const show = authMode === 'oauth' && !user;
 
 {
   show && (
-    <Notice title={t('auth.promptTitle')} accentBorder={false}>
+    <Notice title={t('auth.promptTitle')}>
       <p>{t('auth.promptBody')}</p>
       <p>
         <a class="sign-in-prompt__link" href={signInHref(Astro.url)}>

@@ -14,7 +14,6 @@ const connection = mcpConnection(getAuthSettings(), Astro.url);
 const clients = connectClients(connection);
 // The first tool that works here opens by default.
 const selected = clients.find((client) => client.available) ?? clients[0]!;
-const host = new URL(connection.url).host;
 ---
 
 <BaseLayout title={t('connect.title')}>
@@ -38,11 +37,6 @@ const host = new URL(connection.url).host;
           <Notice title={t('connect.oauthTitle')}>
             <p>{t('connect.oauthBody')}</p>
           </Notice>
-          {!connection.reachableFromWeb && (
-            <Notice tone="warning" title={t('connect.webTitle')}>
-              <p>{t('connect.webBody', { host })}</p>
-            </Notice>
-          )}
         </>
       )
     }
@@ -275,7 +269,7 @@ const host = new URL(connection.url).host;
 
   .connect-extra {
     padding: var(--space-3) var(--space-4);
-    border-left: var(--border-accent) solid var(--color-accent-border);
+    border: 1px solid var(--color-accent-border);
     border-radius: var(--radius-md);
     background: var(--color-accent-subtle);
     font-size: var(--text-sm);

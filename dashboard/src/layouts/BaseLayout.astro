@@ -149,7 +149,7 @@ const signInLink = signInHref(Astro.url);
       <div class="container site-footer__bottom">
         <p>{t('footer.copyright', { year: String(new Date().getFullYear()) })}</p>
         <p>{t('footer.license')}</p>
-        <p>{t(authMode === 'oauth' ? 'footer.privacyAccount' : 'footer.privacy')}</p>
+        {authMode !== 'oauth' && <p>{t('footer.privacy')}</p>}
       </div>
     </footer>
     <LiveRefresh />

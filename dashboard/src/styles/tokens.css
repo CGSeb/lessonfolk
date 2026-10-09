@@ -180,7 +180,6 @@
   --radius-md: 12px; /* notices, inner panels */
   --radius-lg: 20px; /* cards */
   --radius-pill: 999px; /* badges, nav, phrase chips, progress bars */
-  --border-accent: 4px; /* highlight stripes */
   --border-spark: 2px; /* amber outline of spark cards (next lesson, achievements) */
   --focus-width: 3px;
   --focus-offset: 2px;

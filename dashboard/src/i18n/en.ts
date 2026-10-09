@@ -152,7 +152,6 @@ export const en = {
   footer: {
     about: 'LessonFolk is an open-source app developed by CG Seb. It teaches AI to anyone, through a conversation with an AI tutor.',
     privacy: 'Your progress is saved only on this computer.',
-    privacyAccount: 'Your progress is saved on this LessonFolk server, with your account.',
     privacyLink: 'Privacy notice',
     exploreHeading: 'Explore',
     projectHeading: 'Project',
@@ -273,9 +272,6 @@ export const en = {
     oauthTitle: 'Everyone signs in as themselves',
     oauthBody:
       'The first time an app connects, your browser opens: sign in, then allow the app to use LessonFolk. The app then only sees your own progress.',
-    webTitle: 'Web chats cannot reach this address',
-    webBody:
-      'claude.ai and ChatGPT connect from their company’s servers, so they need a public https:// address (LESSONFOLK_BASE_URL). {host} is only reachable from this computer or network.',
     clientsHeading: 'Set up your app',
     helpLabel: 'Steps do not match what you see?',
     notAvailable: 'Not available here',
