@@ -56,7 +56,7 @@ export async function buildPersonalDataExport(db: Database, userId: string, now:
     version: PERSONAL_DATA_VERSION,
     exportedAt: now.toISOString(),
     notice:
-      'All the personal data this LessonFolk holds about you. Secrets (tokens, keys, password hashes) are never included: where one exists, a has… field says so. The tutor’s progress.json is a separate download on the Your data page.',
+      'All the personal data this LessonFolk holds about you. Secrets (tokens, keys, password hashes) are never included: where one exists, a has… field says so. The tutor’s progress.json is a separate download on the Account page.',
     user: {
       id: profile.id,
       name: profile.name,

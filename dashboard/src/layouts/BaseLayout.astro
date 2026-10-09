@@ -26,8 +26,9 @@ const navItems = [
   { href: '/courses', label: t('nav.courses'), current: path === '/courses' || path.startsWith('/courses/') },
   { href: '/authors', label: t('nav.authors'), current: path === '/authors' || path.startsWith('/authors/') },
   { href: '/connect', label: t('nav.connect'), current: path === '/connect' },
-  // The learner's own data: only for someone whose data it is.
-  ...(user ? [{ href: '/account', label: t('nav.account'), current: path === '/account' || path.startsWith('/account/') }] : []),
+  // The learner's own data: only for someone whose data it is. With sign-in, the signed-in
+  // name in the header links to it instead.
+  ...(user && authMode !== 'oauth' ? [{ href: '/account', label: t('nav.account'), current: path === '/account' || path.startsWith('/account/') }] : []),
 ];
 const signInLink = signInHref(Astro.url);
 ---
@@ -86,9 +87,14 @@ const signInLink = signInHref(Astro.url);
             authMode === 'oauth' &&
               (user ? (
                 <form class="account" method="post" action="/sign-out" aria-label={t('auth.accountLabel')}>
-                  <span class="account__name" title={user.email}>
-                    {t('auth.signedInAs', { name: user.name || user.email })}
-                  </span>
+                  <a
+                    class="account__name"
+                    href="/account"
+                    title={user.email}
+                    aria-current={path === '/account' || path.startsWith('/account/') ? 'page' : undefined}
+                  >
+                    {user.name || user.email}
+                  </a>
                   <button class="account__button" type="submit">
                     {t('auth.signOut')}
                   </button>
@@ -273,8 +279,18 @@ const signInLink = signInHref(Astro.url);
   }
 
   .account__name {
-    color: var(--color-text-muted);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
     font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+
+  .account__name:hover,
+  .account__name[aria-current='page'] {
+    color: var(--color-accent);
+    text-decoration: underline;
   }
 
   .account__button {

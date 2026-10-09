@@ -196,7 +196,11 @@ describe('signing in and out', () => {
 
   it('shows who is signed in on every page', async () => {
     const home = visibleText(await (await robin.request('/')).text());
-    expect(home).toContain('Signed in as Robin Tester');
+    expect(home).toContain('Robin Tester Sign out');
+    // The name links to the account page (there is no separate Account item in the menu).
+    const html = await (await robin.request('/')).text();
+    expect(html).toMatch(/<a[^>]*href="\/account"[^>]*>\s*Robin Tester\s*<\/a>/);
+    expect(html).not.toMatch(/nav-link[^>]*href="\/account"/);
     expect(home).toContain('Sign out');
     // Signed in: the sign-in page sends you on.
     const signInPage = await robin.request('/sign-in?next=/courses');

@@ -192,7 +192,7 @@ Put it in `.claude/settings.json` (shared) or `.claude/settings.local.json` (onl
 ## The dashboard
 
 The dashboard shows your courses and progress. Only the tutor writes your progress, except on
-the **Your data** page (import, export, erase).
+the **Account** page (import, export, erase).
 
 | Page | Address | What you see |
 |---|---|---|
@@ -201,7 +201,7 @@ the **Your data** page (import, export, erase).
 | **A course** | `/courses/<course-id>` | The course's lessons with your status, scores, finish dates and the tutor's notes, what the course builds on, and the next lesson. |
 | **Authors** | `/authors` | The people and projects who write the courses, and the courses of each author. |
 | **Connect** | `/connect` | The setup steps for each AI app, with this LessonFolk's address in them (see [Connect your AI chat](#connect-your-ai-chat)). |
-| **Your data** | `/account` | Download, import or erase your progress (see [Your data](#your-data-import-export-erase)). |
+| **Account** | `/account` | Download, import or erase your progress (see [Account](#account-import-export-erase)). |
 
 Pages update by themselves within a few seconds when your tutor saves progress (no reload
 needed; the page keeps your scroll position and open sections). Lessons you skipped after the level check show as "Skipped after level check".
@@ -209,9 +209,10 @@ needed; the page keeps your scroll position and open sections). Lessons you skip
 With sign-in (`LESSONFOLK_AUTH=oauth`), the courses and authors pages are open to everyone,
 without progress. Home needs you to sign in, and each person sees only their own progress.
 
-### Your data (import, export, erase)
+### Account (import, export, erase)
 
-The **Your data** page (`/account`) holds your progress, as a `progress.json` file (the format is
+The **Account** page (`/account`) has one **Your progress** block (download or import a `progress.json`), a small link to download
+all your data, and, last and set apart, **Delete**. It holds your progress, as a `progress.json` file (the format is
 [`progress.example.json`](progress.example.json)):
 
 - **Download** it, as a backup or to move to another LessonFolk, or **download all your data**: one
@@ -228,8 +229,8 @@ The **Your data** page (`/account`) holds your progress, as a `progress.json` fi
 
 **Coming from an older LessonFolk?** Older versions of the tutor saved your progress in
 `.progress/progress.json`, in the LessonFolk folder. The tutor no longer reads that file: import
-it once. Without sign-in, home and the **Your data** page offer to import it on your first visit
-(not in Docker: the container cannot see the file, so upload it on the **Your data** page). From
+it once. Without sign-in, home and the **Account** page offer to import it on your first visit
+(not in Docker: the container cannot see the file, so upload it on the **Account** page). From
 a terminal, `npm run progress:import [-- path/to/progress.json]` does the same for the local
 learner, without the preview.
 
@@ -243,7 +244,7 @@ learner, without the preview.
 - Your conversations go to your AI app's provider (Anthropic for Claude Code, OpenAI for Codex…),
   as with any use of that app. The tutor sends LessonFolk only what it saves: your profile, path,
   lesson statuses, scores and its short notes.
-- To start over, erase your progress on the **Your data** page. Download it first if you want to
+- To start over, erase your progress on the **Account** page. Download it first if you want to
   keep it.
 
 ## Troubleshooting

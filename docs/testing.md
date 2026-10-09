@@ -120,13 +120,13 @@ server the way the dashboard expects. Run it once in **Claude Code** and once in
 repeat it after changes to `AGENTS.md`, the skills, `.mcp.json`, `packages/mcp/prompts/`, the
 progress format or the dashboard.
 
-To read the saved progress at any step, use **Download progress.json** on the **Your data**
+To read the saved progress at any step, use **Download progress.json** on the **Account**
 page (`/account`): it has the progress.json v1 shape of
 [`progress.example.json`](progress.example.json).
 
 ### Before you start
 
-1. Back up your own progress if you have any: **Download progress.json** on the **Your data**
+1. Back up your own progress if you have any: **Download progress.json** on the **Account**
    page.
 2. Start LessonFolk without sign-in (`LESSONFOLK_AUTH=none`, the default) in one terminal:
 
@@ -134,7 +134,7 @@ page (`/account`): it has the progress.json v1 shape of
    docker compose up --build
    ```
 
-3. Start as a new learner: **Erase my progress** on the **Your data** page.
+3. Start as a new learner: **Erase my progress** on the **Account** page.
 4. Open http://127.0.0.1:4321 and keep it visible next to the chat. Also open
    http://127.0.0.1:4321/courses/ai-foundations in a second tab. Reload a page to see new progress.
 
@@ -234,7 +234,7 @@ scenario 1 in **Codex**. Back up your own progress first (see [Before you start]
 
 ### Reset
 
-Stop the tutor, then **Erase my progress** on the **Your data** page (and delete
+Stop the tutor, then **Erase my progress** on the **Account** page (and delete
 `.progress/progress.json` if you made one for scenario 3): the dashboard shows the first visit
 view again. Import your backup if you made one. Stop the app with `Ctrl+C`.
 
@@ -270,7 +270,7 @@ fill in `.env` (`LESSONFOLK_AUTH=oauth`, `LESSONFOLK_BASE_URL=http://localhost:4
 
 Put `.env` back the way it was when you are done, and never commit it.
 
-## Manual check: Connect and Your data pages
+## Manual check: Connect and Account pages
 
 After changes to these pages, with `npm run dashboard` (no sign-in) and a copy of your own
 `progress.json` kept somewhere safe:
@@ -279,7 +279,7 @@ After changes to these pages, with `npm run dashboard` (no sign-in) and a copy o
       not available, and its Claude Code command connects (`/mcp` in Claude Code).
 - [ ] **First run.** With no progress in the database and a `.progress/progress.json`, home offers
       to import it; the preview shows your name and lessons; **Replace my progress** imports it.
-- [ ] **Your data** (`/account`): **Download progress.json** saves the file; importing a file that
+- [ ] **Account** (`/account`): **Download progress.json** saves the file; importing a file that
       is not JSON shows "This file cannot be imported" and changes nothing; **Erase my progress**
       needs "delete" typed, then home shows the first visit again.
 - [ ] Both themes and a 375 px wide window look right.

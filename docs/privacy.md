@@ -34,14 +34,14 @@ or advertising cookies, only the sign-in session cookie.
 
 ## Download all my data
 
-**Your data** page, "Download all my data" (`/api/account/export-all`): one JSON file with every
+**Account** page, "Download all my data" (`/api/account/export-all`): one JSON file with every
 row above that belongs to the learner (`dashboard/src/lib/personal-data.ts`). Where a secret
 exists it only says so (`hasAccessToken: true`). The tutor's `progress.json` stays a separate
 download (`/api/account/export`). A learner can only get their own data: the route takes no user id.
 
 ## Delete my account
 
-**Your data** page, type "delete" (`/api/account/delete`, `deleteLearnerData` in
+**Account** page, type "delete" (`/api/account/delete`, `deleteLearnerData` in
 `dashboard/src/lib/account.ts`): deletes the `user` row and, through the cascade, every row in the
 table above, plus pending `verification` values, in one transaction, then signs out. Sessions are
 rows, so they stop working at once; MCP access tokens are signed and would otherwise live until
@@ -49,7 +49,7 @@ they expire, so the MCP endpoint also checks that the user still exists. Without
 button erases the local learner's progress and history.
 
 Both the full export and the deletion require a **recent sign-in** (10 minutes) on the hosted
-version; otherwise the learner is sent to sign in again and comes back to the Your data page.
+version; otherwise the learner is sent to sign in again and comes back to the Account page.
 
 When you add a table that references a user, make it cascade, add it to the export and to this
 table. The test in `dashboard/tests/e2e/account-oauth.db.test.ts` fails if any text or JSON column
