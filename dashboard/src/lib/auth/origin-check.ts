@@ -12,10 +12,16 @@ const APP_FORM_ENDPOINTS = new Set(['token', 'revoke', 'introspect'].map((name) 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const FORM_CONTENT_TYPES = ['application/x-www-form-urlencoded', 'multipart/form-data', 'text/plain'];
 
-/** A 403 for a cross-site form post, or `undefined` when the request may go on. Same rules as Astro's check. */
-export function crossSiteFormResponse(request: Request, url: URL): Response | undefined {
+/**
+ * A 403 for a cross-site form post, or `undefined` when the request may go on. Same rules as
+ * Astro's check, plus `publicOrigin`: the address people open in their browser
+ * (LESSONFOLK_BASE_URL). Behind a reverse proxy that ends HTTPS, the server sees `http://`
+ * while the browser sends `Origin: https://…`, so `url.origin` alone would refuse every form.
+ */
+export function crossSiteFormResponse(request: Request, url: URL, publicOrigin?: string): Response | undefined {
   if (SAFE_METHODS.has(request.method) || APP_FORM_ENDPOINTS.has(url.pathname)) return undefined;
-  const sameOrigin = request.headers.get('origin') === url.origin;
+  const origin = request.headers.get('origin');
+  const sameOrigin = origin === url.origin || (publicOrigin !== undefined && origin === publicOrigin);
   const contentType = request.headers.get('content-type')?.toLowerCase();
   const forbidden = contentType ? FORM_CONTENT_TYPES.some((type) => contentType.includes(type)) && !sameOrigin : !sameOrigin;
   return forbidden ? new Response(`Cross-site ${request.method} form submissions are forbidden`, { status: 403 }) : undefined;

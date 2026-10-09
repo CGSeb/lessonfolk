@@ -15,11 +15,12 @@ const CRAWLER_FILES = new Set(['/robots.txt', '/sitemap.xml', '/llms.txt', '/llm
 export const onRequest = defineMiddleware(async (context, next) => {
   // MCP: cross-site form posts are refused here (lib/auth/origin-check.ts), and /mcp and
   // OAuth discovery authenticate with tokens, not the session.
-  const forbidden = crossSiteFormResponse(context.request, context.url);
+  const settings = getAuthSettings();
+  const publicOrigin = settings.mode === 'oauth' ? new URL(settings.baseURL).origin : undefined;
+  const forbidden = crossSiteFormResponse(context.request, context.url, publicOrigin);
   if (forbidden) return forbidden;
   if (context.url.pathname === '/mcp' || context.url.pathname.startsWith('/.well-known/')) return next();
   if (CRAWLER_FILES.has(context.url.pathname)) return next();
-  const settings = getAuthSettings();
   context.locals.authMode = settings.mode;
   const path = context.url.pathname;
   context.locals.user = path.startsWith(`${AUTH_BASE_PATH}/`) ? null : await getCurrentUser(context.request, settings);
