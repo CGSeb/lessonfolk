@@ -49,11 +49,11 @@ async function signIn(profile: FakeProfile): Promise<{ browser: Browser; id: str
 const text = async (response: Response) => visibleText(await response.text());
 
 describe('signed out', () => {
-  it('shows the Connect page with LESSONFOLK_BASE_URL, and that web chats need a public address', async () => {
+  it('shows the Connect page with LESSONFOLK_BASE_URL', async () => {
     const page = await text(await new Browser(server.url).request('/connect'));
     expect(page).toContain(`${baseURL}/mcp`);
     expect(page).toContain('Everyone signs in as themselves');
-    expect(page).toContain('Web chats cannot reach this address');
+    expect(page).not.toContain('Web chats cannot reach this address');
     expect(page).toContain('codex mcp login lessonfolk');
     expect(page).not.toContain('LESSONFOLK_MCP_TOKEN');
   });
