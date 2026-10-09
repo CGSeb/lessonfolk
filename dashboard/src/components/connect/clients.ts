@@ -1,7 +1,7 @@
 /**
  * The setup steps of each AI app on the Connect page, for this instance's MCP address and
  * mode. Commands follow each app's documentation; where a menu label is not certain, the
- * text stays generic ("open the connectors settings").
+ * text stays generic ("go to Settings, then Connectors").
  */
 import { t } from '../../i18n/en';
 import type { McpConnection } from '../../lib/connect';
@@ -93,7 +93,7 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
         id: 'claude-desktop',
         name: 'Claude Desktop',
         available: true,
-        steps: [{ text: t('connect.claudeDesktop.connector') }],
+        steps: [{ text: t('connect.claudeDesktop.connector'), code: url }],
         note: t('connect.claudeDesktop.connectorNote'),
         extra: companion,
       }
@@ -115,7 +115,7 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
     id: 'claude-ai',
     name: 'claude.ai',
     available: reachableFromWeb,
-    steps: reachableFromWeb ? [{ text: t('connect.claudeAi.steps') }] : [{ text: unavailable }],
+    steps: reachableFromWeb ? [{ text: t('connect.claudeAi.steps'), code: url }] : [{ text: unavailable }],
   };
 
   const chatgpt: ConnectClient = {

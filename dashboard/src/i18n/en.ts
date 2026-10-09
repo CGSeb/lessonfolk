@@ -311,7 +311,7 @@ export const en = {
     },
     claudeDesktop: {
       connector:
-        'In Claude Desktop, open the connectors settings and add a custom connector with your address. Connect it: your browser opens, sign in, then allow.',
+        'In Claude Desktop, go to Settings, then Connectors, and choose Add custom connector. Type a name (for example LessonFolk), paste this address as the URL, and click Add. Then click Connect on the new connector: your browser opens, sign in, then allow.',
       connectorNote: 'Custom connectors connect from Anthropic’s servers, so they need a public https:// address.',
       local:
         'Custom connectors connect from Anthropic’s servers and cannot reach this computer. Add LessonFolk as a local server instead: in Claude Desktop, open Settings, then Developer, edit the config file (claude_desktop_config.json), add this, then restart Claude Desktop:',
@@ -319,7 +319,7 @@ export const en = {
         'mcp-remote is a small community bridge that needs Node.js; it is not part of LessonFolk or Claude. To send a token, see its documentation.',
     },
     claudeAi: {
-      steps: 'In claude.ai, open the connectors settings and add a custom connector with your address. Connect it: sign in, then allow.',
+      steps: 'In claude.ai, go to Settings, then Connectors, and choose Add custom connector. Type a name (for example LessonFolk), paste this address as the URL, and click Add. Then click Connect on the new connector: sign in, then allow.',
     },
     chatgpt: {
       steps:
