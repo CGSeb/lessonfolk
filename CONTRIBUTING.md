@@ -22,6 +22,7 @@ You can contribute in two ways, and they need different setups:
 - [Contributing a course](#contributing-a-course)
 - [Workflow](#workflow)
 - [Brand and design](#brand-and-design)
+- [Content Security Policy](#content-security-policy)
 - [Search engines and AI search](#search-engines-and-ai-search)
 
 ## Repository map
@@ -308,6 +309,22 @@ dashboard uses the design tokens in
 [`dashboard/src/styles/tokens.css`](dashboard/src/styles/tokens.css): use the tokens, never raw
 values. Write interface text and docs in plain, warm language: short sentences, every technical
 term defined the first time.
+
+## Content Security Policy
+
+The dashboard's CSP allows no `'unsafe-inline'` for scripts or `<style>` elements. Astro builds it
+(`security.csp` in `dashboard/astro.config.mjs`, directives in
+[`dashboard/src/lib/security-headers.ts`](dashboard/src/lib/security-headers.ts)): it hashes the
+scripts and styles it inlines. When you add to a page:
+
+- **Scripts**: use a normal `<script>` in an `.astro` file (Astro bundles and hashes it) or a file
+  in `dashboard/public/`. No `is:inline` script with code in it, no inline event handlers
+  (`onclick=…`), no third-party script hosts without adding them to the config.
+- **Styles**: `<style>` blocks are fine. Inline `style="--var: …"` attributes are allowed
+  (`style-src-attr`), but prefer a class.
+- The CSP only exists in builds, not in `npm run dashboard`: check new pages with
+  `npm run dashboard:build` then `npm run dashboard:start`, and look for "violates the following
+  Content Security Policy" in the browser console.
 
 ## Search engines and AI search
 

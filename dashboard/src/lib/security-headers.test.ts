@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CONTENT_SECURITY_POLICY, securityHeaders, withSecurityHeaders } from './security-headers';
+import { CONTENT_SECURITY_POLICY, CSP_DIRECTIVES, securityHeaders, withSecurityHeaders } from './security-headers';
 
 describe('securityHeaders', () => {
   it('locks down framing, sniffing, plugins and the base URL', () => {
@@ -11,6 +11,11 @@ describe('securityHeaders', () => {
     expect(CONTENT_SECURITY_POLICY).toContain("frame-ancestors 'none'");
     expect(CONTENT_SECURITY_POLICY).toContain("object-src 'none'");
     expect(CONTENT_SECURITY_POLICY).toContain("base-uri 'self'");
+    // No inline scripts or <style> elements; only style="" attributes are allowed inline.
+    expect(CONTENT_SECURITY_POLICY).not.toMatch(/(?:script|style)-src(?:-elem)? [^;]*'unsafe-inline'/);
+    expect(CONTENT_SECURITY_POLICY).toContain("script-src 'self'");
+    expect(CONTENT_SECURITY_POLICY).toContain("style-src-attr 'unsafe-inline'");
+    expect(CSP_DIRECTIVES.join('; ')).not.toContain('unsafe-inline');
     // form-action would block the redirect to the sign-in provider.
     expect(CONTENT_SECURITY_POLICY).not.toContain('form-action');
   });
