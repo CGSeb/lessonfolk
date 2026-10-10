@@ -7,12 +7,18 @@ export const prerender = false;
 /**
  * The privacy notice: what is collected, why, how long, how to export or delete, who to ask.
  * Public (no sign-in). The text is in src/i18n/en.ts and must match the data map in
- * docs/privacy.md. The contact comes from LESSONFOLK_PRIVACY_CONTACT.
+ * docs/privacy.md. The contact comes from LESSONFOLK_PRIVACY_CONTACT, the country or region of the
+ * server from LESSONFOLK_DATA_LOCATION.
  */
 const oauth = Astro.locals.authMode === 'oauth';
 const contact = process.env.LESSONFOLK_PRIVACY_CONTACT?.trim();
+const location = process.env.LESSONFOLK_DATA_LOCATION?.trim();
+const where = location ? t('privacy.where', { location }) : t('privacy.whereUnknown');
 const sections = [
-  { title: 'privacy.whatTitle', body: ['privacy.whatItems', 'privacy.notCollected'] },
+  {
+    title: 'privacy.whatTitle',
+    body: ['privacy.whatAccount', 'privacy.whatProgress', 'privacy.whatApps', 'privacy.whatTechnical', 'privacy.notCollected'],
+  },
   { title: 'privacy.whyTitle', body: ['privacy.why'] },
   { title: 'privacy.howLongTitle', body: ['privacy.howLong'] },
   { title: 'privacy.rightsTitle', body: ['privacy.rights'] },
@@ -37,6 +43,10 @@ const sections = [
               ))}
             </section>
           ))}
+          <section class="stack" style="--stack-space: var(--space-2)">
+            <h2>{t('privacy.whereTitle')}</h2>
+            <p>{where}</p>
+          </section>
           <section class="stack" style="--stack-space: var(--space-2)">
             <h2>{t('privacy.selfHostTitle')}</h2>
             <p>{t('privacy.selfHost')}</p>

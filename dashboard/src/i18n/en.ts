@@ -333,19 +333,29 @@ export const en = {
     introNone:
       'LessonFolk runs on your computer without sign-in. Your progress is saved in the database on this computer and nothing is sent to us.',
     whatTitle: 'What is collected',
-    whatItems:
-      'Your name and email address from the sign-in provider (GitHub or Google). Your progress: your profile, path, lessons, scores, the tutor’s notes and a history of changes. The AI apps you allowed to use LessonFolk. Your sessions, with the browser you used.',
-    notCollected: 'Not collected: passwords (there are none), your conversations with your AI app, analytics or advertising cookies.',
+    whatAccount:
+      'Your account: the name and email address your sign-in provider (GitHub or Google) shares with LessonFolk, and which provider you used.',
+    whatProgress:
+      'Your progress: your profile (name, experience, goal, language, level and interests), your learning path, the status, dates and scores of your lessons, the tutor’s notes about you, and a history of every change.',
+    whatApps: 'The AI apps you allowed to use LessonFolk: their name, address and permissions, and when you allowed them.',
+    whatTechnical:
+      'Your sessions: the browser you signed in with, and the dates. The server also logs each request it receives, with your IP address and the page asked for.',
+    notCollected:
+      'Not collected: passwords (there are none), your profile picture, your conversations with your AI app, analytics or advertising cookies. The only cookie is the one that keeps you signed in.',
+    whereTitle: 'Where it is stored',
+    where: 'In the database of this server, located in {location}. It is not copied to other services. Backups stay with the same host.',
+    whereUnknown: 'In the database of this server, run by the person who runs this LessonFolk. It is not copied to other services.',
     whyTitle: 'Why',
     why: 'To sign you in and to save your progress. Nothing else. Legal basis: providing the service you asked for.',
     howLongTitle: 'How long',
     howLong:
-      'Your data is kept until you delete your account. Sessions expire after 7 days. Server logs are kept for at most 30 days. Backups are kept for at most 35 days, so deleted data leaves them within 35 days.',
+      'Your data is kept until you delete your account. Sessions expire after 7 days. Server logs, the only place your IP address is kept, are kept for at most 30 days. Backups are kept for at most 35 days, so deleted data leaves them within 35 days.',
     rightsTitle: 'Your rights',
     rights:
       'On the Account page you can download all your data, and delete your account and everything linked to it, at any time. You can also ask the contact below to correct your data or answer a question.',
     sharedTitle: 'Who sees it',
-    shared: 'Only you, and the person who runs this LessonFolk. Your data is not sold or shared with advertisers. It is stored by the hosting provider of this server.',
+    shared:
+      'Only you, and the person who runs this LessonFolk. Your data is not sold or shared with advertisers. Your sign-in provider (GitHub or Google) knows that you sign in to LessonFolk. The hosting provider of this server stores the data on its behalf.',
     selfHostTitle: 'Prefer not to send your data?',
     selfHost:
       'LessonFolk is open source. You can run it on your own computer, with no sign-in, and nothing leaves it. The steps are in the project’s documentation on GitHub.',

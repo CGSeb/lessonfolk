@@ -39,6 +39,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       LESSONFOLK_PRIVACY_CONTACT: ${LESSONFOLK_PRIVACY_CONTACT:-}
+      LESSONFOLK_DATA_LOCATION: ${LESSONFOLK_DATA_LOCATION:-}
     # No published port: Caddy reaches it on the internal network. Pending migrations are
     # applied by the image's start command before the server starts.
     depends_on:

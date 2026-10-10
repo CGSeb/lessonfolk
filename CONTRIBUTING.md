@@ -107,6 +107,7 @@ never committed). Variables already set in your shell win over `.env`.
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | (none) | `oauth`: your GitHub OAuth app. Set both or neither. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | (none) | `oauth`: your Google OAuth client. Set both or neither. |
 | `LESSONFOLK_PRIVACY_CONTACT` | (none) | `oauth`: who learners write to about their data (an email address or a page), shown on the `/privacy` page. |
+| `LESSONFOLK_DATA_LOCATION` | (none) | `oauth`: the country or region where the server and its backups are, shown on the `/privacy` page (e.g. `Canada`). |
 | `LESSONFOLK_MCP_TOKEN` | (none) | `none` only: when set, the MCP server at `/mcp` requires `Authorization: Bearer <token>`. Without it, `/mcp` only answers this computer. (`oauth` uses OAuth access tokens instead.) |
 
 **Dashboard server and folders**
