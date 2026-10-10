@@ -1,19 +1,15 @@
 import type { APIContext, APIRoute } from 'astro';
-import { getAppMcpEndpoint } from '@lessonfolk/mcp';
+import { getAppMcpEndpoint, type TokenCheck } from '@lessonfolk/mcp';
 import { getAuth } from '../lib/auth/auth';
 import { getAuthSettings } from '../lib/auth/current-user';
 import { LOCAL_USER } from '../lib/auth/settings';
-import { eq } from 'drizzle-orm';
-import { user } from '@lessonfolk/db';
+import { isTokenAllowed } from '../lib/connected-apps';
 import { getDatabase, getProgressStore } from '../lib/store';
 
 export const prerender = false;
 
-/** Whether the account still exists: tokens of a deleted account stop working at once. */
-async function userExists(userId: string): Promise<boolean> {
-  const rows = await getDatabase().select({ id: user.id }).from(user).where(eq(user.id, userId)).limit(1);
-  return rows.length > 0;
-}
+/** Tokens of a deleted account or a disconnected app stop working at once (src/lib/connected-apps.ts). */
+const tokenAllowed: TokenCheck = (token) => isTokenAllowed(getDatabase(), token);
 
 /** Astro's `clientAddress` throws when the server cannot tell the caller's address. */
 function socketAddress(context: APIContext): string | undefined {
@@ -34,6 +30,6 @@ export const ALL: APIRoute = (context) => {
   const endpoint =
     settings.mode === 'none'
       ? getAppMcpEndpoint({ mode: 'none', userId: LOCAL_USER.id, store })
-      : getAppMcpEndpoint({ mode: 'oauth', auth: getAuth(), baseURL: settings.baseURL, store, userExists });
+      : getAppMcpEndpoint({ mode: 'oauth', auth: getAuth(), baseURL: settings.baseURL, store, tokenAllowed });
   return endpoint(context.request, { clientAddress: socketAddress(context) });
 };

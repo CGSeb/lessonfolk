@@ -1,0 +1,84 @@
+---
+/**
+ * The AI apps connected to the account (oauth mode): name, since when, and a Disconnect button
+ * that posts to /api/account/disconnect-app. Loads its own data, so the account page only
+ * places it.
+ */
+import Notice from '../Notice.astro';
+import { formatDate } from '../course/courseView';
+import { listConnectedApps } from '../../lib/connected-apps';
+import { getDatabase } from '../../lib/store';
+import { t } from '../../i18n/en';
+
+interface Props {
+  userId: string;
+}
+
+const apps = await listConnectedApps(getDatabase(), Astro.props.userId);
+const params = Astro.url.searchParams;
+---
+
+<section class="stack account-group" aria-labelledby="group-apps-heading" style="--stack-space: var(--space-3)">
+  <div class="stack" style="--stack-space: var(--space-1)">
+    <h2 id="group-apps-heading">{t('connectedApps.title')}</h2>
+    <p class="muted">{t('connectedApps.intro')}</p>
+  </div>
+
+  {
+    params.get('disconnected') === '1' && (
+      <Notice title={t('connectedApps.disconnected')} />
+    )
+  }
+  {
+    params.get('error') === 'app' && (
+      <Notice tone="warning" title={t('connectedApps.notFound')}>
+        <p>{t('connectedApps.notFoundBody')}</p>
+      </Notice>
+    )
+  }
+
+  {
+    apps.length === 0 ? (
+      <p class="muted">{t('connectedApps.none')}</p>
+    ) : (
+      <ul class="card stack connected-apps" style="--stack-space: var(--space-3)">
+        {apps.map((app) => {
+          const name = app.name?.trim() || t('connectedApps.unnamed');
+          return (
+            <li class="connected-app">
+              <div class="stack" style="--stack-space: var(--space-1)">
+                <strong>{name}</strong>
+                {app.since && <span class="muted account-small">{t('connectedApps.since', { date: formatDate(app.since.toISOString()) })}</span>}
+              </div>
+              <form method="post" action="/api/account/disconnect-app">
+                <input type="hidden" name="consent" value={app.id} />
+                <button class="button" type="submit" aria-label={t('connectedApps.disconnectLabel', { name })}>
+                  {t('connectedApps.disconnectButton')}
+                </button>
+              </form>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+</section>
+
+<style>
+  .connected-apps {
+    list-style: none;
+    margin: 0;
+  }
+
+  .connected-app {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .account-small {
+    font-size: var(--text-sm);
+  }
+</style>

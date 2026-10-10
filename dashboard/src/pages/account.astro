@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Notice from '../components/Notice.astro';
 import LocalImportOffer from '../components/account/LocalImportOffer.astro';
+import ConnectedApps from '../components/account/ConnectedApps.astro';
 import { offerLocalImport } from '../lib/account';
 import { signInHref } from '../lib/auth/redirect';
 import { loadProgress } from '../lib/store';
@@ -115,6 +116,8 @@ const oauth = authMode === 'oauth';
               <a href="/privacy">{t('account.privacyNote')}</a>
             </p>
           </section>
+
+          {oauth && <ConnectedApps userId={user.id} />}
 
           <section class="stack account-group account-danger" aria-labelledby="group-delete-heading" style="--stack-space: var(--space-3)">
             <div class="stack" style="--stack-space: var(--space-1)">

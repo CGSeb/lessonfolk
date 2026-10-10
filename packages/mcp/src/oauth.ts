@@ -99,6 +99,9 @@ function nativeLoopbackClients() {
   } satisfies BetterAuthPlugin;
 }
 
+/** Whether an access token (its user, client and issue time in seconds) may still be used. */
+export type TokenCheck = (token: { userId: string; clientId: string | undefined; issuedAt: number | undefined }) => Promise<boolean>;
+
 /** What `requireMcpAuth` needs from the Better Auth instance. */
 export type McpAuthServer = Parameters<typeof requireMcpAuth>[0];
 
@@ -106,9 +109,10 @@ export type McpAuthServer = Parameters<typeof requireMcpAuth>[0];
  * The gate of `LESSONFOLK_AUTH=oauth`: a valid access token for this endpoint (signature,
  * issuer, audience, expiry), else a 401 whose `WWW-Authenticate` header points to the
  * protected resource metadata, so the client can start the OAuth flow. The user id is the
- * token's subject; with `userExists`, a token of a deleted account is refused at once.
+ * token's subject; with `tokenAllowed`, a token the app has revoked (its user disconnected the
+ * client or deleted the account) is refused at once.
  */
-export function oauthGate(auth: McpAuthServer, baseURL: string, userExists?: (userId: string) => Promise<boolean>): McpGate {
+export function oauthGate(auth: McpAuthServer, baseURL: string, tokenAllowed?: TokenCheck): McpGate {
   return (request, next) =>
     requireMcpAuth(
       auth,
@@ -116,11 +120,13 @@ export function oauthGate(auth: McpAuthServer, baseURL: string, userExists?: (us
         if (typeof claims.sub !== 'string' || !claims.sub) {
           return Response.json({ error: 'invalid_token', error_description: 'The token has no user.' }, { status: 401 });
         }
-        // Access tokens are signed JWTs, valid until they expire: refuse those of a deleted account.
-        if (userExists && !(await userExists(claims.sub))) {
-          return Response.json({ error: 'invalid_token', error_description: 'This account no longer exists.' }, { status: 401 });
-        }
         const clientId = typeof claims.azp === 'string' ? claims.azp : typeof claims.client_id === 'string' ? claims.client_id : undefined;
+        // Access tokens are signed JWTs, valid until they expire: the app says whether this one was revoked
+        // (the app was disconnected, or the account deleted).
+        const issuedAt = typeof claims.iat === 'number' ? claims.iat : undefined;
+        if (tokenAllowed && !(await tokenAllowed({ userId: claims.sub, clientId, issuedAt }))) {
+          return Response.json({ error: 'invalid_token', error_description: 'This token was revoked.' }, { status: 401 });
+        }
         return next({ userId: claims.sub, client: clientId ? `mcp:${clientId}` : 'mcp' });
       },
       { resource: mcpResource(baseURL) },

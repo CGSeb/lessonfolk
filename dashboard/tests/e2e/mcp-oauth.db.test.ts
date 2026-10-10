@@ -244,6 +244,85 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
     expect((await call()).status).toBe(401);
   });
 
+  it('lets a learner disconnect an app: its access and refresh tokens stop working, and nobody else can do it', async () => {
+    const d = await discover();
+    const clientId = await register(d);
+    const callMcp = (token: string) =>
+      fetch(`${baseURL}/mcp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+      });
+    const refresh = (refreshToken: string) =>
+      fetch(d.tokenEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken, client_id: clientId, resource: d.resource }).toString(),
+      });
+    const signIn = async (profile: Parameters<FakeOAuthServer['signInAs']>[0]) => {
+      const browser = new Browser(baseURL);
+      fake.signInAs(profile);
+      const start = await browser.post('/sign-in/fake', { next: '/account' });
+      const approved = await fetch(location(start), { redirect: 'manual' });
+      await browser.request(location(approved));
+      return browser;
+    };
+
+    const kim = { sub: 'fake-kim', name: 'Kim Connected', email: 'kim@example.test' };
+    const lee = { sub: 'fake-lee', name: 'Lee Other', email: 'lee@example.test' };
+    fake.signInAs(kim);
+    const kimToken = await authorize(d, clientId);
+    fake.signInAs(lee);
+    const leeToken = await authorize(d, clientId);
+    expect(kimToken.refresh_token).toBeTruthy();
+    expect((await callMcp(kimToken.access_token)).status).toBe(200);
+
+    // The account page lists the app, for its own user only.
+    const kimBrowser = await signIn(kim);
+    const leeBrowser = await signIn(lee);
+    const kimPage = await (await kimBrowser.request('/account')).text();
+    expect(visibleText(kimPage)).toContain('Test MCP client');
+    expect(visibleText(kimPage)).toContain('Connected since');
+    const consentIdOf = (html: string) => /name="consent" value="([^"]+)"/.exec(html)?.[1];
+    const kimConsent = consentIdOf(kimPage)!;
+    const leeConsent = consentIdOf(await (await leeBrowser.request('/account')).text())!;
+    expect(kimConsent).toBeTruthy();
+    expect(leeConsent).not.toBe(kimConsent);
+
+    // Lee posts Kim's consent id: nothing is revoked.
+    const attempt = await leeBrowser.post('/api/account/disconnect-app', { consent: kimConsent });
+    expect(location(attempt)).toContain('error=app');
+    expect((await callMcp(kimToken.access_token)).status).toBe(200);
+    // A signed-out visitor and a cross-site post get nowhere either.
+    expect(location(await new Browser(baseURL).post('/api/account/disconnect-app', { consent: kimConsent }))).toContain('/sign-in');
+    const crossSite = await fetch(`${baseURL}/api/account/disconnect-app`, {
+      method: 'POST',
+      headers: { Origin: 'https://evil.example', 'Content-Type': 'application/x-www-form-urlencoded', Cookie: kimBrowser.cookieHeader() },
+      body: `consent=${kimConsent}`,
+      redirect: 'manual',
+    });
+    expect(crossSite.status).toBe(403);
+    expect((await callMcp(kimToken.access_token)).status).toBe(200);
+
+    // Kim disconnects: access token, refresh token and the listing all go.
+    const done = await kimBrowser.post('/api/account/disconnect-app', { consent: kimConsent });
+    expect(location(done)).toContain('disconnected=1');
+    expect((await callMcp(kimToken.access_token)).status).toBe(401);
+    expect((await refresh(kimToken.refresh_token!)).status).toBeGreaterThanOrEqual(400);
+    expect(visibleText(await (await kimBrowser.request('/account')).text())).toContain('No AI app is connected');
+    // Lee is unaffected.
+    expect((await callMcp(leeToken.access_token)).status).toBe(200);
+    expect((await refresh(leeToken.refresh_token!)).status).toBe(200);
+    expect(consentIdOf(await (await leeBrowser.request('/account')).text())).toBe(leeConsent);
+
+    // Allowing the app again does not bring the old token back (consents and tokens are dated to the second).
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    fake.signInAs(kim);
+    const again = await authorize(d, clientId);
+    expect((await callMcp(again.access_token)).status).toBe(200);
+    expect((await callMcp(kimToken.access_token)).status).toBe(401);
+  });
+
   it('refuses a forged or foreign token', async () => {
     const d = await discover();
     const forged = `${Buffer.from('{"alg":"none"}').toString('base64url')}.${Buffer.from(JSON.stringify({ sub: 'fake-robin', aud: d.resource })).toString('base64url')}.`;

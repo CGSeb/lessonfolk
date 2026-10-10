@@ -432,6 +432,19 @@ export const en = {
     tooLarge: 'This file is too large to be a progress.json (more than 1 MB).',
     notFoundLocal: 'The progress file {file} was not found.',
   },
+  connectedApps: {
+    title: 'AI apps connected to your account',
+    intro:
+      'These AI apps can read and save your progress for you. Disconnect one to cut it off at once: it will have to ask for your permission again before it can use LessonFolk.',
+    none: 'No AI app is connected to your account.',
+    unnamed: 'An AI app',
+    since: 'Connected since {date}',
+    disconnectButton: 'Disconnect',
+    disconnectLabel: 'Disconnect {name}',
+    disconnected: 'The app was disconnected. It can no longer use your account.',
+    notFound: 'Nothing was disconnected',
+    notFoundBody: 'This app was not connected to your account any more.',
+  },
 } as const;
 
 /** Shape every UI translation must follow (same keys, any string values). */

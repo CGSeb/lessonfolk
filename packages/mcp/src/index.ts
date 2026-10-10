@@ -15,5 +15,6 @@ export {
   rootDiscoveryHandler,
   verifyOAuthQueryParams,
   type McpAuthServer,
+  type TokenCheck,
 } from './oauth.ts';
 export { getAppMcpEndpoint, MCP_TOKEN_ENV, type AppMcpSettings } from './app.ts';
