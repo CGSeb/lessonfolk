@@ -92,12 +92,8 @@ Changing the schema and generating migrations: see
 | `mcp-none.db.test.ts` | `/mcp` in `none` mode with the MCP client: tools for the local learner, other sites refused, `LESSONFOLK_MCP_TOKEN` required when set |
 | `account-none.db.test.ts` | `none` mode: the Connect page (address, apps, token note), the first-run import of `.progress/progress.json` (from a temporary `LESSONFOLK_ROOT`), import preview and confirm, invalid files refused, export round trip, cross-site posts refused, erase removes the local learner's rows |
 | `account-oauth.db.test.ts` | `oauth` mode: Connect page with `LESSONFOLK_BASE_URL`, account routes need sign-in, import and export for the signed-in user only, deleting the account removes all that user's rows and signs out |
-<<<<<<< HEAD
 | `sessions-oauth.db.test.ts` | `oauth` mode: the Account page lists a learner's browser sessions (no IP address), ends one, the others or all, never another learner's, and a session ends 30 days after sign-in |
-| `mcp-oauth.db.test.ts` | `/mcp` in `oauth` mode as an MCP client connects: 401 with the resource metadata, discovery, dynamic client registration, sign-in (fake provider), consent (allow and deny), PKCE token, then the tools as that user; two users apart (one cannot read or write the other's progress, even with a user id argument); forged tokens refused; oversized bodies refused (413); open client registration rate limited (429) |
-=======
 | `mcp-oauth.db.test.ts` | `/mcp` in `oauth` mode as an MCP client connects: 401 with the resource metadata, discovery, dynamic client registration, sign-in (fake provider), consent (allow and deny; the page says the app name is unverified and shows the redirect host), PKCE token, then the tools as that user; two users apart (one cannot read or write the other's progress, even with a user id argument); forged tokens refused; oversized bodies refused (413); open client registration rate limited (429) |
->>>>>>> origin/main
 
 Progress fixtures (`dashboard/tests/fixtures/progress/`, progress.json files the tests import into Postgres):
 
