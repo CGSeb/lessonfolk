@@ -221,6 +221,10 @@ method (`store.ts`, implemented in `packages/db/src/progress-store.ts`, which lo
 `packages/mcp/prompts/learn.md` (plus its phrase in `instructions.md` and the `learn` skill).
 `reset_course` is a small example. Add the manual check to `docs/testing.md`.
 
+Give every new text or list argument of an MCP tool a `.max()` from `LIMITS` in `server.ts`. The
+store also refuses any write that would make a learner's saved progress larger than the 1 MB
+import limit (`MAX_IMPORT_BYTES`).
+
 ## Contributing a course
 
 A lesson is a Markdown file with key ideas, teaching notes for the tutor, questions to check
