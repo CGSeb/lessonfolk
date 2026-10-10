@@ -11,7 +11,7 @@ x-logging: &logging
 
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
     environment:
       POSTGRES_USER: lessonfolk
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
@@ -30,7 +30,11 @@ services:
   app:
     image: ghcr.io/cgseb/lessonfolk:${LESSONFOLK_IMAGE_TAG:-latest}
     environment:
-      DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD}@db:5432/lessonfolk
+      # The app runs as the least-privilege role lessonfolk_app. The start command applies the
+      # migrations and creates/updates that role as the owner (DATABASE_MIGRATION_URL).
+      DATABASE_URL: postgres://lessonfolk_app:${LESSONFOLK_APP_DB_PASSWORD:?Set LESSONFOLK_APP_DB_PASSWORD in .env}@db:5432/lessonfolk
+      DATABASE_MIGRATION_URL: postgres://lessonfolk:${POSTGRES_PASSWORD}@db:5432/lessonfolk
+      LESSONFOLK_APP_DB_PASSWORD: ${LESSONFOLK_APP_DB_PASSWORD}
       LESSONFOLK_AUTH: oauth
       LESSONFOLK_BASE_URL: https://${LESSONFOLK_DOMAIN:?Set LESSONFOLK_DOMAIN in .env}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
@@ -49,7 +53,7 @@ services:
     restart: unless-stopped
 
   caddy:
-    image: caddy:2-alpine
+    image: caddy:2-alpine@sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f
     environment:
       LESSONFOLK_DOMAIN: ${LESSONFOLK_DOMAIN}
     ports:

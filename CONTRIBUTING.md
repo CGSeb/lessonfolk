@@ -22,6 +22,7 @@ You can contribute in two ways, and they need different setups:
 - [Contributing a course](#contributing-a-course)
 - [Workflow](#workflow)
 - [Brand and design](#brand-and-design)
+- [Content Security Policy](#content-security-policy)
 - [Search engines and AI search](#search-engines-and-ai-search)
 
 ## Repository map
@@ -89,6 +90,8 @@ never committed). Variables already set in your shell win over `.env`.
 | Variable | Default | What it does |
 |---|---|---|
 | `DATABASE_URL` | `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` | The Postgres server for the tests, the migrations, sign-in and the dashboard's progress (in every mode; `LESSONFOLK_AUTH=none` applies pending migrations and creates the local learner on start). In Docker Compose, the app gets its own value pointing to the `db` service. |
+| `DATABASE_MIGRATION_URL` | `DATABASE_URL` | The database owner, used only for migrations and for creating the runtime role. In Docker Compose and the hosted deployment the app runs as the least-privilege role `lessonfolk_app` (`DATABASE_URL`); the image's start command (`npm run migrate`) applies the migrations as the owner first. Leave it unset in development: one account does everything. |
+| `LESSONFOLK_APP_DB_PASSWORD` | `lessonfolk-app` (Compose) | Password of the `lessonfolk_app` role. When set, `migrate` creates or updates the role (connect, read and write the tables and sequences of `public`, no schema changes, no `CREATEDB`/`CREATEROLE`) and re-grants it, so tables added by new migrations are covered. Letters and digits only (it goes in a URL). |
 | `POSTGRES_PASSWORD` | `lessonfolk` | Docker Compose: the password of the `db` service. Change `DATABASE_URL` to match. |
 | `LESSONFOLK_PORT` | `4321` | Docker Compose: the port of the app on your computer. |
 | `LESSONFOLK_DB_PORT` | `5432` | Docker Compose: the port of Postgres on your computer. Change `DATABASE_URL` to match. |
@@ -221,6 +224,10 @@ method (`store.ts`, implemented in `packages/db/src/progress-store.ts`, which lo
 `packages/mcp/prompts/learn.md` (plus its phrase in `instructions.md` and the `learn` skill).
 `reset_course` is a small example. Add the manual check to `docs/testing.md`.
 
+Give every new text or list argument of an MCP tool a `.max()` from `LIMITS` in `server.ts`. The
+store also refuses any write that would make a learner's saved progress larger than the 1 MB
+import limit (`MAX_IMPORT_BYTES`).
+
 ## Contributing a course
 
 A lesson is a Markdown file with key ideas, teaching notes for the tutor, questions to check
@@ -291,6 +298,12 @@ Course text is published under [CC BY 4.0](courses/LICENSE). Course authors are 
 
 Never commit `.progress/` or `.env`.
 
+Docker images (`FROM` in the `Dockerfile`, `image:` in the compose files and in `test.yml`) are
+pinned as `tag@sha256:<digest>` of the multi-arch index, so a rebuilt tag cannot change them
+silently. Dependabot opens the weekly pull requests that refresh the digests (the `test.yml`
+Postgres image has to be updated by hand together with the compose files). To bump one by hand:
+`docker buildx imagetools inspect <tag>` and copy the top-level `Digest`.
+
 ## Brand and design
 
 The logo, colours, type, spacing and voice are in [`docs/brand.md`](docs/brand.md). The
@@ -298,6 +311,22 @@ dashboard uses the design tokens in
 [`dashboard/src/styles/tokens.css`](dashboard/src/styles/tokens.css): use the tokens, never raw
 values. Write interface text and docs in plain, warm language: short sentences, every technical
 term defined the first time.
+
+## Content Security Policy
+
+The dashboard's CSP allows no `'unsafe-inline'` for scripts or `<style>` elements. Astro builds it
+(`security.csp` in `dashboard/astro.config.mjs`, directives in
+[`dashboard/src/lib/security-headers.ts`](dashboard/src/lib/security-headers.ts)): it hashes the
+scripts and styles it inlines. When you add to a page:
+
+- **Scripts**: use a normal `<script>` in an `.astro` file (Astro bundles and hashes it) or a file
+  in `dashboard/public/`. No `is:inline` script with code in it, no inline event handlers
+  (`onclick=…`), no third-party script hosts without adding them to the config.
+- **Styles**: `<style>` blocks are fine. Inline `style="--var: …"` attributes are allowed
+  (`style-src-attr`), but prefer a class.
+- The CSP only exists in builds, not in `npm run dashboard`: check new pages with
+  `npm run dashboard:build` then `npm run dashboard:start`, and look for "violates the following
+  Content Security Policy" in the browser console.
 
 ## Search engines and AI search
 

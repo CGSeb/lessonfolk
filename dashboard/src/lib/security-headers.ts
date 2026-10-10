@@ -1,22 +1,37 @@
 /**
  * Security headers sent with every response (set in src/middleware.ts).
  *
- * The CSP allows inline scripts and styles because Astro inlines its small page scripts and the
- * theme script runs before first paint; everything else is limited to this site. There is no
- * `form-action` on purpose: browsers also apply it to the redirects after a form post, which
- * would block the sign-in redirect to the provider (cross-site form posts are refused by
- * src/lib/auth/origin-check.ts instead).
+ * The CSP has no `'unsafe-inline'` for scripts and none for `<style>` elements. Astro's CSP support
+ * (`security.csp` in astro.config.mjs) hashes the scripts and styles it inlines and adds the
+ * `script-src` and `style-src` directives to each page's own CSP header, together with the
+ * directives below. The theme script is a file (public/theme-init.js), not an inline script.
+ * Only inline `style="…"` attributes (layout variables such as `--stack-space`) stay allowed,
+ * through `style-src-attr`: they cannot run code. There is no `form-action` on purpose: browsers
+ * also apply it to the redirects after a form post, which would block the sign-in redirect to the
+ * provider (cross-site form posts are refused by src/lib/auth/origin-check.ts instead).
  */
-export const CONTENT_SECURITY_POLICY = [
+export const CSP_DIRECTIVES = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https:",
   "font-src 'self' data:",
   "connect-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'none'",
+] as const;
+
+/** Inline `style` attributes, the only inline code the CSP allows. */
+export const STYLE_ATTRIBUTE_SOURCE = "'unsafe-inline'";
+
+/**
+ * The CSP of responses Astro adds none to (API routes, redirects, errors). Pages get Astro's
+ * CSP instead, which has the same directives plus the hashes of their scripts and styles.
+ */
+export const CONTENT_SECURITY_POLICY = [
+  ...CSP_DIRECTIVES,
+  "script-src 'self'",
+  "style-src 'self'",
+  `style-src-attr ${STYLE_ATTRIBUTE_SOURCE}`,
 ].join('; ');
 
 /** One year; browsers only honour it over HTTPS. */

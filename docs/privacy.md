@@ -21,7 +21,7 @@ by an `on delete cascade` key, so deleting the user row deletes it all.
 | `account` | sign-in provider and the learner's id there, scope | yes | access, refresh and id tokens, password |
 | `session` | browser, dates (the IP address is never stored; the `ip_address` column stays empty because Better Auth requires it) | yes | session token |
 | `verification` | short-lived sign-in values (minutes); deleted with the account when keyed by email or user id | no (not linked to the user) | all |
-| `oauth_client` | AI apps the learner registered: name, address, contacts | yes | client secret |
+| `oauth_client` | AI apps that registered themselves: name, address, contacts. Clients nobody allowed are deleted after 7 days | yes | client secret |
 | `oauth_consent` | which AI app the learner allowed, with which scopes | yes | |
 | `oauth_access_token`, `oauth_refresh_token` | which app, scopes, dates | yes (metadata) | token values |
 | `learner` | profile (name, experience, goal, language, level, interests), path | yes | |

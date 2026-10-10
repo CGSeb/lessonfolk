@@ -154,7 +154,11 @@ async function authorize(
   expect(consentUrl.pathname).toBe('/oauth/consent');
   const consentPage = await browser.request(consentUrl.href);
   expect(consentPage.status).toBe(200);
-  expect(visibleText(await consentPage.text())).toContain('Allow Test MCP client to use LessonFolk?');
+  const consentText = visibleText(await consentPage.text());
+  expect(consentText).toContain('Allow Test MCP client to use LessonFolk?');
+  expect(consentText).toContain('was chosen by the app itself');
+  expect(consentText).toContain('localhost:33418');
+  expect(consentText).toContain('on your own computer');
 
   const decided = await browser.post('/oauth/consent/decide', { oauth_query: consentUrl.search.slice(1), accept: String(accept), ...(allowWrite ? { allow_write: 'true' } : {}) });
   expect(decided.status, await decided.clone().text()).toBe(303);

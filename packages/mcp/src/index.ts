@@ -8,6 +8,7 @@ export {
   MCP_PATH,
   OAUTH_CONSENT_PATH,
   OAUTH_SIGN_IN_PATH,
+  isLoopbackHost,
   mcpAuthPlugins,
   mcpAuthSchema,
   mcpResource,

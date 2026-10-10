@@ -25,7 +25,8 @@ the `db-data` volume); `docker compose stop db` stops it when you are done.
 - The tests connect with `DATABASE_URL`, by default
   `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` (the `db` service). To use
   another server or port, see [Environment variables](../CONTRIBUTING.md#environment-variables).
-  The user needs the right to create databases.
+  The user needs the right to create databases (the owner, not the app's `lessonfolk_app` role;
+  `packages/db/src/app-role.db.test.ts` checks that role can run the progress store and nothing more).
 - Each test file gets its **own fresh database**, created and migrated by
   `createTestDatabase()` from `@lessonfolk/db/testing` and dropped at the end, so test
   files run in parallel without seeing each other's rows:
@@ -91,7 +92,7 @@ Changing the schema and generating migrations: see
 | `mcp-none.db.test.ts` | `/mcp` in `none` mode with the MCP client: tools for the local learner, other sites refused, `LESSONFOLK_MCP_TOKEN` required when set |
 | `account-none.db.test.ts` | `none` mode: the Connect page (address, apps, token note), the first-run import of `.progress/progress.json` (from a temporary `LESSONFOLK_ROOT`), import preview and confirm, invalid files refused, export round trip, cross-site posts refused, erase removes the local learner's rows |
 | `account-oauth.db.test.ts` | `oauth` mode: Connect page with `LESSONFOLK_BASE_URL`, account routes need sign-in, import and export for the signed-in user only, deleting the account removes all that user's rows and signs out |
-| `mcp-oauth.db.test.ts` | `/mcp` in `oauth` mode as an MCP client connects: 401 with the resource metadata, discovery, dynamic client registration, sign-in (fake provider), consent (allow and deny), PKCE token, then the tools as that user; two users apart (one cannot read or write the other's progress, even with a user id argument); forged tokens refused; oversized bodies refused (413); open client registration rate limited (429) |
+| `mcp-oauth.db.test.ts` | `/mcp` in `oauth` mode as an MCP client connects: 401 with the resource metadata, discovery, dynamic client registration, sign-in (fake provider), consent (allow and deny; the page says the app name is unverified and shows the redirect host), PKCE token, then the tools as that user; two users apart (one cannot read or write the other's progress, even with a user id argument); forged tokens refused; oversized bodies refused (413); open client registration rate limited (429) |
 
 Progress fixtures (`dashboard/tests/fixtures/progress/`, progress.json files the tests import into Postgres):
 
