@@ -11,6 +11,9 @@ export function redirectWithCookies(location: string, from?: Response): Response
  */
 export function safeReturnPath(next: string | null | undefined): string {
   if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return '/';
+  // Browsers drop tabs and line breaks inside a URL, so "/<tab>/evil.example" would become "//evil.example".
+  // Control characters have no place in a path anyway.
+  if (/[\u0000-\u001f\u007f]/.test(next)) return '/';
   return next;
 }
 

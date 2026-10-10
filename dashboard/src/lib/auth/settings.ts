@@ -177,13 +177,33 @@ export function exposedHost(env: Env = process.env): { host: string; from: 'LESS
  * Startup safety checks. `none` has no sign-in, so anyone who can reach the server
  * would see and change the learner's data: it only runs on a loopback address.
  */
-export function checkStartup(settings: AuthSettings, exposed: { host: string; from: string } = exposedHost()): void {
+export function checkStartup(
+  settings: AuthSettings,
+  exposed: { host: string; from: string } = exposedHost(),
+  env: Env = process.env,
+): void {
   if (settings.mode === 'none' && !isLoopback(exposed.host)) {
     throw new AuthConfigError(
       `LESSONFOLK_AUTH=none has no sign-in, so it only runs on 127.0.0.1, but the server would be reachable on ` +
         `"${exposed.host}" (from ${exposed.from}). Use 127.0.0.1, or set LESSONFOLK_AUTH=oauth with a sign-in provider ` +
         '(see docs/auth-dev.md).',
     );
+  }
+  // A public address means a hosted setup (behind a reverse proxy, the listening address says nothing): never without sign-in.
+  const baseURL = value(env, 'LESSONFOLK_BASE_URL');
+  if (settings.mode === 'none' && baseURL && !isLoopbackURL(baseURL)) {
+    throw new AuthConfigError(
+      `LESSONFOLK_AUTH=none has no sign-in, but LESSONFOLK_BASE_URL is "${baseURL}", an address other than this computer. ` +
+        'Set LESSONFOLK_AUTH=oauth, or remove LESSONFOLK_BASE_URL (see docs/auth-dev.md).',
+    );
+  }
+}
+
+function isLoopbackURL(raw: string): boolean {
+  try {
+    return isLoopback(new URL(raw).hostname);
+  } catch {
+    return false;
   }
 }
 
