@@ -11,6 +11,7 @@ import { createAuthMiddleware } from 'better-auth/api';
 import { jwt } from 'better-auth/plugins';
 import type { BetterAuthPlugin } from 'better-auth/types';
 import type { McpGate } from './endpoint.ts';
+import { LESSONFOLK_SCOPES, parseScopeClaim } from './scopes.ts';
 
 export { mcpAuthSchema } from '@lessonfolk/db';
 /** Checks the signature and expiry of the authorization request Better Auth hands to the consent page. */
@@ -62,7 +63,7 @@ export function mcpAuthPlugins(baseURL: string, options: { purgeUnusedClients?: 
       resource: mcpResource(baseURL),
       loginPage: OAUTH_SIGN_IN_PATH,
       consentPage: OAUTH_CONSENT_PATH,
-      scopes: ['openid', 'profile', 'email', 'offline_access'],
+      scopes: ['openid', 'profile', 'email', 'offline_access', ...LESSONFOLK_SCOPES],
       allowDynamicClientRegistration: true,
       allowUnauthenticatedClientRegistration: true,
     }),
@@ -158,7 +159,7 @@ export function oauthGate(auth: McpAuthServer, baseURL: string, userExists?: (us
           return Response.json({ error: 'invalid_token', error_description: 'This account no longer exists.' }, { status: 401 });
         }
         const clientId = typeof claims.azp === 'string' ? claims.azp : typeof claims.client_id === 'string' ? claims.client_id : undefined;
-        return next({ userId: claims.sub, client: clientId ? `mcp:${clientId}` : 'mcp' });
+        return next({ userId: claims.sub, client: clientId ? `mcp:${clientId}` : 'mcp', scopes: parseScopeClaim(claims.scope) });
       },
       { resource: mcpResource(baseURL) },
     )(request);

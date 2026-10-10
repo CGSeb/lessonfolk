@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { DEFAULT_LANG, courseSummary, findLesson, lessonStatus, readCatalog, readCourses, readLessonText } from './catalog.ts';
 import { INSTRUCTIONS, registerPrompts } from './prompts.ts';
 import type { RateLimiter } from './rate-limit.ts';
+import { SCOPE_READ, SCOPE_WRITE, accessFromScopes } from './scopes.ts';
 
 export const SERVER_INFO = { name: 'lessonfolk', version: '0.1.0' } as const;
 
@@ -33,6 +34,8 @@ export interface LessonfolkServerOptions {
   writeLimiter: RateLimiter;
   /** Kept in the progress change log, e.g. `mcp` or `mcp:<oauth client id>`. */
   client?: string;
+  /** The token's scopes (see scopes.ts); left out means full access. Enforced per tool. */
+  scopes?: string[];
 }
 
 /** Size caps on every free-text argument: the tutor never needs more, and a client must not store megabytes. */
@@ -75,11 +78,18 @@ function report(error: unknown): CallToolResult {
   return fail(describeError(error));
 }
 
-export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter, client = 'mcp' }: LessonfolkServerOptions): McpServer {
+export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter, client = 'mcp', scopes }: LessonfolkServerOptions): McpServer {
   const server = new McpServer(SERVER_INFO, { instructions: INSTRUCTIONS });
   const writeOptions: WriteOptions = { client };
+  const access = accessFromScopes(scopes);
+  const denied = (scope: string) =>
+    fail(
+      `This app was not allowed to ${scope === SCOPE_WRITE ? 'change' : 'read'} the learner's LessonFolk data (missing permission ${scope}). ` +
+        'Nothing was done. Tell the learner, and ask them to connect LessonFolk again and allow it.',
+    );
 
   const read = async (run: () => Promise<unknown> | unknown): Promise<CallToolResult> => {
+    if (!access.read) return denied(SCOPE_READ);
     try {
       const value = await run();
       return ok(typeof value === 'string' ? value : json(value));
@@ -90,6 +100,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
 
   /** A write: rate-limited, then the store applies the tutor rules and returns the new progress. */
   const write = async (done: string, run: () => Promise<Progress>): Promise<CallToolResult> => {
+    if (!access.write) return denied(SCOPE_WRITE);
     const wait = writeLimiter.take(userId);
     if (wait) return fail(`Too many changes in a short time: wait ${wait} seconds, then try again. Nothing was saved.`);
     try {

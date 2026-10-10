@@ -18,6 +18,8 @@ export interface McpIdentity {
   userId: string;
   /** Kept in the progress change log. */
   client?: string;
+  /** The scopes of the access token (oauth). Absent: full access (none mode). See scopes.ts. */
+  scopes?: string[];
 }
 
 /**
@@ -65,7 +67,7 @@ export function createMcpEndpoint({
       const identity = authInfo?.extra?.identity as McpIdentity | undefined;
       // Unreachable through the endpoint: every request passes the gate first.
       if (!identity) throw new Error('MCP request without an identity.');
-      return createLessonfolkServer({ userId: identity.userId, client: identity.client, store, coursesDir, writeLimiter });
+      return createLessonfolkServer({ userId: identity.userId, client: identity.client, scopes: identity.scopes, store, coursesDir, writeLimiter });
     },
     { onerror: (error) => console.error('LessonFolk MCP:', error.message) },
   );
@@ -78,7 +80,7 @@ export function createMcpEndpoint({
     return gate(sized, (identity) => {
       const tooManyForUser = limitRequest(userLimiter, identity.userId);
       if (tooManyForUser) return Promise.resolve(tooManyForUser);
-      return handler.fetch(sized, { authInfo: { token: '', clientId: identity.client ?? 'mcp', scopes: [], extra: { identity } } });
+      return handler.fetch(sized, { authInfo: { token: '', clientId: identity.client ?? 'mcp', scopes: identity.scopes ?? [], extra: { identity } } });
     });
   };
 }
