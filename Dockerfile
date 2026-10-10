@@ -2,7 +2,7 @@
 # Built and started by docker-compose.yml (`docker compose up --build`).
 
 # --- Dependencies: every workspace, dev dependencies included (needed to build) ---
-FROM node:22-alpine AS deps
+FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY dashboard/package.json dashboard/
@@ -20,7 +20,7 @@ COPY dashboard dashboard
 RUN npm run build --workspace dashboard
 
 # --- Production dependencies only ---
-FROM node:22-alpine AS prod-deps
+FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS prod-deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY dashboard/package.json dashboard/
@@ -33,7 +33,7 @@ RUN npm ci --omit=dev --no-audit --no-fund \
     && rm -rf node_modules/drizzle-kit node_modules/@esbuild-kit
 
 # --- Runtime ---
-FROM node:22-alpine
+FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
 # The server only needs `node`: drop npm, npx, corepack and yarn (their bundled packages carry
 # CVEs, and a package manager is of no use to the app).
 RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \

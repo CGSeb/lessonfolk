@@ -11,7 +11,7 @@ name: lessonfolk
 
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
     environment:
       POSTGRES_USER: lessonfolk
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lessonfolk}
@@ -56,7 +56,7 @@ services:
   # The LessonFolk connection is pre-configured; sign in as cbadmin / lessonfolk-dev.
   cloudbeaver:
     profiles: ["tools"]
-    image: dbeaver/cloudbeaver:latest
+    image: dbeaver/cloudbeaver:latest@sha256:7298c59289e9519d8913083c85f3ceb475aa12db0f58e87b6491445a9b298d2c
     environment:
       CB_SERVER_NAME: LessonFolk
       CB_ADMIN_NAME: cbadmin
