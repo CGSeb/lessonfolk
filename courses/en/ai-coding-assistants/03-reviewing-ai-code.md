@@ -60,6 +60,8 @@ prerequisites:
    Good answer: any two of missing input validation, missing authorization check, injection (SQL or HTML built from user input), swallowed errors, unhandled edge cases, outdated or deprecated API usage, unrequested changes elsewhere.
 3. Why should you read the whole diff, not only the function you asked for?
    Good answer: assistants sometimes make unrequested changes (renames, reformatting, deleted code, edits in other files) that can break things or hide in a large change.
+4. A bug in AI-written code you merged reaches production. Who answers for it, and what does that mean for how you review?
+   Good answer: you do; code you accept goes in under your name and "the AI wrote it" explains nothing, so you review it at least as carefully as a new teammate's code.
 
 ## Exercise
 Needs a computer and any coding assistant. Ask the assistant for a small web feature that

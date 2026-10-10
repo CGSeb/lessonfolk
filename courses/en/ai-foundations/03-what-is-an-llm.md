@@ -46,4 +46,4 @@ from your job or hobby. Look for anything inaccurate or vague and discuss it wit
 The learner can explain next-token prediction in their own words and why outputs should be checked.
 
 ## Going further
-- Next course idea: "Prompting basics — talking to AI effectively".
+- Prompting Basics, to write clear requests and get better answers from a chat assistant.

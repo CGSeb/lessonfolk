@@ -76,6 +76,8 @@ prerequisites:
    Good answer: a command is a saved prompt you call explicitly by name; a skill has a description that stays in context so the assistant can load its instructions (and files) on its own when a task matches, as well as when you call it.
 3. What does a plugin add compared with committing a few command files to the repository?
    Good answer: it bundles several pieces (commands, skills, agents, hooks, MCP connections) into one installable, versioned unit that can be shared across projects and teams through a catalogue.
+4. Each time your assistant reviews a pull request against the team checklist, the long review fills the main conversation. Which option from this lesson fits, and why?
+   Good answer: a subagent (a reviewer with its own instructions and limited tools); it works in its own context and returns only the result.
 
 ## Exercise
 Needs a computer and a coding assistant that supports commands or skills (check its

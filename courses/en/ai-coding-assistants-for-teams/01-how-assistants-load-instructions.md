@@ -12,9 +12,9 @@ prerequisites:
 ---
 
 ## Key ideas
-1. **A brief you write once.** In the previous course you learned to give an assistant the
-   context a new teammate would need. A **project instructions file** is that brief, saved in
-   the repository: how to build and test, how the code is organised, the team's conventions.
+1. **A brief you write once.** An assistant does better work with the context a new teammate
+   would need (covered in AI Coding Assistants in Practice). A **project instructions file** is
+   that brief, saved in the repository: how to build and test, how the code is organised, the team's conventions.
    The tool adds it to the model's context automatically at the start of every session, so
    nobody has to repeat it, and everyone on the team gets the same brief.
 2. **AGENTS.md is the shared convention.** `AGENTS.md` is a plain Markdown file at the root of

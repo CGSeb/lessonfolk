@@ -37,13 +37,15 @@ prerequisites: []
    Good answer: any two valid examples (recommendations, spam filter, face unlock, translation, maps…).
 3. What is the difference between a rule-based program and a program that learns?
    Good answer: rules are written by humans explicitly; learning systems find patterns from examples/data.
+4. How is today's AI different from the AI of science-fiction films?
+   Good answer: today's AI is narrow, good at specific tasks, with no wishes, feelings or human-like understanding; an AI that can do anything a person can is still a research goal.
 
 ## Exercise
 No computer needed. Over the next day, notice three moments where AI is working for you
 without you asking. Share them at the start of the next lesson.
 
 ## Completion criteria
-The learner answered questions 1 and 3 correctly (with help if needed) and can give at least one real example.
+The learner answered questions 1, 3 and 4 correctly (with help if needed) and can give at least one real example.
 
 ## Going further
 - The history of AI: from the 1956 Dartmouth workshop to today.

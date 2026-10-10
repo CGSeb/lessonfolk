@@ -36,6 +36,8 @@ prerequisites:
    Good answer: it may fail on other conditions (night, indoors, snow) — the data didn't represent them.
 3. Why is memorising the training examples not enough?
    Good answer: the model must work on new, unseen examples.
+4. What is the difference between a model and a prediction?
+   Good answer: the model is the result of training (the adjusted numbers); a prediction is the answer the model gives on a new input.
 
 ## Exercise
 No computer needed. Pick a task (e.g. sorting emails into "urgent" / "not urgent") and
