@@ -6,6 +6,7 @@ import Notice from '../components/Notice.astro';
 import OverallProgress from '../components/home/OverallProgress.astro';
 import ProfileSummary from '../components/home/ProfileSummary.astro';
 import SayPhrase from '../components/home/SayPhrase.astro';
+import SayTurn from '../components/home/SayTurn.astro';
 import YourPath from '../components/home/YourPath.astro';
 import { getHomeView } from '../components/home/homeView';
 import { t } from '../i18n/en';
@@ -42,7 +43,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
 
 <BaseLayout jsonLd={user ? undefined : websiteJsonLd(siteOrigin(Astro.url), t('site.description'))}>
   {!user && <Landing />}
-  {user && <div class="stack home" style="--stack-space: var(--space-6)">
+  {user && <div class="stack home" style="--stack-space: var(--space-5)">
     {offerImport && <LocalImportOffer />}
     {
       progressError && (
@@ -90,12 +91,13 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
     {
       view.state === 'new' ? (
         <>
-          <header class="stack" style="--stack-space: var(--space-2)">
+          <p class="speaker">{t('thread.tutor')}</p>
+          <header class="card card--indigo home-hello stack" style="--stack-space: var(--space-3)">
             <h1>{t('home.heading')}</h1>
             <p class="home-lead">{t('home.intro')}</p>
           </header>
           <div class="home-columns">
-            <section class="card stack" aria-labelledby="start-heading">
+            <section class="card card--sky stack" aria-labelledby="start-heading">
               <h2 id="start-heading">{t('home.startTitle')}</h2>
               <ol class="home-steps">
                 <li>
@@ -127,8 +129,9 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
         </>
       ) : (
         <>
-          <header class="stack" style="--stack-space: var(--space-3)">
-            <div class="home-title">
+          <p class="speaker">{t('thread.tutor')}</p>
+          <header class="home-top">
+            <div class="card card--indigo home-hello stack" style="--stack-space: var(--space-4)">
               <h1>{name ? t('home.greeting', { name }) : t('home.greetingAnonymous')}</h1>
               <ProfileSummary level={level} interests={interests} />
             </div>
@@ -137,13 +140,16 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
           <div class="home-columns">
             <div class="stack" style="--stack-space: var(--space-5)">
               {view.state === 'in_progress' && (
-                <NextLessonCard
-                  label={view.next.kind === 'resume' ? t('home.resume') : t('home.nextUp')}
-                  course={view.next.course}
-                  lesson={view.next.lesson}
-                >
-                  <SayPhrase instruction={t('home.continueHint')} phrase={t('home.continuePhrase')} />
-                </NextLessonCard>
+                <>
+                  <NextLessonCard
+                    label={view.next.kind === 'resume' ? t('home.resume') : t('home.nextUp')}
+                    course={view.next.course}
+                    lesson={view.next.lesson}
+                  >
+                    <p>{t('home.continueHint')}</p>
+                  </NextLessonCard>
+                  <SayTurn phrase={t('home.continuePhrase')} />
+                </>
               )}
               {view.state === 'done' && (
                 <section class="card card--spark stack home-done" aria-labelledby="done-heading">
@@ -166,7 +172,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
               )}
               {path.state === 'set' && <YourPath courses={path.courses} reason={path.reason} updatedOn={path.updatedOn} />}
               {suggestPath && (
-                <section class="card stack" aria-labelledby="no-path-heading">
+                <section class="card card--teal stack" aria-labelledby="no-path-heading">
                   <h2 id="no-path-heading">{t('path.noneTitle')}</h2>
                   <p>{t('path.noneBody')}</p>
                   <SayPhrase instruction={t('path.noneSay')} phrase={t('path.nonePhrase')} />
@@ -182,15 +188,34 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
 
 <style>
   .home-lead {
-    color: var(--color-text-muted);
     font-size: var(--text-lg);
     line-height: var(--leading-normal);
   }
 
-  /* One readable column: the next lesson first, the path below. */
+  /* One thread: the greeting, the next lesson, what to say, then the path. */
   .home {
-    max-width: 40rem;
+    max-width: 54rem;
     margin-inline: auto;
+  }
+
+  /* The greeting bubble with the progress bubble beside it (below it on a phone). */
+  .home-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .home-hello {
+    flex: 999 1 24rem;
+    min-width: 0;
+    justify-content: space-between;
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    border-radius: var(--bubble-xl);
+  }
+
+  .home-top > :global(.overall-progress) {
+    flex: 1 1 16rem;
+    border-radius: var(--bubble-xl);
   }
 
   .home-columns {
@@ -198,15 +223,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
     gap: var(--space-5);
   }
 
-  .home-title {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-4);
-  }
-
-  /* Steps in order, each with a round indigo icon and small text. */
+  /* Steps in order, each with a round icon and small text. */
   .home-steps {
     display: grid;
     gap: var(--space-3);
@@ -228,7 +245,7 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
     width: 2.25rem;
     height: 2.25rem;
     border-radius: var(--radius-pill);
-    background: var(--color-accent-subtle);
+    background: var(--color-surface-sunken);
     color: var(--color-accent);
   }
 
@@ -245,13 +262,12 @@ const shownIssues = issues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
   .home-steps__text {
     flex: 1;
     min-width: 0;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
     line-height: var(--leading-snug);
   }
 
   .home-done {
-    padding-top: var(--space-6);
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    border-radius: var(--bubble-xl);
   }
 
   .home-issues {

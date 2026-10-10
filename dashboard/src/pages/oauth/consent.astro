@@ -125,19 +125,19 @@ const access = requestedAccess(params.get('scope'));
 
   .consent__button {
     padding: var(--space-3) var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
+    border: 2px solid transparent;
+    border-radius: var(--bubble-md);
     background: var(--color-surface);
     color: var(--color-text);
     font: inherit;
-    font-weight: var(--weight-semibold);
+    font-weight: var(--weight-extrabold);
     cursor: pointer;
   }
 
   .consent__button--primary {
-    border-color: var(--color-accent);
+    border-radius: var(--bubble-you-md);
     background: var(--color-accent);
-    color: var(--color-surface);
+    color: var(--color-on-accent);
   }
 
   .consent__button:hover {

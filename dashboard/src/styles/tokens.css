@@ -1,19 +1,19 @@
 /*
- * Design tokens, derived from the Spark L logo (see docs/brand.md).
- * Use these custom properties instead of raw values: colour literals live
- * only in this file.
+ * Design tokens of the "Bright Thread" look (see docs/brand.md): the site
+ * reads as a chat thread made of coloured bubbles. Use these custom
+ * properties instead of raw values: colour literals live only in this file.
  *
  * Three layers:
  *   1. Brand colours: the fixed logo colours.
- *   2. Ramps: indigo (primary), amber (spark), cool neutrals, plus green
- *      for success. Shared by both themes.
+ *   2. Ramps: indigo (primary), amber (spark), cool neutrals, the theme hues
+ *      and green for success. Shared by both themes.
  *   3. Semantic tokens (--color-*): what components use. Each one is
  *      light-dark(<light>, <dark>), mapped onto the ramps.
  *
- * Every text colour meets WCAG AA (>= 4.5:1) on --color-bg, --color-surface
- * and --color-surface-sunken in both themes, and meaningful UI colours
- * (focus ring, progress fill, strong borders) reach >= 3:1. Amber is never
- * used as text on a light background.
+ * Every text colour meets WCAG AA (>= 4.5:1) on --color-bg, --color-surface,
+ * --color-surface-sunken and the bubble tints in both themes, and meaningful
+ * UI colours (focus ring, progress fill, strong borders) reach >= 3:1. Amber
+ * is a fill with dark text on it, never text on a light background.
  */
 :root {
   color-scheme: light dark;
@@ -67,59 +67,91 @@
 
   /* Theme tones: cool hues next to indigo, so every theme gets its own colour. */
   --sky-50: #f0f9ff;
+  --sky-100: #e0f2fe;
   --sky-200: #bae6fd;
   --sky-300: #7dd3fc;
+  --sky-400: #38bdf8;
   --sky-700: #0369a1;
   --sky-800: #075985;
+  --sky-900: #0c4a6e;
   --sky-950: #082f49;
 
   --violet-50: #f5f3ff;
+  --violet-100: #ede9fe;
   --violet-200: #ddd6fe;
   --violet-300: #c4b5fd;
+  --violet-400: #a78bfa;
   --violet-700: #6d28d9;
   --violet-800: #5b21b6;
+  --violet-900: #4c1d95;
   --violet-950: #2e1065;
 
   --rose-50: #fff1f2;
+  --rose-100: #ffe4e6;
   --rose-200: #fecdd3;
   --rose-300: #fda4af;
+  --rose-400: #fb7185;
   --rose-700: #be123c;
   --rose-800: #9f1239;
+  --rose-900: #881337;
   --rose-950: #4c0519;
 
   --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
   --teal-200: #99f6e4;
   --teal-300: #5eead4;
+  --teal-400: #2dd4bf;
   --teal-700: #0f766e;
   --teal-800: #115e59;
+  --teal-900: #134e4a;
   --teal-950: #042f2e;
 
   --green-50: #ecfdf3;
   --green-100: #d3f5e0;
   --green-300: #86efac;
+  --green-500: #22c55e;
   --green-700: #15803d;
   --green-800: #166534;
   --green-900: #123d26;
 
   /* 3. Semantic colours: light-dark(<light theme>, <dark theme>) */
-  --color-bg: light-dark(var(--neutral-25), var(--neutral-925));
-  --color-surface: light-dark(var(--neutral-0), var(--neutral-900));
-  --color-surface-sunken: light-dark(var(--neutral-50), var(--neutral-950));
+  --color-bg: light-dark(var(--neutral-0), var(--neutral-900));
+  /*
+   * In the dark theme the bubbles are see-through: a wash of white or of the hue's bright
+   * shade over the page, which reads lighter than a solid dark fill. Panels inside a bubble
+   * are a wash of black. Contrast is checked on the colour they make over --color-bg.
+   */
+  --color-surface: light-dark(var(--neutral-50), rgb(255 255 255 / 0.1)); /* the neutral bubble */
+  --color-surface-sunken: light-dark(var(--neutral-0), rgb(0 0 0 / 0.28)); /* panels inside a bubble, code */
   --color-text: light-dark(var(--neutral-900), var(--neutral-50));
   --color-text-muted: light-dark(var(--neutral-600), var(--neutral-300));
-  --color-border: light-dark(var(--neutral-200), var(--neutral-800));
+  --color-border: light-dark(var(--neutral-200), var(--neutral-700));
   --color-border-strong: light-dark(var(--neutral-500), var(--neutral-500));
   --color-accent: light-dark(var(--indigo-600), var(--indigo-300)); /* links, active states, primary fills */
   --color-accent-strong: light-dark(var(--indigo-800), var(--indigo-200)); /* hover */
   --color-accent-subtle: light-dark(var(--indigo-50), var(--indigo-950)); /* tinted backgrounds */
   --color-accent-border: light-dark(var(--indigo-200), var(--indigo-800));
   --color-on-accent: light-dark(var(--neutral-0), var(--indigo-950));
-  --color-spark: light-dark(var(--brand-amber), var(--brand-amber)); /* highlight: next lesson, achievements. Never text on light. */
+  /* The spark bubble: next lesson, achievements. Never text on light. In the dark theme the
+     amber is mixed with the page colour: a deeper gold that does not glare. */
+  --color-spark: light-dark(var(--brand-amber), color-mix(in srgb, var(--brand-amber) 88%, var(--neutral-900)));
+  --color-on-spark: var(--neutral-900); /* text on the spark bubble, in both themes */
+  --color-on-spark-muted: var(--neutral-800);
+  /* The strong bubble (overall progress, current nav item): the text colour as a fill. */
+  --color-ink: light-dark(var(--neutral-900), var(--neutral-50));
+  --color-on-ink: light-dark(var(--neutral-0), var(--neutral-900));
+  --color-on-ink-muted: light-dark(var(--neutral-200), var(--neutral-700));
+  /* Bubble tints: the tutor's bubbles, one hue each. Text on them is --color-text. */
+  --color-tint-indigo: light-dark(var(--indigo-50), color-mix(in srgb, var(--indigo-400) 28%, transparent));
+  --color-tint-sky: light-dark(var(--sky-100), color-mix(in srgb, var(--sky-400) 28%, transparent));
+  --color-tint-rose: light-dark(var(--rose-100), color-mix(in srgb, var(--rose-400) 28%, transparent));
+  --color-tint-teal: light-dark(var(--teal-100), color-mix(in srgb, var(--teal-400) 28%, transparent));
+  --color-tint-violet: light-dark(var(--violet-100), color-mix(in srgb, var(--violet-400) 28%, transparent));
   --color-spark-subtle: light-dark(var(--amber-50), var(--amber-950));
-  --color-progress-track: light-dark(var(--neutral-100), var(--neutral-800));
+  --color-progress-track: light-dark(var(--neutral-100), var(--neutral-700));
   --color-progress-fill: light-dark(var(--indigo-600), var(--indigo-400));
   --color-success: light-dark(var(--green-800), var(--green-300));
-  --color-success-bg: light-dark(var(--green-100), var(--green-900));
+  --color-success-bg: light-dark(var(--green-100), color-mix(in srgb, var(--green-500) 24%, transparent));
   --color-info: light-dark(var(--indigo-700), var(--indigo-200));
   --color-info-bg: light-dark(var(--indigo-100), var(--indigo-900));
   --color-warning: light-dark(var(--amber-900), var(--amber-300));
@@ -127,7 +159,6 @@
   --color-warning-border: light-dark(var(--amber-700), var(--amber-600));
   --color-focus: light-dark(var(--indigo-600), var(--brand-amber));
   --color-focus-halo: light-dark(var(--amber-300), var(--indigo-800));
-  --color-glow: light-dark(rgb(79 70 229 / 0.07), rgb(99 102 241 / 0.12));
   /* Theme badge: ~9:1 (light) and ~11:1 (dark) text contrast on its own background. */
   --color-theme-badge-bg: light-dark(var(--indigo-50), var(--indigo-950));
   --color-theme-badge-text: light-dark(var(--indigo-800), var(--indigo-200));
@@ -135,26 +166,31 @@
   /* Selected theme filter: >= 5.4:1 in both themes for every tone. */
   --color-theme-fill: var(--color-accent);
   --color-on-theme-fill: var(--color-on-accent);
+  /* Bubble of a course in its theme colour (course cards, course page header). */
+  --color-theme-bubble: light-dark(var(--indigo-200), color-mix(in srgb, var(--indigo-400) 38%, transparent));
 
+  /* Bubbles are flat fills: the only shadow is under the skip link. */
   --shadow-color: light-dark(rgb(26 28 51 / 0.06), rgb(0 0 0 / 0.4));
-  --shadow-color-soft: light-dark(rgb(26 28 51 / 0.05), rgb(0 0 0 / 0.35));
-  --shadow-color-ambient: light-dark(rgb(26 28 51 / 0.05), rgb(0 0 0 / 0));
   --shadow-color-raised: light-dark(rgb(79 70 229 / 0.12), rgb(0 0 0 / 0.35));
-  --shadow-sm: 0 1px 2px var(--shadow-color);
-  --shadow-card: 0 1px 2px var(--shadow-color-soft), 0 4px 16px var(--shadow-color-ambient);
   --shadow-raised: 0 2px 4px var(--shadow-color), 0 12px 32px var(--shadow-color-raised);
 
-  /* Typography: Inter (self-hosted, imported in global.css) with system fallbacks. */
-  --font-sans: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+  /*
+   * Typography, self-hosted (imported in BaseLayout.astro): Plus Jakarta Sans for text,
+   * DM Mono for what is typed or labelled (speaker labels, phrases to say, code), and
+   * Inter for the wordmark only, as in the logo files.
+   */
+  --font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+  --font-brand: 'Inter Variable', Inter, system-ui, sans-serif;
   --text-xs: 0.75rem; /* overlines, tiny captions */
   --text-sm: 0.875rem; /* captions, meta, badges */
   --text-base: 1rem; /* body */
   --text-lg: 1.125rem; /* lead paragraphs, card titles */
   --text-xl: 1.3125rem; /* h3, emphasised numbers */
   --text-2xl: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem); /* h2 */
-  --text-3xl: clamp(2rem, 1.6rem + 1.6vw, 2.75rem); /* h1 */
+  --text-3xl: clamp(2.25rem, 1.5rem + 3.2vw, 4rem); /* h1 */
+  --text-hero: clamp(2.625rem, 1.2rem + 6vw, 5.75rem); /* landing headline */
   --leading-tight: 1.2;
   --leading-snug: 1.35;
   --leading-normal: 1.6;
@@ -162,7 +198,8 @@
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
-  --tracking-tight: -0.02em;
+  --weight-extrabold: 800;
+  --tracking-tight: -0.035em;
   --tracking-wide: 0.08em;
 
   /* Spacing scale (4px base) */
@@ -175,27 +212,38 @@
   --space-7: 3rem;
   --space-8: 4rem;
 
-  /* Shape: the mark's corner is 25% of its size (rx 16 on 64). */
+  /*
+   * Shape: every block is a chat bubble, round on three corners with a small "tail" corner.
+   * The tutor's bubbles (what the site says) have the tail top left: --bubble-*.
+   * The learner's bubbles (what they say or do) have it bottom right: --bubble-you-*.
+   */
+  --radius-tail: 8px;
   --radius-sm: 8px; /* code, small chips */
-  --radius-md: 12px; /* notices, inner panels */
-  --radius-lg: 20px; /* cards */
-  --radius-pill: 999px; /* badges, nav, phrase chips, progress bars */
-  --border-spark: 2px; /* amber outline of spark cards (next lesson, achievements) */
+  --radius-md: 16px; /* panels inside a bubble */
+  --radius-lg: 32px; /* bubbles */
+  --radius-xl: 48px; /* the big bubbles: hero, next lesson, course header */
+  --radius-pill: 999px; /* progress bars, round icon buttons */
+  --bubble-sm: 6px 14px 14px 14px; /* badges */
+  --bubble-md: var(--radius-tail) 22px 22px 22px; /* nav links, buttons, notices */
+  --bubble-lg: var(--radius-tail) var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  --bubble-xl: 10px var(--radius-xl) var(--radius-xl) var(--radius-xl);
+  --bubble-you-md: 22px 22px var(--radius-tail) 22px;
+  --bubble-you-lg: var(--radius-lg) var(--radius-lg) var(--radius-tail) var(--radius-lg);
   --focus-width: 3px;
   --focus-offset: 2px;
   --focus-halo-width: 2px;
 
   /* Layout */
-  --content-width: 64rem;
+  --content-width: 68rem;
   --gutter: clamp(1rem, 4vw, 2rem);
 }
 
 /*
  * Theme tones: one colour per course theme, picked from its position in
  * themes.yaml (see theme-tone.ts) and cycling after the last tone. Each tone
- * overrides the theme badge tokens on the element that carries the class.
- * Badge text is >= 7:1 on its background in both themes. Tone 1 is the
- * default indigo.
+ * overrides the theme badge tokens on the element that carries the class,
+ * and the colour of the course's bubble. Badge text is >= 7:1 on its
+ * background in both themes. Tone 1 is the default indigo.
  */
 .theme-tone-2 {
   --color-theme-badge-bg: light-dark(var(--sky-50), var(--sky-950));
@@ -203,6 +251,7 @@
   --color-theme-badge-border: light-dark(var(--sky-200), var(--sky-800));
   --color-theme-fill: light-dark(var(--sky-700), var(--sky-300));
   --color-on-theme-fill: light-dark(var(--neutral-0), var(--sky-950));
+  --color-theme-bubble: light-dark(var(--sky-200), color-mix(in srgb, var(--sky-400) 38%, transparent));
 }
 
 .theme-tone-3 {
@@ -211,6 +260,7 @@
   --color-theme-badge-border: light-dark(var(--violet-200), var(--violet-800));
   --color-theme-fill: light-dark(var(--violet-700), var(--violet-300));
   --color-on-theme-fill: light-dark(var(--neutral-0), var(--violet-950));
+  --color-theme-bubble: light-dark(var(--violet-200), color-mix(in srgb, var(--violet-400) 38%, transparent));
 }
 
 .theme-tone-4 {
@@ -219,6 +269,7 @@
   --color-theme-badge-border: light-dark(var(--rose-200), var(--rose-800));
   --color-theme-fill: light-dark(var(--rose-700), var(--rose-300));
   --color-on-theme-fill: light-dark(var(--neutral-0), var(--rose-950));
+  --color-theme-bubble: light-dark(var(--rose-200), color-mix(in srgb, var(--rose-400) 38%, transparent));
 }
 
 .theme-tone-5 {
@@ -227,6 +278,7 @@
   --color-theme-badge-border: light-dark(var(--teal-200), var(--teal-800));
   --color-theme-fill: light-dark(var(--teal-700), var(--teal-300));
   --color-on-theme-fill: light-dark(var(--neutral-0), var(--teal-950));
+  --color-theme-bubble: light-dark(var(--teal-200), color-mix(in srgb, var(--teal-400) 38%, transparent));
 }
 
 /*

@@ -10,25 +10,34 @@ const { instruction, phrase } = Astro.props;
 
 <p class="say">
   <span>{instruction}</span>
-  <q class="say__phrase" data-copy={phrase}>{phrase}</q>
+  <span class="say__bubble">
+    <q class="say__phrase" data-copy={phrase}>{phrase}</q>
+  </span>
 </p>
 
 <style>
   .say {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-2);
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
   }
 
-  /* Phrase chip: what to type to the tutor. Looks like a friendly chat bubble, not code. */
+  /* What to type to the tutor: the learner's own bubble (indigo, tail bottom right), with its Copy button. */
+  .say__bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+    border-radius: var(--bubble-you-md);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
   .say__phrase {
-    padding: 0.2em 0.85em;
-    border: 1px solid var(--color-accent-border);
-    border-radius: var(--radius-pill);
-    background: var(--color-accent-subtle);
-    color: var(--color-accent-strong);
-    font-weight: var(--weight-semibold);
-    white-space: nowrap;
+    padding-block: var(--space-1);
+    font-family: var(--font-mono);
+    font-weight: var(--weight-medium);
+    quotes: none;
   }
 </style>

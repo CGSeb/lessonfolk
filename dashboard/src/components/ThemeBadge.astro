@@ -28,14 +28,13 @@ const { theme } = Astro.props;
     /* Above the course card's full-card link overlay, so the badge stays clickable. */
     position: relative;
     z-index: 1;
-    border: 1px solid var(--color-theme-badge-border);
     background: var(--color-theme-badge-bg);
     color: var(--color-theme-badge-text);
     text-decoration: none;
   }
 
   .theme-badge:hover {
-    border-color: var(--color-theme-fill);
+    color: var(--color-theme-badge-text);
     text-decoration: underline;
   }
 </style>
