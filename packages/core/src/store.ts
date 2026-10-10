@@ -156,6 +156,17 @@ export function recordReviewScore<C extends CourseRef>(
   return { ...base, lessons: { ...base.lessons, [lessonId]: { ...entry, score } } };
 }
 
+function tryJsonLength(value: unknown): number {
+  try {
+    return JSON.stringify(value)?.length ?? 0;
+  } catch {
+    return Number.POSITIVE_INFINITY; // Cyclic or not serializable: not a JSON document.
+  }
+}
+
+/** Largest progress.json an import accepts, in characters of its JSON (real files are a few kilobytes). */
+export const MAX_IMPORT_BYTES = 1024 * 1024;
+
 /**
  * Validate an imported progress.json (the parsed JSON, or its text) with the v1 schema.
  * Fails with `invalid_progress`. Catalog rules are not checked: the file may come from an
@@ -163,6 +174,12 @@ export function recordReviewScore<C extends CourseRef>(
  */
 export function parseImportedProgress(input: unknown): Progress {
   let json = input;
+  const size = typeof input === 'string' ? input.length : tryJsonLength(input);
+  if (size > MAX_IMPORT_BYTES) {
+    throw new ProgressStoreError('invalid_progress', `This progress.json is too large (more than ${MAX_IMPORT_BYTES / 1024 / 1024} MB).`, {
+      problems: [`size: more than ${MAX_IMPORT_BYTES / 1024 / 1024} MB`],
+    });
+  }
   if (typeof input === 'string') {
     try {
       json = JSON.parse(input.replace(/^\uFEFF/, ''));

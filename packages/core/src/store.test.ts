@@ -3,6 +3,7 @@ import { type Progress, emptyProgress } from './progress.ts';
 import {
   ProgressStoreError,
   formatProgress,
+  MAX_IMPORT_BYTES,
   parseImportedProgress,
   recordReviewScore,
   saveNotes,
@@ -90,6 +91,22 @@ describe('parseImportedProgress', () => {
     expect(codeOf(() => parseImportedProgress('{'))).toBe('invalid_progress');
     expect(codeOf(() => parseImportedProgress({ lessons: { x: { status: 'nope' } } }))).toBe('invalid_progress');
     expect(codeOf(() => parseImportedProgress({ version: 2 }))).toBe('invalid_progress');
+  });
+
+  it('rejects wrong types, non-objects and cyclic values without crashing', () => {
+    for (const input of ['null', '[]', '"text"', '42', '{"lessons":[]}', '{"profile":{"interests":"ai"}}', '{"path":[1]}']) {
+      expect(codeOf(() => parseImportedProgress(input)), input).toBe('invalid_progress');
+    }
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    expect(codeOf(() => parseImportedProgress(cyclic))).toBe('invalid_progress');
+  });
+
+  it('rejects an oversized file, as text or as an object, before parsing it', () => {
+    const big = JSON.stringify({ version: 1, profile: { goal: 'x'.repeat(MAX_IMPORT_BYTES) } });
+    expect(codeOf(() => parseImportedProgress(big))).toBe('invalid_progress');
+    expect(codeOf(() => parseImportedProgress({ profile: { goal: 'x'.repeat(MAX_IMPORT_BYTES) } }))).toBe('invalid_progress');
+    expect(parseImportedProgress({ profile: { goal: 'x'.repeat(1000) } }).profile.goal).toHaveLength(1000);
   });
 });
 

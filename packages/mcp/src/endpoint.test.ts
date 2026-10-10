@@ -51,8 +51,8 @@ describe('createRateLimiter', () => {
 });
 
 describe('callerAddress', () => {
-  it('prefers the first X-Forwarded-For entry, then the socket address', () => {
-    const forwarded = new Request('http://x/mcp', { headers: { 'x-forwarded-for': '203.0.113.7, 10.0.0.1' } });
+  it('prefers the last X-Forwarded-For entry, then the socket address', () => {
+    const forwarded = new Request('http://x/mcp', { headers: { 'x-forwarded-for': '6.6.6.6, 203.0.113.7' } });
     expect(callerAddress(forwarded, { clientAddress: '10.0.0.1' })).toBe('203.0.113.7');
     expect(callerAddress(new Request('http://x/mcp'), { clientAddress: '192.0.2.9' })).toBe('192.0.2.9');
     expect(callerAddress(new Request('http://x/mcp'))).toBe('unknown');
