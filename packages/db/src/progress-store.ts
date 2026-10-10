@@ -16,6 +16,7 @@ import {
   type ProgressStore,
   type TutorCourseRef,
   type WriteOptions,
+  MAX_IMPORT_BYTES,
   ProgressStoreError,
   completeLesson,
   emptyProgress,
@@ -197,6 +198,13 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
       } catch (error) {
         if (error instanceof ProgressStoreError && error.details.userId === undefined) error.details.userId = userId;
         throw error;
+      }
+      // Every write reads and rewrites the whole progress: keep it under the import limit.
+      if (JSON.stringify(result.progress).length > MAX_IMPORT_BYTES) {
+        throw new ProgressStoreError('invalid_progress', `Saved progress is full (more than ${MAX_IMPORT_BYTES / 1024 / 1024} MB). Nothing was saved.`, {
+          problems: [`size: more than ${MAX_IMPORT_BYTES / 1024 / 1024} MB`],
+          userId,
+        });
       }
       await writeProgress(tx, userId, before, result.progress);
       await tx.insert(progressEvent).values({ userId, action: result.action, payload: result.payload, client: opts?.client ?? null });
