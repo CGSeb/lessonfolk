@@ -62,7 +62,14 @@ async function call(client: Client, name: string, args: Record<string, unknown> 
 beforeAll(async () => {
   testDb = await createTestDatabase();
   const store = createPostgresProgressStore(testDb.db, { courses: () => readCourses(coursesDir) });
-  endpoint = createMcpEndpoint({ store, gate: testGate, coursesDir, writeLimit: { limit: 1000, windowMs: 60_000 } });
+  endpoint = createMcpEndpoint({
+    store,
+    gate: testGate,
+    coursesDir,
+    writeLimit: { limit: 1000, windowMs: 60_000 },
+    addressLimit: { limit: 100_000, windowMs: 60_000 },
+    userLimit: { limit: 100_000, windowMs: 60_000 },
+  });
 });
 
 afterEach(async () => {
@@ -230,6 +237,47 @@ describe('users are kept apart', () => {
     expect(JSON.parse(text(await call(bob, 'get_progress'))).profile.name).toBe('Mallory');
   });
 
+  it("a token cannot reach another user's data through ids, resources or crafted arguments", async () => {
+    const carol = await connect(await addUser('carol'));
+    const dave = await connect(await addUser('dave'));
+    await call(carol, 'set_profile', { name: 'Carol', goal: 'secret goal' });
+    await call(carol, 'start_lesson', { lessonId: L1 });
+    await call(carol, 'save_lesson_notes', { lessonId: L1, notes: 'carol private notes' });
+    await call(carol, 'set_path', { path: ['ai-foundations'], reason: 'carol reason' });
+
+    // Dave guesses at Carol's id in every field a client controls.
+    const sneaky = { userId: 'carol', user_id: 'carol', user: 'carol', learner: 'carol', client: 'mcp:carol' };
+    for (const tool of ['get_progress', 'get_next_lesson', 'list_courses', 'list_themes']) {
+      const out = text(await call(dave, tool, sneaky));
+      expect(out).not.toMatch(/Carol|carol private|secret goal|carol reason/);
+    }
+    expect(text(await call(dave, 'get_lesson', { lessonId: L1, ...sneaky }))).toContain('learner status: not_started');
+    for (const [tool, args] of [
+      ['save_lesson_notes', { lessonId: L1, notes: 'dave overwrites' }],
+      ['complete_lesson', { lessonId: L1, score: 1, notes: 'dave completes' }],
+      ['set_profile', { name: 'Dave' }],
+      ['reset_course', { courseId: 'ai-foundations' }],
+      ['set_path', { path: ['ai-foundations'], reason: 'dave path' }],
+    ] as const) {
+      await call(dave, tool, { ...args, ...sneaky });
+    }
+    // Resources hold courses only, never progress.
+    for (const uri of ['lessonfolk://courses/en/ai-foundations', 'lessonfolk://courses/en/ai-foundations/01-what-is-ai']) {
+      expect(JSON.stringify(await dave.readResource({ uri }))).not.toMatch(/Carol|carol private/);
+    }
+
+    const carolAfter = JSON.parse(text(await call(carol, 'get_progress')));
+    expect(carolAfter.profile).toMatchObject({ name: 'Carol', goal: 'secret goal' });
+    expect(carolAfter.lessons[L1]).toMatchObject({ status: 'in_progress', notes: 'carol private notes' });
+    expect(carolAfter.pathReason).toBe('carol reason');
+    const daveAfter = JSON.parse(text(await call(dave, 'get_progress')));
+    expect(daveAfter.profile.name).toBe('Dave');
+    expect(JSON.stringify(daveAfter)).not.toMatch(/carol/i);
+    // Rows in the database belong to the right user.
+    const rows = await testDb.sql`select user_id, profile->>'name' as name from learner where user_id in ('carol', 'dave') order by user_id`;
+    expect(rows.map((r) => [r.user_id, r.name])).toEqual([['carol', 'Carol'], ['dave', 'Dave']]);
+  });
+
   it('refuses requests the gate does not accept', async () => {
     const response = await endpoint(
       new Request(BASE, {
@@ -262,5 +310,72 @@ describe('rate limiting', () => {
     expect(third.isError).toBe(true);
     expect(text(third)).toMatch(/Too many changes .* wait \d+ seconds/);
     expect(JSON.parse(text(await call(client, 'get_progress'))).profile.name).toBe('Two');
+  });
+});
+
+describe('abuse limits', () => {
+  const rpc = (token: string, body: string, headers: Record<string, string> = {}) =>
+    new Request(BASE, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', authorization: `Bearer ${token}`, ...headers },
+      body,
+    });
+  const listTools = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
+  const makeEndpoint = (options: Partial<Parameters<typeof createMcpEndpoint>[0]>) =>
+    createMcpEndpoint({
+      store: createPostgresProgressStore(testDb.db, { courses: () => readCourses(coursesDir) }),
+      gate: testGate,
+      coursesDir,
+      ...options,
+    });
+
+  it('refuses a request body over the size limit with 413, before authenticating', async () => {
+    const small = makeEndpoint({ maxBodyBytes: 2000 });
+    const token = await addUser('big-body');
+    expect((await small(rpc(token, listTools))).status).toBe(200);
+    const big = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'save_lesson_notes', arguments: { notes: 'x'.repeat(5000) } } });
+    expect((await small(rpc(token, big))).status).toBe(413);
+    expect((await small(rpc('wrong-token', big))).status).toBe(413);
+  });
+
+  it('rate limits all requests per address (429 with Retry-After), even without a valid token', async () => {
+    const limited = makeEndpoint({ addressLimit: { limit: 3, windowMs: 60_000 } });
+    const statuses: number[] = [];
+    for (let i = 0; i < 5; i++) statuses.push((await limited(rpc('wrong-token', listTools, { 'x-forwarded-for': '198.51.100.1' }))).status);
+    expect(statuses).toEqual([401, 401, 401, 429, 429]);
+    const refused = await limited(rpc('wrong-token', listTools, { 'x-forwarded-for': '198.51.100.1' }));
+    expect(Number(refused.headers.get('retry-after'))).toBeGreaterThan(0);
+    // Another address is not affected.
+    expect((await limited(rpc('wrong-token', listTools, { 'x-forwarded-for': '198.51.100.2' }))).status).toBe(401);
+  });
+
+  it('rate limits all requests per user, read tools included, without hurting other users', async () => {
+    const limited = makeEndpoint({ userLimit: { limit: 2, windowMs: 60_000 } });
+    const busy = await addUser('flood');
+    const calm = await addUser('calm');
+    expect([
+      (await limited(rpc(busy, listTools))).status,
+      (await limited(rpc(busy, listTools))).status,
+      (await limited(rpc(busy, listTools))).status,
+    ]).toEqual([200, 200, 429]);
+    expect((await limited(rpc(calm, listTools))).status).toBe(200);
+  });
+
+  it('rejects free-text arguments over the size caps and saves nothing', async () => {
+    const client = await connect(await addUser('long-args'));
+    const tooLong = 'x'.repeat(5000);
+    for (const [tool, args] of [
+      ['save_lesson_notes', { lessonId: L1, notes: tooLong }],
+      ['complete_lesson', { lessonId: L1, score: 1, notes: tooLong }],
+      ['set_profile', { name: tooLong }],
+      ['set_path', { path: ['ai-foundations'], reason: tooLong }],
+      ['set_path', { path: Array.from({ length: 101 }, (_, i) => `course-${i}`), reason: 'x' }],
+      ['get_lesson', { lessonId: tooLong }],
+      ['skip_lesson', { lessonId: L1, reason: tooLong }],
+    ] as const) {
+      const result = await client.callTool({ name: tool, arguments: args }).catch((error: Error) => ({ isError: true, content: [{ type: 'text', text: error.message }] }));
+      expect((result as CallToolResult).isError, tool).toBe(true);
+    }
+    expect(JSON.parse(text(await call(client, 'get_progress')))).toMatchObject({ profile: {}, lessons: {} });
   });
 });
