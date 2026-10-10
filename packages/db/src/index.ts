@@ -10,6 +10,7 @@ export {
   type Connection,
   type Database,
 } from './connection.ts';
+export { describeErrorForLog } from './log-safe.ts';
 export {
   createPostgresProgressStore,
   fromTimestamp,

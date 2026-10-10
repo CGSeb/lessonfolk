@@ -359,3 +359,63 @@ describe('onChange', () => {
     await expect(watched.startLesson(id, L1, at)).resolves.toMatchObject({ current: L1 });
   });
 });
+
+describe('learners are kept apart (security pass, ticket #107)', () => {
+  /** Alice has a profile, a path, a finished lesson with notes and a started one. */
+  async function aliceAndBob() {
+    const alice = await newUser();
+    const bob = await newUser();
+    await store.setProfile(alice, { name: 'Alice', level: 'beginner' }, at);
+    await store.setPath(alice, ['ai-foundations'], 'alice only', at);
+    await store.startLesson(alice, L1, at);
+    await store.completeLesson(alice, L1, { score: 0.9, notes: 'alice secret note' }, at);
+    await store.startLesson(alice, L2, at);
+    await store.setProfile(bob, { name: 'Bob' }, at);
+    return { alice, bob };
+  }
+
+  it('Bob’s reads and exports never contain Alice’s data', async () => {
+    const { alice, bob } = await aliceAndBob();
+    const exported = await store.exportProgress(bob);
+    const progress = await store.getProgress(bob);
+    for (const text of [exported, JSON.stringify(progress)]) {
+      for (const secret of ['Alice', 'alice secret note', 'alice only', alice, L1, L2]) expect(text, secret).not.toContain(secret);
+    }
+    expect(progress.lessons).toEqual({});
+  });
+
+  it('Bob’s import, reset, notes and review never touch Alice’s progress or log', async () => {
+    const { alice, bob } = await aliceAndBob();
+    const before = await snapshot(alice);
+
+    await store.importProgress(bob, JSON.stringify({ version: 1, profile: { name: 'Mallory' }, current: null, lessons: {} }), at);
+    await store.setProfile(bob, { name: 'Bob', goal: 'x' }, at);
+    await store.startLesson(bob, L1, at);
+    await store.completeLesson(bob, L1, { score: 0.1, notes: 'bob note' }, at);
+    await store.saveNotes(bob, L1, 'bob overwrites?', at);
+    await store.recordReviewScore(bob, L1, 1, at);
+    await store.resetCourse(bob, 'ai-foundations', at);
+
+    expect(await snapshot(alice)).toEqual(before);
+    expect((await store.getProgress(alice)).lessons[L1]).toMatchObject({ status: 'done', score: 0.9, notes: 'alice secret note' });
+  });
+
+  it('deleting Bob’s learner or user keeps Alice’s data', async () => {
+    const { alice, bob } = await aliceAndBob();
+    await store.startLesson(bob, L1, at);
+    const before = await snapshot(alice);
+
+    expect(await store.deleteLearner(bob)).toBe(true);
+    expect(await snapshot(alice)).toEqual(before);
+
+    await testDb.db.delete(user).where(eq(user.id, bob));
+    expect(await snapshot(alice)).toEqual(before);
+    await testDb.db.delete(user).where(eq(user.id, alice));
+    expect(await snapshot(alice)).toEqual({ learners: [], lessons: [], events: [] });
+  });
+
+  it('a write for an invented user id creates nothing', async () => {
+    await expect(store.setProfile('not-a-user', { name: 'Ghost' }, at)).rejects.toMatchObject({ code: 'unknown_user' });
+    expect(await snapshot('not-a-user')).toEqual({ learners: [], lessons: [], events: [] });
+  });
+});

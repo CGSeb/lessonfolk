@@ -22,6 +22,11 @@ export class Browser {
   private cookies = new Map<string, string>();
   constructor(private readonly origin: string) {}
 
+  /** The `Cookie` header this browser sends (for requests that must stay open, like event streams). */
+  cookieHeader(): string {
+    return [...this.cookies].map(([name, value]) => `${name}=${value}`).join('; ');
+  }
+
   async request(url: string, init: RequestInit = {}): Promise<Response> {
     const headers = new Headers(init.headers);
     // Like a browser following links: Node's fetch would otherwise say "cors", and Better Auth answers fetches with JSON.
