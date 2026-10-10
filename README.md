@@ -7,6 +7,8 @@
 
 <p align="center"><strong>Learn AI from zero to advanced, with an AI as your tutor.</strong></p>
 
+<p align="center"><a href="https://lessonfolk.com"><strong>lessonfolk.com</strong></a></p>
+
 LessonFolk is a collection of open-source AI courses designed to be taught *by* an AI. Connect
 your AI chat ([Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex),
 Claude Desktop, Cursor…) to LessonFolk, say "let's start", and it guides you through lessons in a
