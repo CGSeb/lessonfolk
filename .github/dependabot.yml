@@ -1,7 +1,9 @@
 version: 2
 
-# Weekly update pull requests for what ships: npm packages (all workspaces), GitHub Actions
-# (pinned to commit SHAs) and the Docker base image.
+# Update pull requests for what ships: npm packages (all workspaces) every week, GitHub Actions
+# (pinned to commit SHAs) and the Docker images every month.
+# Major versions of Node and Postgres are ignored: moving the runtime or the database is
+# planned and done by hand. Security updates still open a pull request.
 updates:
   - package-ecosystem: npm
     directory: /
@@ -11,18 +13,32 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # The types follow the Node version we run, bumped by hand with the Dockerfile.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
   # The images pinned by digest in the compose files (local development and hosted deploy).
   - package-ecosystem: docker-compose
     directories:
       - /
       - /deploy
     schedule:
-      interval: weekly
+      interval: monthly
+    ignore:
+      # A new Postgres major needs a data migration, and test.yml has to move with it.
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
