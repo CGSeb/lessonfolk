@@ -15,7 +15,7 @@ import { readAuthSettings, type OAuthSettings } from './settings.ts';
 /** Where Better Auth's routes live (src/pages/api/auth/[...all].ts). */
 export const AUTH_BASE_PATH = '/api/auth';
 
-/** Sessions last 7 days from the last use (the cookie is renewed at most once a day), then the learner signs in again. */
+/** Sessions last 7 days from the last use (the cookie is renewed at most once a day), and 30 days at most (SESSION_MAX_AGE_SECONDS, lib/auth/sessions.ts), then the learner signs in again. */
 export const SESSION_POLICY = { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 } as const;
 
 export function createAuth(settings: OAuthSettings, db: Database) {

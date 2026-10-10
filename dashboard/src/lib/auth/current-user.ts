@@ -1,4 +1,6 @@
+import { getDatabase } from '../store.ts';
 import { getAuth } from './auth.ts';
+import { deleteSessionRow, isPastMaxAge } from './sessions.ts';
 import { checkStartup, LOCAL_USER, readAuthSettings, type AuthSettings } from './settings.ts';
 
 /** The person using the dashboard, exposed to pages and API routes as `Astro.locals.user`. */
@@ -9,9 +11,11 @@ export interface CurrentUser {
   email: string;
   /** When this session started, i.e. the last sign-in (`null` without sign-in). */
   signedInAt: Date | null;
+  /** The id of the session behind this request (`null` without sign-in). */
+  sessionId: string | null;
 }
 
-export const LOCAL_CURRENT_USER: CurrentUser = { ...LOCAL_USER, signedInAt: null };
+export const LOCAL_CURRENT_USER: CurrentUser = { ...LOCAL_USER, signedInAt: null, sessionId: null };
 
 let settings: AuthSettings | undefined;
 
@@ -36,6 +40,12 @@ export async function getCurrentUser(request: Request, auth: AuthSettings = getA
   const result = await getAuth().api.getSession({ headers: request.headers });
   if (!result) return null;
   const { id, name, email } = result.user;
-  return { id, name, email, signedInAt: new Date(result.session.createdAt) };
+  const signedInAt = new Date(result.session.createdAt);
+  // Absolute lifetime: a session used every day still ends after SESSION_MAX_AGE_SECONDS.
+  if (isPastMaxAge(signedInAt)) {
+    await deleteSessionRow(getDatabase(), result.session.id).catch(() => undefined);
+    return null;
+  }
+  return { id, name, email, signedInAt, sessionId: result.session.id };
 }
 

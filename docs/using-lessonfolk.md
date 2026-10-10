@@ -244,6 +244,9 @@ all your data, and, last and set apart, **Delete**. It holds your progress, as a
   signs you out and stops your AI apps from connecting. With sign-in, downloading all your data and
   deleting ask you to sign in again first if you signed in more than 10 minutes ago. What is stored,
   and for how long, is on the **Privacy notice** page and in [Privacy and personal data](privacy.md).
+- With sign-in, **Where you are signed in** lists the browsers signed in to your account (sign-in time
+  and browser). End one you do not use any more, all the others, or **sign out everywhere**. A
+  sign-in also ends by itself after 30 days.
 
 **Coming from an older LessonFolk?** Older versions of the tutor saved your progress in
 `.progress/progress.json`, in the LessonFolk folder. The tutor no longer reads that file: import
