@@ -10,6 +10,7 @@ import {
   findRepoRoot,
   getLevel,
   getStats,
+  MAX_IMPORT_BYTES,
   parseImportedProgress,
   ProgressStoreError,
   type Course,
@@ -21,8 +22,7 @@ import { user, verification, type Database } from '@lessonfolk/db';
 import { ensureLocalLearner } from './auth/local-learner.ts';
 import type { AuthMode } from './auth/settings.ts';
 
-/** Largest progress.json the account page accepts (real files are a few kilobytes). */
-export const MAX_IMPORT_BYTES = 1024 * 1024;
+export { MAX_IMPORT_BYTES };
 
 /** The tutor's progress file in a LessonFolk folder: `<root>/.progress/progress.json`. */
 export function localProgressFile(root: string = findRepoRoot()): string {

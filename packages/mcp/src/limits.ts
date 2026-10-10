@@ -12,13 +12,13 @@ export interface RequestInfo {
 
 /**
  * The caller's IP address. Behind the reverse proxy of a hosted LessonFolk (Caddy sets
- * `X-Forwarded-For` from the real connection and drops any value the caller sent), the first
- * `X-Forwarded-For` entry is the caller. Without a proxy it falls back to the socket address.
+ * `X-Forwarded-For` from the real connection and drops any value the caller sent), the last
+ * `X-Forwarded-For` entry is the one the proxy added, so it is the caller (earlier ones can be forged). Without a proxy it falls back to the socket address.
  * An app exposed directly to the internet should not rely on this for security: put it behind
  * the proxy of `deploy/`.
  */
 export function callerAddress(request: Request, info?: RequestInfo): string {
-  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+  const forwarded = request.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim();
   return (forwarded || info?.clientAddress || 'unknown').slice(0, 64);
 }
 
