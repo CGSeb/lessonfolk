@@ -24,6 +24,8 @@ export const en = {
     skipToContent: 'Skip to main content',
     mainNav: 'Main',
     homeLink: 'LessonFolk, home',
+    menuOpen: 'Open menu',
+    menuClose: 'Close menu',
     themeToDark: 'Switch to dark theme',
     themeToLight: 'Switch to light theme',
   },

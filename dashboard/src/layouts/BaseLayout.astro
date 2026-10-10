@@ -98,6 +98,7 @@ const hidden = noindex || Astro.response.status === 404;
           <span class="wordmark__text">{t('site.name')}</span>
         </a>
         <div class="site-header__actions">
+          <div class="site-menu" id="site-menu">
           <nav aria-label={t('a11y.mainNav')}>
             <ul class="nav-list" role="list">
               {
@@ -135,7 +136,23 @@ const hidden = noindex || Astro.response.status === 404;
                 )
               ))
           }
+          </div>
           <ThemeToggle />
+          <button
+            class="menu-button"
+            type="button"
+            hidden
+            aria-controls="site-menu"
+            aria-expanded="false"
+            data-menu-button
+            data-label-open={t('a11y.menuOpen')}
+            data-label-close={t('a11y.menuClose')}
+          >
+            <svg class="menu-button__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path class="menu-button__bars" d="M4 7h16M4 12h16M4 17h16"></path>
+              <path class="menu-button__cross" d="M6 6l12 12M18 6 6 18"></path>
+            </svg>
+          </button>
         </div>
       </div>
     </header>
@@ -182,6 +199,35 @@ const hidden = noindex || Astro.response.status === 404;
     </footer>
     {user && <LiveRefresh />}
     <CopyButtons />
+    <script>
+      // Mobile menu: collapsed behind a button once JavaScript runs; without JavaScript the
+      // links simply stay visible.
+      const header = document.querySelector<HTMLElement>('.site-header');
+      const button = header?.querySelector<HTMLButtonElement>('[data-menu-button]');
+      if (header && button) {
+        const narrow = window.matchMedia('(max-width: 47.99rem)');
+        const set = (open: boolean) => {
+          header.dataset.menu = open ? 'open' : 'closed';
+          button.setAttribute('aria-expanded', String(open));
+          const label = (open ? button.dataset.labelClose : button.dataset.labelOpen) ?? '';
+          button.setAttribute('aria-label', label);
+          button.title = label;
+        };
+        button.hidden = false;
+        set(false);
+        button.addEventListener('click', () => set(button.getAttribute('aria-expanded') !== 'true'));
+        header.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+            set(false);
+            button.focus();
+          }
+        });
+        document.addEventListener('click', (event) => {
+          if (event.target instanceof Node && !header.contains(event.target)) set(false);
+        });
+        narrow.addEventListener('change', () => set(false));
+      }
+    </script>
   </body>
 </html>
 
@@ -270,6 +316,100 @@ const hidden = noindex || Astro.response.status === 404;
     display: flex;
     align-items: center;
     gap: var(--space-2);
+  }
+
+  .site-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .menu-button {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .menu-button[hidden] {
+    display: none;
+  }
+
+  .menu-button:hover {
+    background: var(--color-surface-sunken);
+  }
+
+  .menu-button__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .menu-button[aria-expanded='true'] .menu-button__bars,
+  .menu-button[aria-expanded='false'] .menu-button__cross {
+    display: none;
+  }
+
+  /* Phones: logo and the two buttons on one row; links drop below in a full-width panel. */
+  @media (max-width: 47.99rem) {
+    .site-header__inner {
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .wordmark {
+      margin-right: auto;
+    }
+
+    .site-header__actions {
+      display: contents;
+    }
+
+    .site-menu {
+      flex: 1 0 100%;
+      order: 3;
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-3);
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .site-header[data-menu='closed'] .site-menu {
+      display: none;
+    }
+
+    .nav-list {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+
+    .nav-link {
+      display: block;
+      padding-block: var(--space-3);
+      border-radius: var(--radius-md);
+    }
+
+    .account {
+      justify-content: space-between;
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .menu-button {
+      display: none;
+    }
   }
 
   .nav-list {
