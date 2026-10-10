@@ -340,6 +340,12 @@ function readThemes(
   catalog.themes = [...themes.values()];
 }
 
+/**
+ * How far `estimatedHours` may be from the sum of the lessons' `estimatedMinutes`:
+ * a quarter of an hour, so a total rounded to the nearest half hour never warns.
+ */
+export const HOURS_TOLERANCE_MINUTES = 15;
+
 function loadCourseDir(
   langDir: string,
   courseId: string,
@@ -411,6 +417,20 @@ function loadCourseDir(
       issues.push({
         file: join(courseDir, name),
         message: `lesson file is not listed in ${courseId}/course.yaml`,
+      });
+    }
+  }
+
+  // Only when every listed lesson loaded: a partial sum would be misleading.
+  if (lessons.length === meta.lessons.length) {
+    const minutes = lessons.reduce((sum, lesson) => sum + lesson.estimatedMinutes, 0);
+    if (Math.abs(meta.estimatedHours * 60 - minutes) > HOURS_TOLERANCE_MINUTES) {
+      const hours = Math.max(0.5, Math.round(minutes / 30) / 2);
+      warnings.push({
+        file: courseFile,
+        message:
+          `estimatedHours is ${meta.estimatedHours}, but its lessons add up to ${minutes} minutes ` +
+          `(about ${hours} hour${hours === 1 ? '' : 's'})`,
       });
     }
   }

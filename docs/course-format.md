@@ -182,5 +182,28 @@ Run `npm run check:courses` before opening a pull request. It fails on:
 - a question under `## Check your understanding` without a `Good answer:` line.
 
 It only warns (without failing) when a lesson strays from the writing guidelines (fewer than
-3 or more than 6 numbered key ideas, or `estimatedMinutes` outside 10–25), when a theme has
-no course yet, and when an author has no course in any language.
+3 or more than 6 numbered key ideas, or `estimatedMinutes` outside 10–25), when a course's
+`estimatedHours` is more than 15 minutes away from the sum of its lessons' `estimatedMinutes`,
+when a theme has no course yet, and when an author has no course in any language.
+
+`check:courses` checks the times against each other, not against reality: nothing in the
+files says how long a learner really takes.
+
+## Review
+
+`check:courses` cannot tell whether a lesson is any good. For that, ask your agent to
+*"review the course …"* (`/review-course` in Claude Code, the "Review a course" procedure in
+`AGENTS.md` for other agents). It reads each lesson and answers six questions:
+
+| Criterion | The lesson… |
+|---|---|
+| `on-topic` | teaches what its title promises and belongs in its course |
+| `objectives-covered` | teaches and tests every objective of its frontmatter |
+| `criteria-match-checks` | has completion criteria the tutor can decide from the checks and the exercise |
+| `level-fit` | is written for its stated level |
+| `no-fast-aging-claims` | has no claim that will soon be wrong (best model, prices, versions, dates) |
+| `no-overlap` | does not repeat another lesson of the catalog |
+
+The agent starts from `npm run review:courses -- <course-id or lesson-id>…`, which prints the
+rubric, the lessons to read and the catalog outline, and calls no AI service. The review is
+the agent's judgement: use it to pick the lessons to reread, not as a pass or fail.
