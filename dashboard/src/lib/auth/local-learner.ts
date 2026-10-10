@@ -1,4 +1,4 @@
-import { connect, isUnreachableError, learner, redactUrl, runMigrations, user, type Database } from '@lessonfolk/db';
+import { connect, isUnreachableError, learner, migrationUrl, redactUrl, runMigrations, user, type Database } from '@lessonfolk/db';
 import { AuthConfigError, LOCAL_USER } from './settings.ts';
 
 /**
@@ -25,9 +25,10 @@ export async function ensureLearner(db: Database, userId: string): Promise<void>
  * migrations and create the local learner. Safe to run on every start. Throws
  * AuthConfigError, saying what to do, when the database cannot be reached or prepared.
  */
-export async function prepareLocalDatabase(url: string): Promise<void> {
+export async function prepareLocalDatabase(url: string, ownerUrl: string = migrationUrl()): Promise<void> {
   try {
-    await runMigrations(url);
+    // Migrations need the owner; the learner row only needs the runtime role.
+    await runMigrations(ownerUrl);
     const { db, close } = connect(url, { max: 1 });
     try {
       await ensureLocalLearner(db);
