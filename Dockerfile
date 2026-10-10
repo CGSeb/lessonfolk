@@ -60,6 +60,9 @@ COPY packages/mcp/src packages/mcp/src
 # The tutor prompts (also bundled in dashboard/dist by the build), kept next to their loader.
 COPY packages/mcp/prompts packages/mcp/prompts
 COPY courses courses
+# The release tag, shown in the dashboard footer (release.yml passes it; empty for other builds).
+ARG LESSONFOLK_VERSION=
+ENV LESSONFOLK_VERSION=$LESSONFOLK_VERSION
 USER node
 EXPOSE 4321
 # Apply pending database migrations, then check the sign-in settings and start the dashboard.

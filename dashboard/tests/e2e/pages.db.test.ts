@@ -401,3 +401,21 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(page.text).not.toContain(INVALID_HOME);
   });
 });
+
+describe('release number in the footer', () => {
+  it('shows no version when the server is not a release', async () => {
+    const page = await getPage(server, '/courses');
+    expect(page.html.split('<footer')[1]).not.toContain('Version');
+  });
+
+  it('shows the release and links to it on GitHub', async () => {
+    const released = await startDashboard({ DATABASE_URL: testDb.url, LESSONFOLK_VERSION: 'v9.8.7' });
+    try {
+      const footer = (await getPage(released, '/courses')).html.split('<footer')[1];
+      expect(footer).toContain('Version v9.8.7');
+      expect(footer).toContain('href="https://github.com/CGSeb/lessonfolk/releases/tag/v9.8.7"');
+    } finally {
+      await released.stop();
+    }
+  });
+});

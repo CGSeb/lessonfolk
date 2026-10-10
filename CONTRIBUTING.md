@@ -127,6 +127,7 @@ never committed). Variables already set in your shell win over `.env`.
 | Variable | Set by | What it does |
 |---|---|---|
 | `NODE_ENV` | The end-to-end tests (`test`), the Docker image (`production`) | The fake OAuth provider of the tests only works with `test`. |
+| `LESSONFOLK_VERSION` | The published Docker image (the release's tag, e.g. `v0.2.0`) | Shown in the dashboard footer, with a link to the release on GitHub. Not set in a build of a checkout: the footer then shows no version. |
 | `LESSONFOLK_TEST_OAUTH_URL` | The end-to-end tests | Turns on the fake OAuth provider. The server refuses to start if it is set outside the tests. |
 | `INIT_CWD` | npm | Lets `npm run check:courses -- <folder>` resolve `<folder>` from where you ran the command. |
 

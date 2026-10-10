@@ -166,6 +166,7 @@ export const en = {
     github: 'GitHub',
     copyright: '© {year} LessonFolk',
     license: 'Code under the MIT license, courses under CC BY 4.0.',
+    version: 'Version {version}',
   },
   landing: {
     overline: 'Free and open source',
