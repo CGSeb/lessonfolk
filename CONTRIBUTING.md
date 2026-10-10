@@ -307,9 +307,14 @@ Never commit `.progress/` or `.env`.
 
 Docker images (`FROM` in the `Dockerfile`, `image:` in the compose files and in `test.yml`) are
 pinned as `tag@sha256:<digest>` of the multi-arch index, so a rebuilt tag cannot change them
-silently. Dependabot opens the weekly pull requests that refresh the digests (the `test.yml`
+silently. Dependabot opens the monthly pull requests that refresh the digests (the `test.yml`
 Postgres image has to be updated by hand together with the compose files). To bump one by hand:
 `docker buildx imagetools inspect <tag>` and copy the top-level `Digest`.
+
+Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) also updates npm packages every
+week and GitHub Actions every month. It skips new major versions of Node (the image and
+`@types/node`) and Postgres: plan those by hand, and change the `Dockerfile`, the compose files
+and the workflows together.
 
 ## Brand and design
 
