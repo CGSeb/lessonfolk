@@ -11,7 +11,7 @@ name: lessonfolk
 
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
     environment:
       POSTGRES_USER: lessonfolk
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lessonfolk}
@@ -33,7 +33,11 @@ services:
     image: ghcr.io/cgseb/lessonfolk:${LESSONFOLK_IMAGE_TAG:-latest}
     build: .
     environment:
-      DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD:-lessonfolk}@db:5432/lessonfolk
+      # The app runs as the least-privilege role lessonfolk_app (data only, no schema changes).
+      # At start, the image applies the migrations and creates that role as the owner below.
+      DATABASE_URL: postgres://lessonfolk_app:${LESSONFOLK_APP_DB_PASSWORD:-lessonfolk-app}@db:5432/lessonfolk
+      DATABASE_MIGRATION_URL: postgres://lessonfolk:${POSTGRES_PASSWORD:-lessonfolk}@db:5432/lessonfolk
+      LESSONFOLK_APP_DB_PASSWORD: ${LESSONFOLK_APP_DB_PASSWORD:-lessonfolk-app}
       LESSONFOLK_AUTH: ${LESSONFOLK_AUTH:-none}
       # The host address the app port is published on (see `ports` below). Inside the
       # container the server listens on 0.0.0.0, so LESSONFOLK_AUTH=none checks this instead.
@@ -56,7 +60,7 @@ services:
   # The LessonFolk connection is pre-configured; sign in as cbadmin / lessonfolk-dev.
   cloudbeaver:
     profiles: ["tools"]
-    image: dbeaver/cloudbeaver:latest
+    image: dbeaver/cloudbeaver:latest@sha256:7298c59289e9519d8913083c85f3ceb475aa12db0f58e87b6491445a9b298d2c
     environment:
       CB_SERVER_NAME: LessonFolk
       CB_ADMIN_NAME: cbadmin

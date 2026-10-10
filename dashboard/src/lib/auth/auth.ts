@@ -5,7 +5,7 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { genericOAuth } from 'better-auth/plugins';
-import { account, session, user, verification, type Database } from '@lessonfolk/db';
+import { account, purgeUnusedOAuthClients, session, user, verification, type Database } from '@lessonfolk/db';
 // The MCP authorization server (/mcp, packages/mcp): its Better Auth plugins and tables.
 import { mcpAuthPlugins, mcpAuthSchema } from '@lessonfolk/mcp';
 import { getDatabase } from '../store.ts';
@@ -30,7 +30,7 @@ export function createAuth(settings: OAuthSettings, db: Database) {
       ...(github && { github: { clientId: github.clientId, clientSecret: github.clientSecret } }),
       ...(google && { google: { clientId: google.clientId, clientSecret: google.clientSecret } }),
     },
-    plugins: [...mcpAuthPlugins(settings.baseURL), ...(settings.fakeOAuthURL ? [fakeOAuthProvider(settings.fakeOAuthURL)] : [])],
+    plugins: [...mcpAuthPlugins(settings.baseURL, { purgeUnusedClients: () => purgeUnusedOAuthClients(db) }), ...(settings.fakeOAuthURL ? [fakeOAuthProvider(settings.fakeOAuthURL)] : [])],
     databaseHooks: {
       session: {
         // The IP address is not needed: do not keep it (the column stays because Better Auth requires it).

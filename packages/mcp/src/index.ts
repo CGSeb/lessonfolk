@@ -8,6 +8,7 @@ export {
   MCP_PATH,
   OAUTH_CONSENT_PATH,
   OAUTH_SIGN_IN_PATH,
+  isLoopbackHost,
   mcpAuthPlugins,
   mcpAuthSchema,
   mcpResource,
@@ -16,4 +17,5 @@ export {
   verifyOAuthQueryParams,
   type McpAuthServer,
 } from './oauth.ts';
+export { accessFromScopes, FULL_ACCESS, LESSONFOLK_SCOPES, requestedAccess, SCOPE_READ, SCOPE_WRITE, withoutWrite, type McpAccess } from './scopes.ts';
 export { getAppMcpEndpoint, MCP_TOKEN_ENV, type AppMcpSettings } from './app.ts';

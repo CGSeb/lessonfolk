@@ -109,7 +109,12 @@ interface TokenResult {
   error?: string | null;
 }
 
-async function authorize(d: Discovery, clientId: string, accept = true): Promise<TokenResult> {
+async function authorize(
+  d: Discovery,
+  clientId: string,
+  accept = true,
+  { scope = 'openid profile offline_access', allowWrite }: { scope?: string; allowWrite?: boolean } = {},
+): Promise<TokenResult> {
   const verifier = randomBytes(32).toString('base64url');
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   const state = randomBytes(8).toString('hex');
@@ -121,7 +126,7 @@ async function authorize(d: Discovery, clientId: string, accept = true): Promise
     code_challenge: challenge,
     code_challenge_method: 'S256',
     state,
-    scope: 'openid profile offline_access',
+    scope,
     resource: d.resource,
   }).toString();
 
@@ -149,9 +154,13 @@ async function authorize(d: Discovery, clientId: string, accept = true): Promise
   expect(consentUrl.pathname).toBe('/oauth/consent');
   const consentPage = await browser.request(consentUrl.href);
   expect(consentPage.status).toBe(200);
-  expect(visibleText(await consentPage.text())).toContain('Allow Test MCP client to use LessonFolk?');
+  const consentText = visibleText(await consentPage.text());
+  expect(consentText).toContain('Allow Test MCP client to use LessonFolk?');
+  expect(consentText).toContain('was chosen by the app itself');
+  expect(consentText).toContain('localhost:33418');
+  expect(consentText).toContain('on your own computer');
 
-  const decided = await browser.post('/oauth/consent/decide', { oauth_query: consentUrl.search.slice(1), accept: String(accept) });
+  const decided = await browser.post('/oauth/consent/decide', { oauth_query: consentUrl.search.slice(1), accept: String(accept), ...(allowWrite ? { allow_write: 'true' } : {}) });
   expect(decided.status, await decided.clone().text()).toBe(303);
   const back = new URL(location(decided));
   expect(back.origin + back.pathname).toBe(REDIRECT_URI);
@@ -217,6 +226,38 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
       expect(JSON.stringify(progress)).not.toContain('Sam');
     } finally {
       await robinAgain.close();
+    }
+  });
+
+  it('scopes the token: a read-only request, or "save my progress" turned off, cannot write; other apps keep full access', async () => {
+    const d = await discover();
+    const clientId = await register(d);
+    fake.signInAs({ sub: 'fake-robin', name: 'Robin Tester', email: 'robin@example.test' });
+
+    // The app asks to read only.
+    const readOnly = await authorize(d, clientId, true, { scope: 'openid lessonfolk:read' });
+    // The app asks for everything, the learner turns "save my progress" off.
+    const narrowed = await authorize(d, clientId, true, { scope: 'openid lessonfolk:read lessonfolk:write', allowWrite: false });
+    // The app asks for everything, the learner keeps it on.
+    const full = await authorize(d, clientId, true, { scope: 'openid lessonfolk:read lessonfolk:write', allowWrite: true });
+    // An app that only knows the OpenID scopes keeps working (compatibility rule).
+    const legacy = await authorize(d, clientId);
+
+    for (const [name, token, canWrite] of [
+      ['read only', readOnly, false],
+      ['narrowed', narrowed, false],
+      ['full', full, true],
+      ['legacy', legacy, true],
+    ] as const) {
+      const client = await connectMcp(baseURL, token.access_token);
+      try {
+        await callJson(client, 'get_progress'); // Everyone reads.
+        const attempt = callJson(client, 'set_profile', { level: 'beginner' });
+        if (canWrite) await expect(attempt, name).resolves.toBeTruthy();
+        else await expect(attempt, name).rejects.toThrow('lessonfolk:write');
+      } finally {
+        await client.close();
+      }
     }
   });
 

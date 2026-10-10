@@ -59,6 +59,15 @@ described in [Environment variables](../CONTRIBUTING.md#environment-variables).
 - `oauth`: sign in with GitHub and/or Google, for several learners. This needs your own OAuth
   apps; follow [Sign-in for developers](auth-dev.md).
 
+**Database accounts.** The app does not run as the database owner. At each start, the image
+applies the migrations as the owner (`lessonfolk`) and creates or updates a second role,
+`lessonfolk_app`, that the app uses: it can read and write the tables, but cannot change the
+schema or create databases and roles. Its password is `LESSONFOLK_APP_DB_PASSWORD` (letters and
+digits only; the default is fine on your own computer, set your own on a server). With your own
+Postgres, give the app `DATABASE_MIGRATION_URL` (an owner able to create roles) and
+`LESSONFOLK_APP_DB_PASSWORD`, and point `DATABASE_URL` at `lessonfolk_app`. If you leave both
+out, the app uses `DATABASE_URL` for everything, as in development.
+
 **Update** to the latest courses and app. `docker compose up -d` uses the image published on
 every release (`ghcr.io/cgseb/lessonfolk`), so no build is needed:
 
@@ -106,6 +115,11 @@ claude mcp add --transport http lessonfolk http://localhost:4321/mcp
 - **`LESSONFOLK_AUTH=oauth`** (and the hosted version): in Claude Code, run `/mcp`, pick
   `lessonfolk` and authenticate. Your browser opens: sign in, then **Allow** the app to use
   LessonFolk. Every learner signs in as themselves and only ever sees their own progress.
+  The consent page lists what the app can do: read your courses and progress
+  (`lessonfolk:read`) and save your progress (`lessonfolk:write`). Untick "Allow it to save
+  and change my progress" to let an app read only; the tools that save, reset or import then
+  refuse. An app that asks for neither scope (including apps connected before these scopes
+  existed) gets both, so every client keeps working.
 
 ## Your first session
 

@@ -19,3 +19,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  # The images pinned by digest in the compose files (local development and hosted deploy).
+  - package-ecosystem: docker-compose
+    directories:
+      - /
+      - /deploy
+    schedule:
+      interval: weekly

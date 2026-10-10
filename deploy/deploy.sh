@@ -6,6 +6,13 @@ set -eu
 cd "$(dirname "$0")"
 tag="${1:?Usage: ./deploy.sh <image tag>}"
 
+# The app connects to Postgres as the least-privilege role lessonfolk_app. Generate its password
+# once if .env does not have one yet (existing servers get it on their first deploy of this version).
+if ! grep -q '^LESSONFOLK_APP_DB_PASSWORD=.' .env; then
+  echo "LESSONFOLK_APP_DB_PASSWORD=$(openssl rand -hex 24)" >> .env
+  echo "Generated LESSONFOLK_APP_DB_PASSWORD in .env."
+fi
+
 echo "LESSONFOLK_IMAGE_TAG=$tag" > image.env
 compose="docker compose --env-file .env --env-file image.env"
 
