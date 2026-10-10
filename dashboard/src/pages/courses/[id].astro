@@ -9,6 +9,7 @@ import ThemeBadge from '../../components/ThemeBadge.astro';
 import SayPhrase from '../../components/home/SayPhrase.astro';
 import SignInPrompt from '../../components/SignInPrompt.astro';
 import { courseAuthors } from '../../components/authors/authorView';
+import { themeToneClass } from '../../components/theme-tone';
 import { getCourseView, issuesForCourse } from '../../components/course/courseView';
 import { t } from '../../i18n/en';
 import { inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
@@ -101,7 +102,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
         </section>
       ) : (
         <>
-          <header class="stack" style="--stack-space: var(--space-3)">
+          <header class:list={['card', 'stack', 'course-head', themeToneClass(theme?.position)]} style="--stack-space: var(--space-3)">
             <h1>{course.title}</h1>
             <CourseAuthors authors={authors} />
             <div class="cluster" style="--cluster-space: var(--space-2)">
@@ -110,7 +111,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
               {showProgress && <StatusBadge status={view.status} />}
             </div>
             <p class="course-lead">{course.description}</p>
-            <p class="muted course-meta">
+            <p class="course-meta">
               {hoursText} <span aria-hidden="true">·</span> {lessonCountText}
             </p>
           </header>
@@ -165,8 +166,8 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
                 const row = showProgress ? lessonRow : { ...lessonRow, isNext: false };
                 return (
                 <li
-                  class:list={['card', 'stack', 'lesson', row.isNext && 'card--spark lesson--next']}
-                  style="--stack-space: var(--space-3)"
+                  class:list={['card', 'stack', 'lesson', `lesson--${row.status}`, row.isNext && 'card--spark lesson--next']}
+                  style="--stack-space: var(--space-2)"
                   aria-current={row.isNext ? 'step' : undefined}
                 >
                   {row.isNext && <p class="overline">{t('course.nextUp')}</p>}
@@ -174,7 +175,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
                     <h3 class="lesson__title">{row.lesson.title}</h3>
                     {showProgress && <StatusBadge status={row.status} />}
                   </div>
-                  <p class="cluster muted lesson__meta" style="--cluster-space: var(--space-1) var(--space-3)">
+                  <p class="cluster lesson__meta" style="--cluster-space: var(--space-1) var(--space-3)">
                     <span>{t('course.minutes', { minutes: row.lesson.estimatedMinutes })}</span>
                     {row.scorePercent !== null && <span>{t('course.score', { score: row.scorePercent })}</span>}
                     {row.completedOn && (
@@ -223,18 +224,31 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
     font-weight: var(--weight-medium);
   }
 
+  /* The course's own bubble, in the colour of its theme. */
+  .course-head {
+    --color-accent: var(--color-accent-strong);
+    align-items: flex-start;
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    border-radius: var(--bubble-xl);
+    background: var(--color-theme-bubble);
+  }
+
+  .course-head :global(.course-authors) {
+    color: var(--color-text);
+  }
+
   .course-lead {
-    color: var(--color-text-muted);
     font-size: var(--text-lg);
   }
 
   .course-meta {
     font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
   }
 
   .course-columns {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-3);
     align-items: start;
   }
 
@@ -246,45 +260,59 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
 
   .course-card-title {
     color: var(--color-text-muted);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: normal;
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
   }
 
-  /* Achievement: a spark dot before the "course finished" message. */
+  /* Achievement: the "course finished" message is a small spark bubble. */
   .course-done {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md);
-    background: var(--color-spark-subtle);
-    color: var(--color-text);
-    font-weight: var(--weight-semibold);
-  }
-
-  .course-done::before {
-    content: '';
-    flex: none;
-    width: 0.625rem;
-    height: 0.625rem;
-    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--bubble-md);
     background: var(--color-spark);
+    color: var(--color-on-spark);
+    font-weight: var(--weight-extrabold);
   }
 
   .lesson-list {
+    max-width: 52rem;
     padding-left: 0;
     list-style: none;
     counter-reset: lesson;
   }
 
+  /* One bubble per lesson, with its number in big type. Finished lessons turn green. */
   .lesson {
+    position: relative;
     max-width: none;
+    padding-left: calc(var(--space-6) + 2.75rem);
     counter-increment: lesson;
   }
 
+  .lesson::before {
+    content: counter(lesson);
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-5);
+    font-size: 2.25rem;
+    font-weight: var(--weight-extrabold);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .lesson--done {
+    background: var(--color-success-bg);
+  }
+
   .lesson--next {
-    box-shadow: var(--shadow-raised);
+    padding-block: var(--space-6);
+  }
+
+  .lesson--next::before {
+    top: var(--space-6);
+    font-size: 3rem;
   }
 
   .lesson__head {
@@ -296,12 +324,13 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
   }
 
   .lesson__title {
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
   }
 
-  .lesson__title::before {
-    content: counter(lesson) '. ';
-    color: var(--color-text-muted);
+  .lesson--next .lesson__title {
+    font-size: var(--text-2xl);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
   }
 
   .lesson__meta {
@@ -310,14 +339,16 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
 
   .lesson__notes {
     padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-md);
+    border-radius: var(--bubble-md);
     background: var(--color-surface-sunken);
   }
 
   .lesson__notes-label {
     color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
   }
 
   .course-issues {

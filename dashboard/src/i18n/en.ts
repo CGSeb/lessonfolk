@@ -35,6 +35,13 @@ export const en = {
     failed: 'Copy failed',
     phrase: 'Copy “{text}”',
   },
+  // The site reads as a chat thread: who speaks, and the learner's lines on the landing page.
+  thread: {
+    tutor: 'Your tutor',
+    you: 'You',
+    youSay: 'You say',
+    sayLabel: 'Things to say in your AI chat:',
+  },
   nav: {
     home: 'Home',
     courses: 'Courses',
@@ -170,6 +177,10 @@ export const en = {
   },
   landing: {
     overline: 'Free and open source',
+    askStart: 'I keep hearing about AI. Where do I even start?',
+    askHow: 'How does it work?',
+    askWhat: 'What can I learn?',
+    askWhy: 'Why not just watch videos?',
     heading: 'Learn AI by talking with an AI tutor',
     lead: 'LessonFolk teaches AI to anyone, from complete beginners to advanced practitioners. Short lessons, a patient tutor in the AI chat you already use, and a place to follow your progress.',
     ctaStart: 'Sign in to start learning',

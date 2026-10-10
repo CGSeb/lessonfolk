@@ -1,5 +1,9 @@
 ---
-// Inter is self-hosted: bundled from node_modules, no request to any font CDN.
+// Fonts are self-hosted: bundled from node_modules, no request to any font CDN.
+import '@fontsource-variable/plus-jakarta-sans';
+import '@fontsource/dm-mono/400.css';
+import '@fontsource/dm-mono/500.css';
+// Inter is for the wordmark only, as in the logo files.
 import '@fontsource-variable/inter';
 import '../styles/global.css';
 import { t } from '../i18n/en';
@@ -39,7 +43,11 @@ const navItems = [
   // name in the header links to it instead.
   ...(user && authMode !== 'oauth' ? [{ href: '/account', label: t('nav.account'), current: path === '/account' || path.startsWith('/account/') }] : []),
 ];
+// Each nav link is a small bubble in its own tint.
+const NAV_TINTS = ['sky', 'rose', 'teal', 'violet', 'indigo'];
 const signInLink = signInHref(Astro.url);
+// What a learner can say to their tutor at any time, ready to copy.
+const sayPhrases = [t('home.continuePhrase'), t('home.reviewPhrase')];
 const release = currentRelease();
 
 // Search engines and link previews: canonical address (no query string or trailing slash),
@@ -104,9 +112,13 @@ const hidden = noindex || Astro.response.status === 404;
           <nav aria-label={t('a11y.mainNav')}>
             <ul class="nav-list" role="list">
               {
-                navItems.map((item) => (
+                navItems.map((item, i) => (
                   <li>
-                    <a class="nav-link" href={item.href} aria-current={item.current ? 'page' : undefined}>
+                    <a
+                      class:list={['nav-link', `nav-link--${NAV_TINTS[i % NAV_TINTS.length]}`]}
+                      href={item.href}
+                      aria-current={item.current ? 'page' : undefined}
+                    >
                       {item.label}
                     </a>
                   </li>
@@ -163,8 +175,26 @@ const hidden = noindex || Astro.response.status === 404;
       <slot />
     </main>
 
-    <footer class="site-footer">
-      <div class="container site-footer__grid">
+    {
+      user && (
+        <aside class="say-dock" aria-label={t('thread.sayLabel')}>
+          <div class="container say-dock__inner">
+            <p class="speaker">{t('thread.sayLabel')}</p>
+            {sayPhrases.map((phrase) => (
+              <span class="say-dock__item">
+                <q class="say-dock__phrase" data-copy={phrase}>
+                  {phrase}
+                </q>
+              </span>
+            ))}
+          </div>
+        </aside>
+      )
+    }
+
+    <footer class="container site-footer">
+      <div class="card site-footer__bubble">
+      <div class="site-footer__grid">
         <div class="site-footer__brand stack" style="--stack-space: var(--space-2)">
           <a class="wordmark" href="/" aria-label={t('a11y.homeLink')}>
             <span class="wordmark__text">{t('site.name')}</span>
@@ -193,7 +223,7 @@ const hidden = noindex || Astro.response.status === 404;
           </ul>
         </nav>
       </div>
-      <div class="container site-footer__bottom">
+      <div class="site-footer__bottom">
         <p>{t('footer.copyright', { year: String(new Date().getFullYear()) })}</p>
         <p>{t('footer.license')}</p>
         {authMode !== 'oauth' && <p>{t('footer.privacy')}</p>}
@@ -206,6 +236,7 @@ const hidden = noindex || Astro.response.status === 404;
             </p>
           )
         }
+      </div>
       </div>
     </footer>
     {user && <LiveRefresh />}
@@ -274,11 +305,6 @@ const hidden = noindex || Astro.response.status === 404;
     transform: none;
   }
 
-  .site-header {
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface);
-  }
-
   .site-header__inner {
     display: flex;
     flex-wrap: wrap;
@@ -294,9 +320,10 @@ const hidden = noindex || Astro.response.status === 404;
     gap: var(--space-3);
     border-radius: var(--radius-md);
     color: var(--color-text);
+    font-family: var(--font-brand);
     font-size: var(--text-xl);
     font-weight: var(--weight-medium); /* matches the logo files */
-    letter-spacing: var(--tracking-tight);
+    letter-spacing: -0.02em;
     text-decoration: none;
   }
 
@@ -306,8 +333,8 @@ const hidden = noindex || Astro.response.status === 404;
 
   .wordmark__mark {
     flex: none;
-    width: 2rem;
-    height: 2rem;
+    width: 2.375rem;
+    height: 2.375rem;
   }
 
   /* The logo colours are fixed brand values, the same in both themes. */
@@ -338,10 +365,10 @@ const hidden = noindex || Astro.response.status === 404;
   .menu-button {
     display: inline-grid;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
     padding: 0;
-    border: 1px solid var(--color-border);
+    border: 0;
     border-radius: var(--radius-pill);
     background: var(--color-surface);
     color: var(--color-text);
@@ -353,7 +380,7 @@ const hidden = noindex || Astro.response.status === 404;
   }
 
   .menu-button:hover {
-    background: var(--color-surface-sunken);
+    color: var(--color-accent);
   }
 
   .menu-button__icon {
@@ -392,7 +419,6 @@ const hidden = noindex || Astro.response.status === 404;
       align-items: stretch;
       gap: var(--space-3);
       padding-top: var(--space-2);
-      border-top: 1px solid var(--color-border);
     }
 
     .site-header[data-menu='closed'] .site-menu {
@@ -407,13 +433,11 @@ const hidden = noindex || Astro.response.status === 404;
     .nav-link {
       display: block;
       padding-block: var(--space-3);
-      border-radius: var(--radius-md);
     }
 
     .account {
       justify-content: space-between;
-      padding-top: var(--space-3);
-      border-top: 1px solid var(--color-border);
+      padding-top: var(--space-2);
     }
   }
 
@@ -426,29 +450,54 @@ const hidden = noindex || Astro.response.status === 404;
   .nav-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-1);
+    gap: var(--space-2);
     padding: 0;
     list-style: none;
   }
 
+  /* Each link is a small tutor bubble in its own tint; the current page is the ink bubble. */
   .nav-link {
     display: inline-block;
     padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-pill);
-    color: var(--color-text-muted);
-    font-weight: var(--weight-medium);
+    border-radius: var(--bubble-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    line-height: 1.7;
     text-decoration: none;
   }
 
+  .nav-link--sky {
+    background: var(--color-tint-sky);
+  }
+
+  .nav-link--rose {
+    background: var(--color-tint-rose);
+  }
+
+  .nav-link--teal {
+    background: var(--color-tint-teal);
+  }
+
+  .nav-link--violet {
+    background: var(--color-tint-violet);
+  }
+
+  .nav-link--indigo {
+    background: var(--color-tint-indigo);
+  }
+
   .nav-link:hover {
-    background: var(--color-surface-sunken);
     color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.22em;
   }
 
   .nav-link[aria-current='page'] {
-    background: var(--color-accent-subtle);
-    color: var(--color-accent);
-    font-weight: var(--weight-semibold);
+    background: var(--color-ink);
+    color: var(--color-on-ink);
   }
 
   .account {
@@ -458,36 +507,45 @@ const hidden = noindex || Astro.response.status === 404;
   }
 
   .account__name {
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--bubble-md);
+    background: var(--color-surface);
     color: var(--color-text);
     font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
+    font-weight: var(--weight-bold);
+    line-height: 1.7;
     text-decoration: none;
   }
 
-  .account__name:hover,
-  .account__name[aria-current='page'] {
-    color: var(--color-accent);
+  .account__name:hover {
+    color: var(--color-text);
     text-decoration: underline;
   }
 
+  .account__name[aria-current='page'] {
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+  }
+
+  /* Signing in or out is the learner's own action: their bubble, tail bottom right. */
   .account__button {
     display: inline-block;
     padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--color-text);
+    border: 0;
+    border-radius: var(--bubble-you-md);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
     font: inherit;
-    font-weight: var(--weight-medium);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    line-height: 1.7;
     text-decoration: none;
     cursor: pointer;
   }
 
   .account__button:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: var(--color-accent-strong);
+    color: var(--color-on-accent);
   }
 
   .site-main {
@@ -500,10 +558,37 @@ const hidden = noindex || Astro.response.status === 404;
     box-shadow: none;
   }
 
-  .site-footer {
-    border-top: 1px solid var(--color-border);
-    padding-block: var(--space-6);
+  /* Phrases the learner can say to their tutor, each one a small "you" bubble to copy. */
+  .say-dock {
+    padding-block: var(--space-4);
     background: var(--color-surface);
+  }
+
+  .say-dock__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .say-dock__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+    border-radius: var(--bubble-you-md);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  .say-dock__phrase {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    quotes: none;
+  }
+
+  .site-footer {
+    padding-block: var(--space-5) var(--space-6);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
@@ -555,8 +640,6 @@ const hidden = noindex || Astro.response.status === 404;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-2) var(--space-5);
-    margin-top: var(--space-6);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-5);
   }
 </style>

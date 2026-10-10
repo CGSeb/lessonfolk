@@ -5,8 +5,9 @@ import type { PathCourse } from './pathView';
 import PathRows from './PathRows.astro';
 
 /**
- * The learner's personal path. Shows the current course and the next ones (finished courses
- * before it and courses after the window fold away), and the tutor's reason on demand.
+ * The learner's personal path: a bubble with the tutor's reason on demand, then one bubble per
+ * course. Shows the current course and the next ones (finished courses before it and courses
+ * after the window fold away).
  */
 interface Props {
   courses: PathCourse<Course>[];
@@ -25,8 +26,21 @@ const shown = courses.slice(start, start + VISIBLE);
 const after = courses.slice(start + VISIBLE);
 ---
 
-<section class="card stack" aria-labelledby="your-path-heading" style="--stack-space: var(--space-3)">
-  <h2 id="your-path-heading">{t('path.title')}</h2>
+<section class="your-path stack" aria-labelledby="your-path-heading" style="--stack-space: var(--space-3)">
+  <div class="card stack" style="--stack-space: var(--space-2)">
+    <h2 id="your-path-heading">{t('path.title')}</h2>
+    {
+      (reason || updatedOn) && (
+        <details>
+          <summary>{t('path.reasonLabel')}</summary>
+          <div class="your-path__reason stack" style="--stack-space: var(--space-1)">
+            {reason && <p>{reason}</p>}
+            {updatedOn && <p class="muted your-path__updated">{t('path.updatedOn', { date: updatedOn })}</p>}
+          </div>
+        </details>
+      )
+    }
+  </div>
 
   {
     before.length > 0 && (
@@ -45,17 +59,6 @@ const after = courses.slice(start + VISIBLE);
       </details>
     )
   }
-  {
-    (reason || updatedOn) && (
-      <details>
-        <summary>{t('path.reasonLabel')}</summary>
-        <div class="your-path__reason stack" style="--stack-space: var(--space-1)">
-          {reason && <p>{reason}</p>}
-          {updatedOn && <p class="muted your-path__updated">{t('path.updatedOn', { date: updatedOn })}</p>}
-        </div>
-      </details>
-    )
-  }
 </section>
 
 <style>
@@ -69,13 +72,12 @@ const after = courses.slice(start + VISIBLE);
     margin-top: var(--space-2);
   }
 
-  /* The tutor's own words: a soft panel with an accent rule, like a quoted chat message. */
+  /* The tutor's own words: a white panel inside the bubble, like a quoted chat message. */
   .your-path__reason {
     margin-top: var(--space-2);
     padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--color-accent-border);
-    border-radius: var(--radius-md);
-    background: var(--color-accent-subtle);
+    border-radius: var(--bubble-md);
+    background: var(--color-surface-sunken);
   }
 
   .your-path__updated {

@@ -1,7 +1,7 @@
 ---
 import { t } from '../../i18n/en';
 
-/** Overall progress in one line: lessons finished, with a bar. */
+/** Overall progress, in the ink bubble: lessons finished, with a bar. */
 interface Props {
   lessons: { finished: number; total: number };
 }
@@ -10,7 +10,7 @@ const { lessons } = Astro.props;
 const lessonsText = t('home.progressLessons', lessons);
 ---
 
-<div class="stack" style="--stack-space: var(--space-2)">
+<div class="card card--ink overall-progress stack" style="--stack-space: var(--space-3)">
   <p class="overall-progress__lessons">{lessonsText}</p>
   <progress class="progress-bar" value={lessons.finished} max={Math.max(lessons.total, 1)} aria-label={t('home.progressTitle')}>
     {lessonsText}
@@ -18,8 +18,15 @@ const lessonsText = t('home.progressLessons', lessons);
 </div>
 
 <style>
+  .overall-progress {
+    justify-content: center;
+    padding: var(--space-5);
+  }
+
   .overall-progress__lessons {
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-extrabold);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.025em;
   }
 </style>

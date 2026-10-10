@@ -340,8 +340,8 @@ const hiddenIssues = issues.length - shownIssues.length;
 <style>
   .warning {
     padding: var(--space-4) var(--space-5);
-    border: 1px solid var(--color-warning-border);
-    border-radius: var(--radius-md);
+    border: 2px solid var(--color-warning-border);
+    border-radius: var(--bubble-lg);
     background: var(--color-warning-bg);
     color: var(--color-warning);
   }
@@ -425,12 +425,16 @@ const hiddenIssues = issues.length - shownIssues.length;
   .catalog-search__input {
     flex: 1;
     min-width: 0;
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-pill);
+    padding: var(--space-3) var(--space-5);
+    border: 2px solid transparent;
+    border-radius: var(--bubble-md);
     background: var(--color-surface);
     color: var(--color-text);
     font: inherit;
+  }
+
+  .catalog-search__input:hover {
+    border-color: var(--color-border-strong);
   }
 
   .catalog-search__input::placeholder {
@@ -438,13 +442,13 @@ const hiddenIssues = issues.length - shownIssues.length;
   }
 
   .catalog-search__button {
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-accent);
-    border-radius: var(--radius-pill);
+    padding: var(--space-3) var(--space-5);
+    border: 0;
+    border-radius: var(--bubble-you-md);
     background: var(--color-accent);
     color: var(--color-on-accent);
     font: inherit;
-    font-weight: var(--weight-medium);
+    font-weight: var(--weight-extrabold);
     cursor: pointer;
   }
 
@@ -463,20 +467,21 @@ const hiddenIssues = issues.length - shownIssues.length;
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
-    border: 1px solid var(--color-theme-badge-border);
-    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    border: 2px solid transparent;
+    border-radius: var(--bubble-md);
     background: var(--color-theme-badge-bg);
     color: var(--color-theme-badge-text);
-    font-weight: var(--weight-medium);
+    font-weight: var(--weight-bold);
     text-decoration: none;
   }
 
   /* "All" is not a theme: neutral, so it never reads as the first theme's colour. */
   .theme-filter--all {
-    --color-theme-badge-border: var(--color-border-strong);
     --color-theme-badge-bg: var(--color-surface);
     --color-theme-badge-text: var(--color-text);
+    --color-theme-fill: var(--color-ink);
+    --color-on-theme-fill: var(--color-on-ink);
   }
 
   .theme-filter:hover {
@@ -509,10 +514,10 @@ const hiddenIssues = issues.length - shownIssues.length;
 
   .pager__link {
     display: inline-block;
-    min-width: 2.5rem;
-    padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    min-width: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: 2px solid transparent;
+    border-radius: var(--bubble-md);
     background: var(--color-surface);
     text-align: center;
     text-decoration: none;
@@ -538,6 +543,7 @@ const hiddenIssues = issues.length - shownIssues.length;
 
   .course-list {
     --grid-min: 20rem;
+    gap: var(--space-3);
     padding: 0;
     list-style: none;
   }

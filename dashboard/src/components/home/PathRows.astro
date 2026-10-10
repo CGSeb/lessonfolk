@@ -26,7 +26,7 @@ const rows = courses.map((row) => ({
   {
     rows.map((row) => (
       <li
-        class:list={['path-rows__item', row.isNext && 'path-rows__item--next']}
+        class:list={['path-rows__item', `path-rows__item--${row.status}`, row.isNext && 'path-rows__item--next']}
         aria-current={row.isNext ? 'step' : undefined}
       >
         <div class="path-rows__body stack" style="--stack-space: var(--space-1)">
@@ -53,52 +53,74 @@ const rows = courses.map((row) => ({
 
 <style>
   .path-rows {
-    display: grid;
-    gap: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
     padding: 0;
     list-style: none;
   }
 
-  /* One row per course: step number, title and lessons, status badge. Wraps on narrow screens. */
+  /* One bubble per course: step number, title and lessons, status badge. */
   .path-rows__item {
+    --badge-bg: var(--color-surface-sunken);
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
+    flex: 1 1 14rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
     max-width: none;
-    padding: var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--bubble-lg);
+    background: var(--color-surface);
     counter-increment: path-step;
   }
 
   .path-rows__item::before {
     content: counter(path-step);
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-accent-subtle);
-    color: var(--color-accent);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
-    font-weight: var(--weight-bold);
+    font-weight: var(--weight-medium);
   }
 
-  /* The course the next lesson comes from: same spark cue as the next-lesson card. */
+  /* Finished courses turn green; the course the next lesson comes from is the spark bubble. */
+  .path-rows__item--done,
+  .path-rows__item--skipped_placement {
+    background: var(--color-success-bg);
+  }
+
+  .path-rows__item--next > * {
+    color-scheme: light;
+  }
+
   .path-rows__item--next {
-    padding: calc(var(--space-3) - var(--border-spark) + 1px);
-    border: var(--border-spark) solid var(--color-spark);
+    --color-text-muted: var(--color-on-spark-muted);
+    --color-accent: var(--color-on-spark);
+    --color-accent-strong: var(--color-on-spark);
+    --color-accent-border: var(--color-on-spark);
+    --color-focus: var(--color-on-spark);
+    background: var(--color-spark);
+    color: var(--color-on-spark);
   }
 
   .path-rows__body {
-    flex: 1 1 12rem;
+    flex: 1;
     min-width: 0;
   }
 
   .path-rows__course {
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+  }
+
+  .path-rows__course a {
+    color: var(--color-text);
+    font-weight: inherit;
+    text-decoration: none;
+  }
+
+  .path-rows__course a:hover {
+    text-decoration: underline;
   }
 
   .path-rows__meta {

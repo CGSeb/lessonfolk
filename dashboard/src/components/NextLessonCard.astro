@@ -3,8 +3,9 @@ import type { Course, Lesson } from '@lessonfolk/core';
 import { t } from '../i18n/en';
 
 /**
- * The lesson the tutor will teach next: title, linked course and duration, with the
- * objectives on demand. Put how to start it (e.g. a SayPhrase) in the default slot.
+ * The lesson the tutor will teach next, in the spark bubble: title, linked course and
+ * duration, with the objectives on demand. Put how to start it (an instruction, a SayPhrase)
+ * in the default slot.
  */
 interface Props {
   /** Card heading, e.g. "Next up". */
@@ -17,11 +18,11 @@ const { label, course, lesson } = Astro.props;
 const headingId = 'next-lesson-heading';
 ---
 
-<section class="card card--spark next-lesson stack" aria-labelledby={headingId}>
-  <h2 class="overline" id={headingId}>{label}</h2>
-  <div class="stack" style="--stack-space: var(--space-1)">
-    <h3>{lesson.title}</h3>
-    <p class="cluster muted" style="--cluster-space: var(--space-2)">
+<section class="card card--spark next-lesson stack" aria-labelledby={headingId} style="--stack-space: var(--space-3)">
+  <h2 class="badge next-lesson__label" id={headingId}>{label}</h2>
+  <div class="stack" style="--stack-space: var(--space-2)">
+    <h3 class="next-lesson__title">{lesson.title}</h3>
+    <p class="cluster" style="--cluster-space: var(--space-2)">
       <a href={`/courses/${encodeURIComponent(course.id)}`}>{course.title}</a>
       <span class="badge">{t('home.minutes', { minutes: lesson.estimatedMinutes })}</span>
     </p>
@@ -36,9 +37,27 @@ const headingId = 'next-lesson-heading';
 </section>
 
 <style>
+  .next-lesson {
+    align-items: flex-start;
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    border-radius: var(--bubble-xl);
+  }
+
+  /* The label is the ink bubble on amber. */
+  .next-lesson__label {
+    background: var(--color-on-spark);
+    color: var(--neutral-0);
+    letter-spacing: normal;
+  }
+
+  .next-lesson__title {
+    font-size: var(--text-3xl);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
   .next-lesson summary {
     cursor: pointer;
-    color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
 
@@ -50,7 +69,7 @@ const headingId = 'next-lesson-heading';
     list-style: none;
   }
 
-  /* Rounded tick-like bullets that echo the mark's rounded strokes. */
+  /* Round bullets that echo the spark dot. */
   .next-lesson__objectives li {
     position: relative;
     padding-left: var(--space-5);
@@ -63,7 +82,7 @@ const headingId = 'next-lesson-heading';
     left: 0.15rem;
     width: 0.5rem;
     height: 0.5rem;
-    border: 2px solid var(--color-accent);
     border-radius: var(--radius-pill);
+    background: var(--color-on-spark);
   }
 </style>

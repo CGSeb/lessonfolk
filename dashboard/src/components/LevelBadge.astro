@@ -9,13 +9,6 @@ interface Props {
 const { level } = Astro.props;
 ---
 
-<span class="badge level-badge">
+<span class="badge">
   <span class="visually-hidden">{t('level.label')}:</span> {t(`level.${level}`)}
 </span>
-
-<style>
-  .level-badge {
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-  }
-</style>

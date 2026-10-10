@@ -23,14 +23,12 @@ html {
 body {
   min-height: 100vh;
   min-height: 100dvh;
-  background: radial-gradient(ellipse 80rem 28rem at 50% -8rem, var(--color-glow), transparent 70%) no-repeat,
-    var(--color-bg);
+  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
   overflow-wrap: break-word;
-  font-feature-settings: 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -49,16 +47,15 @@ h2,
 h3,
 h4 {
   line-height: var(--leading-snug);
-  font-weight: var(--weight-semibold);
-  letter-spacing: -0.011em;
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 
 h1 {
   font-size: var(--text-3xl);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 h2 {
@@ -87,7 +84,7 @@ ol {
 
 a {
   color: var(--color-accent);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
   text-decoration-color: var(--color-accent-border);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.22em;
@@ -150,12 +147,13 @@ pre code {
   padding-right: 5.5rem;
 }
 
+/* It sits on the learner's indigo bubble: a solid fill in that bubble's text colour. */
 .copy-button {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  font: inherit;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-on-accent);
+  color: var(--color-accent-strong);
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
   font-weight: var(--weight-medium);
   line-height: 1.2;
@@ -163,24 +161,23 @@ pre code {
 }
 
 .copy-button:hover {
-  background: var(--color-surface-sunken);
   color: var(--color-text);
 }
 
 .copy-button[data-state='done'] {
-  border-color: var(--color-accent-border);
-  color: var(--color-accent-strong);
+  color: var(--color-success);
 }
 
 .copy-button--box {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
-  padding: 0.3em 0.7em;
+  padding: 0.5em 0.9em;
+  background: var(--color-surface);
 }
 
 .copy-button--phrase {
-  padding: 0.15em 0.6em;
+  padding: 0.55em 1em;
 }
 
 summary {
@@ -230,33 +227,81 @@ summary {
 
 /* Components */
 
-/* Pill button for forms and downloads. Variants: --primary (main action), --warning (cannot be undone). */
+/*
+ * A turn of the thread: a speaker label, then that speaker's bubbles.
+ *   <div class="turn"><p class="speaker">Your tutor</p> <div class="card">…</div></div>
+ * `.turn--you` is the learner's turn, on the right.
+ */
+.turn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.turn > * {
+  max-width: 100%;
+}
+
+.turn--you {
+  align-items: flex-end;
+}
+
+/* Who is speaking ("Your tutor", "You"), and other small typed labels. */
+.speaker {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  line-height: var(--leading-snug);
+  text-transform: uppercase;
+}
+
+/* The learner's bubble: a question they ask, the phrase they say. Indigo, tail bottom right. */
+.bubble-you {
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--bubble-you-lg);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+  letter-spacing: normal;
+}
+
+/*
+ * Bubble button for links, forms and downloads. The main action is something the learner
+ * does, so it takes their bubble (--primary); the others take the tutor's.
+ * Variants: --primary (main action), --warning (cannot be undone).
+ */
 .button {
   display: inline-block;
-  padding: var(--space-2) var(--space-5);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-pill);
+  padding: var(--space-3) var(--space-5);
+  border: 2px solid transparent;
+  border-radius: var(--bubble-md);
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-snug);
   text-decoration: none;
   cursor: pointer;
 }
 
 .button:hover {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 .button--primary,
 .button--primary:hover {
-  border-color: var(--color-accent);
+  border-radius: var(--bubble-you-md);
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
 
 .button--primary:hover {
+  border-color: transparent;
   background: var(--color-accent-strong);
 }
 
@@ -267,32 +312,76 @@ summary {
   color: var(--color-warning);
 }
 
+/*
+ * The tutor's bubble: every block the site shows. A flat fill, tail top left.
+ * Tints: --indigo, --sky, --rose, --teal, --violet. --ink is the strong, inverted bubble.
+ */
 .card {
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  /* Badges are grey on the page and white inside a bubble. */
+  --badge-bg: var(--color-surface-sunken);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--bubble-lg);
   background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+}
+
+.card--indigo {
+  background: var(--color-tint-indigo);
+}
+
+.card--sky {
+  background: var(--color-tint-sky);
+}
+
+.card--rose {
+  background: var(--color-tint-rose);
+}
+
+.card--teal {
+  background: var(--color-tint-teal);
+}
+
+.card--violet {
+  background: var(--color-tint-violet);
+}
+
+.card--ink {
+  --color-text: var(--color-on-ink);
+  --color-text-muted: var(--color-on-ink-muted);
+  --color-progress-track: light-dark(var(--neutral-700), var(--neutral-200));
+  --color-progress-fill: light-dark(var(--indigo-300), var(--indigo-600));
+  background: var(--color-ink);
+  color: var(--color-on-ink);
 }
 
 /*
- * Highlighted card for the "spark" moments (next lesson, achievements):
- * an amber border all around. The padding absorbs the thicker border so the
- * content lines up with plain cards.
+ * The spark bubble, for the moments that matter (next lesson, achievements): filled amber,
+ * with dark text in both themes. Its content gets `color-scheme: light`, which pins the light
+ * value of every token inside it, so badges and panels stay readable on amber in the dark
+ * theme too. The bubble itself keeps the page's scheme: its amber is softer in the dark theme.
  */
-.card--spark {
-  padding: calc(var(--space-5) - var(--border-spark) + 1px);
-  border: var(--border-spark) solid var(--color-spark);
+.card--spark > * {
+  color-scheme: light;
 }
 
-/* Small uppercase label with a spark dot, e.g. "Next up". */
+.card--spark {
+  --color-text-muted: var(--color-on-spark-muted);
+  --color-accent: var(--color-on-spark);
+  --color-accent-strong: var(--color-on-spark);
+  --color-accent-border: var(--color-on-spark);
+  --color-focus: var(--color-on-spark);
+  background: var(--color-spark);
+  color: var(--color-on-spark);
+}
+
+/* Small typed label that opens a bubble, with a spark dot, e.g. "Next up", "How it works". */
 .overline {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-accent);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-bold);
+  color: var(--color-accent-strong);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wide);
   line-height: var(--leading-snug);
   text-transform: uppercase;
@@ -301,23 +390,28 @@ summary {
 .overline::before {
   content: '';
   flex: none;
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.625rem;
+  height: 0.625rem;
   border-radius: var(--radius-pill);
   background: var(--color-spark);
 }
 
-/* Small status label (pill). Variants: --success, --info, --placement, --warning. */
+/* On amber the dot would vanish: it takes the text colour. */
+.card--spark .overline::before {
+  background: var(--color-on-spark);
+}
+
+/* Small status label, a tiny bubble. Variants: --success, --info, --placement, --warning. */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 0.2em 0.75em;
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-sunken);
+  padding: 0.25em 0.85em;
+  border-radius: var(--bubble-sm);
+  background: var(--badge-bg, var(--color-surface));
   color: var(--color-text-muted);
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
   line-height: 1.5;
   white-space: nowrap;
 }
@@ -334,8 +428,8 @@ summary {
 
 /* Skipped by the tutor's level check: outlined, so it reads apart from a manual skip. */
 .badge--placement {
-  border: 1px dashed var(--color-border-strong);
-  background: var(--color-surface);
+  border: 2px dashed var(--color-border-strong);
+  background: transparent;
   color: var(--color-text-muted);
 }
 
@@ -353,7 +447,7 @@ summary {
   appearance: none;
   display: block;
   width: 100%;
-  height: 0.75rem;
+  height: 1rem;
   border: 0;
   border-radius: var(--radius-pill);
   background: var(--color-progress-track);

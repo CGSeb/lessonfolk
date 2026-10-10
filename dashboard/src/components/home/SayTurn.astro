@@ -1,0 +1,36 @@
+---
+import { t } from '../../i18n/en';
+
+/**
+ * The learner's turn in the thread: the exact message to send to the tutor, as a big
+ * "you" bubble on the right. Put the instruction ("In your AI chat… say:") in the bubble before it.
+ */
+interface Props {
+  phrase: string;
+}
+
+const { phrase } = Astro.props;
+---
+
+<div class="turn turn--you">
+  <p class="speaker">{t('thread.youSay')}</p>
+  <p class="bubble-you say-turn">
+    <q class="say-turn__phrase" data-copy={phrase}>{phrase}</q>
+  </p>
+</div>
+
+<style>
+  .say-turn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  }
+
+  .say-turn__phrase {
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-medium);
+    quotes: none;
+  }
+</style>
