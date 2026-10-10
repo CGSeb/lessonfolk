@@ -11,7 +11,12 @@ You can contribute in two ways:
   [Docker](https://docs.docker.com/get-docker/), for the database tests. Go to
   [Development setup](#development-setup).
 
-Either way, changes get in through the same [workflow](#workflow).
+Either way, changes get in through the same [workflow](#workflow). Looking for something to do?
+See the issues labelled
+[good first issue](https://github.com/CGSeb/lessonfolk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+and [help wanted](https://github.com/CGSeb/lessonfolk/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22),
+or ask in [Discussions](https://github.com/CGSeb/lessonfolk/discussions). Everyone here follows
+the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Contributing a course
 
@@ -94,9 +99,16 @@ the main parts work. The rules to keep in mind:
 
 ## Workflow
 
-1. **Issue first.** Open an issue with the **Task** template
-   ([`.github/ISSUE_TEMPLATE/task.yml`](.github/ISSUE_TEMPLATE/task.yml)): summary, why,
-   scope, acceptance criteria. One issue is one deliverable that fits in one pull request.
+**A small fix** (a typo, a wrong fact in a lesson, a broken link) needs no issue: open a pull
+request straight away. If the branch name or the commit message is not quite in the format
+below, that is fine on a first pull request: it can be adjusted when merging.
+
+For anything larger:
+
+1. **Issue first**, so nobody builds something that will not be merged.
+   [Choose a template](https://github.com/CGSeb/lessonfolk/issues/new/choose): a course idea, a
+   bug, a problem in a lesson, or **Task** for other work (summary, why, scope, acceptance
+   criteria). One issue is one deliverable that fits in one pull request.
 2. **Branch** from `main`, named `<type>/<issue number>-<short-slug>`, for example
    `feat/45-prompting-basics`. Never commit straight to `main`.
 3. **One commit per change**, with a message in the format
@@ -109,7 +121,8 @@ the main parts work. The rules to keep in mind:
 5. **CI** ([`.github/workflows/test.yml`](.github/workflows/test.yml)) runs `npm test` and
    `npm run check:courses` on every pull request. It must pass before merging.
 
-Never commit `.progress/` or `.env`.
+Never commit `.progress/` or `.env`. Found a security problem? Report it privately: see
+[Security](SECURITY.md).
 
 **Releases.** Publishing a GitHub release runs [`release.yml`](.github/workflows/release.yml):
 the same tests on the release's tag, then it publishes the Docker image to GHCR and deploys it

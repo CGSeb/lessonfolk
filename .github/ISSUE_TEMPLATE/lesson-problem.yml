@@ -1,0 +1,26 @@
+name: Problem in a lesson
+description: A mistake, an unclear explanation or an outdated claim in a course.
+title: "[Lesson] "
+labels: ["course"]
+body:
+  - type: input
+    id: lesson
+    attributes:
+      label: Course and lesson
+      placeholder: AI Foundations, "How do machines learn?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or unclear
+      description: Quote the sentence if you can, or say what your tutor told you.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: What it should say instead
+      description: Optional. A source helps if it is a factual correction.

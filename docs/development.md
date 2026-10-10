@@ -28,7 +28,7 @@ parts work. To get a working checkout first, follow
 | [`.mcp.json`](../.mcp.json) | Connects Claude Code opened in this folder to the MCP server of a local LessonFolk (`http://localhost:4321/mcp`). |
 | `.progress/` | Where older versions of the tutor saved progress (`progress.json`). Git ignores it; only the import reads it. The format is [`progress.example.json`](progress.example.json). |
 | `docker-compose.yml`, `Dockerfile` | Postgres and the app in containers. |
-| `.github/` | The issue template and the CI workflow. |
+| `.github/` | The issue and pull request templates, and the CI, security and release workflows. |
 
 The repository is an npm **workspace**: one `npm install` at the root installs the dashboard
 and every package under `packages/`, and links them together (the dashboard imports

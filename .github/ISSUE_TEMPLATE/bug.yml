@@ -1,0 +1,36 @@
+name: Bug
+description: Something does not work in the dashboard, the tutor or the setup.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you saw instead. Paste any error message.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Which LessonFolk
+      options:
+        - Hosted (lessonfolk.com)
+        - Self-hosted with Docker
+        - Development (npm run dashboard)
+    validations:
+      required: true
+
+  - type: input
+    id: app
+    attributes:
+      label: AI app
+      description: If the tutor is involved.
+      placeholder: Claude Code, Codex, Claude Desktop, Cursor…
+
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Optional. A screenshot, or your downloaded progress.json with anything personal removed.
