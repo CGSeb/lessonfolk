@@ -3,7 +3,9 @@
 | Document | What it covers |
 |---|---|
 | [Using LessonFolk](using-lessonfolk.md) | For learners: hosted or self-hosted (Docker), connecting your AI chat, your first session, what to say to your tutor, the Course companion, the dashboard, troubleshooting. |
-| [Contributing](../CONTRIBUTING.md) | For contributors: repository map, development setup, every environment variable and npm script, database changes, contributing a course, workflow. |
+| [Contributing](../CONTRIBUTING.md) | For contributors: contributing a course, development setup, the rules for code changes, workflow. |
+| [Developing LessonFolk](development.md) | For code contributors: repository map, every npm script, database changes, adding a tutor action, live refresh, Content Security Policy, Docker images. |
+| [Settings](configuration.md) | Every environment variable: database and Docker Compose, sign-in, dashboard server. |
 | [Course format](course-format.md) | The specification of courses, themes, authors and lesson files, what `npm run check:courses` checks, and the rubric of a course review. |
 | [Testing](testing.md) | How the automated tests work, and the manual checks with a real tutor and with real sign-in. |
 | [Sign-in for developers](auth-dev.md) | The `LESSONFOLK_AUTH` modes, and how to try GitHub and Google sign-in on your machine. |

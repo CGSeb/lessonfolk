@@ -54,12 +54,25 @@ Then say:
 
 The [learner guide](docs/using-lessonfolk.md) has the details.
 
+## Contribute
+
+LessonFolk grows with its courses, and **writing one needs no code**. Open your AI agent in this
+folder and say *"create a course about…"*: it interviews you, proposes an outline, writes the
+lessons with you and checks them. You are credited as the author on the dashboard.
+
+- **Spotted a mistake in a lesson, or have a course idea?**
+  [Open an issue](https://github.com/CGSeb/lessonfolk/issues/new/choose).
+- **Want to write or translate a course, or work on the code?** Start with
+  [Contributing](CONTRIBUTING.md).
+- **A question?** Ask in [Discussions](https://github.com/CGSeb/lessonfolk/discussions).
+
 ## Documentation
 
 - [Using LessonFolk](docs/using-lessonfolk.md): the learner guide (first session, what to say,
   the dashboard, Docker, troubleshooting)
-- [Contributing](CONTRIBUTING.md): development setup, settings, scripts, writing courses,
-  workflow
+- [Contributing](CONTRIBUTING.md): writing courses, development setup, workflow
+- [Developing LessonFolk](docs/development.md): repository map, scripts, database changes
+- [Settings](docs/configuration.md): every environment variable
 - [Course format](docs/course-format.md): how courses and lessons are written
 - [Testing](docs/testing.md): automated tests and manual checks
 - [Sign-in for developers](docs/auth-dev.md): GitHub and Google sign-in

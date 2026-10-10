@@ -1,0 +1,42 @@
+name: Course idea
+description: Suggest a course, or say you would like to write or translate one.
+title: "[Course] "
+labels: ["course"]
+body:
+  - type: textarea
+    id: topic
+    attributes:
+      label: Topic
+      description: What the course is about, and what learners should be able to do at the end.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: level
+    attributes:
+      label: Level
+      options:
+        - Beginner
+        - Intermediate
+        - Advanced
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: who
+    attributes:
+      label: Who writes it
+      description: Writing a course needs no code. Your AI agent writes it with you (see CONTRIBUTING.md).
+      options:
+        - I would like to write it
+        - I would like to translate an existing course
+        - I am only suggesting it
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Optional. Lessons you have in mind, courses it builds on, sources.

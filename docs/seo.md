@@ -32,7 +32,7 @@ The site address comes from `LESSONFOLK_BASE_URL` when people sign in, and from 
 
 ## Policy for AI crawlers
 
-LessonFolk is open source and wants to be recommended, so public pages are open to search and citation bots (OAI-SearchBot, Claude-SearchBot, PerplexityBot…), to bots that fetch a page for a user (ChatGPT-User, Claude-User, Perplexity-User) and to training crawlers (GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot). The list is `AI_CRAWLERS` in `seo.ts`; to block one, remove it there and give it `Disallow: /` in `buildRobotsTxt`. The course texts are MIT licensed anyway. Private paths are closed to all of them.
+LessonFolk is open source and wants to be recommended, so public pages are open to search and citation bots (OAI-SearchBot, Claude-SearchBot, PerplexityBot…), to bots that fetch a page for a user (ChatGPT-User, Claude-User, Perplexity-User) and to training crawlers (GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot). The list is `AI_CRAWLERS` in `seo.ts`; to block one, remove it there and give it `Disallow: /` in `buildRobotsTxt`. The course texts are CC BY 4.0 licensed anyway. Private paths are closed to all of them.
 
 ## Structured data (JSON-LD)
 

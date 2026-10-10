@@ -50,7 +50,8 @@ docker compose up -d --build
 
 **Settings.** To change the defaults, copy `.env.example` to `.env` and edit it. For example,
 set `LESSONFOLK_PORT` if port 4321 is taken, or `LESSONFOLK_DB_PORT` for 5432. Every setting is
-described in [Environment variables](../CONTRIBUTING.md#environment-variables).
+described in [Settings](configuration.md), including the database accounts if you run it on a
+server or with your own Postgres.
 
 **Sign-in.** `LESSONFOLK_AUTH` chooses the sign-in mode:
 
@@ -58,15 +59,6 @@ described in [Environment variables](../CONTRIBUTING.md#environment-variables).
   your own computer could reach it.
 - `oauth`: sign in with GitHub and/or Google, for several learners. This needs your own OAuth
   apps; follow [Sign-in for developers](auth-dev.md).
-
-**Database accounts.** The app does not run as the database owner. At each start, the image
-applies the migrations as the owner (`lessonfolk`) and creates or updates a second role,
-`lessonfolk_app`, that the app uses: it can read and write the tables, but cannot change the
-schema or create databases and roles. Its password is `LESSONFOLK_APP_DB_PASSWORD` (letters and
-digits only; the default is fine on your own computer, set your own on a server). With your own
-Postgres, give the app `DATABASE_MIGRATION_URL` (an owner able to create roles) and
-`LESSONFOLK_APP_DB_PASSWORD`, and point `DATABASE_URL` at `lessonfolk_app`. If you leave both
-out, the app uses `DATABASE_URL` for everything, as in development.
 
 **Update** to the latest courses and app. `docker compose up -d` uses the image published on
 every release (`ghcr.io/cgseb/lessonfolk`), so no build is needed:
@@ -115,11 +107,8 @@ claude mcp add --transport http lessonfolk http://localhost:4321/mcp
 - **`LESSONFOLK_AUTH=oauth`** (and the hosted version): in Claude Code, run `/mcp`, pick
   `lessonfolk` and authenticate. Your browser opens: sign in, then **Allow** the app to use
   LessonFolk. Every learner signs in as themselves and only ever sees their own progress.
-  The consent page lists what the app can do: read your courses and progress
-  (`lessonfolk:read`) and save your progress (`lessonfolk:write`). You allow everything
-  the app asked for, or deny it. An app that asks for `lessonfolk:read` only cannot save,
-  reset or import. An app that asks for neither scope (including apps connected before these scopes
-  existed) gets both, so every client keeps working.
+  The consent page lists what the app can do: read your courses and progress, and save your
+  progress. You allow everything the app asked for, or deny it.
 
 ## Your first session
 
@@ -127,7 +116,6 @@ In your connected chat, say:
 
 > Let's start learning AI.
 
-(In Claude Code you can also type `/learn`, or the server's prompt `/mcp__lessonfolk__learn`.)
 What happens next:
 
 1. **Onboarding.** The tutor asks a few questions, one at a time: what to call you, your
@@ -166,9 +154,7 @@ Talk naturally. These are the phrases the tutor recognises:
 
 The server also offers three **prompts** (shortcuts your app may list): `learn`, `review` and
 `progress`. In Claude Code they are `/mcp__lessonfolk__learn` and so on; opened in the LessonFolk
-folder, Claude Code also has the shorter skills `/learn`, `/progress` and `/review`.
-
-The full rules the tutor follows are in
+folder, Claude Code also has the shorter skills `/learn`, `/progress` and `/review`. The full rules the tutor follows are in
 [`packages/mcp/prompts/`](../packages/mcp/prompts).
 
 ## The Course companion (Claude Code)
@@ -229,8 +215,7 @@ without progress. Home needs you to sign in, and each person sees only their own
 
 ### Account (import, export, erase)
 
-The **Account** page (`/account`) has one **Your progress** block (download or import a `progress.json`), a small link to download
-all your data, and, last and set apart, **Delete**. It holds your progress, as a `progress.json` file (the format is
+The **Account** page (`/account`) holds your progress, as a `progress.json` file (the format is
 [`progress.example.json`](progress.example.json)):
 
 - **Download** it, as a backup or to move to another LessonFolk, or **download all your data**: one
@@ -263,8 +248,8 @@ learner, without the preview.
 - **Self-hosted**: your progress is saved in the database on your computer. Without sign-in,
   LessonFolk only listens on your own computer (`127.0.0.1`) and sends nothing anywhere.
 - **Hosted**: your progress is saved on the hosted server, with your account. Each learner only
-  ever sees their own progress, and you can download or delete it at any time on the **Your
-  data** page.
+  ever sees their own progress, and you can download or delete it at any time on the
+  **Account** page.
 - Your conversations go to your AI app's provider (Anthropic for Claude Code, OpenAI for Codex…),
   as with any use of that app. The tutor sends LessonFolk only what it saves: your profile, path,
   lesson statuses, scores and its short notes.
