@@ -5,6 +5,7 @@
  * session cookie (the client proves itself with PKCE or its credentials), so CSRF does not apply.
  */
 import { AUTH_BASE_PATH } from './auth';
+import { isLoopback } from './settings';
 
 /** OAuth endpoints that apps call directly (not browsers), with form bodies. */
 const APP_FORM_ENDPOINTS = new Set(['token', 'revoke', 'introspect'].map((name) => `${AUTH_BASE_PATH}/oauth2/${name}`));
@@ -25,4 +26,23 @@ export function crossSiteFormResponse(request: Request, url: URL, publicOrigin?:
   const contentType = request.headers.get('content-type')?.toLowerCase();
   const forbidden = contentType ? FORM_CONTENT_TYPES.some((type) => contentType.includes(type)) && !sameOrigin : !sameOrigin;
   return forbidden ? new Response(`Cross-site ${request.method} form submissions are forbidden`, { status: 403 }) : undefined;
+}
+
+/**
+ * Without sign-in (`LESSONFOLK_AUTH=none`) the dashboard is protected only by listening on this
+ * computer. A web page could still reach it through DNS rebinding (its own domain made to resolve
+ * to 127.0.0.1) and read the learner's data, or a reverse proxy could expose it. Both send a
+ * `Host` that is not this computer: refuse it with a 403.
+ */
+export function foreignHostResponse(request: Request): Response | undefined {
+  const host = request.headers.get('host');
+  if (host) {
+    try {
+      const { hostname } = new URL(`http://${host}`);
+      if (isLoopback(hostname) || hostname.endsWith('.localhost')) return undefined;
+    } catch {
+      // not a valid host: refused below
+    }
+  }
+  return new Response('LESSONFOLK_AUTH=none only answers on 127.0.0.1 or localhost.', { status: 403 });
 }

@@ -2,6 +2,7 @@
  * LESSONFOLK_AUTH=none: the single local learner is created in Postgres on first
  * start (once), and every page gets it without signing in.
  */
+import { request } from 'node:http';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { learner, user } from '@lessonfolk/db';
@@ -63,6 +64,21 @@ describe('LESSONFOLK_AUTH=none', () => {
       const course = await getPage(server, '/courses/ai-foundations');
       expect(course.text).toContain('1 of 3 lessons');
       expect(course.text).not.toContain('Sign in');
+    });
+
+    it('refuses a Host that is not this computer (DNS rebinding, reverse proxy)', async () => {
+      const get = (host: string) =>
+        new Promise<number>((resolve, reject) => {
+          const req = request(`${server.url}/api/me`, { headers: { host } }, (res) => {
+            res.resume();
+            resolve(res.statusCode ?? 0);
+          });
+          req.on('error', reject).end();
+        });
+      expect(await get('evil.example')).toBe(403);
+      expect(await get('lessonfolk.com')).toBe(403);
+      expect(await get(new URL(server.url).host)).toBe(200);
+      expect(await get('localhost:4321')).toBe(200);
     });
 
     it('has no sign-in page or auth routes', async () => {

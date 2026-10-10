@@ -15,6 +15,9 @@ import { readAuthSettings, type OAuthSettings } from './settings.ts';
 /** Where Better Auth's routes live (src/pages/api/auth/[...all].ts). */
 export const AUTH_BASE_PATH = '/api/auth';
 
+/** Sessions last 7 days from the last use (the cookie is renewed at most once a day), then the learner signs in again. */
+export const SESSION_POLICY = { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 } as const;
+
 export function createAuth(settings: OAuthSettings, db: Database) {
   const { github, google } = settings.providers;
   return betterAuth({
@@ -42,6 +45,18 @@ export function createAuth(settings: OAuthSettings, db: Database) {
           after: async (created) => ensureLearner(db, created.id),
         },
       },
+    },
+    session: SESSION_POLICY,
+    account: {
+      // One person, one account: a provider joins an existing account only when it reports the
+      // same verified email as an email already verified here. No provider is trusted blindly.
+      accountLinking: { enabled: true, trustedProviders: [], allowDifferentEmails: false, requireLocalEmailVerified: true },
+    },
+    advanced: {
+      // Secure cookies whenever the public address is https (Better Auth already does this for the
+      // `__Secure-` cookie prefix; stated here so a change of default cannot weaken it).
+      useSecureCookies: settings.baseURL.startsWith('https://'),
+      defaultCookieAttributes: { httpOnly: true, sameSite: 'lax' },
     },
     telemetry: { enabled: false },
   });

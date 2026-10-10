@@ -1,7 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { AUTH_BASE_PATH } from './lib/auth/auth';
 import { getAuthSettings, getCurrentUser } from './lib/auth/current-user';
-import { crossSiteFormResponse } from './lib/auth/origin-check';
+import { crossSiteFormResponse, foreignHostResponse } from './lib/auth/origin-check';
 import { isPrivatePath } from './lib/seo';
 
 // Crawler files: no session needed.
@@ -19,6 +19,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const publicOrigin = settings.mode === 'oauth' ? new URL(settings.baseURL).origin : undefined;
   const forbidden = crossSiteFormResponse(context.request, context.url, publicOrigin);
   if (forbidden) return forbidden;
+  // No sign-in: only answer as 127.0.0.1 or localhost (DNS rebinding, reverse proxies).
+  if (settings.mode === 'none') {
+    const foreign = foreignHostResponse(context.request);
+    if (foreign) return foreign;
+  }
   if (context.url.pathname === '/mcp' || context.url.pathname.startsWith('/.well-known/')) return next();
   if (CRAWLER_FILES.has(context.url.pathname)) return next();
   context.locals.authMode = settings.mode;

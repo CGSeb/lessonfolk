@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { crossSiteFormResponse } from './origin-check';
+import { crossSiteFormResponse, foreignHostResponse } from './origin-check';
 
 const ORIGIN = 'http://localhost:4321';
 
@@ -37,5 +37,21 @@ describe('crossSiteFormResponse', () => {
       expect(check(`/api/auth/oauth2/${name}`, { contentType: 'application/x-www-form-urlencoded' })).toBeUndefined();
     }
     expect(check('/api/auth/oauth2/consent', { contentType: 'application/x-www-form-urlencoded' })).toBe(403);
+  });
+});
+
+describe('foreignHostResponse (LESSONFOLK_AUTH=none)', () => {
+  const status = (host: string) => foreignHostResponse(new Request('http://localhost:4321/', { headers: { host } }))?.status;
+
+  it('answers on this computer', () => {
+    for (const host of ['127.0.0.1:4321', 'localhost:4321', 'localhost', '[::1]:4321', 'lessonfolk.localhost:4321']) {
+      expect(status(host)).toBeUndefined();
+    }
+  });
+
+  it('refuses other names, which is how DNS rebinding and reverse proxies arrive', () => {
+    for (const host of ['evil.example', 'evil.example:4321', '127.0.0.1.evil.example', 'lessonfolk.com', '192.168.1.20:4321']) {
+      expect(status(host)).toBe(403);
+    }
   });
 });

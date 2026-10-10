@@ -86,6 +86,17 @@ describe('checkStartup', () => {
   });
 });
 
+describe('checkStartup and a public address', () => {
+  const local = { host: '127.0.0.1', from: 'HOST' };
+  it('refuses no sign-in when LESSONFOLK_BASE_URL is a public address (behind a reverse proxy)', () => {
+    expect(() => checkStartup({ mode: 'none' }, local, { LESSONFOLK_BASE_URL: 'https://lessonfolk.example' })).toThrow(/LESSONFOLK_BASE_URL/);
+  });
+  it('allows no sign-in with a local or missing LESSONFOLK_BASE_URL', () => {
+    expect(() => checkStartup({ mode: 'none' }, local, { LESSONFOLK_BASE_URL: 'http://localhost:4321' })).not.toThrow();
+    expect(() => checkStartup({ mode: 'none' }, local, {})).not.toThrow();
+  });
+});
+
 describe('exposedHost', () => {
   it('uses the published address (docker compose) before the listening address', () => {
     expect(exposedHost({})).toEqual({ host: '127.0.0.1', from: 'HOST' });
@@ -109,7 +120,7 @@ describe('isLoopback', () => {
 describe('safeReturnPath', () => {
   it('keeps same-site paths and drops everything else', () => {
     expect(safeReturnPath('/courses?theme=x')).toBe('/courses?theme=x');
-    for (const next of [null, '', 'https://evil.example', '//evil.example', '/\\evil.example', 'courses']) {
+    for (const next of [null, '', 'https://evil.example', '//evil.example', '/\\evil.example', 'courses', '/\t/evil.example', '/\n/evil.example', '/\r\n/evil.example', '/\u0000']) {
       expect(safeReturnPath(next)).toBe('/');
     }
   });
