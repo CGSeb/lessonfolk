@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { accessFromScopes, parseScopeClaim, requestedAccess, withoutWrite } from './scopes.ts';
+import { accessFromScopes, parseScopeClaim, requestedAccess } from './scopes.ts';
 
 describe('accessFromScopes', () => {
   it('gives full access when there are no token scopes (none mode)', () => {
@@ -32,12 +32,5 @@ describe('consent helpers', () => {
     expect(requestedAccess('openid lessonfolk:read lessonfolk:write')).toEqual({ read: true, write: true, specific: true });
     expect(requestedAccess('openid')).toEqual({ read: true, write: true, specific: false });
     expect(requestedAccess(null)).toEqual({ read: true, write: true, specific: false });
-  });
-
-  it('drops the write scope, keeps read, and does nothing without a write scope', () => {
-    expect(withoutWrite('openid lessonfolk:read lessonfolk:write')).toBe('openid lessonfolk:read');
-    expect(withoutWrite('openid lessonfolk:write')).toBe('openid lessonfolk:read');
-    expect(withoutWrite('openid lessonfolk:read')).toBeUndefined();
-    expect(withoutWrite('openid')).toBeUndefined();
   });
 });

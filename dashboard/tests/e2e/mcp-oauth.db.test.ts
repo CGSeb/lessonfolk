@@ -113,7 +113,7 @@ async function authorize(
   d: Discovery,
   clientId: string,
   accept = true,
-  { scope = 'openid profile offline_access', allowWrite }: { scope?: string; allowWrite?: boolean } = {},
+  { scope = 'openid profile offline_access' }: { scope?: string } = {},
 ): Promise<TokenResult> {
   const verifier = randomBytes(32).toString('base64url');
   const challenge = createHash('sha256').update(verifier).digest('base64url');
@@ -154,13 +154,15 @@ async function authorize(
   expect(consentUrl.pathname).toBe('/oauth/consent');
   const consentPage = await browser.request(consentUrl.href);
   expect(consentPage.status).toBe(200);
-  const consentText = visibleText(await consentPage.text());
+  const consentHtml = await consentPage.text();
+  const consentText = visibleText(consentHtml);
   expect(consentText).toContain('Allow Test MCP client to use LessonFolk?');
   expect(consentText).toContain('was chosen by the app itself');
   expect(consentText).toContain('localhost:33418');
   expect(consentText).toContain('on your own computer');
+  expect(consentHtml).not.toContain('name="allow_write"');
 
-  const decided = await browser.post('/oauth/consent/decide', { oauth_query: consentUrl.search.slice(1), accept: String(accept), ...(allowWrite ? { allow_write: 'true' } : {}) });
+  const decided = await browser.post('/oauth/consent/decide', { oauth_query: consentUrl.search.slice(1), accept: String(accept) });
   expect(decided.status, await decided.clone().text()).toBe(303);
   const back = new URL(location(decided));
   expect(back.origin + back.pathname).toBe(REDIRECT_URI);
@@ -229,23 +231,20 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
     }
   });
 
-  it('scopes the token: a read-only request, or "save my progress" turned off, cannot write; other apps keep full access', async () => {
+  it('scopes the token: a read-only request cannot write; other apps get all they asked for', async () => {
     const d = await discover();
     const clientId = await register(d);
     fake.signInAs({ sub: 'fake-robin', name: 'Robin Tester', email: 'robin@example.test' });
 
     // The app asks to read only.
     const readOnly = await authorize(d, clientId, true, { scope: 'openid lessonfolk:read' });
-    // The app asks for everything, the learner turns "save my progress" off.
-    const narrowed = await authorize(d, clientId, true, { scope: 'openid lessonfolk:read lessonfolk:write', allowWrite: false });
-    // The app asks for everything, the learner keeps it on.
-    const full = await authorize(d, clientId, true, { scope: 'openid lessonfolk:read lessonfolk:write', allowWrite: true });
+    // The app asks for everything: allowing grants it all (the consent page has no partial choice).
+    const full = await authorize(d, clientId, true, { scope: 'openid lessonfolk:read lessonfolk:write' });
     // An app that only knows the OpenID scopes keeps working (compatibility rule).
     const legacy = await authorize(d, clientId);
 
     for (const [name, token, canWrite] of [
       ['read only', readOnly, false],
-      ['narrowed', narrowed, false],
       ['full', full, true],
       ['legacy', legacy, true],
     ] as const) {
