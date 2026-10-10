@@ -291,6 +291,12 @@ Course text is published under [CC BY 4.0](courses/LICENSE). Course authors are 
 
 Never commit `.progress/` or `.env`.
 
+Docker images (`FROM` in the `Dockerfile`, `image:` in the compose files and in `test.yml`) are
+pinned as `tag@sha256:<digest>` of the multi-arch index, so a rebuilt tag cannot change them
+silently. Dependabot opens the weekly pull requests that refresh the digests (the `test.yml`
+Postgres image has to be updated by hand together with the compose files). To bump one by hand:
+`docker buildx imagetools inspect <tag>` and copy the top-level `Digest`.
+
 ## Brand and design
 
 The logo, colours, type, spacing and voice are in [`docs/brand.md`](docs/brand.md). The
