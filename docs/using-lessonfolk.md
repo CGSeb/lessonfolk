@@ -236,6 +236,9 @@ all your data, and, last and set apart, **Delete**. It holds your progress, as a
 - **Download** it, as a backup or to move to another LessonFolk, or **download all your data**: one
   JSON file with every record LessonFolk holds about you (profile, sign-in methods, sessions, the AI
   apps you allowed, progress and its history), never passwords or tokens.
+- **Disconnect** an AI app (with sign-in). The **AI apps connected to your account** block lists the apps you allowed;
+  **Disconnect** removes your permission, its refresh tokens and stops its access at once. The app has to ask you again
+  before it can use LessonFolk.
 - **Import** a `progress.json`. LessonFolk checks the file and shows what changes before you
   confirm; an invalid file is refused with the list of problems. Importing replaces the progress
   saved here.

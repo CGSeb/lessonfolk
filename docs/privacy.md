@@ -45,7 +45,7 @@ download (`/api/account/export`). A learner can only get their own data: the rou
 `dashboard/src/lib/account.ts`): deletes the `user` row and, through the cascade, every row in the
 table above, plus pending `verification` values, in one transaction, then signs out. Sessions are
 rows, so they stop working at once; MCP access tokens are signed and would otherwise live until
-they expire, so the MCP endpoint also checks that the user still exists. Without sign-in, the same
+they expire, so the MCP endpoint also checks, on each request, that the user still has the consent the token was issued under (consents go with the account). Without sign-in, the same
 button erases the local learner's progress and history.
 
 Both the full export and the deletion require a **recent sign-in** (10 minutes) on the hosted

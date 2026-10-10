@@ -5,11 +5,11 @@
  */
 import { getCoursesDir, type ProgressStore } from '@lessonfolk/core';
 import { createMcpEndpoint, localGate, type McpEndpoint } from './endpoint.ts';
-import { oauthGate, type McpAuthServer } from './oauth.ts';
+import { oauthGate, type McpAuthServer, type TokenCheck } from './oauth.ts';
 
 export type AppMcpSettings = { store: ProgressStore } & (
   | { mode: 'none'; userId: string }
-  | { mode: 'oauth'; auth: McpAuthServer; baseURL: string; userExists?: (userId: string) => Promise<boolean> }
+  | { mode: 'oauth'; auth: McpAuthServer; baseURL: string; tokenAllowed?: TokenCheck }
 );
 
 /** Optional static token for `LESSONFOLK_AUTH=none`. */
@@ -23,7 +23,7 @@ export function getAppMcpEndpoint(settings: AppMcpSettings, env: NodeJS.ProcessE
   const gate =
     settings.mode === 'none'
       ? localGate({ userId: settings.userId, token: env[MCP_TOKEN_ENV]?.trim() || undefined })
-      : oauthGate(settings.auth, settings.baseURL, settings.userExists);
+      : oauthGate(settings.auth, settings.baseURL, settings.tokenAllowed);
   endpoint = createMcpEndpoint({ store: settings.store, gate, coursesDir: getCoursesDir() });
   return endpoint;
 }
