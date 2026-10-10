@@ -53,9 +53,10 @@ export function mcpResource(baseURL: string): string {
  * required, redirect URIs must match what was registered, and tokens only work for this MCP
  * endpoint.
  */
-export function mcpAuthPlugins(baseURL: string) {
+export function mcpAuthPlugins(baseURL: string, options: { purgeUnusedClients?: () => Promise<unknown> } = {}) {
   return [
     nativeLoopbackClients(),
+    ...(options.purgeUnusedClients ? [unusedClientCleanup(options.purgeUnusedClients)] : []),
     jwt(),
     mcp({
       resource: mcpResource(baseURL),
@@ -66,6 +67,42 @@ export function mcpAuthPlugins(baseURL: string) {
       allowUnauthenticatedClientRegistration: true,
     }),
   ];
+}
+
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+
+/**
+ * Open registration lets anyone add clients, so clean up as it is used: after a registration,
+ * at most once an hour, `purge` deletes the clients nobody ever allowed (see
+ * `purgeUnusedOAuthClients` in @lessonfolk/db). A failed cleanup never fails the registration.
+ */
+function unusedClientCleanup(purge: () => Promise<unknown>, intervalMs = CLEANUP_INTERVAL_MS) {
+  let last = 0;
+  return {
+    id: 'lessonfolk-unused-client-cleanup',
+    hooks: {
+      after: [
+        {
+          matcher: (ctx: { path?: string }) => ctx.path === '/oauth2/register',
+          handler: createAuthMiddleware(async () => {
+            const now = Date.now();
+            if (now - last < intervalMs) return;
+            last = now;
+            try {
+              await purge();
+            } catch {
+              last = 0; // try again at the next registration
+            }
+          }),
+        },
+      ],
+    },
+  } satisfies BetterAuthPlugin;
+}
+
+/** True when the host is a loopback address, where CLI and desktop apps listen for their callback. */
+export function isLoopbackHost(hostname: string): boolean {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname.endsWith('.localhost');
 }
 
 const LOOPBACK_HTTP = /^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//i;
