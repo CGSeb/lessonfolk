@@ -13,9 +13,10 @@ prerequisites:
 
 ## Key ideas
 1. **You describe tools; the model chooses them.** A tool definition has a name, a
-   description of what it does and when to use it, and its parameters (as a JSON Schema). You
-   send these definitions with the messages, and the model can answer with a **tool call**
-   instead of text: the tool's name plus arguments.
+   description of what it does and when to use it, and its parameters (as a **JSON Schema**, a
+   standard way to describe the shape of JSON data: the fields, their types and which are
+   required). You send these definitions with the messages, and the model can answer with a
+   **tool call** instead of text: the tool's name plus arguments.
 2. **The model asks, your code acts.** The model never runs anything. Your code reads the tool
    call, runs the matching Python function, and sends the result back as a message with the
    `tool` role. The model then uses that result to continue.

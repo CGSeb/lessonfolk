@@ -30,7 +30,7 @@ prerequisites:
    on what is found along the way.
 
 ## Teaching notes
-- The ticket's goal is to replace hype with a clear mental model: be calm and concrete, and
+- The goal of this course is to replace hype with a clear mental model: be calm and concrete, and
   avoid claims about what agents will soon do or which products are best.
 - You are, in this chat, possibly an agent yourself (you may read files and call tools). If
   so, use it as a live example: say which tools you have and how you choose to use them.
@@ -42,7 +42,7 @@ prerequisites:
   loop, with tools. The difference is the system around it.
 - Misconception: "agents act on their own". They act only through tools your code runs, with
   the permissions you give them (lesson 6).
-- Do not name agent frameworks or products; the ticket keeps the course framework-free.
+- Do not name agent frameworks or products: the course is framework-free.
 
 ## Check your understanding
 1. In your own words, what makes a system an agent rather than a chatbot?

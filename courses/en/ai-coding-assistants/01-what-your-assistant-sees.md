@@ -17,8 +17,8 @@ prerequisites:
    as you type. **Chat in the editor** answers questions and proposes edits to the code you
    point it at. **Agent-style assistants** can read files, search the project, run commands
    (tests, builds) and edit several files on their own, in a loop, until they think the task
-   is done. All of them are built on the same kind of language model you met in earlier
-   courses.
+   is done. All of them are built on a large language model, the kind of model behind chat
+   assistants (covered in AI Foundations).
 2. **The model only sees its context.** Everything it knows about your task comes from what
    the tool sends with your request: your message, the current file or selection, files the
    tool picked or that you attached, the output of commands it ran, and any project
@@ -63,6 +63,8 @@ prerequisites:
    Good answer: any three of the goal or reason for the change, team decisions, production behaviour or real data, the bug report, constraints such as what must not change, files it did not open, the framework version if not visible.
 3. Why is "add the whole repository to the context" not always a good idea?
    Good answer: the context window is limited and long contexts make the model less precise; the right, relevant files work better than everything.
+4. What can an agent-style assistant do that inline completion cannot?
+   Good answer: read and search files, run commands such as tests, and edit several files in a loop until it thinks the task is done; inline completion only suggests the next lines as you type.
 
 ## Exercise
 Needs a computer and any coding assistant (a free tier or this chat works). Take a small,

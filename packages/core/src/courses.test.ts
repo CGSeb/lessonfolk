@@ -437,6 +437,38 @@ describe('lesson sections (invalid fixture)', () => {
   });
 });
 
+describe('estimatedHours', () => {
+  /** Copy of the pinned courses (lessons add up to 55 minutes) with another `estimatedHours`. */
+  function hoursWarnings(estimatedHours: number, dropLesson = false) {
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-courses-'));
+    cpSync(validDir, dir, { recursive: true });
+    const courseFile = join(dir, 'en', 'ai-foundations', 'course.yaml');
+    writeFileSync(
+      courseFile,
+      readFileSync(courseFile, 'utf8').replace(/^estimatedHours:.*$/m, `estimatedHours: ${estimatedHours}`),
+    );
+    if (dropLesson) rmSync(join(dir, 'en', 'ai-foundations', '03-what-is-an-llm.md'));
+    const { warnings } = inspectCatalog('en', dir);
+    return warnings.filter((w) => w.file === courseFile).map((w) => w.message);
+  }
+
+  it('accepts a total within a quarter of an hour of the lessons', () => {
+    expect(hoursWarnings(1)).toEqual([]);
+    expect(hoursWarnings(0.75)).toEqual([]);
+  });
+
+  it('warns when the total drifts from the sum of the lessons', () => {
+    expect(hoursWarnings(2)).toEqual([
+      'estimatedHours is 2, but its lessons add up to 55 minutes (about 1 hour)',
+    ]);
+    expect(hoursWarnings(0.5)).toHaveLength(1);
+  });
+
+  it('does not compare when a listed lesson failed to load', () => {
+    expect(hoursWarnings(2, true)).toEqual([]);
+  });
+});
+
 describe('loadCatalog (live edits)', () => {
   it('reads files at call time, without caching', () => {
     const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-courses-'));

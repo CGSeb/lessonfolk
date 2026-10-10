@@ -55,6 +55,8 @@ prerequisites:
    Good answer: errors caused by the request itself, such as an invalid key or bad parameters, because sending the same request again will fail the same way.
 3. Name two ways to reduce the cost or response time of an AI feature.
    Good answer: any two of shorter system prompts, trimming or summarising history, limiting reply length, choosing a smaller model, streaming for perceived speed (time only), caching repeated answers.
+4. You notice your API key in a screenshot you posted in a public chat. What do you do, and what would have limited the damage?
+   Good answer: revoke the key and create a new one at once; a spending or usage limit at the provider caps what a leaked key or a bug can cost.
 
 ## Exercise
 Needs a computer, Python and your setup — free, code. Wrap your model call with a timeout

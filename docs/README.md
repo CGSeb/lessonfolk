@@ -4,7 +4,7 @@
 |---|---|
 | [Using LessonFolk](using-lessonfolk.md) | For learners: hosted or self-hosted (Docker), connecting your AI chat, your first session, what to say to your tutor, the Course companion, the dashboard, troubleshooting. |
 | [Contributing](../CONTRIBUTING.md) | For contributors: repository map, development setup, every environment variable and npm script, database changes, contributing a course, workflow. |
-| [Course format](course-format.md) | The specification of courses, themes, authors and lesson files, and what `npm run check:courses` checks. |
+| [Course format](course-format.md) | The specification of courses, themes, authors and lesson files, what `npm run check:courses` checks, and the rubric of a course review. |
 | [Testing](testing.md) | How the automated tests work, and the manual checks with a real tutor and with real sign-in. |
 | [Sign-in for developers](auth-dev.md) | The `LESSONFOLK_AUTH` modes, and how to try GitHub and Google sign-in on your machine. |
 | [Privacy and personal data](privacy.md) | Data map (what is stored where), download-all and delete-account, retention of logs and backups. |

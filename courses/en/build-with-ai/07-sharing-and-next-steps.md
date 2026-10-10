@@ -56,13 +56,13 @@ prerequisites:
 ## Exercise
 Needs nothing (or a computer to start building) — free. Write a one-page sharing plan for
 your chatbot: who will use it, how they will access it, where the key lives, which limits you
-will set, the data notice you will show, and how you will collect feedback. Review it with the
-tutor. Optionally, share the terminal version with one person and note what they struggled
+will set, the data notice you will show, how you will collect feedback, and what you plan to
+learn next and why. Review it with the tutor. Optionally, share the terminal version with one person and note what they struggled
 with.
 
 ## Completion criteria
 The learner answers the checks correctly and writes a sharing plan that covers key storage,
-limits and a data notice.
+limits, a data notice and what to learn next.
 
 ## Going further
 - AI Agents and Tools: letting models call functions and take actions.

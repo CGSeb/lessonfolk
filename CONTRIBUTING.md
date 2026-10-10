@@ -35,7 +35,7 @@ You can contribute in two ways, and they need different setups:
 | [`packages/core/`](packages/core) | `@lessonfolk/core`: loading and validating courses, the progress format (progress.json v1), the tutor's rules (next lesson, path, level check) as code, and the `ProgressStore` interface every progress backend follows. |
 | [`packages/db/`](packages/db) | `@lessonfolk/db`: the Postgres schema ([Drizzle](https://orm.drizzle.team)), the migrations in `drizzle/`, the Postgres progress store (`createPostgresProgressStore`) and the database test helpers. |
 | [`packages/mcp/`](packages/mcp) | `@lessonfolk/mcp`: the MCP server (course and progress tools, course resources, tutor prompts) the dashboard serves at `/mcp`, and its OAuth setup for `LESSONFOLK_AUTH=oauth`. The tutor's instructions and the `learn`, `review` and `progress` prompts are `packages/mcp/prompts/*.md`: the only copy of the tutoring procedures (the skills point to them). |
-| [`.claude/skills/`](.claude/skills) | Claude Code skills (`learn`, `progress` and `review`, which run the MCP prompts; `create-course`, `edit-course`) and two mods: `course-companion` (for learners) and `course-builder` (for course authors). |
+| [`.claude/skills/`](.claude/skills) | Claude Code skills (`learn`, `progress` and `review`, which run the MCP prompts; `create-course`, `edit-course`, `review-course`) and two mods: `course-companion` (for learners) and `course-builder` (for course authors). |
 | [`docs/`](docs) | Documentation: see the [index](docs/README.md). |
 | [`assets/brand/`](assets/brand) | Logo files. |
 | [`.mcp.json`](.mcp.json) | Connects Claude Code opened in this folder to the MCP server of a local LessonFolk (`http://localhost:4321/mcp`). |
@@ -142,6 +142,7 @@ Run root scripts from the repository root. Run a workspace script with `-w <work
 | `npm run dashboard:start` | Run the built server, after the sign-in startup checks (`dashboard/scripts/serve.ts`). Build first. |
 | `npm test` | Run the tests of every workspace (core, db, mcp, dashboard). Needs Postgres. |
 | `npm run check:courses` | Validate every course and lesson file. Add `-- <folder>` to check another courses folder. |
+| `npm run review:courses` | Print the brief your agent follows to review lessons (rubric, lessons to read, catalog outline). Add `-- <course-id or lesson-id>…` to pick lessons. Calls no AI service. |
 | `npm run progress:import` | Copy a `progress.json` (default: the old `.progress/progress.json`, or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. |
 | `npm run check -w dashboard` | Type-check the dashboard (`astro check`). |
 | `npm run check -w packages/core` | Type-check `@lessonfolk/core`. |
@@ -249,8 +250,13 @@ AI Foundations"* or *"reorder the lessons of …"*. The agent proposes the chang
 file names, lesson ids and prerequisites in sync, and warns you before renaming a lesson that
 learners may already have finished (their progress refers to lessons by id).
 
-In Claude Code these flows are the `/create-course` and `/edit-course` skills. Codex follows the
-same "Create a course" and "Edit a course" procedures from [`AGENTS.md`](AGENTS.md). While
+**Review a course.** Say *"review the course AI Foundations"*. The agent reads each lesson and
+reports the ones to reread, against the six criteria of [Review](docs/course-format.md#review):
+on topic, objectives covered, completion criteria, level, fast-aging claims, overlap. It changes
+no file.
+
+In Claude Code these flows are the `/create-course`, `/edit-course` and `/review-course` skills. Codex follows the
+same "Create a course", "Edit a course" and "Review a course" procedures from [`AGENTS.md`](AGENTS.md). While
 `/create-course` runs, Claude Code shows the **Course builder** pane beside the chat: the course
 title, the steps done so far and the lessons written. `/course-builder` reopens it. It is a mod
 in `.claude/skills/course-builder/`.

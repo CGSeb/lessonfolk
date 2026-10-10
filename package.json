@@ -16,7 +16,8 @@
     "dashboard:start": "npm run start --workspace dashboard",
     "test": "npm run test --workspaces --if-present",
     "progress:import": "npm run progress:import --workspace dashboard --",
-    "check:courses": "npm run check:courses --workspace dashboard --"
+    "check:courses": "npm run check:courses --workspace dashboard --",
+    "review:courses": "npm run review:courses --workspace dashboard --"
   },
   "overrides": {
     "esbuild": "^0.28.1"
