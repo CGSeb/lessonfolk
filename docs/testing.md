@@ -25,7 +25,8 @@ the `db-data` volume); `docker compose stop db` stops it when you are done.
 - The tests connect with `DATABASE_URL`, by default
   `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` (the `db` service). To use
   another server or port, see [Environment variables](../CONTRIBUTING.md#environment-variables).
-  The user needs the right to create databases.
+  The user needs the right to create databases (the owner, not the app's `lessonfolk_app` role;
+  `packages/db/src/app-role.db.test.ts` checks that role can run the progress store and nothing more).
 - Each test file gets its **own fresh database**, created and migrated by
   `createTestDatabase()` from `@lessonfolk/db/testing` and dropped at the end, so test
   files run in parallel without seeing each other's rows:

@@ -30,7 +30,11 @@ services:
   app:
     image: ghcr.io/cgseb/lessonfolk:${LESSONFOLK_IMAGE_TAG:-latest}
     environment:
-      DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD}@db:5432/lessonfolk
+      # The app runs as the least-privilege role lessonfolk_app. The start command applies the
+      # migrations and creates/updates that role as the owner (DATABASE_MIGRATION_URL).
+      DATABASE_URL: postgres://lessonfolk_app:${LESSONFOLK_APP_DB_PASSWORD:?Set LESSONFOLK_APP_DB_PASSWORD in .env}@db:5432/lessonfolk
+      DATABASE_MIGRATION_URL: postgres://lessonfolk:${POSTGRES_PASSWORD}@db:5432/lessonfolk
+      LESSONFOLK_APP_DB_PASSWORD: ${LESSONFOLK_APP_DB_PASSWORD}
       LESSONFOLK_AUTH: oauth
       LESSONFOLK_BASE_URL: https://${LESSONFOLK_DOMAIN:?Set LESSONFOLK_DOMAIN in .env}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}

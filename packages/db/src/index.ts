@@ -1,10 +1,13 @@
 export * from './schema.ts';
 export {
+  APP_ROLE,
   connect,
   databaseUrl,
   DEFAULT_DATABASE_URL,
+  ensureAppRole,
   isUnreachableError,
   MIGRATIONS_DIR,
+  migrationUrl,
   redactUrl,
   runMigrations,
   type Connection,

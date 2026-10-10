@@ -59,6 +59,15 @@ described in [Environment variables](../CONTRIBUTING.md#environment-variables).
 - `oauth`: sign in with GitHub and/or Google, for several learners. This needs your own OAuth
   apps; follow [Sign-in for developers](auth-dev.md).
 
+**Database accounts.** The app does not run as the database owner. At each start, the image
+applies the migrations as the owner (`lessonfolk`) and creates or updates a second role,
+`lessonfolk_app`, that the app uses: it can read and write the tables, but cannot change the
+schema or create databases and roles. Its password is `LESSONFOLK_APP_DB_PASSWORD` (letters and
+digits only; the default is fine on your own computer, set your own on a server). With your own
+Postgres, give the app `DATABASE_MIGRATION_URL` (an owner able to create roles) and
+`LESSONFOLK_APP_DB_PASSWORD`, and point `DATABASE_URL` at `lessonfolk_app`. If you leave both
+out, the app uses `DATABASE_URL` for everything, as in development.
+
 **Update** to the latest courses and app. `docker compose up -d` uses the image published on
 every release (`ghcr.io/cgseb/lessonfolk`), so no build is needed:
 

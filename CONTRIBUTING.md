@@ -90,6 +90,8 @@ never committed). Variables already set in your shell win over `.env`.
 | Variable | Default | What it does |
 |---|---|---|
 | `DATABASE_URL` | `postgres://lessonfolk:lessonfolk@127.0.0.1:5432/lessonfolk` | The Postgres server for the tests, the migrations, sign-in and the dashboard's progress (in every mode; `LESSONFOLK_AUTH=none` applies pending migrations and creates the local learner on start). In Docker Compose, the app gets its own value pointing to the `db` service. |
+| `DATABASE_MIGRATION_URL` | `DATABASE_URL` | The database owner, used only for migrations and for creating the runtime role. In Docker Compose and the hosted deployment the app runs as the least-privilege role `lessonfolk_app` (`DATABASE_URL`); the image's start command (`npm run migrate`) applies the migrations as the owner first. Leave it unset in development: one account does everything. |
+| `LESSONFOLK_APP_DB_PASSWORD` | `lessonfolk-app` (Compose) | Password of the `lessonfolk_app` role. When set, `migrate` creates or updates the role (connect, read and write the tables and sequences of `public`, no schema changes, no `CREATEDB`/`CREATEROLE`) and re-grants it, so tables added by new migrations are covered. Letters and digits only (it goes in a URL). |
 | `POSTGRES_PASSWORD` | `lessonfolk` | Docker Compose: the password of the `db` service. Change `DATABASE_URL` to match. |
 | `LESSONFOLK_PORT` | `4321` | Docker Compose: the port of the app on your computer. |
 | `LESSONFOLK_DB_PORT` | `5432` | Docker Compose: the port of Postgres on your computer. Change `DATABASE_URL` to match. |

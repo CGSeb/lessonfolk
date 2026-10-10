@@ -33,7 +33,11 @@ services:
     image: ghcr.io/cgseb/lessonfolk:${LESSONFOLK_IMAGE_TAG:-latest}
     build: .
     environment:
-      DATABASE_URL: postgres://lessonfolk:${POSTGRES_PASSWORD:-lessonfolk}@db:5432/lessonfolk
+      # The app runs as the least-privilege role lessonfolk_app (data only, no schema changes).
+      # At start, the image applies the migrations and creates that role as the owner below.
+      DATABASE_URL: postgres://lessonfolk_app:${LESSONFOLK_APP_DB_PASSWORD:-lessonfolk-app}@db:5432/lessonfolk
+      DATABASE_MIGRATION_URL: postgres://lessonfolk:${POSTGRES_PASSWORD:-lessonfolk}@db:5432/lessonfolk
+      LESSONFOLK_APP_DB_PASSWORD: ${LESSONFOLK_APP_DB_PASSWORD:-lessonfolk-app}
       LESSONFOLK_AUTH: ${LESSONFOLK_AUTH:-none}
       # The host address the app port is published on (see `ports` below). Inside the
       # container the server listens on 0.0.0.0, so LESSONFOLK_AUTH=none checks this instead.
