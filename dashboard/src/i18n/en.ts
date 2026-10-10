@@ -19,6 +19,16 @@ export const en = {
     connectDescription: 'Connect Claude, ChatGPT or another AI chat app to LessonFolk, so your AI tutor can teach the courses and save your progress.',
     privacyDescription: 'What LessonFolk stores about you, where, and how to download or delete it.',
   },
+  // The permissions listed on the page where a learner allows an AI app (MCP scopes, packages/mcp/src/scopes.ts).
+  consent: {
+    permissionsHeading: 'This app will be able to:',
+    permissionRead: 'Read the courses and your progress',
+    permissionWrite: 'Save your progress: profile, path, lessons, scores and notes. It can also reset a course or replace your progress with an imported file.',
+    writeToggle: 'Allow it to save and change my progress',
+    writeToggleHint: 'Turn this off to let the app read only. It can then teach from what you already did, but cannot save anything.',
+    readOnlyNotice: 'This app asked to read only: it cannot save or change your progress.',
+    fullAccessNotice: 'This app did not ask for specific permissions, so it gets all of them.',
+  },
   a11y: {
     skipToContent: 'Skip to main content',
     mainNav: 'Main',

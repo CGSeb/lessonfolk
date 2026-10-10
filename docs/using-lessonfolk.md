@@ -106,6 +106,11 @@ claude mcp add --transport http lessonfolk http://localhost:4321/mcp
 - **`LESSONFOLK_AUTH=oauth`** (and the hosted version): in Claude Code, run `/mcp`, pick
   `lessonfolk` and authenticate. Your browser opens: sign in, then **Allow** the app to use
   LessonFolk. Every learner signs in as themselves and only ever sees their own progress.
+  The consent page lists what the app can do: read your courses and progress
+  (`lessonfolk:read`) and save your progress (`lessonfolk:write`). Untick "Allow it to save
+  and change my progress" to let an app read only; the tools that save, reset or import then
+  refuse. An app that asks for neither scope (including apps connected before these scopes
+  existed) gets both, so every client keeps working.
 
 ## Your first session
 

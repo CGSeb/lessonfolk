@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { verifyOAuthQueryParams } from '@lessonfolk/mcp';
+import { requestedAccess, verifyOAuthQueryParams } from '@lessonfolk/mcp';
+import { t } from '../../i18n/en';
 import { getAuth } from '../../lib/auth/auth';
 import { getAuthSettings } from '../../lib/auth/current-user';
 
@@ -39,6 +40,8 @@ if (valid) {
   }
 }
 const appName = clientName || 'An AI app';
+// What the app asks for (lessonfolk:read / lessonfolk:write). No lessonfolk scope at all means everything.
+const access = requestedAccess(params.get('scope'));
 ---
 
 <BaseLayout title="Allow access" noindex>
@@ -48,15 +51,28 @@ const appName = clientName || 'An AI app';
         <>
           <header class="stack" style="--stack-space: var(--space-2)">
             <h1>Allow {appName} to use LessonFolk?</h1>
-            <p class="muted">
-              Signed in as {Astro.locals.user.name}. If you allow it, this app can read your courses and your progress, and save your
-              progress (profile, path, lessons, scores and notes) while it tutors you.
-            </p>
+            <p class="muted">Signed in as {Astro.locals.user.name}. If you allow it, this app can tutor you with LessonFolk.</p>
+            <h2 class="consent__heading">{t('consent.permissionsHeading')}</h2>
+            <ul class="consent__permissions">
+              <li>{t('consent.permissionRead')}</li>
+              {access.write && <li>{t('consent.permissionWrite')}</li>}
+            </ul>
+            {!access.write && <p class="muted">{t('consent.readOnlyNotice')}</p>}
+            {access.write && !access.specific && <p class="muted">{t('consent.fullAccessNotice')}</p>}
             {redirectHost && <p class="muted">You will then go back to {redirectHost}.</p>}
             <p class="muted">Only allow apps you just asked to connect to LessonFolk.</p>
           </header>
           <form method="post" action="/oauth/consent/decide" class="consent__actions">
             <input type="hidden" name="oauth_query" value={oauthQuery} />
+            {access.write && access.specific && (
+              <label class="consent__toggle">
+                <input type="checkbox" name="allow_write" value="true" checked />
+                <span>
+                  {t('consent.writeToggle')}
+                  <span class="muted consent__hint">{t('consent.writeToggleHint')}</span>
+                </span>
+              </label>
+            )}
             <button class="consent__button consent__button--primary" type="submit" name="accept" value="true">
               Allow
             </button>
@@ -84,6 +100,22 @@ const appName = clientName || 'An AI app';
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+  }
+
+  .consent__toggle {
+    display: flex;
+    flex-basis: 100%;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  .consent__hint {
+    display: block;
+  }
+
+  .consent__permissions {
+    margin: 0;
+    padding-left: var(--space-5);
   }
 
   .consent__button {
