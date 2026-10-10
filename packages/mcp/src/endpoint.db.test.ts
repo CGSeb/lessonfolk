@@ -278,6 +278,41 @@ describe('users are kept apart', () => {
     expect(rows.map((r) => [r.user_id, r.name])).toEqual([['carol', 'Carol'], ['dave', 'Dave']]);
   });
 
+  it('no tool reaches another user’s progress, whatever user id or lesson Bob names', async () => {
+    const alice = await connect(await addUser('alice2'));
+    const bob = await connect(await addUser('bob2'));
+    await call(alice, 'set_profile', { name: 'Alice', level: 'beginner' });
+    await call(alice, 'start_lesson', { lessonId: L1 });
+    await call(alice, 'complete_lesson', { lessonId: L1, score: 0.9, notes: 'alice private note' });
+    await call(alice, 'start_lesson', { lessonId: L2 });
+    const before = JSON.parse(text(await call(alice, 'get_progress')));
+
+    // Every tool Bob has, with Alice's id added: none takes it, none lets it through.
+    const forged = { userId: 'alice2', user_id: 'alice2' };
+    const seen: string[] = [];
+    for (const [name, args] of [
+      ['get_progress', {}],
+      ['get_next_lesson', {}],
+      ['set_profile', { name: 'Bob' }],
+      ['start_lesson', { lessonId: L1 }],
+      ['save_lesson_notes', { lessonId: L1, notes: 'bob note' }],
+      ['complete_lesson', { lessonId: L1, score: 0.1, notes: 'bob done' }],
+      ['record_review_score', { lessonId: L1, score: 1 }],
+      ['skip_lesson', { lessonId: L2, reason: 'bob skips' }],
+      ['reset_course', { courseId: 'ai-foundations' }],
+      ['import_progress', { progress: { version: 1, profile: { name: 'Mallory' }, lessons: {} } }],
+    ] as const) {
+      const result = await call(bob, name, { ...args, ...forged });
+      seen.push(text(result));
+    }
+    // Nothing Bob was told is Alice's.
+    expect(seen.join('\n')).not.toContain('alice private note');
+    expect(seen.join('\n')).not.toContain('"Alice"');
+
+    expect(JSON.parse(text(await call(alice, 'get_progress')))).toEqual(before);
+    expect(JSON.parse(text(await call(bob, 'get_progress'))).profile.name).toBe('Mallory');
+  });
+
   it('refuses requests the gate does not accept', async () => {
     const response = await endpoint(
       new Request(BASE, {
@@ -287,6 +322,42 @@ describe('users are kept apart', () => {
       }),
     );
     expect(response.status).toBe(401);
+  });
+});
+
+describe('logs', () => {
+  it('a failed database write logs no learner data and tells the AI nothing about the query', async () => {
+    const { DrizzleQueryError } = await import('drizzle-orm');
+    const real = createPostgresProgressStore(testDb.db, { courses: () => readCourses(coursesDir) });
+    const failing = {
+      ...real,
+      saveNotes: () => {
+        throw new DrizzleQueryError('update lesson_progress set notes = $1', ['PRIVATE-NOTE', 'private@example.test'], Object.assign(new Error('boom PRIVATE-NOTE'), { code: '57P01' }));
+      },
+    };
+    const failingEndpoint = createMcpEndpoint({ store: failing, gate: testGate, coursesDir });
+    const logged: unknown[][] = [];
+    const original = console.error;
+    console.error = (...args: unknown[]) => void logged.push(args);
+    try {
+      const client = new Client({ name: 'lessonfolk-test', version: '1.0.0' });
+      await client.connect(
+        new StreamableHTTPClientTransport(new URL(BASE), {
+          requestInit: { headers: { Authorization: `Bearer ${await addUser('erin')}` } },
+          fetch: (url, init) => failingEndpoint(new Request(url, init)),
+        }),
+      );
+      clients.push(client);
+      const result = await call(client, 'save_lesson_notes', { lessonId: L1, notes: 'PRIVATE-NOTE' });
+      expect(result.isError).toBe(true);
+      expect(text(result)).not.toContain('PRIVATE-NOTE');
+      expect(text(result)).not.toContain('lesson_progress');
+    } finally {
+      console.error = original;
+    }
+    const output = JSON.stringify(logged.map((args) => args.map(String)));
+    expect(output).toContain('57P01');
+    for (const secret of ['PRIVATE-NOTE', 'private@example.test', 'erin', 'lesson_progress']) expect(output).not.toContain(secret);
   });
 });
 
