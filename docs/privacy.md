@@ -73,4 +73,11 @@ The `/privacy` page is linked from the footer, the sign-in page and the Account 
 learners who would rather not send data to self-hosting ([using-lessonfolk](using-lessonfolk.md)).
 There are no separate terms of service.
 
-The contact shown on `/privacy` is the `LESSONFOLK_PRIVACY_CONTACT` environment variable.
+The contact shown on `/privacy` is the `LESSONFOLK_PRIVACY_CONTACT` environment variable, and the
+"Where it is stored" section says the country or region of the server from `LESSONFOLK_DATA_LOCATION`
+(for example `Canada`). Without it the page says the data is on the server of whoever runs this
+LessonFolk. A host must set it to where the database and its backups really are, and change it if the
+server moves.
+
+If the data is stored outside the learner's country (for example learners in the EU, a server in
+Canada), say so in `LESSONFOLK_DATA_LOCATION`: the page shows it as written.
