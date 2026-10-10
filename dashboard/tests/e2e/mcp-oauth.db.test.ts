@@ -193,7 +193,7 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
     } finally {
       await client.close();
     }
-    const [robinRow] = await testDb.sql`select u.email, l.profile from learner l join "user" u on u.id = l.user_id where l.profile->>'name' = 'Robin'`;
+    const [robinRow] = await testDb.sql`select u.id as user_id, u.email, l.profile from learner l join "user" u on u.id = l.user_id where l.profile->>'name' = 'Robin'`;
     expect(robinRow.email).toBe('robin@example.test');
 
     // Another person signs in with the same app: they see only their own progress.
@@ -202,8 +202,21 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
     const samClient = await connectMcp(baseURL, sam.access_token);
     try {
       expect(await callJson(samClient, 'get_progress')).toMatchObject({ profile: {}, lessons: {} });
+      // Sam's token, whatever arguments he sends, only writes to Sam; Robin's data stays as it was.
+      await callJson(samClient, 'set_profile', { name: 'Sam', userId: robinRow.user_id });
+      await callJson(samClient, 'save_lesson_notes', { lessonId: 'ai-foundations/01-what-is-ai', notes: 'sam notes' }).catch(() => {});
+      expect((await callJson(samClient, 'get_progress')).profile.name).toBe('Sam');
     } finally {
       await samClient.close();
+    }
+    const robinAgain = await connectMcp(baseURL, robin.access_token);
+    try {
+      const progress = await callJson(robinAgain, 'get_progress');
+      expect(progress.profile.name).toBe('Robin');
+      expect(progress.current).toBe('ai-foundations/01-what-is-ai');
+      expect(JSON.stringify(progress)).not.toContain('Sam');
+    } finally {
+      await robinAgain.close();
     }
   });
 
@@ -256,5 +269,41 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
       redirect: 'manual',
     });
     expect(crossSite.status).toBe(403);
+  });
+  it('refuses oversized request bodies on /mcp and on the OAuth endpoints', async () => {
+    const big = 'x'.repeat(2 * 1024 * 1024);
+    const mcp = await fetch(`${baseURL}/mcp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer not-a-token' },
+      body: big,
+    });
+    expect(mcp.status).toBe(413);
+    const d = await discover();
+    const register = await fetch(d.registrationEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_name: big, redirect_uris: [REDIRECT_URI] }),
+    });
+    expect(register.status).toBe(413);
+  });
+
+  // Last on purpose: it uses up the registration budget of this address.
+  it('rate limits open client registration per address', async () => {
+    const d = await discover();
+    const statuses: number[] = [];
+    for (let i = 0; i < 15; i++) {
+      const response = await fetch(d.registrationEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ client_name: `Flood ${i}`, redirect_uris: [REDIRECT_URI], token_endpoint_auth_method: 'none' }),
+      });
+      statuses.push(response.status);
+      if (response.status === 429) {
+        expect(Number(response.headers.get('retry-after'))).toBeGreaterThan(0);
+        break;
+      }
+    }
+    expect(statuses.at(-1)).toBe(429);
+    expect(statuses.filter((status) => status < 300).length).toBeLessThanOrEqual(10);
   });
 });

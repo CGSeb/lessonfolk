@@ -9,6 +9,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { ProgressStore } from '@lessonfolk/core';
 import { createMcpHandler } from '@modelcontextprotocol/server';
+import { callerAddress, limitBodySize, limitRequest, type RequestInfo } from './limits.ts';
 import { DEFAULT_WRITE_LIMIT, createRateLimiter, type RateLimitOptions } from './rate-limit.ts';
 import { createLessonfolkServer } from './server.ts';
 
@@ -29,13 +30,36 @@ export interface McpEndpointOptions {
   gate: McpGate;
   /** The courses folder (`getCoursesDir()`). */
   coursesDir: string;
+  /** Write tools per user (default 60 per minute). */
   writeLimit?: RateLimitOptions;
+  /** All requests per caller address, signed in or not (default 300 per minute). */
+  addressLimit?: RateLimitOptions;
+  /** All requests per user (default 200 per minute). */
+  userLimit?: RateLimitOptions;
+  /** Largest request body in bytes (default 1 MiB). */
+  maxBodyBytes?: number;
 }
 
-export type McpEndpoint = (request: Request) => Promise<Response>;
+export type McpEndpoint = (request: Request, info?: RequestInfo) => Promise<Response>;
 
-export function createMcpEndpoint({ store, gate, coursesDir, writeLimit = DEFAULT_WRITE_LIMIT }: McpEndpointOptions): McpEndpoint {
+/** Default abuse limits of the endpoint: generous for a tutor session, far below a flood. */
+export const DEFAULT_ADDRESS_LIMIT: RateLimitOptions = { limit: 300, windowMs: 60_000 };
+export const DEFAULT_USER_LIMIT: RateLimitOptions = { limit: 200, windowMs: 60_000 };
+/** A whole progress.json (`import_progress`) is far smaller than this. */
+export const MCP_MAX_BODY_BYTES = 1024 * 1024;
+
+export function createMcpEndpoint({
+  store,
+  gate,
+  coursesDir,
+  writeLimit = DEFAULT_WRITE_LIMIT,
+  addressLimit = DEFAULT_ADDRESS_LIMIT,
+  userLimit = DEFAULT_USER_LIMIT,
+  maxBodyBytes = MCP_MAX_BODY_BYTES,
+}: McpEndpointOptions): McpEndpoint {
   const writeLimiter = createRateLimiter(writeLimit);
+  const addressLimiter = createRateLimiter(addressLimit);
+  const userLimiter = createRateLimiter(userLimit);
   const handler = createMcpHandler(
     ({ authInfo }) => {
       const identity = authInfo?.extra?.identity as McpIdentity | undefined;
@@ -45,10 +69,18 @@ export function createMcpEndpoint({ store, gate, coursesDir, writeLimit = DEFAUL
     },
     { onerror: (error) => console.error('LessonFolk MCP:', error.message) },
   );
-  return (request) =>
-    gate(request, (identity) =>
-      handler.fetch(request, { authInfo: { token: '', clientId: identity.client ?? 'mcp', scopes: [], extra: { identity } } }),
-    );
+  return async (original, info) => {
+    // Before anything else, so unauthenticated floods and huge bodies cost almost nothing.
+    const tooMany = limitRequest(addressLimiter, callerAddress(original, info));
+    if (tooMany) return tooMany;
+    const sized = await limitBodySize(original, maxBodyBytes);
+    if (sized instanceof Response) return sized;
+    return gate(sized, (identity) => {
+      const tooManyForUser = limitRequest(userLimiter, identity.userId);
+      if (tooManyForUser) return Promise.resolve(tooManyForUser);
+      return handler.fetch(sized, { authInfo: { token: '', clientId: identity.client ?? 'mcp', scopes: [], extra: { identity } } });
+    });
+  };
 }
 
 // ---------------------------------------------------------------------------

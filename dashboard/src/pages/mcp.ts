@@ -1,4 +1,4 @@
-import type { APIRoute } from 'astro';
+import type { APIContext, APIRoute } from 'astro';
 import { getAppMcpEndpoint } from '@lessonfolk/mcp';
 import { getAuth } from '../lib/auth/auth';
 import { getAuthSettings } from '../lib/auth/current-user';
@@ -15,16 +15,25 @@ async function userExists(userId: string): Promise<boolean> {
   return rows.length > 0;
 }
 
+/** Astro's `clientAddress` throws when the server cannot tell the caller's address. */
+function socketAddress(context: APIContext): string | undefined {
+  try {
+    return context.clientAddress;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * The MCP server (Streamable HTTP), packages/mcp. `none`: the local learner, on this computer
  * only (optional LESSONFOLK_MCP_TOKEN). `oauth`: an OAuth access token issued by this app.
  */
-export const ALL: APIRoute = ({ request }) => {
+export const ALL: APIRoute = (context) => {
   const settings = getAuthSettings();
   const store = getProgressStore();
   const endpoint =
     settings.mode === 'none'
       ? getAppMcpEndpoint({ mode: 'none', userId: LOCAL_USER.id, store })
       : getAppMcpEndpoint({ mode: 'oauth', auth: getAuth(), baseURL: settings.baseURL, store, userExists });
-  return endpoint(request);
+  return endpoint(context.request, { clientAddress: socketAddress(context) });
 };
