@@ -52,7 +52,7 @@ export async function loadProgress(userId: string, progressStore?: ProgressStore
     const progress = await (progressStore ?? getProgressStore()).getProgress(userId);
     return isBlankProgress(progress) ? { state: 'missing' } : { state: 'ok', progress };
   } catch (error) {
-    console.error(`Could not read the progress of user ${userId}:`, error);
+    console.error('Could not read the progress of a learner:', error);
     // Only the error code is shown on the page; the full error goes to the server log.
     const code = (error as { code?: unknown }).code ?? (error as Error).name;
     return { state: 'invalid', error: `Could not read your progress from the database (${String(code)}).` };

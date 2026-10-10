@@ -6,8 +6,8 @@ set -eu
 cd "$(dirname "$0")"
 file="${1:-$(ls -1t backups/lessonfolk-*.sql.gz 2>/dev/null | head -n 1)}"
 [ -n "$file" ] && [ -f "$file" ] || { echo "No backup found." >&2; exit 1; }
-scratch=lessonfolk_restore_test
-psql="docker compose exec -T db psql -U lessonfolk -v ON_ERROR_STOP=1"
+scratch="${RESTORE_SCRATCH_DB:-lessonfolk_restore_test}"
+psql="${COMPOSE:-docker compose} exec -T db psql -U lessonfolk -v ON_ERROR_STOP=1"
 
 $psql -d postgres -c "DROP DATABASE IF EXISTS $scratch" -c "CREATE DATABASE $scratch"
 trap '$psql -d postgres -c "DROP DATABASE IF EXISTS $scratch" > /dev/null' EXIT
