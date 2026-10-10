@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { verifyOAuthQueryParams } from '@lessonfolk/mcp';
+import { isLoopbackHost, requestedAccess, verifyOAuthQueryParams } from '@lessonfolk/mcp';
+import { t } from '../../i18n/en';
 import { getAuth } from '../../lib/auth/auth';
 import { getAuthSettings } from '../../lib/auth/current-user';
 
@@ -22,6 +23,7 @@ const valid = oauthQuery !== '' && (await verifyOAuthQueryParams(oauthQuery, set
 
 let clientName: string | undefined;
 let redirectHost: string | undefined;
+let redirectIsLocal = false;
 if (valid) {
   try {
     const client = (await getAuth().api.getOAuthClientPublic({
@@ -33,42 +35,67 @@ if (valid) {
     clientName = undefined;
   }
   try {
-    redirectHost = new URL(params.get('redirect_uri') ?? '').host;
+    const redirect = new URL(params.get('redirect_uri') ?? '');
+    redirectHost = redirect.host;
+    redirectIsLocal = redirect.protocol === 'http:' && isLoopbackHost(redirect.hostname);
   } catch {
     redirectHost = undefined;
   }
 }
-const appName = clientName || 'An AI app';
+const appName = clientName || t('consent.unknownApp');
+// What the app asks for (lessonfolk:read / lessonfolk:write). No lessonfolk scope at all means everything.
+const access = requestedAccess(params.get('scope'));
 ---
 
-<BaseLayout title="Allow access" noindex>
+<BaseLayout title={t('consent.title')} noindex>
   <div class="stack consent" style="--stack-space: var(--space-5)">
     {
       valid ? (
         <>
           <header class="stack" style="--stack-space: var(--space-2)">
-            <h1>Allow {appName} to use LessonFolk?</h1>
-            <p class="muted">
-              Signed in as {Astro.locals.user.name}. If you allow it, this app can read your courses and your progress, and save your
-              progress (profile, path, lessons, scores and notes) while it tutors you.
-            </p>
-            {redirectHost && <p class="muted">You will then go back to {redirectHost}.</p>}
-            <p class="muted">Only allow apps you just asked to connect to LessonFolk.</p>
+            <h1>{t('consent.heading', { app: appName })}</h1>
+            <p class="muted">{t('consent.signedInAs', { name: Astro.locals.user.name })}</p>
+            {clientName && <p class="muted">{t('consent.nameNotVerified', { app: clientName })}</p>}
+            {redirectHost && (
+              <div class:list={['consent__redirect', !redirectIsLocal && 'consent__redirect--warn']} role={redirectIsLocal ? undefined : 'alert'}>
+                <p>
+                  {t('consent.redirectLabel')} <strong class="consent__host">{redirectHost}</strong>
+                </p>
+                <p class="muted">{redirectIsLocal ? t('consent.redirectLocal') : t('consent.redirectWarning')}</p>
+              </div>
+            )}
+            <h2 class="consent__heading">{t('consent.permissionsHeading')}</h2>
+            <ul class="consent__permissions">
+              <li>{t('consent.permissionRead')}</li>
+              {access.write && <li>{t('consent.permissionWrite')}</li>}
+            </ul>
+            {!access.write && <p class="muted">{t('consent.readOnlyNotice')}</p>}
+            {access.write && !access.specific && <p class="muted">{t('consent.fullAccessNotice')}</p>}
+            <p class="muted">{t('consent.onlyAllow')}</p>
           </header>
           <form method="post" action="/oauth/consent/decide" class="consent__actions">
             <input type="hidden" name="oauth_query" value={oauthQuery} />
+            {access.write && access.specific && (
+              <label class="consent__toggle">
+                <input type="checkbox" name="allow_write" value="true" checked />
+                <span>
+                  {t('consent.writeToggle')}
+                  <span class="muted consent__hint">{t('consent.writeToggleHint')}</span>
+                </span>
+              </label>
+            )}
             <button class="consent__button consent__button--primary" type="submit" name="accept" value="true">
-              Allow
+              {t('consent.allow')}
             </button>
             <button class="consent__button" type="submit" name="accept" value="false">
-              Deny
+              {t('consent.deny')}
             </button>
           </form>
         </>
       ) : (
         <header class="stack" style="--stack-space: var(--space-2)">
-          <h1>This request has expired</h1>
-          <p class="muted">Go back to your AI app and connect to LessonFolk again.</p>
+          <h1>{t('consent.expiredHeading')}</h1>
+          <p class="muted">{t('consent.expiredBody')}</p>
         </header>
       )
     }
@@ -80,10 +107,41 @@ const appName = clientName || 'An AI app';
     max-width: 32rem;
   }
 
+  .consent__redirect {
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md, 0.5rem);
+  }
+
+  .consent__redirect--warn {
+    border-color: var(--color-accent);
+  }
+
+  .consent__host {
+    font-size: 1.15em;
+    overflow-wrap: anywhere;
+  }
+
   .consent__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+  }
+
+  .consent__toggle {
+    display: flex;
+    flex-basis: 100%;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  .consent__hint {
+    display: block;
+  }
+
+  .consent__permissions {
+    margin: 0;
+    padding-left: var(--space-5);
   }
 
   .consent__button {

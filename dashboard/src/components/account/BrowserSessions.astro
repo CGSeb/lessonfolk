@@ -1,0 +1,119 @@
+---
+/**
+ * Account page, oauth mode: the browsers signed in to this account (created time and browser,
+ * no IP address), with a button to end each one, and "sign out everywhere".
+ * Changes post to /api/account/sessions (src/pages/api/account/sessions.ts).
+ */
+import Notice from '../Notice.astro';
+import { listBrowserSessions } from '../../lib/auth/sessions';
+import { getDatabase } from '../../lib/store';
+import { t } from '../../i18n/en';
+
+interface Props {
+  userId: string;
+  sessionId: string | null;
+}
+
+const { userId, sessionId } = Astro.props;
+const sessions = await listBrowserSessions(getDatabase(), userId, sessionId);
+const done = Astro.url.searchParams.get('sessions');
+const notice = done === 'revoked' ? 'account.sessionsRevoked' : done === 'others' ? 'account.sessionsOthers' : undefined;
+const created = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' });
+const others = sessions.some((s) => !s.current);
+---
+
+<section class="stack account-group" aria-labelledby="group-sessions-heading" style="--stack-space: var(--space-3)">
+  <div class="stack" style="--stack-space: var(--space-1)">
+    <h2 id="group-sessions-heading">{t('account.sessionsTitle')}</h2>
+    <p class="muted">{t('account.sessionsIntro')}</p>
+  </div>
+
+  {notice && <Notice title={t(notice)} />}
+  {done === 'error' && <Notice tone="warning" title={t('account.sessionsError')} />}
+
+  <div class="card stack">
+    <ul class="sessions">
+      {
+        sessions.map((s) => (
+          <li class="sessions__item">
+            <div>
+              <p class="sessions__browser">
+                {s.browser ?? t('account.sessionsUnknownBrowser')}
+                {s.current && <span class="sessions__current">{t('account.sessionsCurrent')}</span>}
+              </p>
+              <p class="muted account-small">
+                {t('account.sessionsCreated', { date: created.format(s.createdAt) })}
+              </p>
+            </div>
+            {!s.current && (
+              <form method="post" action="/api/account/sessions">
+                <input type="hidden" name="action" value="revoke" />
+                <input type="hidden" name="id" value={s.id} />
+                <button class="button" type="submit">{t('account.sessionsRevoke')}</button>
+              </form>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="muted account-small">{t('account.sessionsLifetime')}</p>
+
+    <div class="sessions__actions">
+      {
+        others && (
+          <form method="post" action="/api/account/sessions">
+            <input type="hidden" name="action" value="others" />
+            <button class="button" type="submit">{t('account.sessionsSignOutOthers')}</button>
+          </form>
+        )
+      }
+      <form method="post" action="/api/account/sessions">
+        <input type="hidden" name="action" value="all" />
+        <button class="button button--warning" type="submit">{t('account.sessionsSignOutAll')}</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sessions {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sessions__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .sessions__item:first-child {
+    padding-top: 0;
+  }
+
+  .sessions__browser {
+    font-weight: var(--weight-semibold);
+  }
+
+  .sessions__current {
+    margin-left: var(--space-2);
+    padding: 0 var(--space-2);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-regular, 400);
+  }
+
+  .sessions__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import { authStartupChecks } from './src/lib/auth/dev-integration.ts';
+import { CSP_DIRECTIVES, STYLE_ATTRIBUTE_SOURCE } from './src/lib/security-headers.ts';
 
 // Settings (LESSONFOLK_AUTH, sign-in providers, DATABASE_URL…) from the repository's
 // .env, if there is one; variables already set in the environment win.
@@ -18,7 +19,16 @@ export default defineConfig({
   adapter: node({ mode: 'standalone' }),
   server: { port: 4321 },
   integrations: [authStartupChecks()],
-  // Cross-site form posts are refused in src/middleware.ts instead (src/lib/auth/origin-check.ts),
-  // which lets MCP clients post to the OAuth token endpoint.
-  security: { checkOrigin: false },
+  // checkOrigin is off: cross-site form posts are refused in src/middleware.ts instead
+  // (src/lib/auth/origin-check.ts), which lets MCP clients post to the OAuth token endpoint.
+  // The CSP (hashes for inline scripts and styles, no 'unsafe-inline') is built by Astro; see
+  // src/lib/security-headers.ts. It is only active in builds, not in `astro dev`.
+  security: {
+    checkOrigin: false,
+    csp: {
+      directives: [...CSP_DIRECTIVES],
+      scriptDirective: { resources: ["'self'"] },
+      styleDirective: { resources: ["'self'", { resource: STYLE_ATTRIBUTE_SOURCE, kind: 'attribute' }] },
+    },
+  },
 });

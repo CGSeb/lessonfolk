@@ -102,6 +102,15 @@ describe('writes', () => {
     userId = await newUser();
   });
 
+  it('refuse a write that would grow the saved progress past the import limit, and change nothing', async () => {
+    const lessons: Record<string, unknown> = { [L1]: { status: 'in_progress', startedAt: TODAY } };
+    for (let i = 0; i < 270; i++) lessons[`extra/lesson-${i}`] = { status: 'in_progress', startedAt: TODAY, notes: 'x'.repeat(3600) };
+    await store.importProgress(userId, { version: 1, lessons }, at); // just under the limit
+    await expectRejected(userId, () => store.saveNotes(userId, L1, 'y'.repeat(100_000), at), 'invalid_progress');
+    expect((await store.getProgress(userId)).lessons[L1].notes).toBeUndefined();
+    await store.saveNotes(userId, L1, 'short', at); // small writes still work
+  });
+
   it('walk a learner through onboarding, a path and a lesson, logging every change', async () => {
     await store.setProfile(userId, { name: 'Alex', experience: 'none', level: 'beginner', interests: ['understanding-ai'] }, at);
     await store.setPath(userId, ['ai-foundations'], 'Start with how AI works.', at);

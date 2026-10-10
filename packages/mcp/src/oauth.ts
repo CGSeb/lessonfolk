@@ -11,6 +11,7 @@ import { createAuthMiddleware } from 'better-auth/api';
 import { jwt } from 'better-auth/plugins';
 import type { BetterAuthPlugin } from 'better-auth/types';
 import type { McpGate } from './endpoint.ts';
+import { LESSONFOLK_SCOPES, parseScopeClaim } from './scopes.ts';
 
 export { mcpAuthSchema } from '@lessonfolk/db';
 /** Checks the signature and expiry of the authorization request Better Auth hands to the consent page. */
@@ -53,19 +54,56 @@ export function mcpResource(baseURL: string): string {
  * required, redirect URIs must match what was registered, and tokens only work for this MCP
  * endpoint.
  */
-export function mcpAuthPlugins(baseURL: string) {
+export function mcpAuthPlugins(baseURL: string, options: { purgeUnusedClients?: () => Promise<unknown> } = {}) {
   return [
     nativeLoopbackClients(),
+    ...(options.purgeUnusedClients ? [unusedClientCleanup(options.purgeUnusedClients)] : []),
     jwt(),
     mcp({
       resource: mcpResource(baseURL),
       loginPage: OAUTH_SIGN_IN_PATH,
       consentPage: OAUTH_CONSENT_PATH,
-      scopes: ['openid', 'profile', 'email', 'offline_access'],
+      scopes: ['openid', 'profile', 'email', 'offline_access', ...LESSONFOLK_SCOPES],
       allowDynamicClientRegistration: true,
       allowUnauthenticatedClientRegistration: true,
     }),
   ];
+}
+
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+
+/**
+ * Open registration lets anyone add clients, so clean up as it is used: after a registration,
+ * at most once an hour, `purge` deletes the clients nobody ever allowed (see
+ * `purgeUnusedOAuthClients` in @lessonfolk/db). A failed cleanup never fails the registration.
+ */
+function unusedClientCleanup(purge: () => Promise<unknown>, intervalMs = CLEANUP_INTERVAL_MS) {
+  let last = 0;
+  return {
+    id: 'lessonfolk-unused-client-cleanup',
+    hooks: {
+      after: [
+        {
+          matcher: (ctx: { path?: string }) => ctx.path === '/oauth2/register',
+          handler: createAuthMiddleware(async () => {
+            const now = Date.now();
+            if (now - last < intervalMs) return;
+            last = now;
+            try {
+              await purge();
+            } catch {
+              last = 0; // try again at the next registration
+            }
+          }),
+        },
+      ],
+    },
+  } satisfies BetterAuthPlugin;
+}
+
+/** True when the host is a loopback address, where CLI and desktop apps listen for their callback. */
+export function isLoopbackHost(hostname: string): boolean {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname.endsWith('.localhost');
 }
 
 const LOOPBACK_HTTP = /^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//i;
@@ -127,7 +165,7 @@ export function oauthGate(auth: McpAuthServer, baseURL: string, tokenAllowed?: T
         if (tokenAllowed && !(await tokenAllowed({ userId: claims.sub, clientId, issuedAt }))) {
           return Response.json({ error: 'invalid_token', error_description: 'This token was revoked.' }, { status: 401 });
         }
-        return next({ userId: claims.sub, client: clientId ? `mcp:${clientId}` : 'mcp' });
+        return next({ userId: claims.sub, client: clientId ? `mcp:${clientId}` : 'mcp', scopes: parseScopeClaim(claims.scope) });
       },
       { resource: mcpResource(baseURL) },
     )(request);
