@@ -16,13 +16,14 @@ const FORM_CONTENT_TYPES = ['application/x-www-form-urlencoded', 'multipart/form
 /**
  * A 403 for a cross-site form post, or `undefined` when the request may go on. Same rules as
  * Astro's check, plus `publicOrigin`: the address people open in their browser
- * (LESSONFOLK_BASE_URL). Behind a reverse proxy that ends HTTPS, the server sees `http://`
- * while the browser sends `Origin: https://…`, so `url.origin` alone would refuse every form.
+ * (LESSONFOLK_BASE_URL). When it is set, it is the only origin accepted: behind a reverse
+ * proxy `url.origin` is not the public address (Astro falls back to `localhost:<port>` for a
+ * `Host` outside `security.allowedDomains`), so it must not count as the same site.
  */
 export function crossSiteFormResponse(request: Request, url: URL, publicOrigin?: string): Response | undefined {
   if (SAFE_METHODS.has(request.method) || APP_FORM_ENDPOINTS.has(url.pathname)) return undefined;
   const origin = request.headers.get('origin');
-  const sameOrigin = origin === url.origin || (publicOrigin !== undefined && origin === publicOrigin);
+  const sameOrigin = origin === (publicOrigin ?? url.origin);
   const contentType = request.headers.get('content-type')?.toLowerCase();
   const forbidden = contentType ? FORM_CONTENT_TYPES.some((type) => contentType.includes(type)) && !sameOrigin : !sameOrigin;
   return forbidden ? new Response(`Cross-site ${request.method} form submissions are forbidden`, { status: 403 }) : undefined;
