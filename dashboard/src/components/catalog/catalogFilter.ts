@@ -64,17 +64,25 @@ export function coursesHref({ theme, q, recommended, page }: Partial<CatalogQuer
  * One filter per theme that has courses, in `themes.yaml` order, then the
  * fallback bucket for courses with no known theme (a content error, reported
  * on the page) so they can still be found.
+ *
+ * Which themes are listed comes from `courses` (the whole catalog); the counts come from
+ * `counted`, the courses left by the search and the recommended filter (not the theme
+ * filter), so the badges show how many courses each theme would give. A theme with no
+ * match stays listed, at 0.
  */
 export function getThemeFilters(
   courses: FilterCourse[],
   themes: { id: string; title: string }[],
+  counted: FilterCourse[] = courses,
 ): ThemeFilter[] {
   const known = new Set(themes.map((t) => t.id));
   const filters: ThemeFilter[] = themes
-    .map(({ id, title }) => ({ id, title, count: courses.filter((c) => c.theme === id).length }))
-    .filter((f) => f.count > 0);
-  const others = courses.filter((c) => !known.has(c.theme)).length;
-  if (others) filters.push({ id: OTHER_THEME, title: undefined, count: others });
+    .map(({ id, title }) => ({ id, title, count: counted.filter((c) => c.theme === id).length, listed: courses.some((c) => c.theme === id) }))
+    .filter((f) => f.listed)
+    .map(({ id, title, count }) => ({ id, title, count }));
+  if (courses.some((c) => !known.has(c.theme))) {
+    filters.push({ id: OTHER_THEME, title: undefined, count: counted.filter((c) => !known.has(c.theme)).length });
+  }
   return filters;
 }
 
