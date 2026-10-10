@@ -59,7 +59,7 @@ of any table still holds the user's id or email after deletion.
 
 | Where | Kept | Notes |
 |---|---|---|
-| Sessions | 7 days | Better Auth's default expiry. |
+| Sessions | 7 days without use, 30 days at most | Renewed while in use (`SESSION_POLICY`), but never past 30 days after sign-in (`SESSION_MAX_AGE_SECONDS`, `dashboard/src/lib/auth/sessions.ts`). The Account page lists them (sign-in time and browser name, no IP address) and ends one, the others, or all. |
 | Server and proxy logs | at most 30 days | Requests include the IP address; it is the only place one is kept. Set by whoever hosts the server. |
 | Database backups | at most 35 days | Deleted data leaves the backups when they expire; a backup is never restored without deleting again the accounts deleted since. |
 
