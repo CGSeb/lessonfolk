@@ -17,5 +17,8 @@
     "test": "npm run test --workspaces --if-present",
     "progress:import": "npm run progress:import --workspace dashboard --",
     "check:courses": "npm run check:courses --workspace dashboard --"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
   }
 }
