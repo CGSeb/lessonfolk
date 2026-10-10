@@ -17,7 +17,7 @@ development OAuth apps. You need a GitHub account and/or a Google account. Nothi
 ## 1. Prepare your settings
 
 Copy `.env.example` to `.env` at the repository root (if you have not already), then set the
-following (every setting is listed in [Environment variables](../CONTRIBUTING.md#environment-variables)):
+following (every setting is listed in [Settings](configuration.md)):
 
 ```bash
 LESSONFOLK_AUTH=oauth
@@ -112,13 +112,8 @@ npm run dashboard        # reads .env; open http://localhost:4321
 
 `npm run dashboard` listens on `127.0.0.1:4321`, which `http://localhost:4321` reaches.
 
-### What to check
-
-- The sign-in page lists exactly the providers you configured.
-- Signing in with each provider brings you back signed in; signing out signs you out.
-- Signing in again with the same account finds the same user (no duplicate in the `user` table).
-
-To look at the rows: `docker compose exec db psql -U lessonfolk -d lessonfolk -c 'select id, name, email from "user"'`.
+What to check is listed in
+[Manual check: sign-in with GitHub and Google](testing.md#manual-check-sign-in-with-github-and-google).
 
 ## 5. Back to no sign-in
 

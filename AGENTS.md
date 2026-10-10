@@ -35,7 +35,7 @@ project's `.mcp.json` connects to `http://localhost:4321/mcp`.
   `.mcp.json`; other apps: the dashboard's **Connect** page), and start the session again. Or to
   use a hosted LessonFolk. See `docs/using-lessonfolk.md`.
 - Never modify `courses/` while tutoring, and never create or edit progress files such as
-  `.progress/progress.json`. An old one can be imported on the dashboard's **Your data** page.
+  `.progress/progress.json`. An old one can be imported on the dashboard's **Account** page.
 
 ## Contributing (when the user is editing the project, not learning)
 If the user asks to create or edit courses, follow `docs/course-format.md` exactly and keep

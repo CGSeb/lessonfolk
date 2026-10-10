@@ -58,8 +58,9 @@ The [learner guide](docs/using-lessonfolk.md) has the details.
 
 - [Using LessonFolk](docs/using-lessonfolk.md): the learner guide (first session, what to say,
   the dashboard, Docker, troubleshooting)
-- [Contributing](CONTRIBUTING.md): development setup, settings, scripts, writing courses,
-  workflow
+- [Contributing](CONTRIBUTING.md): writing courses, development setup, workflow
+- [Developing LessonFolk](docs/development.md): repository map, scripts, database changes
+- [Settings](docs/configuration.md): every environment variable
 - [Course format](docs/course-format.md): how courses and lessons are written
 - [Testing](docs/testing.md): automated tests and manual checks
 - [Sign-in for developers](docs/auth-dev.md): GitHub and Google sign-in
