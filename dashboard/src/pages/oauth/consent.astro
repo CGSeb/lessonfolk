@@ -70,20 +70,10 @@ const access = requestedAccess(params.get('scope'));
               {access.write && <li>{t('consent.permissionWrite')}</li>}
             </ul>
             {!access.write && <p class="muted">{t('consent.readOnlyNotice')}</p>}
-            {access.write && !access.specific && <p class="muted">{t('consent.fullAccessNotice')}</p>}
             <p class="muted">{t('consent.onlyAllow')}</p>
           </header>
           <form method="post" action="/oauth/consent/decide" class="consent__actions">
             <input type="hidden" name="oauth_query" value={oauthQuery} />
-            {access.write && access.specific && (
-              <label class="consent__toggle">
-                <input type="checkbox" name="allow_write" value="true" checked />
-                <span>
-                  {t('consent.writeToggle')}
-                  <span class="muted consent__hint">{t('consent.writeToggleHint')}</span>
-                </span>
-              </label>
-            )}
             <button class="consent__button consent__button--primary" type="submit" name="accept" value="true">
               {t('consent.allow')}
             </button>
@@ -126,17 +116,6 @@ const access = requestedAccess(params.get('scope'));
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
-  }
-
-  .consent__toggle {
-    display: flex;
-    flex-basis: 100%;
-    gap: var(--space-3);
-    align-items: flex-start;
-  }
-
-  .consent__hint {
-    display: block;
   }
 
   .consent__permissions {

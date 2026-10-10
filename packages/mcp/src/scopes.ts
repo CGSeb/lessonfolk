@@ -10,8 +10,9 @@
  * `scope` parameter gets all of the client's scopes, so Claude Code, Codex and ChatGPT get both
  * by default. A token that carries no `lessonfolk:*` scope at all (a client that asked for the
  * OpenID scopes only, or a token issued before these scopes existed) keeps full access. As soon
- * as a token carries one, it is limited to what it names: the learner can narrow a request on
- * the consent page, and a client that asks for `lessonfolk:read` only is held to reading.
+ * as a token carries one, it is limited to what it names: a client that asks for
+ * `lessonfolk:read` only is held to reading. The consent page is all or nothing: the learner
+ * allows what the client asked for, or denies it.
  */
 export const SCOPE_READ = 'lessonfolk:read';
 export const SCOPE_WRITE = 'lessonfolk:write';
@@ -43,16 +44,4 @@ export function requestedAccess(scope: string | null | undefined): McpAccess & {
   const scopes = parseScopeClaim(scope ?? '') ?? [];
   const specific = scopes.some((s) => (LESSONFOLK_SCOPES as readonly string[]).includes(s));
   return { ...accessFromScopes(scopes), specific };
-}
-
-/**
- * The scopes to grant when the learner turned "save my progress" off: the request without
- * `lessonfolk:write` (and with `lessonfolk:read`). Undefined when nothing needs narrowing.
- */
-export function withoutWrite(scope: string | null | undefined): string | undefined {
-  const scopes = parseScopeClaim(scope ?? '') ?? [];
-  if (!scopes.includes(SCOPE_WRITE)) return undefined;
-  const kept = scopes.filter((s) => s !== SCOPE_WRITE);
-  if (!kept.includes(SCOPE_READ)) kept.push(SCOPE_READ);
-  return kept.join(' ');
 }

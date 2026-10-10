@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro';
-import { withoutWrite } from '@lessonfolk/mcp';
 import { AUTH_BASE_PATH, getAuth } from '../../../lib/auth/auth';
 import { getAuthSettings } from '../../../lib/auth/current-user';
 import { redirectWithCookies } from '../../../lib/auth/redirect';
@@ -18,8 +17,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const oauthQuery = form?.get('oauth_query')?.toString();
   if (!oauthQuery) return new Response('Missing authorization request.', { status: 400 });
 
-  const narrowed = withoutWrite(new URLSearchParams(oauthQuery).get('scope'));
-
   // Better Auth's consent endpoint, through its HTTP handler (accepting runs the authorize step,
   // which needs a real request), asking for the redirect URI as JSON.
   const headers = new Headers({ 'Content-Type': 'application/json', Accept: 'application/json' });
@@ -31,12 +28,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     new Request(`${settings.baseURL}${AUTH_BASE_PATH}/oauth2/consent`, {
       method: 'POST',
       headers,
-      // Without "save my progress" ticked, grant the request minus lessonfolk:write (a subset is allowed).
-      body: JSON.stringify({
-        accept: form?.get('accept') === 'true',
-        oauth_query: oauthQuery,
-        ...(form?.has('allow_write') ? {} : narrowed ? { scope: narrowed } : {}),
-      }),
+      // All or nothing: allowing grants exactly what the app asked for.
+      body: JSON.stringify({ accept: form?.get('accept') === 'true', oauth_query: oauthQuery }),
     }),
   );
   const result = (await response.json().catch(() => ({}))) as { redirect_uri?: string; url?: string };
