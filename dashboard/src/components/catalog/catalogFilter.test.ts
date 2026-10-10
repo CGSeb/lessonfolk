@@ -78,6 +78,15 @@ describe('getThemeFilters', () => {
   it('has no fallback bucket when every course has a known theme', () => {
     expect(getThemeFilters([foundations], themes).map((f) => f.id)).toEqual(['understanding']);
   });
+
+  it('counts only the courses left by the search, keeping every theme listed (at 0 when none match)', () => {
+    const matching = filterCourses(courses, { theme: undefined, q: 'resume' }, themes);
+    expect(getThemeFilters(courses, themes, matching)).toEqual([
+      { id: 'understanding', title: 'Understanding AI', count: 0 },
+      { id: 'using', title: 'Using AI tools', count: 1 },
+      { id: OTHER_THEME, title: undefined, count: 0 },
+    ]);
+  });
 });
 
 describe('filterCourses', () => {

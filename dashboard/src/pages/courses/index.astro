@@ -36,14 +36,17 @@ const stats = new Map(getStats(catalog.courses, progress).courses.map((s) => [s.
 
 // Theme filter, search and page all come from the URL query, so the live refresh
 // (which re-fetches this URL), reloads and shared links keep them.
-const themeFilters = getThemeFilters(catalog.courses, catalog.themes);
+const allThemeFilters = getThemeFilters(catalog.courses, catalog.themes);
 const query = parseCatalogQuery(
   Astro.url.searchParams,
-  themeFilters.map((f) => f.id),
+  allThemeFilters.map((f) => f.id),
 );
+// The badge counts follow the search and the recommended filter (but not the theme itself).
+const searched = filterCourses(catalog.courses, { ...query, theme: undefined }, catalog.themes, recommended);
+const themeFilters = getThemeFilters(catalog.courses, catalog.themes, searched);
 const themeTitle = (id: string | undefined) =>
   id === OTHER_THEME ? t('courses.otherThemeTitle') : (themesById.get(id ?? '')?.title ?? t('courses.allThemes'));
-const badges = [{ id: undefined, count: catalog.courses.length }, ...themeFilters].map(({ id, count }) => ({
+const badges = [{ id: undefined, count: searched.length }, ...themeFilters].map(({ id, count }) => ({
   title: themeTitle(id),
   count,
   tone: id === undefined ? 'theme-filter--all' : themeToneClass(themesById.get(id)?.position),
