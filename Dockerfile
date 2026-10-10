@@ -27,10 +27,17 @@ COPY dashboard/package.json dashboard/
 COPY packages/core/package.json packages/core/
 COPY packages/db/package.json packages/db/
 COPY packages/mcp/package.json packages/mcp/
-RUN npm ci --omit=dev --no-audit --no-fund
+# drizzle-kit (and the esbuild binaries it bundles) is an optional peer of better-auth, only used
+# by the schema-generation CLI: keep it, and its CVE-laden Go binaries, out of the image.
+RUN npm ci --omit=dev --no-audit --no-fund \
+    && rm -rf node_modules/drizzle-kit node_modules/@esbuild-kit
 
 # --- Runtime ---
 FROM node:22-alpine
+# The server only needs `node`: drop npm, npx, corepack and yarn (their bundled packages carry
+# CVEs, and a package manager is of no use to the app).
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+           /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
 WORKDIR /app
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \

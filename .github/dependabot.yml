@@ -1,0 +1,21 @@
+version: 2
+
+# Weekly update pull requests for what ships: npm packages (all workspaces), GitHub Actions
+# (pinned to commit SHAs) and the Docker base image.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
