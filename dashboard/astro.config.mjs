@@ -21,10 +21,16 @@ export default defineConfig({
   integrations: [authStartupChecks()],
   // checkOrigin is off: cross-site form posts are refused in src/middleware.ts instead
   // (src/lib/auth/origin-check.ts), which lets MCP clients post to the OAuth token endpoint.
+  // allowedDomains: the Node adapter only trusts a `Host` header that matches this list, and
+  // otherwise builds `Astro.url` as `localhost:<port>`. Without sign-in the pages use the
+  // address of the request (the MCP address on the Connect page, form posts, the sitemap), so
+  // the names of this computer are listed. With sign-in they use LESSONFOLK_BASE_URL, which is
+  // only known when the server starts, so the hosted address does not need to be here.
   // The CSP (hashes for inline scripts and styles, no 'unsafe-inline') is built by Astro; see
   // src/lib/security-headers.ts. It is only active in builds, not in `astro dev`.
   security: {
     checkOrigin: false,
+    allowedDomains: [{ hostname: 'localhost' }, { hostname: '**.localhost' }, { hostname: '127.0.0.1' }],
     csp: {
       directives: [...CSP_DIRECTIVES],
       scriptDirective: { resources: ["'self'"] },

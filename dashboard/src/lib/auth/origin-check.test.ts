@@ -29,6 +29,7 @@ describe('crossSiteFormResponse', () => {
     expect(check('/sign-in/github', { ...behindProxy, origin: 'https://lessonfolk.com' })).toBeUndefined();
     expect(check('/sign-in/github', { ...behindProxy, origin: 'https://evil.example' })).toBe(403);
     expect(check('/sign-in/github', { ...behindProxy })).toBe(403);
+    expect(check('/sign-in/github', { ...behindProxy, origin: ORIGIN })).toBe(403);
     expect(check('/sign-in/github', { contentType: behindProxy.contentType, origin: 'https://lessonfolk.com' })).toBe(403);
   });
 
