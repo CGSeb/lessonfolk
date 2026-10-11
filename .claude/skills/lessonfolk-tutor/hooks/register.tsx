@@ -54,16 +54,21 @@ const isLessonfolkTool = (tool: string) =>
 
 // Calls a tool of the LessonFolk MCP server with the session's own connection (and sign-in),
 // so it reads the same progress as the tutor, from a local or a hosted instance.
-const callServer = ($: EngineInterface) => async (tool: string, args?: Record<string, unknown>) => {
+const callServer = ($: EngineInterface, failures: string[] = []) => async (tool: string, args?: Record<string, unknown>) => {
   for (const name of server ? [server] : [SERVER, PLUGIN_SERVER]) {
     try {
       const { content, isError } = await $.mcp.call(name, tool, args)
-      if (isError) continue
+      const text = content.flatMap(block => (block.type === 'text' ? [block.text] : [])).join('\n')
+      if (isError) {
+        failures.push(`${name} ${tool}: ${text.slice(0, 120)}`)
+        continue
+      }
       server = name
 
-      return content.flatMap(block => (block.type === 'text' ? [block.text] : [])).join('\n')
-    } catch {
+      return text
+    } catch (error) {
       // Not connected under this name: try the next one.
+      failures.push(`${name} ${tool}: ${error instanceof Error ? error.message : String(error)}`.slice(0, 160))
     }
   }
 
@@ -77,7 +82,9 @@ async function refresh($: EngineInterface, isQuiet = false) {
   const config = await $.fs.read(`${root}/.mcp.json`).then(text => text, () => undefined)
   await update($, instance, () => instanceUrl(config))
 
-  const loaded = await load(callServer($))
+  const failures: string[] = []
+  const loaded = await load(callServer($, failures))
+  if (loaded.view.state === 'offline') loaded.view = { ...loaded.view, reason: [...new Set(failures)].slice(0, 3) }
   const before = await read($, snapshot)
   const previous = before ? { snapshot: before, view: await read($, view) } : undefined
   await update($, view, () => loaded.view)
@@ -340,7 +347,7 @@ export const register: Register = on => {
 
       return (
         <Box flexDirection="column">
-          {lines.map(line => (
+          {[...lines, ...(v.reason ?? [])].map(line => (
             <Text dimColor>{line}</Text>
           ))}
         </Box>
