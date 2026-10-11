@@ -27,6 +27,7 @@ parts work. To get a working checkout first, follow
 | [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json) | Makes this repository a Claude Code plugin marketplace with one plugin, `lessonfolk-tutor`, and gives it its MCP server (the hosted LessonFolk). |
 | [`docs/`](.) | Documentation: see the [index](README.md). |
 | [`assets/brand/`](../assets/brand) | Logo files. |
+| `dashboard/public/teaser.mp4`, `teaser-poster.jpg`, [`assets/teaser-thumbnail.png`](../assets/teaser-thumbnail.png) | The 26-second teaser video of the landing page, the picture shown before it plays, and the thumbnail the README links from. They are rendered outside this repository: to change the video, replace the three files. |
 | [`.mcp.json`](../.mcp.json) | Connects Claude Code opened in this folder to the MCP server of a local LessonFolk (`http://localhost:4321/mcp`). |
 | `.progress/` | Where older versions of the tutor saved progress (`progress.json`). Git ignores it; only the import reads it. The format is [`progress.example.json`](progress.example.json). |
 | `docker-compose.yml`, `Dockerfile` | Postgres and the app in containers. |
