@@ -393,7 +393,10 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     // No link is set in authors.yaml, so none is rendered.
     // (The footer's GitHub link opens in a new tab, so look at the page content only.)
     expect(page.html.split('<footer')[0]).not.toContain('target="_blank"');
-    expectText(page.text, { include: fixture.catalog.include, exclude: [] });
+    // A finished course (here skipped by the level check) is no longer marked "Recommended for you".
+    const finished = fixture.catalog.include.includes(`Status: ${PLACEMENT}`);
+    const include = finished ? fixture.catalog.include.filter((text) => text !== 'Recommended for you') : fixture.catalog.include;
+    expectText(page.text, { include, exclude: finished ? ['Recommended for you'] : [] });
   });
 
   it('answers 404 for an unknown author', async () => {

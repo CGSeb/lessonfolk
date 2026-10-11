@@ -2,7 +2,6 @@
 import { t } from '../i18n/en';
 import type { Course, CourseStats } from '@lessonfolk/core';
 import CourseAuthors from './CourseAuthors.astro';
-import DoneCheck from './DoneCheck.astro';
 import LevelBadge from './LevelBadge.astro';
 import ThemeBadge from './ThemeBadge.astro';
 import type { AuthorLink } from './authors/authorView';
@@ -29,6 +28,8 @@ const { course, total } = stats;
 const finished = finishedLessons(stats);
 const courseStatus = getCourseStatus(stats);
 const status = courseStatusDisplay(courseStatus);
+// Finished by the learner or the level check: no longer worth recommending.
+const done = showProgress && isCourseDone(courseStatus);
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
 const hours = course.estimatedHours;
 const progressText = t('courses.lessonsProgress', { done: finished, total });
@@ -42,18 +43,13 @@ const progressId = `course-progress-${course.id}`;
 <article class:list={['card', 'stack', 'course-card', themeToneClass(theme?.position)]} style="--stack-space: var(--space-3)">
   <Heading class="course-card__title">
     <a href={`/courses/${course.id}`}>{course.title}</a>
-    {
-      showProgress && isCourseDone(courseStatus) && (
-        <DoneCheck variant={courseStatus === 'completed' ? 'done' : 'skipped'} />
-      )
-    }
   </Heading>
 
   <CourseAuthors authors={authors} />
 
   <div class="cluster" style="--cluster-space: var(--space-2)">
     {
-      recommended && (
+      recommended && !done && (
         <span class="badge course-card__recommended" title={t('courses.recommendedTitle')}>
           {t('courses.recommended')}
         </span>
@@ -62,8 +58,13 @@ const progressId = `course-progress-${course.id}`;
     <ThemeBadge theme={theme} />
     <LevelBadge level={course.level} />
     {
-      showProgress && !isCourseDone(courseStatus) && (
-        <span class:list={['badge', status.variant && `badge--${status.variant}`]}>
+      showProgress && (
+        <span class:list={['badge', status.variant && `badge--${status.variant}`, done && 'course-card__done']}>
+          {done && (
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              {courseStatus === 'completed' ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M5 7l5 5-5 5M13 7l5 5-5 5" />}
+            </svg>
+          )}
           <span class="visually-hidden">{t('status.label')}:</span> {t(status.key)}
         </span>
       )
@@ -108,9 +109,6 @@ const progressId = `course-progress-${course.id}`;
   }
 
   .course-card__title {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
     font-size: 1.75rem;
     line-height: 1.05;
     letter-spacing: -0.035em;
@@ -155,6 +153,32 @@ const progressId = `course-progress-${course.id}`;
   .course-card__recommended {
     background: var(--color-spark);
     color: var(--color-on-spark);
+  }
+
+  /* Finished courses get a solid, high-contrast badge with an icon so they stand out on the bubble. */
+  .course-card__done {
+    font-weight: var(--weight-bold);
+  }
+
+  .course-card__done.badge--success {
+    background: var(--color-success);
+    color: var(--color-on-accent);
+  }
+
+  .course-card__done.badge--placement {
+    border: 2px solid var(--color-ink);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .course-card__done svg {
+    width: 0.9em;
+    height: 0.9em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .course-card__progress {
