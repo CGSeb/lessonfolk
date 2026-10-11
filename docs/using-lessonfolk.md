@@ -21,7 +21,7 @@ shows your courses and progress.
 
 ## Two ways to use LessonFolk
 
-| | Hosted (coming soon) | Self-hosted |
+| | Hosted ([lessonfolk.com](https://lessonfolk.com)) | Self-hosted |
 |---|---|---|
 | What you do | Sign in on the hosted LessonFolk with GitHub or Google | Run LessonFolk on your computer with Docker |
 | Your progress | Saved on the hosted server, with your account | Saved in a database on your computer; nothing is sent to us |
