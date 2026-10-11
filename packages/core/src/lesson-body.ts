@@ -14,10 +14,15 @@ export const LESSON_SECTIONS: readonly SectionSpec[] = [
   { title: 'Key ideas', required: true },
   { title: 'Teaching notes', required: true },
   { title: 'Check your understanding', required: true },
-  { title: 'Exercise', required: false },
   { title: 'Completion criteria', required: true },
   { title: 'Going further', required: false },
 ];
+
+/** Sections that left the format, with what to do instead. */
+const REMOVED_SECTIONS: Readonly<Record<string, string>> = {
+  Exercise:
+    'lessons have no exercise section any more: put applied questions in "## Check your understanding" and remove it',
+};
 
 /** Writing guidelines from docs/course-format.md. */
 export const KEY_IDEAS_RANGE = { min: 3, max: 6 };
@@ -73,9 +78,12 @@ export function checkLessonBody(body: string, estimatedMinutes: number): LessonB
     const rank = known.get(title);
     if (rank === undefined) {
       const near = LESSON_SECTIONS.find((s) => loose(s.title) === loose(title));
+      const removed = Object.entries(REMOVED_SECTIONS).find(([name]) => loose(name) === loose(title));
       const hint = near
         ? `did you mean ${heading(near.title)}?`
-        : `expected one of ${LESSON_SECTIONS.map((s) => heading(s.title)).join(', ')}`;
+        : removed
+          ? removed[1]
+          : `expected one of ${LESSON_SECTIONS.map((s) => heading(s.title)).join(', ')}`;
       errors.push(`unknown section ${heading(title)}; ${hint}`);
     } else if (seen.has(title)) {
       errors.push(`section ${heading(title)} appears more than once`);

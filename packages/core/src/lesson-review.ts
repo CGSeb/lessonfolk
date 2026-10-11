@@ -22,12 +22,12 @@ export const REVIEW_CRITERIA: readonly ReviewCriterion[] = [
     id: 'objectives-covered',
     question:
       'Is every objective of the frontmatter taught by at least one key idea and tested by at ' +
-      'least one question of "Check your understanding" or by the exercise?',
+      'least one question of "Check your understanding"?',
   },
   {
     id: 'criteria-match-checks',
     question:
-      'Can the tutor decide every completion criterion from the checks and the exercise alone, ' +
+      'Can the tutor decide every completion criterion from the checks alone, ' +
       'with no criterion about something the lesson never asks?',
   },
   {

@@ -85,8 +85,10 @@ author). Never edit other courses.
      adapt for beginners vs experienced learners, and pacing hints.
    - `## Check your understanding`: 2–4 numbered questions, each followed by a
      `Good answer:` line describing what a correct answer contains (not a verbatim answer).
-   - `## Exercise` (optional): say whether it needs nothing, a computer or code; it must be free.
-   - `## Completion criteria`: tied to the checks, so the tutor can decide objectively.
+   - No `## Exercise` section: lessons are taught and checked in the conversation. Put a
+     question that applies the ideas to a case in the checks instead.
+   - `## Completion criteria`: tied to the checks, so the tutor can decide objectively; never
+     require the learner to build or install something.
    - `## Going further` (optional): prefer topics or stable, well-known sources; never
      invent links.
    - Match the level: beginner lessons define every term and avoid math. Prefer everyday

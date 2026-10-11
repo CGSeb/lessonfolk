@@ -38,10 +38,6 @@ prerequisites: []
 3. What is the difference between a rule-based program and a program that learns?
    Good answer: rules are written by humans explicitly; learning systems find patterns from examples/data.
 
-## Exercise
-No computer needed. Over the next day, notice three moments where AI is working for you
-without you asking. Share them at the start of the next lesson.
-
 ## Completion criteria
 The learner answered questions 1 and 3 correctly (with help if needed) and can give at least one real example.
 
