@@ -73,7 +73,7 @@ The `/privacy` page is linked from the footer, the sign-in page and the Account 
 learners who would rather not send data to self-hosting ([using-lessonfolk](using-lessonfolk.md)).
 There are no separate terms of service.
 
-The contact shown on `/privacy` is the `LESSONFOLK_PRIVACY_CONTACT` environment variable, and the
+Who runs the server (shown in "Who runs this LessonFolk") is `LESSONFOLK_OPERATOR`: a host on the hosted version must set it, because the person responsible for the data has to be named. The contact shown on `/privacy` is the `LESSONFOLK_PRIVACY_CONTACT` environment variable, and the
 "Where it is stored" section says the country or region of the server from `LESSONFOLK_DATA_LOCATION`
 (for example `Canada`). Without it the page says the data is on the server of whoever runs this
 LessonFolk. A host must set it to where the database and its backups really are, and change it if the
@@ -81,3 +81,5 @@ server moves.
 
 If the data is stored outside the learner's country (for example learners in the EU, a server in
 Canada), say so in `LESSONFOLK_DATA_LOCATION`: the page shows it as written.
+
+The notice carries a "Last updated" date (`privacy.updated` in `en.ts`): change it whenever the text changes. It also states the legal bases (the service asked for; legitimate interest for the logs), the right to complain to a data protection authority, that conversations stay with the learner’s AI app, and a minimum age of 16.

@@ -33,6 +33,7 @@ Details in [Sign-in for developers](auth-dev.md).
 | `BETTER_AUTH_SECRET` | (none) | `oauth` only, required: a random secret of 32 characters or more that signs the session cookies. |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | (none) | `oauth`: your GitHub OAuth app. Set both or neither. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | (none) | `oauth`: your Google OAuth client. Set both or neither. |
+| `LESSONFOLK_OPERATOR` | (none) | `oauth`: who runs this LessonFolk and is responsible for the data (a name and a country, e.g. `Jane Doe, France`), shown on the `/privacy` page. Without it the page has no "Who runs" section. |
 | `LESSONFOLK_PRIVACY_CONTACT` | (none) | `oauth`: who learners write to about their data (an email address or a page), shown on the `/privacy` page. |
 | `LESSONFOLK_DATA_LOCATION` | (none) | `oauth`: the country or region where the server and its backups are, shown on the `/privacy` page (e.g. `Canada`). |
 | `LESSONFOLK_MCP_TOKEN` | (none) | `none` only: when set, the MCP server at `/mcp` requires `Authorization: Bearer <token>`. Without it, `/mcp` only answers this computer. (`oauth` uses OAuth access tokens instead.) |

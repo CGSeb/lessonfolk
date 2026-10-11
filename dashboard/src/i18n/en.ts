@@ -421,16 +421,23 @@ export const en = {
     where: 'In the database of this server, located in {location}. It is not copied to other services. Backups stay with the same host.',
     whereUnknown: 'In the database of this server, run by the person who runs this LessonFolk. It is not copied to other services.',
     whyTitle: 'Why',
-    why: 'To sign you in and to save your progress. Nothing else. Legal basis: providing the service you asked for.',
+    why: 'To sign you in and to save your progress. Nothing else. Legal basis: providing the service you asked for. The server logs, with your IP address, are kept to keep the service secure and to find faults (legitimate interest).',
     howLongTitle: 'How long',
     howLong:
-      'Your data is kept until you delete your account. Sessions expire after 7 days without use, and after 30 days at most; you can end them on the Account page. Server logs, the only place your IP address is kept, are kept for at most 30 days. Backups are kept for at most 35 days, so deleted data leaves them within 35 days.',
+      'Your data is kept until you delete your account, including an account you no longer use. Sessions expire after 7 days without use, and after 30 days at most; you can end them on the Account page. Server logs, the only place your IP address is kept, are kept for at most 30 days. Backups are kept for at most 35 days, so deleted data leaves them within 35 days.',
     rightsTitle: 'Your rights',
     rights:
-      'On the Account page you can download all your data, and delete your account and everything linked to it, at any time. You can also ask the contact below to correct your data or answer a question.',
+      'On the Account page you can download all your data, and delete your account and everything linked to it, at any time. You can also ask the contact below to correct your data, to stop using it in a way you object to, or to answer a question. If you think your data is not handled properly, you may complain to your data protection authority (in the European Union, the one of your country).',
     sharedTitle: 'Who sees it',
     shared:
       'Only you, and the person who runs this LessonFolk. Your data is not sold or shared with advertisers. Your sign-in provider (GitHub or Google) knows that you sign in to LessonFolk. The hosting provider of this server stores the data on its behalf.',
+    aiApps:
+      'Your conversation stays between you and your AI app: its provider handles it under its own privacy policy. LessonFolk only receives what the tutor saves, your progress and notes.',
+    operatorTitle: 'Who runs this LessonFolk',
+    operator: '{operator} runs this LessonFolk and decides what is done with your data.',
+    ageTitle: 'Age',
+    age: 'LessonFolk is not meant for children under 16. If you are younger, ask a parent or guardian before you sign in.',
+    updated: 'Last updated: 11 October 2026.',
     selfHostTitle: 'Prefer not to send your data?',
     selfHost:
       'LessonFolk is open source. You can run it on your own computer, with no sign-in, and nothing leaves it. The steps are in the project’s documentation on GitHub.',

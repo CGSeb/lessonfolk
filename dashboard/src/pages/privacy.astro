@@ -8,11 +8,12 @@ export const prerender = false;
  * The privacy notice: what is collected, why, how long, how to export or delete, who to ask.
  * Public (no sign-in). The text is in src/i18n/en.ts and must match the data map in
  * docs/privacy.md. The contact comes from LESSONFOLK_PRIVACY_CONTACT, the country or region of the
- * server from LESSONFOLK_DATA_LOCATION.
+ * server from LESSONFOLK_DATA_LOCATION, who runs it from LESSONFOLK_OPERATOR.
  */
 const oauth = Astro.locals.authMode === 'oauth';
 const contact = process.env.LESSONFOLK_PRIVACY_CONTACT?.trim();
 const location = process.env.LESSONFOLK_DATA_LOCATION?.trim();
+const operator = process.env.LESSONFOLK_OPERATOR?.trim();
 const where = location ? t('privacy.where', { location }) : t('privacy.whereUnknown');
 const sections = [
   {
@@ -22,7 +23,8 @@ const sections = [
   { title: 'privacy.whyTitle', body: ['privacy.why'] },
   { title: 'privacy.howLongTitle', body: ['privacy.howLong'] },
   { title: 'privacy.rightsTitle', body: ['privacy.rights'] },
-  { title: 'privacy.sharedTitle', body: ['privacy.shared'] },
+  { title: 'privacy.sharedTitle', body: ['privacy.shared', 'privacy.aiApps'] },
+  { title: 'privacy.ageTitle', body: ['privacy.age'] },
 ] as const;
 ---
 
@@ -35,6 +37,12 @@ const sections = [
     {
       oauth && (
         <>
+          {operator && (
+            <section class="stack" style="--stack-space: var(--space-2)">
+              <h2>{t('privacy.operatorTitle')}</h2>
+              <p>{t('privacy.operator', { operator })}</p>
+            </section>
+          )}
           {sections.map((section) => (
             <section class="stack" style="--stack-space: var(--space-2)">
               <h2>{t(section.title)}</h2>
@@ -63,6 +71,7 @@ const sections = [
         </>
       )
     }
+    {oauth && <p class="muted">{t('privacy.updated')}</p>}
     <p>
       <a href="/account">{t('privacy.accountLink')}</a>
     </p>
