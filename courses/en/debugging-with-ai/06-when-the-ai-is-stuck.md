@@ -66,14 +66,6 @@ prerequisites:
 4. When should you stop asking the assistant and change approach?
    Good answer: after a limit you set (a few failed attempts or a fixed time), or when it loops or invents things; then debug yourself, rubber-duck it, or ask a person with the bug brief.
 
-## Exercise
-Needs a computer and any free assistant, or this chat. Recall a bug where an assistant went in
-circles (yours, or one the tutor describes). Write the clean summary you would use to start a
-fresh conversation: the bug brief, what was ruled out, the evidence so far and the next
-hypothesis. Optionally, try it in a new conversation and compare the result. Then write your
-personal "stuck" rule in one or two lines (for example, "after three failed fixes: fresh
-summary, then the documentation, then a colleague") and discuss it with the tutor.
-
 ## Completion criteria
 The learner answers the checks correctly, can name the signs of a stuck or confidently wrong
 assistant, and has a concrete rule for when and how to change approach.

@@ -2,7 +2,7 @@
 id: ai-foundations/03-what-is-an-llm
 title: What is a large language model?
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Explain what an LLM does at a high level
   - Understand "predicting the next word"
@@ -37,10 +37,6 @@ prerequisites:
    Good answer: it produces plausible text, not verified facts; plausibility ≠ truth.
 3. Give one tip to get a better answer from a chat assistant.
    Good answer: give context, be specific, give examples, ask it to show its reasoning or sources, etc.
-
-## Exercise
-Ask a chat assistant (this one works) a question you already know the answer to in detail,
-from your job or hobby. Look for anything inaccurate or vague and discuss it with the tutor.
 
 ## Completion criteria
 The learner can explain next-token prediction in their own words and why outputs should be checked.

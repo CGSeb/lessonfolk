@@ -2,11 +2,11 @@
 id: build-with-ai/04-conversation-memory
 title: Conversation memory and context limits
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Explain why a model API keeps no memory between calls
-  - Keep a conversation going by sending its history
-  - Handle the context window limit
+  - Explain how sending the history keeps a conversation going
+  - Name ways to stay within the context window limit
 prerequisites:
   - build-with-ai/03-structured-output
 ---
@@ -52,29 +52,9 @@ prerequisites:
 3. Describe one strategy to keep a long conversation within limits, and its downside.
    Good answer: keep only the last N messages (forgets early details) or summarise older messages (loses some detail, costs an extra call); the system prompt is always kept.
 
-## Exercise
-Needs a computer, Python and your setup — free, code. Build a conversation loop that keeps
-history and trims it:
-
-```python
-MAX_MESSAGES = 10
-history = [{"role": "system", "content": "You are a helpful assistant."}]
-
-def chat(user_text):
-    history.append({"role": "user", "content": user_text})
-    recent = [history[0]] + history[1:][-MAX_MESSAGES:]
-    reply = call_model(recent)  # your lesson 1 request, returning the reply text
-    history.append({"role": "assistant", "content": reply})
-    return reply
-```
-
-Tell the model your name, chat for a while, and see when it forgets it. Then lower
-`MAX_MESSAGES` and try again. Discuss with the tutor what you would keep or summarise for a
-real app.
-
 ## Completion criteria
-The learner answers the checks correctly and has a working loop that sends history and keeps
-it within a limit.
+The learner answers the checks correctly and can describe a loop that sends the history and
+keeps it within a limit.
 
 ## Going further
 - Topic: tokenizers, to see how text is split into tokens.

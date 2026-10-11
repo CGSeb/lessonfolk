@@ -2,7 +2,7 @@
 id: ai-coding-assistants-for-teams/01-how-assistants-load-instructions
 title: How assistants load project instructions
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Explain what a project instructions file is and when the assistant reads it
   - Name AGENTS.md and the instructions file of the tool you use
@@ -73,13 +73,6 @@ prerequisites:
    Good answer: AGENTS.md is an open convention read by many tools, so the rules reach teammates whatever assistant they use, and there is one place to maintain.
 3. A teammate pastes the whole team wiki into the instructions file "so the assistant knows everything". What is the problem?
    Good answer: the file is loaded on every request, so it fills the context window, dilutes the important rules and makes the model less precise; keep it short and point to documents the assistant can open when needed.
-
-## Exercise
-Needs a computer. In a project you work on (or in this repository), find every instructions
-file your assistant reads: look for `AGENTS.md` and your tool's own file at the root, in
-sub-folders and in your home folder. Then start a fresh session and ask the assistant what
-project instructions it has. Compare its answer with what you found, and discuss any
-surprise with the tutor.
 
 ## Completion criteria
 The learner answers the checks correctly, can name AGENTS.md and their own tool's

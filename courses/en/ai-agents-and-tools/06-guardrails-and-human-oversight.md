@@ -2,7 +2,7 @@
 id: ai-agents-and-tools/06-guardrails-and-human-oversight
 title: Guardrails and human oversight
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Limit what an agent can do with least privilege and budgets
   - Require human approval before risky actions
@@ -55,33 +55,9 @@ prerequisites:
 3. What should an agent's logs contain, and why keep them?
    Good answer: each step's request, tool calls, arguments, results and approvals; to debug failures, explain what happened and detect misuse, while storing them carefully as user data.
 
-## Exercise
-Needs a computer, Python and your agent from lesson 3 — free, code. Add a risky tool and a
-human approval step:
-
-```python
-def place_order(item, quantity):
-    return f"Order placed: {quantity} x {item}"  # a fake action, nothing real happens
-
-RISKY = {"place_order"}
-
-def run_tool(name, args):
-    if name not in TOOL_FUNCTIONS:
-        return f"Error: unknown tool {name}."
-    if name in RISKY:
-        print(f"The agent wants to run {name} with {args}.")
-        if input("Approve? (yes/no) ").strip().lower() != "yes":
-            return "The user did not approve this action."
-    return TOOL_FUNCTIONS[name](**args)
-```
-
-Add argument validation (`quantity` must be a whole number between 1 and 10), log each step to
-a file, and run your lesson 5 tricky inputs again. Show the tutor one approved and one refused
-action in your log.
-
 ## Completion criteria
-The learner answers the checks correctly and has an agent with at least one approval-gated
-action, argument validation, a step limit and a log.
+The learner answers the checks correctly and can describe an agent with at least one
+approval-gated action, argument validation, a step limit and a log.
 
 ## Going further
 - Topics: evaluating agents with test suites, sandboxing tools, permission systems.

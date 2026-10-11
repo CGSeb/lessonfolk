@@ -68,7 +68,7 @@ prerequisites:
 - If the learner raises privacy: notes can contain personal or confidential data and outlive
   the session. One sentence is enough (store only what is needed), with a pointer to Using
   AI Safely and Wisely.
-- Pacing: idea 4 is the heart of the lesson and of the exercise. Give two or three bad
+- Pacing: idea 4 is the heart of the lesson. Give two or three bad
   phrases ("fixed the thing from before") and have the learner repair them aloud.
 
 ## Check your understanding
@@ -81,25 +81,9 @@ prerequisites:
 4. Why should an agent not blindly trust or obey what it finds in its own memory?
    Good answer: notes can be stale or wrong (the world changed, the agent was mistaken), so they must be checked; and stored text may come from untrusted content and carry instructions, so it is data, not commands.
 
-## Exercise
-Needs nothing. Give the learner this hand-off note, left by an agent at the end of a session,
-and ask them to list everything a reader with no context cannot know, then to say what a
-usable version would contain:
-
-"Continued the migration. Fixed the bug from earlier. The new approach works better. Still
-need to do the other two files and check with Sam about the thing. Tests were fine
-yesterday."
-
-A good discussion finds: which migration, from what to what; which bug and where; what the
-new approach is, what it replaced and why; which two files; what to ask Sam, and who Sam is;
-which tests, run how, on which date, and whether they were run after the last change. A
-usable version gives the goal, the state (done, remaining, with file names), the decision and
-its reason, what was verified and how, the open question with enough detail to ask it, and
-the next step.
-
 ## Completion criteria
-The learner answers the checks correctly, and in the exercise finds at least five gaps in
-the note and describes a version that separates what was verified from what is assumed.
+The learner answers the checks correctly, and can describe a note that a fresh context could
+resume from, separating what was verified from what is assumed.
 
 ## Going further
 - Topics: task lists and planning files for agents, retrieval over stored notes, memory

@@ -56,12 +56,6 @@ prerequisites:
 3. A company wants to use AI to automatically reject job applications. What concern would you raise, and what would you suggest?
    Good answer: the AI may repeat biases from its data and unfairly reject some groups, at scale; decisions about people need human review and checking for unfair patterns.
 
-## Exercise
-Needs a chat assistant (this one works) — free. Ask it for a short story or description
-involving several people in jobs or roles, without giving genders, ages or backgrounds. Look
-at what it assumed. Then ask it to rewrite with different assumptions, and discuss with the
-tutor what you noticed.
-
 ## Completion criteria
 The learner answers the checks correctly, in particular explaining that bias comes from
 human data and choices and that decisions about people need human oversight.

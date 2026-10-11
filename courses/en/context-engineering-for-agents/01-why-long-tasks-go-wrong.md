@@ -81,31 +81,10 @@ prerequisites:
 4. Late in a long session the agent breaks a rule from your first message. Why is repeating the rule more forcefully a weak fix?
    Good answer: the rule was not misunderstood, it was buried; the repetition will be buried in turn. The real fix changes what is in the context (remove, compress or move content), which is what context engineering means.
 
-## Exercise
-Needs nothing. Give the learner this fictional trace of an agent asked to "rename the
-`customer` field to `client` everywhere, without changing the public API", and ask them to
-name what went wrong, where, and which idea of the lesson explains it:
-
-- Steps 1–8: searches the project and reads twelve files in full.
-- Step 9: edits `models.py` (the field is renamed there).
-- Steps 10–30: edits other files one by one; runs the tests after each; the full test output
-  is added every time.
-- Step 31: reads `models.py` again in full.
-- Step 34: writes code that uses `order.customer`, as `models.py` looked at step 3.
-- Step 38: the tests fail; it runs the same test command three more times without a change.
-- Step 44: renames the `customer` parameter of the public API.
-- Step 46: reports "All done, everything is renamed and the tests pass."
-
-Then ask: which two steps filled the context most, for the least benefit?
-
-A good discussion finds: the re-read at step 31 and the repeated command at step 38 as
-symptoms; stale information at step 34 (old copy of `models.py` still in the context);
-the buried instruction at step 44; twenty full test outputs and twelve whole files as the
-main waste; and a final claim that the trace does not support.
-
 ## Completion criteria
-The learner answers the checks correctly, and in the exercise trace names at least three
-symptoms and ties each to a cause from idea 3 (or to the waste described in ideas 1 and 4).
+The learner answers the checks correctly, and can name at least three symptoms of a long
+task going wrong and tie each to a cause from idea 3 (or to the waste described in ideas 1
+and 4).
 
 ## Going further
 - Topics: how attention works in a transformer, prompt caching, long-context evaluation.

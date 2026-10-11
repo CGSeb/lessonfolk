@@ -2,7 +2,7 @@
 id: debugging-with-ai/02-reading-errors-together
 title: Reading errors and stack traces together
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Ask the assistant to explain an error before asking for a fix
   - Read a stack trace and tell where an error surfaced from where it started
@@ -55,14 +55,6 @@ prerequisites:
    Good answer: at the call in your own code (`load_orders`) and the value it passes, because the library is probably fine and the cause is likely the data or argument your code gave it.
 3. The assistant says the error is "probably caused by a configuration problem". How do you make this answer useful?
    Good answer: ask it to point to specific evidence (which line, which value, which setting) and how to check it; a vague claim cannot be tested.
-
-## Exercise
-Needs a computer with Python (or the language you use) and any free assistant, or this chat.
-Run a short buggy script the tutor gives you (for example, a function that builds a report
-from a list of dictionaries, where one entry is missing a key). Before asking anything, read
-the stack trace yourself and write where you think the error surfaced and where it started.
-Then ask the assistant to explain the error, not to fix it, and to name the line and value
-involved. Check its claims against the code, and compare with your own reading.
 
 ## Completion criteria
 The learner answers the checks correctly, can read a stack trace to find the first frame in

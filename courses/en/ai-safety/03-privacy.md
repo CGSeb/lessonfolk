@@ -55,13 +55,6 @@ prerequisites:
 3. Why should you look at a tool's privacy settings or policy?
    Good answer: because what happens to conversations (storage, human review, use for training) depends on the tool and settings, and differs between tools and between personal and work accounts.
 
-## Exercise
-Needs a chat assistant you use (this one works) — free. Open its settings or privacy page and
-find out whether conversations are kept and whether they can be used to improve the model.
-Then take a real request you would like help with, and rewrite it with sensitive details
-removed or replaced. Show the tutor the "before" and "after" (keep the real details private:
-describe the "before" in general terms).
-
 ## Completion criteria
 The learner answers the checks correctly and can rewrite a request to remove sensitive
 details while keeping it useful.

@@ -77,29 +77,9 @@ prerequisites:
 4. A sub-agent reports "the cause is in `auth/refresh.py`, line 88; I confirmed it with the tests". What should the main agent, or you, do before acting on it?
    Good answer: treat it as a claim: read the cited lines, run or inspect the test it mentions, in proportion to the stakes; and have the sub-agent's trace available to check what it really did.
 
-## Exercise
-Needs nothing. Give the learner the situation and the brief, and ask what the sub-agent
-cannot know, how they would rewrite the brief, and what the report should look like.
-
-The situation in the main agent's context: since last Tuesday's release, users are logged out
-after about ten minutes. The session store was checked and is healthy. The main agent
-suspects the token refresh code in `auth/refresh.py`. The user said the public
-authentication API must not change, and wants a diagnosis before any fix.
-
-The brief the main agent wrote: "Look into the login problem and fix whatever you find."
-
-A good discussion finds: the brief hides the symptom (logged out after ten minutes, since
-Tuesday's release), what was ruled out (the session store), the suspect (`auth/refresh.py`),
-the constraint (public API unchanged) and the user's wish (diagnosis only); worse, it asks
-for a fix the user did not want. A better brief states all of these, asks for read-only
-investigation, and asks for a report with the likely cause, the evidence (file and lines,
-what changed in the release), how sure the sub-agent is, and what it did not check. The
-sub-agent should get read tools only.
-
 ## Completion criteria
-The learner answers the checks correctly, and in the exercise names at least four things
-missing from the brief, removes the unwanted "fix", and specifies what the report must
-contain.
+The learner answers the checks correctly, and can list what a sub-agent's brief must contain
+and what its report must contain.
 
 ## Going further
 - Topics: orchestrator and worker designs, least privilege for agents, logging and tracing

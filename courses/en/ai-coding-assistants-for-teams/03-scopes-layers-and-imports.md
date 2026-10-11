@@ -65,12 +65,6 @@ prerequisites:
 3. Why use a scoped rule for the `api/` folder rather than adding it to the root file?
    Good answer: it only loads when the assistant works on matching files, so the root file stays short and other tasks are not cluttered with irrelevant rules.
 
-## Exercise
-Needs a computer. For a project you work on, sketch its layers: what belongs in your personal
-file, what in the shared AGENTS.md, and which folders deserve their own scoped rules. If your
-team uses more than one tool, set up the import or setting so your tool reads AGENTS.md, and
-check with a fresh session that a shared rule is followed.
-
 ## Completion criteria
 The learner answers the checks correctly and can explain where a given rule belongs
 (personal, project, scoped) and how to share one AGENTS.md across tools.

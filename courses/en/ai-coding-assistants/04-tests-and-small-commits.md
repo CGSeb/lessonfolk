@@ -2,7 +2,7 @@
 id: ai-coding-assistants/04-tests-and-small-commits
 title: Tests and small commits as a safety net
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Use tests to check AI changes automatically
   - Use small commits and diffs so every AI change is easy to review and undo
@@ -56,12 +56,6 @@ prerequisites:
    Good answer: the diff then shows exactly what the assistant changed, and a bad change can be discarded instantly by going back to the last commit.
 3. The assistant produced a 1,500-line diff for what you thought was a small task. What is a sensible reaction?
    Good answer: do not try to review it all; discard it, and split the task into smaller steps with clearer done criteria (or ask for a plan first).
-
-## Exercise
-Needs a computer, a project under git with a test runner, and any coding assistant. Commit
-everything, then write (or ask for and review) two or three tests for a small function you
-want, including one edge case. Ask the assistant to implement the function so the tests pass
-without changing the tests. Review the diff, commit, and tell the tutor what you checked.
 
 ## Completion criteria
 The learner answers the checks correctly and can describe a loop of clean state → tests →

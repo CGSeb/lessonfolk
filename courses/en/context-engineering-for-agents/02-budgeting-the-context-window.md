@@ -77,28 +77,10 @@ prerequisites:
 4. Why does one unused tool with a long description cost more than it seems?
    Good answer: tool definitions are a fixed cost sent and read at every step, so the cost is multiplied by the number of steps, and extra similar tools make tool choice less reliable.
 
-## Exercise
-Needs nothing. Give the learner this fictional picture of an agent's window at step 40 of a
-bug investigation, and ask what they would change first, how, and what they would leave alone:
-
-- Instructions: a small share. Half of it is a style guide for writing release notes.
-- Tool definitions: a noticeable share. Forty tools are connected; the task has used four.
-- Messages (user and model): a small share.
-- Tool results: about two thirds of the window, made of nine full test logs (the same three
-  tests fail in each), six whole source files, and one database query that returned 2,000 rows.
-- Free room: very little.
-
-A good discussion: starts with the tool results because they are the largest share; returns
-only the failing tests and their errors; replaces whole files by the relevant functions or by
-paths the agent can read again; returns a count and a few rows for the query, with a note on
-how to filter; then drops the unused tools and moves the release-notes guide to something
-loaded on demand; and leaves the messages alone, since they are small and carry the task and
-the decisions.
-
 ## Completion criteria
-The learner answers the checks correctly, and in the exercise starts from the largest share
-and proposes at least three concrete changes, including one that turns content into a
-reference or says what was cut.
+The learner answers the checks correctly, and for a context that is too full starts from the
+largest share and proposes at least three concrete changes, including one that turns content
+into a reference or says what was cut.
 
 ## Going further
 - Topics: tokenizers and token counting, prompt caching, tool design for agents.

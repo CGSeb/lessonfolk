@@ -4,7 +4,7 @@ title: Handling errors, cost and latency
 level: intermediate
 estimatedMinutes: 20
 objectives:
-  - Handle common API errors with timeouts and retries
+  - Explain how timeouts and retries handle common API errors
   - Explain what drives cost and response time
   - Keep API keys and usage under control
 prerequisites:
@@ -44,7 +44,7 @@ prerequisites:
 - Misconception: "streaming makes the model faster". It improves perceived speed, not
   generation speed.
 - Streaming code varies by tool; describe the concept and let the learner follow their tool's
-  documentation if they want to try it. The exercise does not require it.
+  documentation if they want to try it.
 - For learners who have built web services, connect to what they know: timeouts, retries,
   idempotency, secrets management.
 
@@ -58,35 +58,9 @@ prerequisites:
 4. You notice your API key in a screenshot you posted in a public chat. What do you do, and what would have limited the damage?
    Good answer: revoke the key and create a new one at once; a spending or usage limit at the provider caps what a leaked key or a bug can cost.
 
-## Exercise
-Needs a computer, Python and your setup — free, code. Wrap your model call with a timeout
-and retries:
-
-```python
-import time
-import requests
-
-RETRYABLE = {429, 500, 502, 503, 504}
-
-def call_with_retries(payload, tries=4):
-    for attempt in range(tries):
-        try:
-            response = requests.post(URL, headers=HEADERS, json=payload, timeout=60)
-            if response.status_code not in RETRYABLE:
-                response.raise_for_status()
-                return response.json()
-        except (requests.Timeout, requests.ConnectionError):
-            pass
-        time.sleep(2 ** attempt)
-    raise RuntimeError("The model is not responding, please try again later.")
-```
-
-Test it by pointing `URL` at a wrong address or stopping your local runner. Then print the
-usage numbers of a short and a long conversation and compare them with the tutor.
-
 ## Completion criteria
-The learner answers the checks correctly and has a model call with a timeout, retries with
-backoff for temporary errors, and a clear error message.
+The learner answers the checks correctly and can describe a model call with a timeout,
+retries with backoff for temporary errors, and a clear error message.
 
 ## Going further
 - Your provider's documentation on rate limits, usage and spending limits.

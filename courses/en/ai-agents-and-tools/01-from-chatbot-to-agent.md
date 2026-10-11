@@ -52,11 +52,6 @@ prerequisites:
 3. Why are agents harder to make reliable than a single model call?
    Good answer: they take many steps, each can go wrong and errors add up; they are less predictable, slower, cost more and are harder to test.
 
-## Exercise
-Needs nothing — free. List three tasks from your work or life where AI could help. For each,
-decide whether it needs a chatbot, a workflow or an agent, and which tools it would need.
-Discuss your choices with the tutor.
-
 ## Completion criteria
 The learner answers the checks correctly, in particular placing a task on the
 chatbot/workflow/agent spectrum with a reason.

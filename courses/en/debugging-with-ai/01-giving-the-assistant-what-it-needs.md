@@ -2,7 +2,7 @@
 id: debugging-with-ai/01-giving-the-assistant-what-it-needs
 title: Giving the assistant what it needs
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Explain why "it doesn't work, fix it" leads to guesses
   - Write a debugging brief with the error, a reproduction and expected vs actual behaviour
@@ -59,14 +59,6 @@ prerequisites:
    Good answer: what you did, the expected value and the actual value (with the input data), the code that computes it, ideally as a small reproduction, plus what changed recently.
 3. What is a minimal reproduction, and why is it worth making?
    Good answer: the smallest code and steps that still show the bug; it keeps the assistant focused, keeps unrelated or private code out of the chat, and often reveals the cause on its own.
-
-## Exercise
-Needs a computer with Python (or any language you use) and any free assistant, or this chat.
-The tutor gives you a short buggy script, for example a function that averages a list of
-prices read from text and crashes on one input. First ask an assistant "this doesn't work,
-fix it" with the code only. Then reduce the bug to a minimal reproduction and send a full
-brief (what you did, expected, actual with the exact error, what you tried). Compare the two
-answers with the tutor. Use your own language if you prefer: the tutor adapts the snippet.
 
 ## Completion criteria
 The learner answers the checks correctly and can list, without help, what a good debugging

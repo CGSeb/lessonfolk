@@ -2,7 +2,7 @@
 id: debugging-with-ai/03-hypotheses-not-guesses
 title: Hypotheses, not guesses
 level: intermediate
-estimatedMinutes: 25
+estimatedMinutes: 20
 objectives:
   - Ask the assistant for ranked likely causes, each with a way to test it
   - Choose a cheap test for a hypothesis (logs, prints, a debugger, bisecting)
@@ -62,14 +62,6 @@ prerequisites:
    Good answer: bisect: test a version halfway between the good and the bad one, keep the half that contains the change, and repeat (version control tools can automate it).
 4. Why change only one thing at a time?
    Good answer: so you know which change had which effect; changing several things at once makes the result impossible to interpret.
-
-## Exercise
-Needs a computer with Python (or the language you use) and any free assistant, or this chat.
-The tutor gives you a script with a bug that has no error, for example a discount
-calculation that gives the wrong total for some orders only. Ask the assistant for ranked
-causes and a test for each, without a fix. Run the tests one at a time (prints are fine),
-report each result back to the assistant, and keep a short log: hypothesis, test, result.
-Stop when the evidence points to one cause, and show your log to the tutor.
 
 ## Completion criteria
 The learner answers the checks correctly and can run, or describe, a loop of hypothesis →

@@ -81,36 +81,10 @@ prerequisites:
 4. Give one way a summary can mislead the agent, and one protection against it.
    Good answer: a lost detail, a softened constraint, an invented or rounded-up state, a lost reason or drift over repeated compactions; protections include keeping the original task verbatim outside the summary and checking claims against files and tests (or starting fresh when the session is tangled).
 
-## Exercise
-Needs nothing. Describe this fictional session to the learner, then show the two summaries
-and ask what each one lost and what could go wrong after it.
-
-The session: the agent was asked to "add a CSV export to the reports page, without changing
-the existing JSON export, using the project's `Exporter` base class". After sixty steps it
-has written `CsvExporter` in `exports/csv.py` and added the route `/reports/export.csv`. It
-first tried a streamed response, which failed in the test setup; it then chose to build the
-file in memory with a limit of 10,000 rows, and the user agreed. Two of fourteen tests still
-fail (`test_unicode_names` and `test_empty_report`). The documentation is not updated.
-
-- **Summary A:** "We are adding a CSV export. Most of the work is done and the tests mostly
-  pass. A few edge cases remain. Next: finish and clean up."
-- **Summary B:** "Goal: add a CSV export to the reports page. Done: `CsvExporter` in
-  `exports/csv.py`, route `/reports/export.csv`. Tests pass. Next: update the documentation."
-
-Then ask what a third, better summary would contain.
-
-A good discussion: A is vague everywhere (no paths, no names of failing tests, no decisions),
-so the agent must rediscover the work. B is precise but drops both constraints (JSON export
-untouched, `Exporter` base class), drops the failed streaming attempt and the agreed row
-limit (so the agent may try streaming again or remove the limit), and states "tests pass",
-which is false. A better summary keeps the task in its original words, the files and route,
-the decision with its reason and the user's agreement, the two failing tests by name, and
-the next steps.
-
 ## Completion criteria
-The learner answers the checks correctly, and in the exercise finds at least two distinct
-losses in summary B (a dropped constraint or decision, and the false test status) and lists
-what a better summary keeps.
+The learner answers the checks correctly, and can name at least two things a careless summary
+loses (such as a constraint or decision, or the real test status) and list what a good
+summary keeps.
 
 ## Going further
 - Topics: summarisation prompts, checkpoints and resuming long tasks.

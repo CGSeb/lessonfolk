@@ -2,7 +2,7 @@
 id: ai-coding-assistants-for-teams/05-permissions-and-hooks
 title: "Guardrails: permissions and hooks"
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Explain why instructions alone cannot guarantee a rule is followed
   - Use permissions to limit what an assistant may do
@@ -74,12 +74,6 @@ prerequisites:
    Good answer: a permission limits an action (e.g. deny reading `.env`, deny `git push`, allow `npm test` without asking); a hook runs a script at a moment (e.g. format after each edit, run tests before finishing, block edits to a path).
 3. Why commit the team's permissions and hooks to the repository, and what should stay personal?
    Good answer: so everyone gets the same guardrails and changes are reviewed like code; personal preferences, convenience allowances and machine-specific paths stay in the personal or local settings.
-
-## Exercise
-Needs a computer and an agent-style coding assistant that supports permissions or hooks
-(check its documentation). In a project of yours, add one permission rule (allow your test
-command, or deny reading a secret file) and one hook (format files after edit, or block edits
-to a protected folder). Try a task that triggers each, and show the result to the tutor.
 
 ## Completion criteria
 The learner answers the checks correctly and can decide, for a given rule, whether it belongs

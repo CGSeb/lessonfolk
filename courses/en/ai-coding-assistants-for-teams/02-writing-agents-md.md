@@ -2,7 +2,7 @@
 id: ai-coding-assistants-for-teams/02-writing-agents-md
 title: Writing a good AGENTS.md
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Structure an instructions file around commands, map, conventions, boundaries and done
   - Turn vague wishes into specific, checkable rules
@@ -61,12 +61,6 @@ prerequisites:
    Good answer: a specific rule naming the pattern, the place and an example, e.g. which error type or helper to use in which folder, what never to do, and a file to copy from.
 3. Name two things that should not go in AGENTS.md, and why.
    Good answer: any two of secrets or credentials (the file is committed and sent to tools), rules the linter or formatter already enforces, long copied documentation (wastes context, point to it instead), facts that change constantly, vague wishes that cannot be checked.
-
-## Exercise
-Needs a computer. Write (or rewrite) the AGENTS.md of a project you work on, in 40 lines or
-fewer, with the five sections of this lesson. Then give your assistant a small real task in a
-fresh session and see whether it ran the right commands and followed your conventions.
-Review the file with the tutor and cut any line that is vague or redundant.
 
 ## Completion criteria
 The learner answers the checks correctly and has drafted, or can describe in detail, an

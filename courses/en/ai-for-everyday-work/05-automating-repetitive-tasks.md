@@ -51,11 +51,6 @@ prerequisites:
 3. You batch 15 product descriptions in one request. What should you still do?
    Good answer: check each result, because one item can be wrong or off-style even when the others are fine.
 
-## Exercise
-Needs your own chat assistant — free. Pick one task you repeat at least every month. Write a
-prompt for it, run it on a real (non-confidential) example, fix what is off, and save it as a
-template with [blanks] in a note. Share the template with the tutor.
-
 ## Completion criteria
 The learner answers the checks correctly and produces one reusable template with blanks for a
 task they really do.

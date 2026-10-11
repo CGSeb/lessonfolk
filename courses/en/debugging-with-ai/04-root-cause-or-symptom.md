@@ -2,7 +2,7 @@
 id: debugging-with-ai/04-root-cause-or-symptom
 title: Root cause or symptom?
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Tell a fix that removes the cause from one that silences the symptom
   - Recognise the common symptom-hiding fixes assistants propose
@@ -58,13 +58,6 @@ prerequisites:
    Good answer: any three of catching all exceptions, early returns or default values for missing data, removed or loosened validation, forced type conversions, retries, delays or longer timeouts, tests changed to pass.
 3. An order total crashes because a discount is `None`. How do you find where the real fix belongs?
    Good answer: ask "why?" repeatedly (why is it `None`, where was it produced, why was that allowed) and fix at the deepest cause you can act on, such as where the discount is computed or the data is validated, not only where it crashed.
-
-## Exercise
-Needs a computer and any free assistant, or this chat (Python is optional). The tutor gives
-you a crashing function and three candidate fixes, for example one that catches the error,
-one that adds a default value, and one that fixes the data where it is created. For each,
-say whether it removes the cause or silences the symptom, and what happens to the bad input.
-Then ask an assistant to fix the original crash and judge its fix with the same questions.
 
 ## Completion criteria
 The learner answers the checks correctly, can name the common silencers, and can explain for

@@ -50,11 +50,6 @@ prerequisites:
 3. What is a good way to start a brainstorm with AI?
    Good answer: ask for many ideas at once, including unusual ones, then narrow down or group them against what matters to them.
 
-## Exercise
-Needs your own chat assistant — free. Pick a real, low-stakes choice you are facing. Ask for
-at least 10 options, choose your favourite, ask the assistant to argue against it, and build a
-comparison table with your own criteria. Tell the tutor whether your choice changed.
-
 ## Completion criteria
 The learner answers the checks correctly and can explain how to use AI to challenge an idea
 while keeping the decision their own.

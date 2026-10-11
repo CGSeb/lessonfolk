@@ -54,12 +54,6 @@ prerequisites:
 3. Give one kind of task where you should double-check an assistant's answer, and why.
    Good answer: e.g. exact counting or calculations (it predicts text rather than computing, unless it uses a tool), or health, money or legal questions (high stakes, can be confidently wrong).
 
-## Exercise
-Needs a chat assistant (this one works) — free. Ask it something you can verify yourself:
-how many times a given letter appears in a long word, the sum of a list of ten numbers, or a
-detail from your own job. Check the answer yourself and discuss with the tutor whether a better
-prompt would have helped, or whether it hit a limit.
-
 ## Completion criteria
 The learner answers the checks correctly and can explain, in their own words, the difference
 between what a better prompt can improve and what it cannot.

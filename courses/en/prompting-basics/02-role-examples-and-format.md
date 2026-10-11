@@ -2,7 +2,7 @@
 id: prompting-basics/02-role-examples-and-format
 title: Role, examples and output format
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Use a role to set the perspective of an answer
   - Show an example to get the style or structure you want
@@ -55,12 +55,6 @@ prerequisites:
    Good answer: paste the description they like as an example and ask for new ones in the same style (few-shot), rather than only describing the style in adjectives.
 3. Improve this prompt so the answer is easy to use: "Tell me about the pros and cons of working from home."
    Good answer: asks for a specific format (e.g. a two-column table or two bulleted lists), and adds at least one of length, tone, audience or a constraint.
-
-## Exercise
-Needs a chat assistant (this one works) — free. Choose a task you repeat often (a weekly
-update, a social post, a shopping list). Write one prompt that uses a role, an example of a
-past version you liked, and a clear format and length. Run it, then remove the example and
-run it again. Discuss the difference with the tutor.
 
 ## Completion criteria
 The learner answers the checks correctly, including that a role changes style but not

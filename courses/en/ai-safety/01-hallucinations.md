@@ -51,12 +51,6 @@ prerequisites:
 3. An assistant gives you three book references for an essay. What should you keep in mind?
    Good answer: the references may be invented or may not say what is claimed, so each one needs to be found and checked before using it.
 
-## Exercise
-Needs a chat assistant (this one works) — free. Ask it about something small and specific you
-know very well (your town, your job, a niche hobby), and ask for sources. Check the details
-and the sources yourself, and discuss any errors with the tutor: which risky situation from
-idea 4 was it?
-
 ## Completion criteria
 The learner answers the checks correctly, in particular explaining that fluency and
 confidence do not mean accuracy, and names at least two situations where errors are likely.

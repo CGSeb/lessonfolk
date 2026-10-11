@@ -2,11 +2,11 @@
 id: build-with-ai/03-structured-output
 title: Structured output (JSON)
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Ask a model for JSON with a clear shape
-  - Parse and validate the output in code
-  - Handle invalid output gracefully
+  - Explain how code parses and validates the output
+  - Say what code should do with invalid output
 prerequisites:
   - build-with-ai/02-system-prompts
 ---
@@ -52,35 +52,9 @@ prerequisites:
 3. A JSON mode guarantees valid JSON. Is the data then reliable?
    Good answer: no; the structure is valid but the values can still be wrong or invented, so content still needs validation and checking where it matters.
 
-## Exercise
-Needs a computer, Python and your setup — free, code. Ask the model to extract data from a
-sentence and validate it:
-
-```python
-import json
-
-SYSTEM = (
-    "Extract the event from the user's text. Answer with JSON only, no other text, "
-    'in this shape: {"title": string, "date": "YYYY-MM-DD" or null, "people": [string]}'
-)
-
-def parse_event(text):
-    try:
-        event = json.loads(text)
-    except json.JSONDecodeError:
-        return None
-    if not isinstance(event.get("title"), str) or not isinstance(event.get("people"), list):
-        return None
-    return event
-```
-
-Send a few sentences (a clear one, one with no date, one in another language), parse each
-reply with `parse_event`, and add one retry when it returns `None`. Tell the tutor how often
-the first answer was valid.
-
 ## Completion criteria
-The learner answers the checks correctly and has code that parses and validates model output,
-with a retry or fallback for invalid answers.
+The learner answers the checks correctly and can describe how code parses and validates model
+output, with a retry or fallback for invalid answers.
 
 ## Going further
 - Topic: JSON Schema, a standard way to describe the shape of JSON data.

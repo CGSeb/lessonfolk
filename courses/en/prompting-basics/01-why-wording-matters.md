@@ -54,11 +54,6 @@ prerequisites:
 3. Name the three things this lesson suggests adding to a prompt, and say why the audience matters.
    Good answer: context, goal and audience; the audience changes the vocabulary, level of detail and tone of the right answer.
 
-## Exercise
-Needs a chat assistant (this one works) — free. Pick something you really need this week
-(an email, a plan, an explanation). Ask for it in one short sentence, then ask again with
-context, goal and audience. Compare the two answers with the tutor: what changed, and why?
-
 ## Completion criteria
 The learner answers the checks correctly, and in particular rewrites a vague prompt by adding
 at least two of context, goal and audience.
