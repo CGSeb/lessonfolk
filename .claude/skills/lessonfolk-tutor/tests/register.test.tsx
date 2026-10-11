@@ -22,8 +22,8 @@ const BAND = {
 
 // The LessonFolk server as the mod sees it: the learner's saved progress, whether it answers,
 // who asked it, the project's .mcp.json, if any, and the only names it is connected under
-// (any name when absent).
-type Server = { saved: Saved; isUp: boolean; asked: string[]; mcpJson?: string; names?: string[] }
+// (any name when absent), and the refusal it answers every call with, if any.
+type Server = { saved: Saved; isUp: boolean; asked: string[]; mcpJson?: string; names?: string[]; refusal?: string }
 
 const newServer = (saved: Saved = { lessons: {}, current: null }): Server => ({ saved, isUp: true, asked: [] })
 
@@ -41,6 +41,7 @@ const engine = (on: On, server: Server, unplaced?: string) => {
     return { value: server.mcpJson } as never
   })
   on('mcp.call', async (_$, e) => {
+    if (server.refusal) return { value: { content: [{ type: 'text', text: server.refusal }], isError: true } } as never
     if (server.names && !server.names.includes(e.server)) throw new Error(`No MCP server named ${e.server}`)
     server.asked.push(`${e.server}:${e.tool}`)
     const text = server.isUp ? answer(() => server.saved, e.tool, e.args) : undefined
@@ -180,6 +181,18 @@ describe('course companion', () => {
     expect(await ui.find({ type: 'Text', text: 'Your progress could not be read.' })).toBeDefined()
     const lines = (await ui.findAll({ type: 'Text' })).map(node => node.text)
     expect(lines.some(line => line?.startsWith('lessonfolk get_progress: '))).toBe(true)
+    await ui.unmount()
+  })
+
+  test('a refused read names the permission rules that allow it', async ($, on) => {
+    const server = newServer(STARTED)
+    engine(on, server)
+    server.refusal = '$.mcp.call(lessonfolk, get_progress) refused: auto mode'
+    await save($, server, STARTED, 't1')
+
+    const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    const lines = (await ui.findAll({ type: 'Text' })).map(node => node.text ?? '')
+    expect(lines.some(line => line.includes('mcp__lessonfolk__get_progress'))).toBe(true)
     await ui.unmount()
   })
 
