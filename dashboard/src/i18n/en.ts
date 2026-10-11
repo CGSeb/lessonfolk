@@ -178,6 +178,7 @@ export const en = {
   landing: {
     overline: 'Free and open source',
     askStart: 'I keep hearing about AI. Where do I even start?',
+    askShow: 'Can you show me?',
     askHow: 'How does it work?',
     askWhat: 'What can I learn?',
     askWhy: 'Why not just watch videos?',
@@ -185,6 +186,9 @@ export const en = {
     lead: 'LessonFolk teaches AI to anyone, from complete beginners to advanced practitioners. Short lessons, a patient tutor in the AI chat you already use, and a place to follow your progress.',
     ctaStart: 'Sign in to start learning',
     ctaCourses: 'Browse the courses',
+    videoTitle: 'LessonFolk in 26 seconds',
+    videoLabel: 'A short video with music: a first chat with the tutor, the progress, the course themes and the AI chats LessonFolk connects to.',
+    videoFallback: 'Watch the video',
     howTitle: 'How it works',
     step1Title: 'Sign in and connect your AI chat',
     step1Body: 'Create your account in a click, then connect the AI app you already use. It takes a couple of minutes.',
