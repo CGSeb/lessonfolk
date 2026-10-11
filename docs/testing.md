@@ -245,7 +245,7 @@ credentials), then run `docker compose up --build`.
       "Signing in did not work". Set only `GITHUB_CLIENT_ID` (no secret): the app refuses to start
       and says `GITHUB_CLIENT_SECRET` is missing.
 - [ ] **An AI chat.** `claude mcp remove lessonfolk`, add it again, then `/mcp` → `lessonfolk` →
-      authenticate. The browser shows sign-in, then "Allow Claude Code to use LessonFolk?".
+      authenticate. The browser shows sign-in, then "Allow this app to use LessonFolk?", with the app name (for example Claude Code) below it.
       Allow: the tools act on your signed-in user. Deny once: Claude Code reports that the
       authorization failed. Repeat with Codex.
 - [ ] **No sign-in mode.** Set `LESSONFOLK_AUTH=none`: no **Sign in** button, `/sign-in` sends
