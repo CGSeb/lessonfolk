@@ -36,8 +36,10 @@ will close a course, others will stand alone.
 
 Pick one of two ways:
 
-**Hosted** (coming soon): sign in on the hosted LessonFolk with GitHub or Google, open its
-**Connect** page and add LessonFolk to your AI chat. Your progress is saved with your account.
+**Hosted** ([lessonfolk.com](https://lessonfolk.com)): sign in with GitHub or Google, open its
+**Connect** page and add LessonFolk to your AI chat (in Claude Code, a
+[plugin](docs/using-lessonfolk.md#connect-your-ai-chat) does it for you). Your progress is saved
+with your account.
 
 **Self-hosted**: private, on your computer, no data sent to us. With
 [Docker](https://docs.docker.com/get-docker/) running:
