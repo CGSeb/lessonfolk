@@ -201,7 +201,7 @@ The pane's own calls (`get_progress` and `list_courses`) need a permission like 
 In the LessonFolk folder, the project's `.claude/settings.json` allows them. If the pane still
 says your progress could not be read although `/mcp` shows the server as connected (typically
 with the plugin, in auto permission mode, or if you replaced the project settings), allow them
-yourself (the pane then lists the refused call and the two rules to allow):
+yourself (the pane then lists the rules to allow, with a **Copy rules** button that copies them as JSON):
 
 ```json
 {

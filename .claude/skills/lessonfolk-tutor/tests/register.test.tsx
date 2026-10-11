@@ -30,7 +30,7 @@ const newServer = (saved: Saved = { lessons: {}, current: null }): Server => ({ 
 // The engine beneath the mod: the server from memory, every tool call succeeding, what the
 // mod shows (toasts, panes, prompts) recorded.
 const engine = (on: On, server: Server, unplaced?: string) => {
-  const seen = { toasts: [] as string[], opened: [] as string[], prompts: [] as string[], framed: [] as string[] }
+  const seen = { copied: [] as string[], toasts: [] as string[], opened: [] as string[], prompts: [] as string[], framed: [] as string[] }
   // The session runs in D:\repo (a relative path would land in the mod's own folder).
   on('session.cwd', async () => ({ value: 'D:\\repo' }) as never)
   on('fs.read', async (_$, e) => {
@@ -53,6 +53,11 @@ const engine = (on: On, server: Server, unplaced?: string) => {
     } as never
   })
   on('tool.call', async () => ({ result: 'ok' }) as never)
+  on('ui.copy', async (_$, e) => {
+    seen.copied.push(e.text)
+
+    return { value: { isCopied: true } } as never
+  })
   on('ui.toast', async (_$, e) => {
     seen.toasts.push(e.text)
 
@@ -184,15 +189,19 @@ describe('course companion', () => {
     await ui.unmount()
   })
 
-  test('a refused read names the permission rules that allow it', async ($, on) => {
+  test('a refused read lists the permission rules that allow it, and a button copies them', async ($, on) => {
     const server = newServer(STARTED)
-    engine(on, server)
+    const seen = engine(on, server)
     server.refusal = '$.mcp.call(refused: auto mode'
     await save($, server, STARTED, 't1', 'mcp__plugin_lessonfolk-tutor_lessonfolk__start_lesson')
 
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
     const lines = (await ui.findAll({ type: 'Text' })).map(node => node.text ?? '')
-    expect(lines.some(line => line.includes('"mcp__plugin_lessonfolk-tutor_lessonfolk__get_progress"'))).toBe(true)
+    expect(lines.some(line => line === 'mcp__plugin_lessonfolk-tutor_lessonfolk__get_progress')).toBe(true)
+
+    await ui.press({ key: 'copy-rules' })
+    expect(JSON.parse(seen.copied[0] ?? '{}').permissions.allow).toContain('mcp__plugin_lessonfolk-tutor_lessonfolk__list_courses')
+    expect(seen.toasts.at(-1)).toContain('Copied')
     await ui.unmount()
   })
 
