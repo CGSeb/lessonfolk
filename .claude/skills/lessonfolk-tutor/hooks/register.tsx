@@ -75,6 +75,18 @@ const callServer = ($: EngineInterface, failures: string[] = []) => async (tool:
   return undefined
 }
 
+// When the app refused the pane's own reads (auto permission mode, typically), say which rules
+// allow them, spelled for the server name the refusal came from.
+const refusalHint = (reason: string[] = []) => {
+  const names = [...new Set(reason.filter(line => /refused/i.test(line)).map(line => line.split(' ')[0] ?? ''))]
+  if (names.length === 0) return undefined
+  const rules = names.flatMap(name =>
+    ['get_progress', 'list_courses'].map(tool => `"mcp__${name.replace(/[:.]/g, '_')}__${tool}"`),
+  )
+
+  return ["The app refused the pane's read. Allow these in ~/.claude/settings.json:", `permissions.allow: [${rules.join(', ')}]`]
+}
+
 // Re-reads the progress and the courses from the server; toasts what changed since the last read.
 async function refresh($: EngineInterface, isQuiet = false) {
   // A relative path would resolve against the mod's own folder: read from the session's.
@@ -347,7 +359,7 @@ export const register: Register = on => {
 
       return (
         <Box flexDirection="column">
-          {[...lines, ...(v.reason ?? [])].map(line => (
+          {[...lines, ...(refusalHint(v.reason) ?? v.reason ?? [])].map(line => (
             <Text dimColor>{line}</Text>
           ))}
         </Box>
