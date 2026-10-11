@@ -164,7 +164,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Get lesson',
       description:
         'The full lesson file: frontmatter, content, key ideas, teaching notes (for you, the tutor, never to paste), ' +
-        '"Check your understanding" questions with good-answer hints, exercise and completion criteria. ' +
+        '"Check your understanding" questions with good-answer hints, and completion criteria. ' +
         "Starts with a short header giving the course and the learner's status for this lesson. Read it in full before teaching.",
       inputSchema: z.object({ lessonId, lang }),
       annotations: readOnly,

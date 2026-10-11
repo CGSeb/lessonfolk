@@ -2,7 +2,7 @@
 id: ai-safety/02-verifying-answers-and-sources
 title: Verifying answers and sources
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Match the amount of checking to the stakes of the answer
   - Check claims and sources against independent, reliable sources
@@ -34,7 +34,7 @@ prerequisites:
 - Analogy that works: **advice from a friend of a friend**. Fine for a restaurant tip; for a
   medical decision you would want to hear it from a doctor. The same answer deserves different
   levels of trust depending on what you will do with it.
-- Demo: pick a factual claim together (ideally from the learner's lesson 1 exercise), and
+- Demo: pick a factual claim together (ideally one the learner met recently), and
   walk through ideas 2–3 out loud: what is the key fact, where would a reliable source be,
   what would you search for.
 - Misconception: "asking the AI 'are you sure?' verifies the answer". It may confirm a wrong
@@ -54,12 +54,6 @@ prerequisites:
    Good answer: do not rely on it alone; check with a reliable medical source and, above all, ask a pharmacist or doctor, because the stakes are high.
 3. Why is asking the assistant "are you sure?" not a real check?
    Good answer: the same model is answering again from the same knowledge, so it may repeat or reword an error; a check needs an independent source.
-
-## Exercise
-Needs a chat assistant and a web browser — free. Ask an assistant a factual question that
-matters to you (a rule at work, a historical fact, a figure for a project). Identify the one
-or two key claims, find an independent reliable source for each, and report back to the tutor:
-confirmed, wrong, or impossible to confirm?
 
 ## Completion criteria
 The learner answers the checks correctly, in particular adjusting the checking to the stakes

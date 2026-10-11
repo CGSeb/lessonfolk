@@ -2,7 +2,7 @@
 id: prompting-basics/03-iterating-on-a-bad-answer
 title: Iterating on a bad answer
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Treat a first answer as a draft to improve
   - Diagnose why an answer missed the mark
@@ -50,12 +50,6 @@ prerequisites:
    Good answer: any two of missing information (add the context), wrong format or length (ask for the format), too generic (add goal or audience), misunderstood task (restate the task more clearly), each paired with a matching fix.
 3. When is it better to start a new conversation instead of correcting again?
    Good answer: when the conversation has many failed attempts or has drifted, so old mistakes keep coming back; a fresh, improved prompt that includes what was learned works better.
-
-## Exercise
-Needs a chat assistant (this one works) — free. Ask for something with a deliberately vague
-one-line prompt. Then improve the answer in at most three follow-ups, naming each time which
-cause you are fixing. Finally, write the single prompt you wish you had sent first, and test it
-in a new conversation.
 
 ## Completion criteria
 The learner answers the checks correctly, and can turn vague feedback ("it's bad") into a

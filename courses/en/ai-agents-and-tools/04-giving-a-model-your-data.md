@@ -2,10 +2,10 @@
 id: ai-agents-and-tools/04-giving-a-model-your-data
 title: Giving a model your data (RAG basics)
 level: intermediate
-estimatedMinutes: 25
+estimatedMinutes: 15
 objectives:
   - Explain retrieval-augmented generation (RAG) and why it is needed
-  - Retrieve relevant passages from your own documents with keyword search
+  - Explain how keyword search retrieves relevant passages from your own documents
   - Make the model answer from those passages and cite them
 prerequisites:
   - ai-agents-and-tools/03-the-agent-loop
@@ -34,9 +34,9 @@ prerequisites:
 - Analogy that works: **an open-book exam**. The student (the model) does not memorise the
   book; a good index (retrieval) points to the right pages, and the student answers from them,
   quoting the page.
-- Use the learner's own non-confidential text if they have some (notes, a public manual);
-  otherwise use the small built-in example in the exercise.
-- Keyword search is the required exercise; embeddings are an optional extension. If the
+- For examples, use the learner's own non-confidential text if they have some (notes, a
+  public manual); otherwise invent a few short passages.
+- Keyword search is the core of the lesson; embeddings are an optional extension. If the
   learner tries embeddings, their local runner or provider must offer an embedding model;
   follow its documentation, and do not name specific models.
 - Misconception: "RAG makes answers correct". It helps the model use the right information,
@@ -55,43 +55,9 @@ prerequisites:
 3. Why ask the model to cite passages and to say when the answer is not in them?
    Good answer: it keeps the answer grounded in the documents, lets users check the source, and reduces invented answers when retrieval found nothing relevant.
 
-## Exercise
-Needs a computer, Python and your setup — free, code. Build a tiny keyword RAG:
-
-```python
-import re
-
-DOCS = [
-    "Returns: items can be returned within 30 days with the receipt.",
-    "Shipping: orders over 50 euros ship for free; smaller orders cost 5 euros.",
-    "Opening hours: the shop is open Monday to Saturday, 9:00 to 18:00.",
-]
-
-def words(text):
-    return set(re.findall(r"\w+", text.lower()))
-
-def search(question, k=2):
-    scored = sorted(DOCS, key=lambda d: len(words(d) & words(question)), reverse=True)
-    return scored[:k]
-
-def answer(question):
-    passages = search(question)
-    context = "\n".join(f"[{i + 1}] {p}" for i, p in enumerate(passages))
-    messages = [
-        {"role": "system", "content": "Answer only from the passages. Cite them like [1]. "
-         "If they do not contain the answer, say you don't know."},
-        {"role": "user", "content": f"Passages:\n{context}\n\nQuestion: {question}"},
-    ]
-    return call_model_text(messages)  # your Build with AI call, returning the reply text
-```
-
-Ask three questions: one answered by the documents, one with different wording ("Can I send
-something back?"), and one not covered at all. Discuss the results with the tutor. Optional:
-make `search` a tool for your lesson 3 agent, or try embeddings if your setup offers them.
-
 ## Completion criteria
-The learner answers the checks correctly and has a working retrieval-then-answer pipeline that
-cites passages and handles a question the documents do not cover.
+The learner answers the checks correctly and can describe a retrieval-then-answer pipeline
+that cites passages and handles a question the documents do not cover.
 
 ## Going further
 - Topics: embeddings, vector search, chunking strategies, hybrid search.

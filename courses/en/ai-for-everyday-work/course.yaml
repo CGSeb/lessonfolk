@@ -4,7 +4,7 @@ level: beginner
 theme: using-ai
 authors: [lessonfolk]
 description: Turn AI into everyday habits — summarise and draft, research and learn, work with documents, brainstorm, save time on repetitive tasks and build a routine that suits you. No code needed.
-estimatedHours: 2
+estimatedHours: 1.5
 prerequisites: [prompting-basics, ai-safety]
 lessons:
   - ai-for-everyday-work/01-summarizing-and-drafting

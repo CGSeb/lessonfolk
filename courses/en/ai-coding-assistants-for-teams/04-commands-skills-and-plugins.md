@@ -79,12 +79,6 @@ prerequisites:
 4. Each time your assistant reviews a pull request against the team checklist, the long review fills the main conversation. Which option from this lesson fits, and why?
    Good answer: a subagent (a reviewer with its own instructions and limited tools); it works in its own context and returns only the result.
 
-## Exercise
-Needs a computer and a coding assistant that supports commands or skills (check its
-documentation; a free tier is enough). Pick a task your team repeats (writing release notes,
-adding an endpoint, a review checklist) and turn it into a command or a skill in your project.
-Run it on a real case, then refine its description or instructions with the tutor.
-
 ## Completion criteria
 The learner answers the checks correctly and can choose, for a given team workflow, between
 the instructions file, a command, a skill, a subagent and a plugin, with a reason.

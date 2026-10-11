@@ -10,7 +10,6 @@ function body(sections: Record<string, string | null> = {}): string {
     'Key ideas': IDEAS,
     'Teaching notes': 'Notes.',
     'Check your understanding': CHECKS,
-    Exercise: null,
     'Completion criteria': 'Done.',
     'Going further': null,
     ...sections,
@@ -25,7 +24,7 @@ describe('checkLessonBody', () => {
   it('accepts a valid body, with or without optional sections', () => {
     expect(checkLessonBody(body(), 15)).toEqual({ errors: [], warnings: [] });
     expect(
-      checkLessonBody(body({ Exercise: 'Do it.', 'Going further': 'Read more.' }), 15),
+      checkLessonBody(body({ 'Going further': 'Read more.' }), 15),
     ).toEqual({ errors: [], warnings: [] });
   });
 
@@ -68,9 +67,16 @@ describe('checkLessonBody', () => {
     expect(checkLessonBody(swapped, 15).errors).toEqual([
       'section "## Key ideas" must come before "## Teaching notes"',
     ]);
-    const lateExercise = body({ 'Going further': 'More.' }) + '\n## Exercise\nDo it.';
-    expect(checkLessonBody(lateExercise, 15).errors).toEqual([
-      'section "## Exercise" must come before "## Going further"',
+    const lateCriteria = body({ 'Completion criteria': null, 'Going further': 'More.' }) + '\n## Completion criteria\nDone.';
+    expect(checkLessonBody(lateCriteria, 15).errors).toEqual([
+      'section "## Completion criteria" must come before "## Going further"',
+    ]);
+  });
+
+  it('rejects the removed exercise section and says what to do instead', () => {
+    const withExercise = body() + '\n## Exercise\nDo it.';
+    expect(checkLessonBody(withExercise, 15).errors).toEqual([
+      'unknown section "## Exercise"; lessons have no exercise section any more: put applied questions in "## Check your understanding" and remove it',
     ]);
   });
 

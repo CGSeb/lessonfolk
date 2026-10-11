@@ -50,14 +50,9 @@ prerequisites:
 3. Before pasting a document into a chat assistant, what should you check?
    Good answer: that it does not contain passwords, other people's personal data or confidential information, or remove and replace those parts first.
 
-## Exercise
-Needs nothing (or a chat assistant to test) — free. The tutor gives three flawed prompts, one
-at a time. For each, name the mistake and rewrite it. Optionally, run both versions in a chat
-assistant and compare.
-
 ## Completion criteria
-The learner answers the checks correctly and correctly names and fixes at least two of the
-mistakes in practice prompts.
+The learner answers the checks correctly, naming and fixing the mistakes in the flawed prompts
+of checks 1 and 2.
 
 ## Going further
 - Next lesson: what even a perfect prompt cannot fix.

@@ -2,7 +2,7 @@
 id: ai-for-everyday-work/03-documents-and-data
 title: Working with documents and data
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Ask precise questions about a document and check where the answers come from
   - Extract information from text into a usable form
@@ -57,12 +57,6 @@ prerequisites:
    Good answer: any extraction into a useful shape, e.g. a list of dates and deadlines, a table of names and roles, action items with owners, checked against the source.
 3. You ask an assistant for the total of a column of 30 numbers. What should you keep in mind?
    Good answer: the total may be wrong because it predicts text rather than calculating (unless it uses a calculation tool), so check it, e.g. in a spreadsheet.
-
-## Exercise
-Needs your own chat assistant — free. Take a non-confidential document (a public report, a
-product manual, a terms-of-service page, or a long article). Ask two precise questions and
-ask for the passages behind the answers, then extract one list or table from it. Check one
-answer against the original and tell the tutor whether it held up.
 
 ## Completion criteria
 The learner answers the checks correctly, in particular the habit of asking for the source

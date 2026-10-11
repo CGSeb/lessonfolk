@@ -2,7 +2,7 @@
 id: ai-coding-assistants-for-teams/06-team-setup
 title: Your team's AI setup
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Decide what of the AI setup is shared and what stays personal
   - Maintain instructions, skills and plugins like code
@@ -64,12 +64,6 @@ prerequisites:
    Good answer: who publishes it and whether the source is trusted, what access it needs and what it does with data (it runs with your access), that it is pinned to a version, and that it is added to the approved list after review.
 3. What would you put in your team's AI working agreement? Give at least three points.
    Good answer: any three of approved tools and what code or data may go to them, the same review bar and ownership of AI-written code by the person who opens the pull request, how AI help is credited, pull request size, where the shared setup lives and who maintains it, how changes to it are reviewed.
-
-## Exercise
-Needs nothing (a computer is optional). Write your team's AI setup checklist on one page:
-what is committed (instructions, scoped rules, commands or skills, shared settings, approved
-plugins), what stays personal, who maintains it, and a five-point AI working agreement.
-Discuss it with the tutor, then share it with your team if you want to.
 
 ## Completion criteria
 The learner answers the checks correctly and has written, or can describe, a team setup that

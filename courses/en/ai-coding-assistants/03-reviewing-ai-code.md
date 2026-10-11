@@ -2,7 +2,7 @@
 id: ai-coding-assistants/03-reviewing-ai-code
 title: Reviewing AI-written code
 level: intermediate
-estimatedMinutes: 25
+estimatedMinutes: 20
 objectives:
   - Recognise the typical failures of AI-written code
   - Review an AI change with a short, repeatable checklist
@@ -62,12 +62,6 @@ prerequisites:
    Good answer: assistants sometimes make unrequested changes (renames, reformatting, deleted code, edits in other files) that can break things or hide in a large change.
 4. A bug in AI-written code you merged reaches production. Who answers for it, and what does that mean for how you review?
    Good answer: you do; code you accept goes in under your name and "the AI wrote it" explains nothing, so you review it at least as carefully as a new teammate's code.
-
-## Exercise
-Needs a computer and any coding assistant. Ask the assistant for a small web feature that
-handles user input, for example "an API route that saves a comment for a blog post". Review
-the result with the checklist from the teaching notes and list every issue you find. Share
-the list with the tutor; then ask the assistant to fix the issues and review the new diff.
 
 ## Completion criteria
 The learner answers the checks correctly and can name, without help, at least four kinds of

@@ -28,6 +28,10 @@ short lesson at a time. Courses are grouped by theme: *Understanding AI*, *Using
 *Building with AI* and *AI and society*. The full list, in the recommended order, is
 [`courses/en/index.yaml`](courses/en/index.yaml), or ask your tutor *"what can I learn?"*.
 
+**Coming soon: Projects.** Real projects to practise what the courses teach: a subject, a few
+milestones to reach, and your tutor as a coach who gives hints instead of the solution. Some
+will close a course, others will stand alone.
+
 ## Quick start
 
 Pick one of two ways:

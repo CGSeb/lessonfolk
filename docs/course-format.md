@@ -149,10 +149,8 @@ beginners vs experienced learners, pacing hints.
 
 ## Check your understanding
 Numbered questions. Under each, a "Good answer:" line describing what a correct
-answer contains (not a word-for-word answer).
-
-## Exercise            (optional)
-A hands-on activity. Say whether it needs a computer, code, or nothing at all.
+answer contains (not a word-for-word answer). Include at least one question that asks the
+learner to apply an idea to a case, not only to recall it.
 
 ## Completion criteria
 When the tutor may mark the lesson as done.
@@ -165,7 +163,8 @@ Links or topics for curious learners.
 - Write for the level stated. Beginner lessons define every term and avoid math.
 - Keep lessons short: 3–6 key ideas, 10–25 minutes.
 - Prefer everyday examples. Avoid fast-aging claims ("the best model today is…").
-- No secrets, no paid-only requirements for mandatory exercises.
+- A lesson is taught and checked in the conversation: it has no exercise section, and its
+  completion criteria never require the learner to build, install or pay for something.
 
 ## Validation
 
@@ -178,7 +177,8 @@ Run `npm run check:courses` before opening a pull request. It fails on:
   missing from `courses/authors/` or larger than 512 KB, or a course with no `authors` or an
   author slug not listed in `authors.yaml`;
 - lesson sections that are missing, misspelled, duplicated or out of order (only the `##`
-  headings above are allowed; `###` sub-headings are free);
+  headings above are allowed, so a `## Exercise` section from the older format fails;
+  `###` sub-headings are free);
 - a question under `## Check your understanding` without a `Good answer:` line.
 
 It only warns (without failing) when a lesson strays from the writing guidelines (fewer than
@@ -199,7 +199,7 @@ files says how long a learner really takes.
 |---|---|
 | `on-topic` | teaches what its title promises and belongs in its course |
 | `objectives-covered` | teaches and tests every objective of its frontmatter |
-| `criteria-match-checks` | has completion criteria the tutor can decide from the checks and the exercise |
+| `criteria-match-checks` | has completion criteria the tutor can decide from the checks |
 | `level-fit` | is written for its stated level |
 | `no-fast-aging-claims` | has no claim that will soon be wrong (best model, prices, versions, dates) |
 | `no-overlap` | does not repeat another lesson of the catalog |

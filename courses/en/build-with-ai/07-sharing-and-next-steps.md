@@ -53,13 +53,6 @@ prerequisites:
 3. What should users of your chatbot be told?
    Good answer: that it is an AI and can be wrong, what data is stored and for how long, and whether their messages are sent to a model provider.
 
-## Exercise
-Needs nothing (or a computer to start building) — free. Write a one-page sharing plan for
-your chatbot: who will use it, how they will access it, where the key lives, which limits you
-will set, the data notice you will show, how you will collect feedback, and what you plan to
-learn next and why. Review it with the tutor. Optionally, share the terminal version with one person and note what they struggled
-with.
-
 ## Completion criteria
 The learner answers the checks correctly and writes a sharing plan that covers key storage,
 limits, a data notice and what to learn next.

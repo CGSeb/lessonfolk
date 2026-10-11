@@ -66,12 +66,6 @@ prerequisites:
 4. What can an agent-style assistant do that inline completion cannot?
    Good answer: read and search files, run commands such as tests, and edit several files in a loop until it thinks the task is done; inline completion only suggests the next lines as you type.
 
-## Exercise
-Needs a computer and any coding assistant (a free tier or this chat works). Take a small,
-real task from one of your projects. Write the request twice: once in one line, once as a
-brief for a new teammate (goal, files, constraints, an example, how to know it is done).
-Compare the two results with the tutor and note what the assistant got wrong without context.
-
 ## Completion criteria
 The learner can explain what goes into an assistant's context and what does not, answers the
 checks correctly, and can list what a good brief for a coding task contains.

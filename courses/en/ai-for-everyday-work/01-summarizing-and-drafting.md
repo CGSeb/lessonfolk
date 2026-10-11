@@ -2,7 +2,7 @@
 id: ai-for-everyday-work/01-summarizing-and-drafting
 title: Summarizing and drafting text
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Ask for a summary shaped by its purpose and its reader
   - Use AI drafts as a starting point and make them your own
@@ -52,12 +52,6 @@ prerequisites:
    Good answer: edit it to sound like you, remove what does not fit, and check facts, names, dates and numbers, because they are responsible for what they send.
 3. Why should you still glance at the original for an important summary?
    Good answer: a summary can leave out key points or change their strength or meaning, so the parts that matter need checking against the source.
-
-## Exercise
-Needs your own chat assistant — free. Take a real text from your week (a long email thread,
-an article, meeting notes without confidential details). Ask for a summary with a purpose,
-reader and length. Then ask for a short reply or follow-up draft, and edit it until you would
-send it. Tell the tutor what you changed and why.
 
 ## Completion criteria
 The learner answers the checks correctly and writes at least one summary request that states

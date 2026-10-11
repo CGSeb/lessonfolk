@@ -4,7 +4,7 @@ level: intermediate
 theme: using-ai
 authors: [lessonfolk]
 description: Work with AI coding assistants like a senior developer — know what they see, split work into tasks they handle well, review their code, protect your secrets, and keep tests and git as your safety net. The course works with any tool.
-estimatedHours: 2
+estimatedHours: 1.5
 prerequisites: [prompting-basics, ai-safety]
 lessons:
   - ai-coding-assistants/01-what-your-assistant-sees

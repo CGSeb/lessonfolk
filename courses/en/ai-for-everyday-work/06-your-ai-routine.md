@@ -32,8 +32,8 @@ prerequisites:
   learner choose their own tasks. Their answers matter more than your explanations here.
 - Analogy that works: **a gym routine**. A few exercises you actually do every week beat an
   ambitious plan you drop after a few days; you adjust it as you get stronger.
-- Use the learner's notes and exercises from earlier lessons, if available, to suggest which
-  tasks fit them.
+- Use the learner's notes from earlier lessons, if available, to suggest which tasks fit
+  them.
 - Misconception: "the more I use AI, the better". The goal is useful results with the right
   amount of checking, not maximum use.
 - Misconception: "once set up, the routine is done". Results, tools and needs change;
@@ -48,11 +48,6 @@ prerequisites:
    Good answer: a clear rule tied to stakes, e.g. always check facts, numbers and names before sending or publishing, because AI can be confidently wrong.
 3. Why review your AI routine every few weeks?
    Good answer: to keep what saves time, drop what does not, fix recurring errors, and adapt as tools and work change.
-
-## Exercise
-Needs nothing (or a note app) — free. Write your AI routine in five lines: your 2–3 tasks, one
-task you keep for yourself, your checking rules, and a date to review it. Share it with the
-tutor for feedback.
 
 ## Completion criteria
 The learner answers the checks correctly and writes a short personal routine with tasks,

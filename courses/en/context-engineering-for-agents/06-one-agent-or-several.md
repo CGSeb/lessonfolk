@@ -48,7 +48,7 @@ prerequisites:
   timings before service. The brigade is faster; it also needs a chef who does nothing but
   coordinate and check the plates.
 - This lesson is about judgement. Teach ideas 1 to 5 briskly, then spend most of the time on
-  cases: the learner's own tasks first, the exercise after.
+  cases: the learner's own tasks first, invented ones after.
 - For learners who build agents: the usual shape is one orchestrating agent that starts
   workers as tools and merges their reports. Ask what in their design decides shared things
   (names, interfaces, formats) before the workers start.
@@ -80,28 +80,10 @@ prerequisites:
 4. Name three costs of coordination between agents.
    Good answer: any three of the work of splitting, briefing and merging, information lost at each brief and report, total cost multiplied by the number of agents, and errors that are harder to trace across contexts.
 
-## Exercise
-Needs nothing. Give the learner these three tasks. For each, ask whether they would use one
-agent or several, in which shape, and what they would decide before starting.
-
-1. "Find every place where our thirty services write personal data to their logs."
-2. "Redesign the data model of the billing module and update all the code that uses it."
-3. "Add input validation to twelve API endpoints, each in its own file, following the
-   example already written for the first one."
-
-A good discussion: task 1 suits several agents, since it is read-only and the pieces are
-independent (one per service, or per group of services), with a fixed report format agreed
-first and one agent merging the reports. Task 2 suits one agent, because the decisions are
-coupled; at most a read-only sub-agent first lists where the model is used. Task 3 can go
-either way: one agent doing the endpoints in sequence is simple and safe; parallel writers
-work because the files do not overlap, provided the example and the conventions are in every
-brief, and a fresh agent or the learner reviews the result. In each case the learner should
-use the questions of idea 6 and name the cost they accept.
-
 ## Completion criteria
-The learner answers the checks correctly, and in the exercise justifies each choice with
-independence (or coupling) and with reading versus writing, and names what must be decided
-before any split.
+The learner answers the checks correctly, and justifies a choice between one agent and
+several with independence (or coupling) and with reading versus writing, and names what must
+be decided before any split.
 
 ## Going further
 - Topics: evaluating agents on long tasks, orchestration patterns, tracing systems with

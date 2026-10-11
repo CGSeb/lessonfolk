@@ -2,10 +2,10 @@
 id: build-with-ai/02-system-prompts
 title: System prompts and behaviour
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Use a system prompt to set a model's role, rules and tone for an app
-  - Write and test a system prompt iteratively
+  - Write a system prompt and plan how to test it
   - Know why a system prompt is not a security boundary
 prerequisites:
   - build-with-ai/01-how-an-api-call-works
@@ -36,7 +36,7 @@ prerequisites:
   greet customers and what they are allowed to do; customers never read it, but they feel
   it. And a determined customer can still sometimes talk an employee into bending a rule.
 - Live demo: you can show the effect in this chat by role-playing two system prompts for the
-  same user question, then let the learner try it in code.
+  same user question, then ask the learner to write a system prompt of their own.
 - Misconception: "the system prompt guarantees behaviour". It strongly influences it; it
   does not guarantee it (idea 5). Models also differ in how closely they follow it.
 - Misconception: "longer system prompts are better". Contradictory or bloated instructions
@@ -52,26 +52,9 @@ prerequisites:
 3. Why should you not put an API key or a secret discount code in a system prompt?
    Good answer: users can sometimes get the model to reveal or ignore its instructions (prompt injection), so the system prompt is not a safe place for secrets; enforce rules in code.
 
-## Exercise
-Needs a computer, Python and your setup from lesson 1 — free, code. Add a system message
-before the user message:
-
-```python
-messages = [
-    {"role": "system", "content": "You are a friendly cooking assistant for beginners. "
-     "Answer in at most 5 short steps. If asked about anything else, politely say you "
-     "only help with cooking."},
-    {"role": "user", "content": "How do I boil an egg?"},
-]
-```
-
-Send it with the lesson 1 code, then test four user messages: a normal one, a vague one, an
-off-topic one and one that asks the assistant to ignore its instructions. Change one line of
-the system prompt and run the same four again. Share what you observed with the tutor.
-
 ## Completion criteria
-The learner answers the checks correctly and has written and tested a system prompt against
-at least one off-topic or rule-breaking message.
+The learner answers the checks correctly and has written a system prompt, and says how they
+would test it with at least one off-topic or rule-breaking message.
 
 ## Going further
 - Topic: prompt injection and how apps defend against it.

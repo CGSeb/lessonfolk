@@ -37,9 +37,5 @@ prerequisites:
 3. Why is memorising the training examples not enough?
    Good answer: the model must work on new, unseen examples.
 
-## Exercise
-No computer needed. Pick a task (e.g. sorting emails into "urgent" / "not urgent") and
-describe what training examples you would collect and one way your data could be biased.
-
 ## Completion criteria
 The learner correctly explains training data and prediction, and gives a sensible answer to question 2.

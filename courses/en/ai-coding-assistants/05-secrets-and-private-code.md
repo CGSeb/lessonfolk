@@ -2,7 +2,7 @@
 id: ai-coding-assistants/05-secrets-and-private-code
 title: Secrets and private code
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Identify where secrets and private data can reach a coding assistant
   - Keep secrets out of prompts and out of AI-written code
@@ -60,13 +60,6 @@ prerequisites:
    Good answer: anything sent to the browser is public, so the key would be exposed; keep it on the server and have the front end call your own server route.
 3. You notice an API key was committed and pushed an hour ago. What is the first thing to do, and why is deleting the commit not enough?
    Good answer: revoke or rotate the key at the provider first; the old key stays in git history, clones, forks or caches, so removing the commit does not make it safe.
-
-## Exercise
-Needs a computer and one of your projects (no assistant required). Check three things:
-which files in the project hold secrets and whether they are in `.gitignore`; whether your
-coding assistant can be told to exclude files, and how; and whether any secret is used in
-front-end code. Note one fix and discuss it with the tutor. Never share real secret values
-with the tutor while doing this.
 
 ## Completion criteria
 The learner answers the checks correctly and can name where secrets hide in a project, how to

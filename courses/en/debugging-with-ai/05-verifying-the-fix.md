@@ -2,7 +2,7 @@
 id: debugging-with-ai/05-verifying-the-fix
 title: Verifying the fix
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Reproduce a bug reliably before fixing it
   - Turn the reproduction into a test that fails before the fix and passes after
@@ -56,14 +56,6 @@ prerequisites:
    Good answer: the whole test suite still passes (no regressions), the test was not changed to pass, the same mistake does not exist elsewhere, and temporary debug code is removed.
 3. A bug happens only sometimes. Why is fixing it straight away risky?
    Good answer: without a reliable reproduction you cannot tell whether the fix worked or the bug just did not occur this time; first find the condition that triggers it.
-
-## Exercise
-Needs a computer with Python (or the language you use) and its usual test tool; an assistant
-is optional. Take the bug from an earlier exercise in this course, or one of your own. Write
-a test that reproduces it and run it: confirm it fails for the right reason. Fix the bug (or
-ask an assistant to, without touching the test), run the test and then the whole suite. Ask
-the assistant where else the same mistake could exist. Finish with a two-sentence
-explanation of the bug and fix, and share it with the tutor.
 
 ## Completion criteria
 The learner answers the checks correctly and can describe the loop of reproduce → failing

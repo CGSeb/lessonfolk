@@ -55,12 +55,6 @@ prerequisites:
 3. Describe your own workflow for a typical AI-assisted task in a few steps.
    Good answer: covers most of: brief with context, split or plan, choose a mode, clean git state, tests, review the diff, commit small, keep secrets out.
 
-## Exercise
-Needs nothing (a computer is optional). List five tasks from your recent or upcoming work.
-For each, choose drive, pair or delegate and give one reason. Then write your personal
-checklist for an AI-assisted task in five lines or fewer, and keep it next to your editor.
-Discuss both with the tutor.
-
 ## Completion criteria
 The learner answers the checks correctly, can justify a mode choice by clarity, risk and ease
 of checking, and has described a workflow that uses the habits of the course.

@@ -2,7 +2,7 @@
 id: ai-for-everyday-work/02-research-and-learning
 title: Research and learning with AI
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Use AI to get an overview of a new topic and explanations at your level
   - Use AI to test and deepen your understanding
@@ -53,12 +53,6 @@ prerequisites:
    Good answer: by quizzing them, or by checking and correcting their own explanation of the topic.
 3. When is it not enough to rely on what an assistant told you while researching?
    Good answer: for facts they will rely on, repeat or decide with, and for recent, local or very specialised information; those need checking in reliable sources.
-
-## Exercise
-Needs your own chat assistant — free (a web browser helps for checking). Pick a topic you
-want to learn for work or a hobby. Ask for a map of it, ask for an explanation of one part at
-your level, then ask to be quizzed with three questions. Finally, check one key fact in a
-reliable source and tell the tutor what you found.
 
 ## Completion criteria
 The learner answers the checks correctly and can describe a research approach that uses AI to

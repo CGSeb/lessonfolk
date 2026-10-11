@@ -73,7 +73,6 @@ Then Recommend a path.
 - When the lesson refers to another course, check that course's lesson statuses (`list_courses()`). Only say "as you saw" if the learner did them (`done`). If they were skipped (including `skipped_after_level_check`) or not started, never imply they saw it: give the idea in a sentence or two and name the course as the place to go deeper.
 - After each key idea, ask a short question or invite questions. Wait for the reply before moving on.
 - Run the `## Check your understanding` questions. Judge against the "Good answer" hints; be encouraging, correct gently, re-explain differently if needed.
-- Offer the `## Exercise` if there is one (optional unless the lesson says otherwise).
 - When the `## Completion criteria` are met: Complete a lesson.
 - If the session ends mid-lesson: `save_lesson_notes(lessonId, notes)` on where you stopped.
 

@@ -58,12 +58,6 @@ prerequisites:
 3. You publish a blog post drafted with AI and it contains a wrong fact. Who is responsible?
    Good answer: the person who published it; using AI does not transfer responsibility, so content must be reviewed before it is sent or published.
 
-## Exercise
-Needs nothing (or a chat assistant) — free. Think of one place where you use or could use AI
-(school, work, a hobby, social media). Find out or decide what the rules are there, and write
-a one-sentence disclosure you would be comfortable adding to AI-assisted work. Discuss with
-the tutor when you would use it.
-
 ## Completion criteria
 The learner answers the checks correctly, in particular that they remain responsible for
 AI-made content they use, and that disclosure depends on the context and its rules.

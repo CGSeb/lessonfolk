@@ -41,7 +41,7 @@ describe('crawler files', () => {
     const { response, body } = await fetchText('/sitemap.xml');
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toContain('xml');
-    for (const path of ['/', '/courses', '/courses/ai-foundations', '/authors', '/authors/lessonfolk', '/connect', '/privacy']) {
+    for (const path of ['/', '/courses', '/courses/ai-foundations', '/projects', '/authors', '/authors/lessonfolk', '/connect', '/privacy']) {
       expect(body).toContain(`<loc>${server.url}${path}</loc>`);
     }
     expect(body).not.toMatch(/\/(account|api|sign-in|oauth)/);
@@ -87,7 +87,7 @@ describe('meta tags', () => {
   });
 
   it('has one h1 and a canonical URL on the public pages', async () => {
-    for (const path of ['/courses', '/courses/ai-foundations', '/authors', '/connect', '/privacy']) {
+    for (const path of ['/courses', '/courses/ai-foundations', '/projects', '/authors', '/connect', '/privacy']) {
       const { html } = await getPage(server, path);
       expect(html.match(/<h1[\s>]/g)?.length, path).toBe(1);
       expect(html, path).toContain('<link rel="canonical"');

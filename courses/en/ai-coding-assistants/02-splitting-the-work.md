@@ -2,7 +2,7 @@
 id: ai-coding-assistants/02-splitting-the-work
 title: Splitting the work into good tasks
 level: intermediate
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Explain why small, well-specified tasks work better than large vague ones
   - Split a feature into tasks an assistant can complete reliably
@@ -56,13 +56,6 @@ prerequisites:
    Good answer: small scope (a few files), one clear goal, the needed context, and clear done criteria such as expected behaviour and tests that must pass.
 3. Before letting the assistant implement a medium-sized feature, what should you ask it for, and why?
    Good answer: a plan (steps, files, open questions), because correcting a plan is cheap and lets you keep the important decisions before any code is written.
-
-## Exercise
-Needs nothing but a text editor (an assistant is optional). Pick a feature from your work or
-a familiar one, such as "users can reset their password". Split it into 4–8 tasks. For each,
-write one sentence of goal and one line of done criteria, and mark the decisions you would
-make yourself before starting. Review the split with the tutor; optionally ask an assistant
-for its own plan and compare.
 
 ## Completion criteria
 The learner answers the checks correctly and can split a feature into small tasks with clear

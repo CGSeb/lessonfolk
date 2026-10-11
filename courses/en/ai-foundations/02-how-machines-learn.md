@@ -2,7 +2,7 @@
 id: ai-foundations/02-how-machines-learn
 title: How do machines learn?
 level: beginner
-estimatedMinutes: 20
+estimatedMinutes: 15
 objectives:
   - Describe machine learning as learning from examples
   - Explain training data, model, and prediction
@@ -38,10 +38,6 @@ prerequisites:
    Good answer: the model must work on new, unseen examples.
 4. What is the difference between a model and a prediction?
    Good answer: the model is the result of training (the adjusted numbers); a prediction is the answer the model gives on a new input.
-
-## Exercise
-No computer needed. Pick a task (e.g. sorting emails into "urgent" / "not urgent") and
-describe what training examples you would collect and one way your data could be biased.
 
 ## Completion criteria
 The learner correctly explains training data and prediction, and gives a sensible answer to question 2.
