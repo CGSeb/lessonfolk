@@ -17,6 +17,7 @@ LessonFolk **MCP server** (`/mcp` of the dashboard app), never in files of this 
 | `courses/<lang>/<course>/<lesson>.md` | A lesson: content + teaching notes + checks |
 | `docs/course-format.md` | Specification of the course and lesson format |
 | `packages/mcp/prompts/` | The tutor's instructions and its `learn`, `review` and `progress` procedures, served by the MCP server |
+| `.claude/skills/lessonfolk-tutor/` | The learner plugin for Claude Code (skills and Course companion); after editing a prompt, run `npm run plugin:sync` |
 | `docs/progress.example.json` | The progress import/export format (`progress.json` v1) |
 
 ## When the user wants to learn

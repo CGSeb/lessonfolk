@@ -102,9 +102,10 @@ npm run progress:import -- dashboard/tests/fixtures/progress/all-done/progress.j
 
 ### Course companion tests
 
-The Course companion mod has its own tests in `.claude/skills/course-companion/tests/`; they
-are not part of `npm test`: run them with `claude plugin test .claude/skills/course-companion`
-(and `claude plugin validate` on the same folder). The mod reads the progress through the
+The Course companion mod has its own tests in `.claude/skills/lessonfolk-tutor/tests/`; they
+are not part of `npm test`: run them with `claude plugin test .claude/skills/lessonfolk-tutor`
+(and `claude plugin validate` on the same folder, and on `.` for the marketplace file). CI runs
+the three in the `plugin` job. The mod reads the progress through the
 LessonFolk MCP server with `$.mcp.call` (`get_progress`, `list_courses`, `get_lesson`), so it
 needs no file or token of its own and works with a local or a hosted instance; the tests stand in
 for the server with `tests/server.ts`. When you add or rename an MCP read tool it uses, update
@@ -145,7 +146,7 @@ real sign-in works. Run the check that matches what you changed:
 - [ ] **Not connected.** Stop the app (`docker compose stop app`), start a new chat and say
       *Let's start learning AI*: the tutor does not teach from the files and tells you to start
       LessonFolk and connect. Start the app again (`docker compose start app`), then a new chat.
-- [ ] **Onboarding.** Say *Let's start learning AI* (or `/learn` in Claude Code). The tutor calls
+- [ ] **Onboarding.** Say *Let's start learning AI* (or `/lessonfolk-tutor:learn` in Claude Code). The tutor calls
       `get_progress` first, then asks one question at a time: name, experience, goal, interests
       (theme titles, empty themes marked "coming soon") and language. Answer "none" or "used
       ChatGPT-like tools" for experience: no level check is offered.
@@ -166,8 +167,8 @@ real sign-in works. Run the check that matches what you changed:
       date, a `score` between 0 and 1 and short `notes`; `current` is cleared. Home shows "How do
       machines learn?" under "Next up"; the course page shows lesson 1 "Done" with its score,
       date and notes, and "1 of 3 lessons".
-- [ ] **Commands.** *Show my progress* (or `/progress`) matches the dashboard. *Quiz me* (or
-      `/review`) asks about lesson 1 and saves a review score.
+- [ ] **Commands.** *Show my progress* (or `/lessonfolk-tutor:progress`) matches the dashboard. *Quiz
+      me* (or `/lessonfolk-tutor:review`) asks about lesson 1 and saves a review score.
 - [ ] **Reset.** Say *reset AI Foundations*: the tutor shows the lessons and scores that will be
       removed and asks first. After your yes, the dashboard shows the course as not started and
       *continue* starts its first lesson.

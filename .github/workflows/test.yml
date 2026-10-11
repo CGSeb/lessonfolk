@@ -44,3 +44,31 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run check:courses
+
+  # The learner plugin for Claude Code (.claude-plugin/marketplace.json and
+  # .claude/skills/lessonfolk-tutor): its manifests, and the Course companion's own tests.
+  plugin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PLUGIN: .claude/skills/lessonfolk-tutor
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: npm install --global @anthropic-ai/claude-code@2.1.291
+      - run: claude plugin validate .
+      - run: claude plugin validate "$PLUGIN"
+      - run: claude plugin test "$PLUGIN"
+      # Installed plugins update when this version changes: a release must carry its own number.
+      - name: The plugin version is the release number
+        if: github.event_name == 'release'
+        run: |
+          version=$(node -p "require('./$PLUGIN/.claude-plugin/plugin.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "plugin.json says $version but the release is $GITHUB_REF_NAME: set \"version\" in $PLUGIN/.claude-plugin/plugin.json before releasing." >&2
+            exit 1
+          fi

@@ -85,6 +85,23 @@ you pick. A tab can be linked to, e.g. `/connect#codex`. Web chats (claude.ai, C
 connect from their company's servers, so they cannot reach LessonFolk on your computer: when
 self-hosting without sign-in, use an app that runs on your computer.
 
+**Claude Code with the hosted LessonFolk: the plugin.** No need to clone anything. In a terminal:
+
+```bash
+claude plugin marketplace add CGSeb/lessonfolk
+```
+
+```bash
+claude plugin install lessonfolk-tutor@lessonfolk
+```
+
+The plugin connects Claude Code (and the Code tab of Claude Desktop) to https://lessonfolk.com
+and adds the `learn`, `progress` and `review` skills and the
+[Course companion](#the-course-companion-claude-code). Then start Claude Code, run `/mcp`, pick
+the LessonFolk server and authenticate. The plugin only connects to the hosted LessonFolk: for
+your own instance, use the steps below. If you had already added the hosted server by hand, you
+can keep it: Claude Code connects to the same address once.
+
 **Claude Code in the LessonFolk folder.** Run `claude` in the folder you cloned: its `.mcp.json`
 already lists the `lessonfolk` server at `http://localhost:4321/mcp`. Approve it when Claude
 Code asks (`/mcp` shows it connected). That's all.
@@ -153,14 +170,17 @@ Talk naturally. These are the phrases the tutor recognises:
 | *"update my interests"* | Asks which themes interest you, then offers a new path. |
 
 The server also offers three **prompts** (shortcuts your app may list): `learn`, `review` and
-`progress`. In Claude Code they are `/mcp__lessonfolk__learn` and so on; opened in the LessonFolk
-folder, Claude Code also has the shorter skills `/learn`, `/progress` and `/review`. The full rules the tutor follows are in
-[`packages/mcp/prompts/`](../packages/mcp/prompts).
+`progress`. In Claude Code they are `/mcp__lessonfolk__learn` and so on. With the
+[plugin](#connect-your-ai-chat), or opened in the LessonFolk folder, Claude Code also has the
+skills `/lessonfolk-tutor:learn`, `/lessonfolk-tutor:progress` and `/lessonfolk-tutor:review`.
+The full rules the tutor follows are in [`packages/mcp/prompts/`](../packages/mcp/prompts).
 
 ## The Course companion (Claude Code)
 
-In Claude Code (also in Claude Desktop), an optional **mod** (a small add-on that loads with the project) helps you
-follow along. It starts on its own once you begin learning:
+In Claude Code (also in Claude Desktop), a **mod** (a small add-on) helps you follow along. It
+comes with the [plugin](#connect-your-ai-chat) for the hosted LessonFolk, and loads on its own
+when Claude Code is opened in the LessonFolk folder (self-hosted). It starts once you begin
+learning:
 
 - **A side pane** shows your course, its lessons (done, current, to do) and the key ideas of the
   current lesson, ticked off as the tutor covers them, then the next lesson.
@@ -169,19 +189,19 @@ follow along. It starts on its own once you begin learning:
   example), the buttons show those answers instead.
 - **Companion** reopens the pane (so does `/course-companion`). **Dashboard** opens the
   [dashboard](#the-dashboard) of your LessonFolk instance: the address of the `lessonfolk` server
-  in the project's `.mcp.json`, or `http://localhost:4321/` when it names none.
+  in the project's `.mcp.json`, or https://lessonfolk.com when the folder has none.
 
 The companion reads your progress and the courses from the LessonFolk MCP server, the same one
 the tutor uses, so it works the same with a local or a hosted instance and refreshes each time the
 tutor calls the server. It needs that server connected (`/mcp` lists it); otherwise the pane says
 your progress could not be read. If your Claude Code does not show the pane, nothing is lost:
-everything works in the chat. The mod lives in `.claude/skills/course-companion/`. Codex has no
-companion.
+everything works in the chat. Codex has no companion.
 
 The pane's own calls (`get_progress` and `list_courses`) need a permission like any tool call.
-The project's `.claude/settings.json` allows them. If the pane still says your progress could
-not be read although `/mcp` shows `lessonfolk` as connected (typically in auto permission mode, or
-if you replaced the project settings), allow them yourself:
+In the LessonFolk folder, the project's `.claude/settings.json` allows them. If the pane still
+says your progress could not be read although `/mcp` shows the server as connected (typically
+with the plugin, in auto permission mode, or if you replaced the project settings), allow them
+yourself:
 
 ```json
 {
@@ -191,7 +211,10 @@ if you replaced the project settings), allow them yourself:
 }
 ```
 
-Put it in `.claude/settings.json` (shared) or `.claude/settings.local.json` (only you).
+Put it in `.claude/settings.json` (shared) or `.claude/settings.local.json` (only you). With
+the plugin, the server has another name: the two rules are
+`mcp__plugin_lessonfolk-tutor_lessonfolk__get_progress` and
+`mcp__plugin_lessonfolk-tutor_lessonfolk__list_courses`, in `~/.claude/settings.json`.
 
 ## The dashboard
 
@@ -261,7 +284,7 @@ learner, without the preview.
 **The tutor does not act like a tutor, or says LessonFolk is not connected.** LessonFolk must be
 running and connected to your chat. Check that http://127.0.0.1:4321 opens (self-hosted: start it
 with `docker compose up -d`), then check the connection: in Claude Code, `/mcp` should show
-`lessonfolk` connected (approve it, or reconnect). Start a new chat and say *"let's start"*
+`lessonfolk` connected (approve it, authenticate, or reconnect). Start a new chat and say *"let's start"*
 again.
 
 **"Port 4321 is already in use".** Another program, maybe another dashboard, uses the port. Stop

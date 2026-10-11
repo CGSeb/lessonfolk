@@ -327,6 +327,20 @@ export const en = {
       text: 'In Claude Code and Claude Desktop, an optional side pane shows your course and lessons, with buttons for Continue, Quiz me and Skip.',
       link: 'How to install the Course companion',
     },
+    plugin: {
+      claudeCode:
+        'Install the LessonFolk plugin (recommended). It connects Claude Code to this LessonFolk and adds the learn, progress and review skills and the Course companion, a side pane showing your course and lessons. In a terminal, run:',
+      install: 'Then:',
+      claudeCodeCheck:
+        'Start Claude Code (claude), type /mcp, choose the LessonFolk server and authenticate. Your browser opens: sign in, then allow.',
+      manualTitle: 'Or configure the server by hand',
+      manualNote: 'The tutor works the same in the chat, without the skills and the side pane.',
+      claudeDesktop:
+        'For the Code tab, install the LessonFolk plugin (recommended). Claude Desktop uses the plugins of Claude Code: this one connects it to this LessonFolk and adds the learn, progress and review skills and the Course companion, a side pane showing your course and lessons. In a terminal, run:',
+      claudeDesktopCheck:
+        'Open a new session in the Code tab, type /mcp, choose the LessonFolk server and authenticate. Your browser opens: sign in, then allow.',
+      connectorTitle: 'Or add the connector (it also works in plain chats)',
+    },
     claudeCode: {
       add: 'In a terminal, run:',
       checkNone: 'Start Claude Code (claude) and type /mcp: lessonfolk shows as connected.',

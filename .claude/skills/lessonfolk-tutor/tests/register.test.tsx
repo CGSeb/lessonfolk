@@ -4,14 +4,15 @@ import { describe, expect, test } from 'claude-code/testing'
 
 import { answer, progress, type Saved } from './server'
 
-const PLUGIN = 'course-companion'
-const TOOL = 'mcp__course-companion__key_idea'
-const CHOICES = 'mcp__course-companion__choices'
+const PLUGIN = 'lessonfolk-tutor'
+const PANE_ID = 'course-companion'
+const TOOL = 'mcp__lessonfolk-tutor__key_idea'
+const CHOICES = 'mcp__lessonfolk-tutor__choices'
 const LESSONFOLK = 'mcp__lessonfolk__start_lesson'
 
 const PANE = {
   component: 'Pane',
-  requestId: PLUGIN,
+  requestId: PANE_ID,
   props: { title: 'Course companion', isFocused: false } as unknown as RenderPropsOf['Pane'],
 } as const
 const BAND = {
@@ -20,8 +21,9 @@ const BAND = {
 } as const
 
 // The LessonFolk server as the mod sees it: the learner's saved progress, whether it answers,
-// who asked it and the project's .mcp.json, if any.
-type Server = { saved: Saved; isUp: boolean; asked: string[]; mcpJson?: string }
+// who asked it, the project's .mcp.json, if any, and the only names it is connected under
+// (any name when absent).
+type Server = { saved: Saved; isUp: boolean; asked: string[]; mcpJson?: string; names?: string[] }
 
 const newServer = (saved: Saved = { lessons: {}, current: null }): Server => ({ saved, isUp: true, asked: [] })
 
@@ -39,6 +41,7 @@ const engine = (on: On, server: Server, unplaced?: string) => {
     return { value: server.mcpJson } as never
   })
   on('mcp.call', async (_$, e) => {
+    if (server.names && !server.names.includes(e.server)) throw new Error(`No MCP server named ${e.server}`)
     server.asked.push(`${e.server}:${e.tool}`)
     const text = server.isUp ? answer(() => server.saved, e.tool, e.args) : undefined
 
@@ -91,7 +94,7 @@ describe('course companion', () => {
     const seen = engine(on, server)
     await save($, server, STARTED, 't1')
 
-    expect(seen.opened).toEqual([PLUGIN])
+    expect(seen.opened).toEqual([PANE_ID])
     for (const surface of ['terminal', 'desktop'] as const) {
       const ui = await $.ui.mount({ plugin: PLUGIN, surface, ...PANE })
       expect(await ui.find({ type: 'Text', text: 'Basics' })).toBeDefined()
@@ -105,6 +108,17 @@ describe('course companion', () => {
     expect(server.asked).toContain('lessonfolk:get_progress')
     expect(server.asked).toContain('lessonfolk:list_courses')
     expect(server.asked).toContain('lessonfolk:get_lesson')
+  })
+
+  test('the server the installed plugin brought is asked by its plugin name', async ($, on) => {
+    const server = { ...newServer(STARTED), names: ['plugin:lessonfolk-tutor:lessonfolk'] }
+    engine(on, server)
+    await $.command.run({ command: 'course-companion', args: '' } as never)
+
+    expect(server.asked).toContain('plugin:lessonfolk-tutor:lessonfolk:get_progress')
+    const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await ui.find({ type: 'Text', text: '● Lesson one' })).toBeDefined()
+    await ui.unmount()
   })
 
   test('a hosted server added under another name is asked by that name', async ($, on) => {
@@ -243,38 +257,38 @@ describe('course companion', () => {
     const server = newServer(STARTED)
     const seen = engine(on, server)
     // The session kept its state from before the restart: learning had started.
-    on('state.get', { plugin: 'course-companion', key: 'isActive' }, async () => ({ value: true, version: 1 }) as never)
+    on('state.get', { plugin: PLUGIN, key: 'isActive' }, async () => ({ value: true, version: 1 }) as never)
 
     await $.tool.call({ tool: 'Skill', tool_use_id: 's1', skill: 'learn' } as never)
-    expect(seen.opened).toEqual([PLUGIN])
+    expect(seen.opened).toEqual([PANE_ID])
 
     // Later saves in the same run leave a pane the learner closed alone.
     await save($, server, STARTED, 't1')
-    expect(seen.opened).toEqual([PLUGIN])
+    expect(seen.opened).toEqual([PANE_ID])
   })
 
   test('the Companion button above the prompt reopens a closed pane', async ($, on) => {
     const server = newServer()
     const seen = engine(on, server)
     await save($, server, STARTED, 't1')
-    expect(seen.opened).toEqual([PLUGIN])
+    expect(seen.opened).toEqual([PANE_ID])
 
     for (const surface of ['terminal', 'desktop'] as const) {
       const ui = await $.ui.mount({ plugin: PLUGIN, surface, ...BAND })
       await ui.press({ key: 'pane' })
       await ui.unmount()
     }
-    expect(seen.opened).toEqual([PLUGIN, PLUGIN, PLUGIN])
+    expect(seen.opened).toEqual([PANE_ID, PANE_ID, PANE_ID])
   })
 
-  test('the Dashboard link opens the instance of .mcp.json, local by default', async ($, on) => {
+  test('the Dashboard link opens the instance of .mcp.json, the hosted one by default', async ($, on) => {
     const server = newServer()
     engine(on, server)
     await save($, server, STARTED, 't1')
 
-    const local = await $.ui.mount({ plugin: PLUGIN, surface: 'desktop', ...BAND })
-    expect(await local.find({ type: 'Link', href: 'http://localhost:4321/' })).toBeDefined()
-    await local.unmount()
+    const byDefault = await $.ui.mount({ plugin: PLUGIN, surface: 'desktop', ...BAND })
+    expect(await byDefault.find({ type: 'Link', href: 'https://lessonfolk.com/' })).toBeDefined()
+    await byDefault.unmount()
 
     server.mcpJson = JSON.stringify({ mcpServers: { lessonfolk: { type: 'http', url: 'https://learn.example.org/mcp' } } })
     await save($, server, STARTED, 't2')

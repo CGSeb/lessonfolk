@@ -4,7 +4,7 @@
  * text stays generic ("go to Settings, then Connectors").
  */
 import { t } from '../../i18n/en';
-import type { McpConnection } from '../../lib/connect';
+import { PLUGIN, type McpConnection } from '../../lib/connect';
 
 export interface ClientStep {
   text: string;
@@ -19,6 +19,8 @@ export interface ConnectClient {
   available: boolean;
   steps: ClientStep[];
   note?: string;
+  /** Another way to connect this app, shown under the recommended steps. */
+  alternative?: { title: string; steps: ClientStep[]; note?: string };
   /** An optional extra for this app, shown under the steps with a link. */
   extra?: { title: string; text: string; href: string; linkText: string };
 }
@@ -31,7 +33,7 @@ const TOKEN_HEADER = 'Authorization: Bearer <your token>';
 const json = (value: unknown) => JSON.stringify(value, null, 2);
 
 export function connectClients(connection: McpConnection): ConnectClient[] {
-  const { url, mode, tokenRequired, reachableFromWeb } = connection;
+  const { url, mode, tokenRequired, reachableFromWeb, plugin } = connection;
   const oauth = mode === 'oauth';
   // The web-chat answer when this address is not public.
   const unavailable = t(mode === 'none' ? 'connect.notAvailableLocal' : 'connect.notAvailableWeb');
@@ -43,19 +45,31 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
     linkText: t('connect.companion.link'),
   };
 
-  const claudeCode: ConnectClient = {
-    id: 'claude-code',
-    name: 'Claude Code',
-    available: true,
-    steps: [
-      {
-        text: t('connect.claudeCode.add'),
-        code: `claude mcp add --transport http lessonfolk ${url}${tokenRequired ? ` --header "${TOKEN_HEADER}"` : ''}`,
-      },
-      { text: t(oauth ? 'connect.claudeCode.checkOauth' : 'connect.claudeCode.checkNone') },
-    ],
-    extra: companion,
-  };
+  // The learner plugin (skills, Course companion and this server): only on the instance it
+  // connects to. Everywhere else, the manual setup for this instance's own address.
+  const pluginSteps = (intro: string, check: string): ClientStep[] => [
+    { text: intro, code: `claude plugin marketplace add ${PLUGIN.marketplace}` },
+    { text: t('connect.plugin.install'), code: `claude plugin install ${PLUGIN.id}` },
+    { text: check },
+  ];
+
+  const claudeCodeManual: ClientStep[] = [
+    {
+      text: t('connect.claudeCode.add'),
+      code: `claude mcp add --transport http lessonfolk ${url}${tokenRequired ? ` --header "${TOKEN_HEADER}"` : ''}`,
+    },
+    { text: t(oauth ? 'connect.claudeCode.checkOauth' : 'connect.claudeCode.checkNone') },
+  ];
+
+  const claudeCode: ConnectClient = plugin
+    ? {
+        id: 'claude-code',
+        name: 'Claude Code',
+        available: true,
+        steps: pluginSteps(t('connect.plugin.claudeCode'), t('connect.plugin.claudeCodeCheck')),
+        alternative: { title: t('connect.plugin.manualTitle'), steps: claudeCodeManual, note: t('connect.plugin.manualNote') },
+      }
+    : { id: 'claude-code', name: 'Claude Code', available: true, steps: claudeCodeManual, extra: companion };
 
   const codex: ConnectClient = {
     id: 'codex',
@@ -88,12 +102,25 @@ export function connectClients(connection: McpConnection): ConnectClient[] {
 
   // Claude Desktop's custom connectors connect from Anthropic's servers; on a local address,
   // a local bridge in its config file connects from this computer instead.
-  const claudeDesktop: ConnectClient = reachableFromWeb
+  const connectorSteps: ClientStep[] = [{ text: t('connect.claudeDesktop.connector'), code: url }];
+  const claudeDesktop: ConnectClient = plugin
     ? {
         id: 'claude-desktop',
         name: 'Claude Desktop',
         available: true,
-        steps: [{ text: t('connect.claudeDesktop.connector'), code: url }],
+        steps: pluginSteps(t('connect.plugin.claudeDesktop'), t('connect.plugin.claudeDesktopCheck')),
+        alternative: {
+          title: t('connect.plugin.connectorTitle'),
+          steps: connectorSteps,
+          note: t('connect.claudeDesktop.connectorNote'),
+        },
+      }
+    : reachableFromWeb
+    ? {
+        id: 'claude-desktop',
+        name: 'Claude Desktop',
+        available: true,
+        steps: connectorSteps,
         note: t('connect.claudeDesktop.connectorNote'),
         extra: companion,
       }

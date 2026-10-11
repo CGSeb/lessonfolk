@@ -119,14 +119,16 @@ For anything larger:
    with `Closes #<number>`. If the change affects tutoring, say whether you tried it in Claude
    Code, Codex or both.
 5. **CI** ([`.github/workflows/test.yml`](.github/workflows/test.yml)) runs `npm test` and
-   `npm run check:courses` on every pull request. It must pass before merging.
+   `npm run check:courses` on every pull request, and checks the
+   [learner plugin](docs/development.md#the-learner-plugin). It must pass before merging.
 
 Never commit `.progress/` or `.env`. Found a security problem? Report it privately: see
 [Security](SECURITY.md).
 
 **Releases.** Publishing a GitHub release runs [`release.yml`](.github/workflows/release.yml):
 the same tests on the release's tag, then it publishes the Docker image to GHCR and deploys it
-to the hosted server (the files in [`deploy/`](deploy)).
+to the hosted server (the files in [`deploy/`](deploy)). Before publishing, set `version` in
+`.claude/skills/lessonfolk-tutor/.claude-plugin/plugin.json` to the release number.
 
 ## License
 

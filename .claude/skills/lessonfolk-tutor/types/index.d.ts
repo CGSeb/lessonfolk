@@ -31,7 +31,7 @@ export type Choices = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'course-companion': {
+    'lessonfolk-tutor': {
       isActive: boolean
       instance: string
       choices: Choices | null

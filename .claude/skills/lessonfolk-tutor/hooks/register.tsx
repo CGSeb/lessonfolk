@@ -9,6 +9,7 @@ import {
   load,
   markIdea,
   parseChoices,
+  PLUGIN_SERVER,
   replyOf,
   SERVER,
   TOOL_PREFIX,
@@ -17,18 +18,20 @@ import {
 
 const PANE = 'course-companion'
 const TITLE = 'Course companion'
-const TOOL = 'mcp__course-companion__key_idea'
-const CHOICES_TOOL = 'mcp__course-companion__choices'
+// The tools this mod registers: `mcp__<plugin>__<tool>`.
+const OWN_PREFIX = 'mcp__lessonfolk-tutor__'
+const TOOL = 'mcp__lessonfolk-tutor__key_idea'
+const CHOICES_TOOL = 'mcp__lessonfolk-tutor__choices'
 
 const NO_IDEAS: IdeaMarks = { covered: [] }
 
-const isActive = atom({ plugin: 'course-companion', key: 'isActive' } as const, false)
-const choices = atom({ plugin: 'course-companion', key: 'choices' } as const, null as Choices | null)
-const view = atom({ plugin: 'course-companion', key: 'view' } as const, { state: 'no-progress' } as View)
-const snapshot = atom({ plugin: 'course-companion', key: 'snapshot' } as const, null)
-const ideas = atom({ plugin: 'course-companion', key: 'ideas' } as const, NO_IDEAS)
+const isActive = atom({ plugin: 'lessonfolk-tutor', key: 'isActive' } as const, false)
+const choices = atom({ plugin: 'lessonfolk-tutor', key: 'choices' } as const, null as Choices | null)
+const view = atom({ plugin: 'lessonfolk-tutor', key: 'view' } as const, { state: 'no-progress' } as View)
+const snapshot = atom({ plugin: 'lessonfolk-tutor', key: 'snapshot' } as const, null)
+const ideas = atom({ plugin: 'lessonfolk-tutor', key: 'ideas' } as const, NO_IDEAS)
 // The LessonFolk instance the Dashboard button opens (local or hosted).
-const instance = atom({ plugin: 'course-companion', key: 'instance' } as const, DEFAULT_INSTANCE)
+const instance = atom({ plugin: 'lessonfolk-tutor', key: 'instance' } as const, DEFAULT_INSTANCE)
 
 // The learner commands of AGENTS.md, offered as buttons above the prompt.
 const COMMANDS = [
@@ -40,24 +43,31 @@ const COMMANDS = [
 
 const isSkill = (name: string | undefined, skill: string) => name === skill || name?.endsWith(`:${skill}`)
 
-// The server's name as this session knows it: `lessonfolk` from `.mcp.json`, or the name of the
-// connector a hosted instance was added under, learned from the tutor's first call to it.
-let server = SERVER
+// The server's name as this session knows it: `lessonfolk` from `.mcp.json` or added by hand,
+// the installed plugin's own, or the name of the connector a hosted instance was added under,
+// learned from the tutor's first call to it. Until one answers, both known names are tried.
+let server: string | undefined
 
 const isLessonfolkTool = (tool: string) =>
-  tool.startsWith(TOOL_PREFIX) || (/^mcp__[^_].*lessonfolk.*?__/i.test(tool) && !tool.startsWith('mcp__course-'))
+  tool.startsWith(TOOL_PREFIX) ||
+  (/^mcp__[^_].*lessonfolk.*?__/i.test(tool) && !tool.startsWith(OWN_PREFIX) && !tool.startsWith('mcp__course-'))
 
 // Calls a tool of the LessonFolk MCP server with the session's own connection (and sign-in),
 // so it reads the same progress as the tutor, from a local or a hosted instance.
 const callServer = ($: EngineInterface) => async (tool: string, args?: Record<string, unknown>) => {
-  try {
-    const { content, isError } = await $.mcp.call(server, tool, args)
-    if (isError) return undefined
+  for (const name of server ? [server] : [SERVER, PLUGIN_SERVER]) {
+    try {
+      const { content, isError } = await $.mcp.call(name, tool, args)
+      if (isError) continue
+      server = name
 
-    return content.flatMap(block => (block.type === 'text' ? [block.text] : [])).join('\n')
-  } catch {
-    return undefined
+      return content.flatMap(block => (block.type === 'text' ? [block.text] : [])).join('\n')
+    } catch {
+      // Not connected under this name: try the next one.
+    }
   }
+
+  return undefined
 }
 
 // Re-reads the progress and the courses from the server; toasts what changed since the last read.

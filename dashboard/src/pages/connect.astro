@@ -91,6 +91,20 @@ const selected = clients.find((client) => client.available) ?? clients[0]!;
                 ))}
               </ol>
               {client.note && <p class="muted connect-note">{client.note}</p>}
+              {client.alternative && (
+                <details class="connect-alternative">
+                  <summary>{client.alternative.title}</summary>
+                  <ol class="stack connect-steps" style="--stack-space: var(--space-3)">
+                    {client.alternative.steps.map((step) => (
+                      <li class="stack" style="--stack-space: var(--space-2)">
+                        <p>{step.text}</p>
+                        {step.code && <pre><code>{step.code}</code></pre>}
+                      </li>
+                    ))}
+                  </ol>
+                  {client.alternative.note && <p class="muted connect-note">{client.alternative.note}</p>}
+                </details>
+              )}
               {client.extra && (
                 <aside class="connect-extra stack" style="--stack-space: var(--space-1)">
                   <h4>{client.extra.title}</h4>
@@ -273,6 +287,16 @@ const selected = clients.find((client) => client.available) ?? clients[0]!;
     border-radius: var(--radius-md);
     background: var(--color-accent-subtle);
     font-size: var(--text-sm);
+  }
+
+  /* Folded by default: the recommended steps above are enough for most people. */
+  .connect-alternative {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .connect-alternative > :not(summary) {
+    margin-top: var(--space-3);
   }
 
   .connect-note {
