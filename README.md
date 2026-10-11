@@ -9,11 +9,7 @@
 
 <p align="center"><a href="https://lessonfolk.com"><strong>lessonfolk.com</strong></a></p>
 
-<p align="center">
-  <a href="dashboard/public/teaser.mp4">
-    <img src="assets/teaser-thumbnail.png" alt="Watch LessonFolk in 26 seconds (video with music)" width="640">
-  </a>
-</p>
+https://github.com/user-attachments/assets/bc8eccbd-1f95-4d20-92f5-15d528b05d47
 
 LessonFolk is a collection of open-source AI courses designed to be taught *by* an AI. Connect
 your AI chat ([Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex),
