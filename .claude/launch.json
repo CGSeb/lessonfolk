@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dashboard"],
       "port": 4321
+    },
+    {
+      "name": "dashboard-hosted-preview",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set LESSONFOLK_AUTH=oauth&& set LESSONFOLK_BASE_URL=https://lessonfolk.com&& set BETTER_AUTH_SECRET=preview-only-secret-0123456789abcdef&& set GITHUB_CLIENT_ID=preview&& set GITHUB_CLIENT_SECRET=preview&& npm run dev -w dashboard -- --port 4399"],
+      "port": 4399
     }
   ]
 }
