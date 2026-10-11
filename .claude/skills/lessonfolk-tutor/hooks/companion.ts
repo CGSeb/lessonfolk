@@ -11,6 +11,8 @@ export type Caller = (tool: string, args?: Record<string, unknown>) => Promise<s
 // The name of the server in `.mcp.json` (what `claude mcp add lessonfolk …` registers).
 export const SERVER = 'lessonfolk'
 export const TOOL_PREFIX = `mcp__${SERVER}__`
+// The same server when the installed plugin brought it (the marketplace entry declares it).
+export const PLUGIN_SERVER = `plugin:lessonfolk-tutor:${SERVER}`
 
 type Progress = {
   profile?: { level?: string }
@@ -131,8 +133,10 @@ export const load = async (call: Caller): Promise<Loaded> => {
 }
 
 // The LessonFolk instance the Dashboard button opens: the origin of the `lessonfolk` url in the
-// project's `.mcp.json` (the MCP endpoint is `<instance>/mcp`), the local default otherwise.
-export const DEFAULT_INSTANCE = 'http://localhost:4321/'
+// project's `.mcp.json` (the MCP endpoint is `<instance>/mcp`), as in a clone of the repository;
+// otherwise the hosted instance, the one the installed plugin connects to (the same address as
+// in `.claude-plugin/marketplace.json`).
+export const DEFAULT_INSTANCE = 'https://lessonfolk.com/'
 
 export const instanceUrl = (mcpJson?: string): string => {
   try {

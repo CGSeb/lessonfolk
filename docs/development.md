@@ -21,8 +21,10 @@ parts work. To get a working checkout first, follow
 | [`dashboard/`](../dashboard) | The web dashboard (an [Astro](https://astro.build) server), its sign-in code, its end-to-end tests, and the scripts `scripts/serve.ts` (starts the built server after checking its settings) and `scripts/check-courses.ts`. |
 | [`packages/core/`](../packages/core) | `@lessonfolk/core`: loading and validating courses, the progress format (progress.json v1), the tutor's rules (next lesson, path, level check) as code, and the `ProgressStore` interface every progress backend follows. |
 | [`packages/db/`](../packages/db) | `@lessonfolk/db`: the Postgres schema ([Drizzle](https://orm.drizzle.team)), the migrations in `drizzle/`, the Postgres progress store (`createPostgresProgressStore`) and the database test helpers. |
-| [`packages/mcp/`](../packages/mcp) | `@lessonfolk/mcp`: the MCP server (course and progress tools, course resources, tutor prompts) the dashboard serves at `/mcp`, and its OAuth setup for `LESSONFOLK_AUTH=oauth`. The tutor's instructions and the `learn`, `review` and `progress` prompts are `packages/mcp/prompts/*.md`: the only copy of the tutoring procedures (the skills point to them). |
-| [`.claude/skills/`](../.claude/skills) | Claude Code skills (`learn`, `progress` and `review`, which run the MCP prompts; `create-course`, `edit-course`, `review-course`) and two mods: `course-companion` (for learners) and `course-builder` (for course authors). |
+| [`packages/mcp/`](../packages/mcp) | `@lessonfolk/mcp`: the MCP server (course and progress tools, course resources, tutor prompts) the dashboard serves at `/mcp`, and its OAuth setup for `LESSONFOLK_AUTH=oauth`. The tutor's instructions and the `learn`, `review` and `progress` prompts are `packages/mcp/prompts/*.md`: the source of the tutoring procedures (`npm run plugin:sync` copies them into the plugin's skills). |
+| [`.claude/skills/lessonfolk-tutor/`](../.claude/skills/lessonfolk-tutor) | The learner plugin for Claude Code: the `learn`, `progress` and `review` skills and the Course companion mod. It loads on its own in a clone and is published by the marketplace file below. See [The learner plugin](#the-learner-plugin). |
+| [`.claude/skills/`](../.claude/skills) (the rest) | For course authors, in a clone only: the `create-course`, `edit-course` and `review-course` skills and the `course-builder` mod. Never part of the plugin. |
+| [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json) | Makes this repository a Claude Code plugin marketplace with one plugin, `lessonfolk-tutor`, and gives it its MCP server (the hosted LessonFolk). |
 | [`docs/`](.) | Documentation: see the [index](README.md). |
 | [`assets/brand/`](../assets/brand) | Logo files. |
 | [`.mcp.json`](../.mcp.json) | Connects Claude Code opened in this folder to the MCP server of a local LessonFolk (`http://localhost:4321/mcp`). |
@@ -47,6 +49,7 @@ Run root scripts from the repository root. Run a workspace script with `-w <work
 | `npm test` | Run the tests of every workspace (core, db, mcp, dashboard). Needs Postgres. |
 | `npm run check:courses` | Validate every course and lesson file. Add `-- <folder>` to check another courses folder. |
 | `npm run review:courses` | Print the brief your agent follows to review lessons (rubric, lessons to read, catalog outline). Add `-- <course-id or lesson-id>…` to pick lessons. Calls no AI service. |
+| `npm run plugin:sync` | Copy the tutor procedures (`packages/mcp/prompts/*.md`) into the learner plugin's skills. Run it after editing a prompt; a test fails otherwise. |
 | `npm run progress:import` | Copy a `progress.json` (default: the old `.progress/progress.json`, or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. |
 | `npm run check -w <workspace>` | Type-check one workspace (`dashboard`, `packages/core`, `@lessonfolk/db` or `@lessonfolk/mcp`). |
 | `npm test -w <workspace>` | Run one workspace's tests. |
@@ -96,12 +99,36 @@ A learner action such as resetting a course touches four places: a pure rule in
 [`packages/core/src/tutor.ts`](../packages/core/src/tutor.ts) (with unit tests), the
 `ProgressStore` method (`store.ts`, implemented in `packages/db/src/progress-store.ts`, which
 logs a `progress_event`), the MCP tool in `packages/mcp/src/server.ts`, and the procedure in
-`packages/mcp/prompts/learn.md` (plus its phrase in `instructions.md` and the `learn` skill).
+`packages/mcp/prompts/learn.md` (plus its phrase in `instructions.md`; then `npm run plugin:sync`
+for the `learn` skill).
 `reset_course` is a small example. Add the manual check to [Testing](testing.md).
 
 Give every new text or list argument of an MCP tool a `.max()` from `LIMITS` in `server.ts`. The
 store also refuses any write that would make a learner's saved progress larger than the 1 MB
 import limit (`MAX_IMPORT_BYTES`).
+
+## The learner plugin
+
+Learners on the hosted LessonFolk install one Claude Code plugin instead of cloning the
+repository (`claude plugin marketplace add CGSeb/lessonfolk`, then
+`claude plugin install lessonfolk-tutor@lessonfolk`). It is for learners only: nothing for
+building courses or contributing goes in it.
+
+- **One copy.** The plugin is the folder `.claude/skills/lessonfolk-tutor/`. In a clone, Claude
+  Code loads it from there (as `lessonfolk-tutor@skills-dir`) with the project's `.mcp.json`,
+  so contributors work against their local LessonFolk. Installed from the marketplace, the
+  same folder comes with the hosted server, which only the marketplace entry declares.
+- **The hosted address** is written in `.claude-plugin/marketplace.json`, in
+  `dashboard/src/lib/connect.ts` (`PLUGIN_MCP_URL`: the Connect page recommends the plugin only
+  on that instance) and in the companion's `DEFAULT_INSTANCE`. A dashboard test keeps the three
+  equal.
+- **Skills.** An installed plugin cannot read this repository, so each skill carries its
+  procedure: edit `packages/mcp/prompts/*.md`, then run `npm run plugin:sync`.
+- **Names.** The plugin is not called `lessonfolk`, the name of the MCP server: the mod's own
+  tools are `mcp__lessonfolk-tutor__*` and must not mix with the server's `mcp__lessonfolk__*`.
+- **Version.** `version` in the plugin's `plugin.json` is the LessonFolk release number.
+  Installed plugins update only when it changes, so set it to the new number before publishing
+  a release (the release workflow fails otherwise).
 
 ## Live refresh
 

@@ -131,13 +131,13 @@ describe('markIdea', () => {
 })
 
 describe('instanceUrl', () => {
-  test('the dashboard is the origin of the lessonfolk url in .mcp.json, local by default', () => {
+  test('the dashboard is the origin of the lessonfolk url in .mcp.json, the hosted one by default', () => {
     const config = (url: string) => JSON.stringify({ mcpServers: { lessonfolk: { type: 'http', url } } })
     expect(instanceUrl(config('http://localhost:4321/mcp'))).toBe('http://localhost:4321/')
     expect(instanceUrl(config('https://learn.example.org/mcp'))).toBe('https://learn.example.org/')
-    expect(instanceUrl(config('not a url'))).toBe('http://localhost:4321/')
-    expect(instanceUrl('{ nope')).toBe('http://localhost:4321/')
-    expect(instanceUrl(undefined)).toBe('http://localhost:4321/')
+    expect(instanceUrl(config('not a url'))).toBe('https://lessonfolk.com/')
+    expect(instanceUrl('{ nope')).toBe('https://lessonfolk.com/')
+    expect(instanceUrl(undefined)).toBe('https://lessonfolk.com/')
   })
 })
 
