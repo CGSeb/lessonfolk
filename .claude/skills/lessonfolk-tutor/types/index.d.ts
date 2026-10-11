@@ -13,6 +13,8 @@ export type View = {
   lessons?: LessonState[]
   current?: { id: string; title: string; ideas: string[] }
   next?: { id: string; title: string; courseTitle?: string }
+  // Offline only: why each attempt to reach the server failed.
+  reason?: string[]
 }
 
 // Lesson statuses as last read from the server, to spot what a save changed.

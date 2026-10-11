@@ -170,7 +170,20 @@ describe('course companion', () => {
     await ui.unmount()
   })
 
-  test('the commands band appears once learning starts and sends the command', async ($, on) => {
+  test('a server that cannot be reached says why in the pane', async ($, on) => {
+    const server = newServer(STARTED)
+    server.names = []
+    engine(on, server)
+    await save($, server, STARTED, 't1')
+
+    const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await ui.find({ type: 'Text', text: 'Your progress could not be read.' })).toBeDefined()
+    const lines = (await ui.findAll({ type: 'Text' })).map(node => node.text)
+    expect(lines.some(line => line?.startsWith('lessonfolk get_progress: '))).toBe(true)
+    await ui.unmount()
+  })
+
+  test('the commands band appears once learning starts and sends the command',async ($, on) => {
     const server = newServer()
     const seen = engine(on, server)
 
