@@ -75,17 +75,18 @@ const callServer = ($: EngineInterface, failures: string[] = []) => async (tool:
   return undefined
 }
 
-// When the app refused the pane's own reads (auto permission mode, typically), say which rules
-// allow them, spelled for the server name the refusal came from.
-const refusalHint = (reason: string[] = []) => {
+// When the app refused the pane's own reads (auto permission mode, typically), the rules that
+// allow them, spelled for the server name each refusal came from.
+const refusedRules = (reason: string[] = []) => {
   const names = [...new Set(reason.filter(line => /refused/i.test(line)).map(line => line.split(' ')[0] ?? ''))]
-  if (names.length === 0) return undefined
-  const rules = names.flatMap(name =>
-    ['get_progress', 'list_courses'].map(tool => `"mcp__${name.replace(/[:.]/g, '_')}__${tool}"`),
-  )
 
-  return ["The app refused the pane's read. Allow these in ~/.claude/settings.json:", `permissions.allow: [${rules.join(', ')}]`]
+  return names.flatMap(name =>
+    ['get_progress', 'list_courses'].map(tool => `mcp__${name.replace(/[:.]/g, '_')}__${tool}`),
+  )
 }
+
+// The settings.json fragment to paste: the pane's text cannot be selected, so it is copied.
+const rulesSnippet = (rules: string[]) => JSON.stringify({ permissions: { allow: rules } }, null, 2)
 
 // Re-reads the progress and the courses from the server; toasts what changed since the last read.
 async function refresh($: EngineInterface, isQuiet = false) {
@@ -346,7 +347,7 @@ export const register: Register = on => {
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const { Box, Text } = $.ui.resolve(e)
+    const { Box, Button, Text } = $.ui.resolve(e)
     const v = await read($, view)
     const marks = await read($, ideas)
 
@@ -357,11 +358,26 @@ export const register: Register = on => {
         'all-done': ['You have finished every course. Well done!', 'Ask the tutor what to explore next.'],
       }[v.state]
 
+      const rules = refusedRules(v.reason)
+      const hint = rules.length > 0
+        ? ["The app refused the pane's read.", 'Allow it in ~/.claude/settings.json (permissions.allow):']
+        : (v.reason ?? [])
+
       return (
         <Box flexDirection="column">
-          {[...lines, ...(refusalHint(v.reason) ?? v.reason ?? [])].map(line => (
+          {[...lines, ...hint, ...rules].map(line => (
             <Text dimColor>{line}</Text>
           ))}
+          {rules.length > 0 && (
+            <Button
+              key="copy-rules"
+              label="Copy rules"
+              onPress={async press => {
+                const { isCopied } = await $.ui.copy({ text: rulesSnippet(rules), surface: press.surface })
+                $.ui.toast(isCopied ? 'Copied: paste it into ~/.claude/settings.json' : 'Could not copy to the clipboard')
+              }}
+            />
+          )}
         </Box>
       )
     }
