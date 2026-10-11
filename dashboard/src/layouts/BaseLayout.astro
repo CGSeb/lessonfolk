@@ -37,6 +37,8 @@ const { authMode, user } = Astro.locals;
 const navItems = [
   { href: '/', label: t('nav.home'), current: path === '/' },
   { href: '/courses', label: t('nav.courses'), current: path === '/courses' || path.startsWith('/courses/') },
+  // Announced, not open yet: the page says "coming soon".
+  { href: '/projects', label: t('nav.projects'), current: path === '/projects', soon: true },
   { href: '/authors', label: t('nav.authors'), current: path === '/authors' || path.startsWith('/authors/') },
   { href: '/connect', label: t('nav.connect'), current: path === '/connect' },
   // The learner's own data: only for someone whose data it is. With sign-in, the signed-in
@@ -46,8 +48,6 @@ const navItems = [
 // Each nav link is a small bubble in its own tint.
 const NAV_TINTS = ['sky', 'rose', 'teal', 'violet', 'indigo'];
 const signInLink = signInHref(Astro.url);
-// What a learner can say to their tutor at any time, ready to copy.
-const sayPhrases = [t('home.continuePhrase'), t('home.reviewPhrase')];
 const release = currentRelease();
 
 // Search engines and link previews: canonical address (no query string or trailing slash),
@@ -120,6 +120,7 @@ const hidden = noindex || Astro.response.status === 404;
                       aria-current={item.current ? 'page' : undefined}
                     >
                       {item.label}
+                      {'soon' in item && item.soon && <span class="nav-link__soon">{t('nav.soon')}</span>}
                     </a>
                   </li>
                 ))
@@ -129,19 +130,33 @@ const hidden = noindex || Astro.response.status === 404;
           {
             authMode === 'oauth' &&
               (user ? (
-                <form class="account" method="post" action="/sign-out" aria-label={t('auth.accountLabel')}>
-                  <a
-                    class="account__name"
-                    href="/account"
-                    title={user.email}
-                    aria-current={path === '/account' || path.startsWith('/account/') ? 'page' : undefined}
-                  >
-                    {user.name || user.email}
-                  </a>
-                  <button class="account__button" type="submit">
-                    {t('auth.signOut')}
-                  </button>
-                </form>
+                <details class="account-menu" data-account-menu>
+                  <summary class="account-menu__button" aria-label={t('auth.accountLabel')} title={t('auth.accountLabel')}>
+                    <svg class="account-menu__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <circle cx="12" cy="8" r="4"></circle>
+                      <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"></path>
+                    </svg>
+                    <span class="account-menu__label">{user.name || user.email}</span>
+                  </summary>
+                  <div class="account-menu__panel">
+                    <p class="account-menu__who">
+                      <span class="account-menu__name">{user.name || user.email}</span>
+                      {user.name && <span class="account-menu__email">{user.email}</span>}
+                    </p>
+                    <a
+                      class="account-menu__item"
+                      href="/account"
+                      aria-current={path === '/account' || path.startsWith('/account/') ? 'page' : undefined}
+                    >
+                      {t('nav.account')}
+                    </a>
+                    <form method="post" action="/sign-out">
+                      <button class="account-menu__item" type="submit">
+                        {t('auth.signOut')}
+                      </button>
+                    </form>
+                  </div>
+                </details>
               ) : (
                 path !== '/sign-in' && (
                   <a class="account__button" href={signInLink}>
@@ -151,7 +166,6 @@ const hidden = noindex || Astro.response.status === 404;
               ))
           }
           </div>
-          <ThemeToggle />
           <button
             class="menu-button"
             type="button"
@@ -174,23 +188,6 @@ const hidden = noindex || Astro.response.status === 404;
     <main id="main" class="container site-main" tabindex="-1">
       <slot />
     </main>
-
-    {
-      user && (
-        <aside class="say-dock" aria-label={t('thread.sayLabel')}>
-          <div class="container say-dock__inner">
-            <p class="speaker">{t('thread.sayLabel')}</p>
-            {sayPhrases.map((phrase) => (
-              <span class="say-dock__item">
-                <q class="say-dock__phrase" data-copy={phrase}>
-                  {phrase}
-                </q>
-              </span>
-            ))}
-          </div>
-        </aside>
-      )
-    }
 
     <footer class="container site-footer">
       <div class="card site-footer__bubble">
@@ -227,6 +224,7 @@ const hidden = noindex || Astro.response.status === 404;
         <p>{t('footer.copyright', { year: String(new Date().getFullYear()) })}</p>
         <p>{t('footer.license')}</p>
         {authMode !== 'oauth' && <p>{t('footer.privacy')}</p>}
+        <ThemeToggle />
         {
           release && (
             <p>
@@ -268,6 +266,21 @@ const hidden = noindex || Astro.response.status === 404;
           if (event.target instanceof Node && !header.contains(event.target)) set(false);
         });
         narrow.addEventListener('change', () => set(false));
+      }
+
+      // Account menu: a <details>, so it opens without JavaScript; this closes it on Escape
+      // and on a click outside.
+      const account = document.querySelector<HTMLDetailsElement>('[data-account-menu]');
+      if (account) {
+        account.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && account.open) {
+            account.open = false;
+            account.querySelector('summary')?.focus();
+          }
+        });
+        document.addEventListener('click', (event) => {
+          if (event.target instanceof Node && !account.contains(event.target)) account.open = false;
+        });
       }
     </script>
   </body>
@@ -435,9 +448,23 @@ const hidden = noindex || Astro.response.status === 404;
       padding-block: var(--space-3);
     }
 
-    .account {
-      justify-content: space-between;
-      padding-top: var(--space-2);
+    /* In the phone menu the account is a full-width row with the name, its links below it. */
+    .account-menu__button {
+      justify-content: flex-start;
+      gap: var(--space-2);
+      width: 100%;
+      padding-inline: var(--space-4);
+    }
+
+    .account-menu__label {
+      display: inline;
+    }
+
+    .account-menu__panel {
+      position: static;
+      min-width: 0;
+      margin-top: var(--space-2);
+      box-shadow: none;
     }
   }
 
@@ -488,6 +515,22 @@ const hidden = noindex || Astro.response.status === 404;
     background: var(--color-tint-indigo);
   }
 
+  /* "Soon" tag of a section that is announced but not open yet. */
+  .nav-link__soon {
+    margin-left: var(--space-1);
+    padding: 0.1em 0.55em;
+    border-radius: var(--bubble-sm);
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    font-size: var(--text-xs);
+    vertical-align: 0.1em;
+  }
+
+  .nav-link[aria-current='page'] .nav-link__soon {
+    background: var(--color-on-ink);
+    color: var(--color-ink);
+  }
+
   .nav-link:hover {
     color: var(--color-text);
     text-decoration: underline;
@@ -500,29 +543,103 @@ const hidden = noindex || Astro.response.status === 404;
     color: var(--color-on-ink);
   }
 
-  .account {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+  /* The signed-in learner: a round button that opens their name, the account page and sign out. */
+  .account-menu {
+    position: relative;
   }
 
-  .account__name {
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--bubble-md);
-    background: var(--color-surface);
-    color: var(--color-text);
+  .account-menu__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
     font-size: var(--text-sm);
     font-weight: var(--weight-bold);
-    line-height: 1.7;
-    text-decoration: none;
+    list-style: none;
+    cursor: pointer;
   }
 
-  .account__name:hover {
+  .account-menu__button::-webkit-details-marker {
+    display: none;
+  }
+
+  .account-menu__button:hover,
+  .account-menu[open] .account-menu__button {
+    background: var(--color-accent-strong);
+  }
+
+  .account-menu__icon {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  /* The name sits in the panel; next to the icon it only shows in the phone menu. */
+  .account-menu__label {
+    display: none;
+  }
+
+  .account-menu__panel {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    z-index: 5;
+    display: grid;
+    gap: var(--space-1);
+    min-width: 14rem;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .account-menu__who {
+    display: grid;
+    padding: var(--space-1) var(--space-3) var(--space-2);
+    font-size: var(--text-sm);
+  }
+
+  .account-menu__name {
+    font-weight: var(--weight-bold);
+    overflow-wrap: anywhere;
+  }
+
+  .account-menu__email {
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .account-menu__item {
+    display: block;
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
     color: var(--color-text);
-    text-decoration: underline;
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
   }
 
-  .account__name[aria-current='page'] {
+  .account-menu__item:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .account-menu__item[aria-current='page'] {
     background: var(--color-ink);
     color: var(--color-on-ink);
   }
@@ -556,35 +673,6 @@ const hidden = noindex || Astro.response.status === 404;
   .site-main:focus {
     outline: none;
     box-shadow: none;
-  }
-
-  /* Phrases the learner can say to their tutor, each one a small "you" bubble to copy. */
-  .say-dock {
-    padding-block: var(--space-4);
-    background: var(--color-surface);
-  }
-
-  .say-dock__inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
-  }
-
-  .say-dock__item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
-    border-radius: var(--bubble-you-md);
-    background: var(--color-accent);
-    color: var(--color-on-accent);
-  }
-
-  .say-dock__phrase {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    quotes: none;
   }
 
   .site-footer {
@@ -635,9 +723,15 @@ const hidden = noindex || Astro.response.status === 404;
     text-decoration: underline;
   }
 
+  /* The footer card has the same colour as the theme switch, so the switch takes the page colour. */
+  .site-footer__bottom :global(.theme-toggle) {
+    background: var(--color-bg);
+  }
+
   .site-footer__bottom {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
     gap: var(--space-2) var(--space-5);
     margin-top: var(--space-5);

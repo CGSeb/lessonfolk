@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/en';
+
+// Projects are announced before they open: this page only says what to expect.
+const points = [
+  { title: t('projects.realTitle'), body: t('projects.realBody'), tint: 'sky' },
+  { title: t('projects.milestonesTitle'), body: t('projects.milestonesBody'), tint: 'rose' },
+  { title: t('projects.coachTitle'), body: t('projects.coachBody'), tint: 'teal' },
+  { title: t('projects.whereTitle'), body: t('projects.whereBody'), tint: 'violet' },
+];
+---
+
+<BaseLayout title={t('projects.title')} description={t('site.projectsDescription')}>
+  <div class="stack" style="--stack-space: var(--space-6)">
+    <header class="stack" style="--stack-space: var(--space-3)">
+      <div class="cluster projects-title">
+        <h1>{t('projects.heading')}</h1>
+        <span class="badge badge--info">{t('projects.comingSoon')}</span>
+      </div>
+      <p class="muted projects-intro">{t('projects.intro')}</p>
+    </header>
+
+    <section class="stack" style="--stack-space: var(--space-4)" aria-labelledby="projects-what">
+      <h2 id="projects-what">{t('projects.whatHeading')}</h2>
+      <ul class="grid projects-points" role="list">
+        {
+          points.map((point) => (
+            <li class:list={['card', `card--${point.tint}`, 'stack']} style="--stack-space: var(--space-2)">
+              <h3>{point.title}</h3>
+              <p>{point.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="card stack" style="--stack-space: var(--space-3)" aria-labelledby="projects-meanwhile">
+      <h2 id="projects-meanwhile">{t('projects.meanwhileHeading')}</h2>
+      <p>{t('projects.meanwhileBody')}</p>
+      <div class="cluster">
+        <a class="button button--primary" href="/courses">{t('projects.browseCourses')}</a>
+        <a href="https://github.com/CGSeb/lessonfolk" target="_blank" rel="noopener noreferrer">{t('projects.follow')}</a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .projects-title {
+    align-items: center;
+  }
+
+  .projects-intro {
+    max-width: 44rem;
+    font-size: var(--text-lg);
+  }
+
+  .projects-points {
+    --grid-min: 16rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .projects-points > li {
+    max-width: none;
+  }
+
+  .projects-points h3 {
+    font-size: var(--text-lg);
+  }
+</style>

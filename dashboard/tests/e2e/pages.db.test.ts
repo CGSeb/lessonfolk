@@ -350,6 +350,17 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     }
   });
 
+  it('announces Projects as coming soon, from the nav and on its page', async () => {
+    const page = await getPage(server, '/projects');
+    expect(page.status).toBe(200);
+    expect(page.text).toContain('Coming soon');
+    expect(page.html).toMatch(/<a[^>]*class="nav-link[^"]*"[^>]*href="\/projects"[^>]*aria-current="page"/);
+    expect(page.html).toMatch(/<a[^>]*href="\/courses"[^>]*>\s*Browse the courses\s*<\/a>/);
+    // Every page links to it from the nav, tagged "Soon".
+    const home = await getPage(server, '/courses');
+    expect(home.html).toMatch(/href="\/projects"[^>]*>\s*Projects\s*<span class="nav-link__soon"[^>]*>Soon<\/span>/);
+  });
+
   it('renders the authors list', async () => {
     const page = await getPage(server, '/authors');
     expect(page.status).toBe(200);
