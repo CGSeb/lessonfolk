@@ -214,6 +214,9 @@ describe('signed in', () => {
     expect(privacy).toContain('How long');
     expect(privacy).toContain('Where it is stored');
     expect(privacy).toContain('IP address');
+    expect(privacy).toContain('data protection authority');
+    expect(privacy).toContain('Last updated');
+    expect(privacy).toContain('under 16');
     const account = await (await robin.browser.request('/account')).text();
     expect(account).toContain('href="/privacy"');
     expect(account).toContain('href="/api/account/export-all"');
