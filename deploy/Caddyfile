@@ -8,3 +8,9 @@
 	}
 	reverse_proxy app:4321
 }
+
+# www redirects to the bare domain. Its DNS record must point at this server too; until it does,
+# Caddy cannot get a certificate for it (the main site is not affected).
+www.{$LESSONFOLK_DOMAIN} {
+	redir https://{$LESSONFOLK_DOMAIN}{uri} permanent
+}
