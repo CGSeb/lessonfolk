@@ -307,10 +307,11 @@ export const en = {
   },
   consent: {
     title: 'Allow access',
-    heading: 'Allow {app} to use LessonFolk?',
+    heading: 'Allow this app to use LessonFolk?',
+    appLabel: 'App name:',
     unknownApp: 'An AI app',
     signedInAs: 'Signed in as {name}. If you allow it, this app can tutor you with LessonFolk.',
-    nameNotVerified: 'The name "{app}" was chosen by the app itself. LessonFolk has not checked it, so it may not be who it claims to be.',
+    nameNotVerified: 'This name was chosen by the app itself. LessonFolk has not checked it, so it may not be who it claims to be.',
     redirectLabel: 'Access will be given to:',
     redirectLocal: 'This address is on your own computer: the app runs on your device.',
     redirectWarning: 'This is a website. Check that it is the one you are connecting from.',

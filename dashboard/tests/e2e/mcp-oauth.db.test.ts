@@ -156,7 +156,8 @@ async function authorize(
   expect(consentPage.status).toBe(200);
   const consentHtml = await consentPage.text();
   const consentText = visibleText(consentHtml);
-  expect(consentText).toContain('Allow Test MCP client to use LessonFolk?');
+  expect(consentText).toContain('Allow this app to use LessonFolk?');
+  expect(consentText).toContain('App name: Test MCP client');
   expect(consentText).toContain('was chosen by the app itself');
   expect(consentText).toContain('localhost:33418');
   expect(consentText).toContain('on your own computer');

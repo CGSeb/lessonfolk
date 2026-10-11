@@ -53,9 +53,14 @@ const access = requestedAccess(params.get('scope'));
       valid ? (
         <>
           <header class="stack" style="--stack-space: var(--space-2)">
-            <h1>{t('consent.heading', { app: appName })}</h1>
+            <h1>{t('consent.heading')}</h1>
             <p class="muted">{t('consent.signedInAs', { name: Astro.locals.user.name })}</p>
-            {clientName && <p class="muted">{t('consent.nameNotVerified', { app: clientName })}</p>}
+            <div class="consent__box">
+              <p>
+                {t('consent.appLabel')} <strong class="consent__host">{appName}</strong>
+              </p>
+              {clientName && <p class="muted">{t('consent.nameNotVerified')}</p>}
+            </div>
             {redirectHost && (
               <div class:list={['consent__redirect', !redirectIsLocal && 'consent__redirect--warn']} role={redirectIsLocal ? undefined : 'alert'}>
                 <p>
@@ -97,6 +102,7 @@ const access = requestedAccess(params.get('scope'));
     max-width: 32rem;
   }
 
+  .consent__box,
   .consent__redirect {
     padding: var(--space-3) var(--space-4);
     border: 1px solid var(--color-border);
