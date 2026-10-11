@@ -61,12 +61,23 @@ const access = requestedAccess(params.get('scope'));
               </p>
               {clientName && <p class="muted">{t('consent.nameNotVerified')}</p>}
             </div>
-            {redirectHost && (
-              <div class:list={['consent__redirect', !redirectIsLocal && 'consent__redirect--warn']} role={redirectIsLocal ? undefined : 'alert'}>
+            {redirectHost && redirectIsLocal && (
+              <div class="consent__redirect">
+                <p>{t('consent.redirectLocal')}</p>
+                <details class="consent__details">
+                  <summary class="muted">{t('consent.technicalDetails')}</summary>
+                  <p class="muted">
+                    {t('consent.redirectLabel')} <strong class="consent__host">{redirectHost}</strong>
+                  </p>
+                </details>
+              </div>
+            )}
+            {redirectHost && !redirectIsLocal && (
+              <div class="consent__redirect consent__redirect--warn" role="alert">
                 <p>
                   {t('consent.redirectLabel')} <strong class="consent__host">{redirectHost}</strong>
                 </p>
-                <p class="muted">{redirectIsLocal ? t('consent.redirectLocal') : t('consent.redirectWarning')}</p>
+                <p class="muted">{t('consent.redirectWarning')}</p>
               </div>
             )}
             <h2 class="consent__heading">{t('consent.permissionsHeading')}</h2>
@@ -111,6 +122,10 @@ const access = requestedAccess(params.get('scope'));
 
   .consent__redirect--warn {
     border-color: var(--color-accent);
+  }
+
+  .consent__details summary {
+    cursor: pointer;
   }
 
   .consent__host {
