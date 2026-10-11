@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "lessonfolk": { "type": "http", "url": "https://lessonfolk.com/mcp" }
+  }
+}
