@@ -187,12 +187,12 @@ describe('course companion', () => {
   test('a refused read names the permission rules that allow it', async ($, on) => {
     const server = newServer(STARTED)
     engine(on, server)
-    server.refusal = '$.mcp.call(lessonfolk, get_progress) refused: auto mode'
-    await save($, server, STARTED, 't1')
+    server.refusal = '$.mcp.call(refused: auto mode'
+    await save($, server, STARTED, 't1', 'mcp__plugin_lessonfolk-tutor_lessonfolk__start_lesson')
 
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
     const lines = (await ui.findAll({ type: 'Text' })).map(node => node.text ?? '')
-    expect(lines.some(line => line.includes('mcp__lessonfolk__get_progress'))).toBe(true)
+    expect(lines.some(line => line.includes('"mcp__plugin_lessonfolk-tutor_lessonfolk__get_progress"'))).toBe(true)
     await ui.unmount()
   })
 

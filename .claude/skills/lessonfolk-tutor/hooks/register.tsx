@@ -78,14 +78,13 @@ const callServer = ($: EngineInterface, failures: string[] = []) => async (tool:
 // When the app refused the pane's own reads (auto permission mode, typically), say which rules
 // allow them, spelled for the server name the refusal came from.
 const refusalHint = (reason: string[] = []) => {
-  const name = reason.find(line => /refused/i.test(line))?.split(' ')[0]
-  if (!name) return undefined
-  const rule = (tool: string) => `mcp__${name.replace(/[:.]/g, '_')}__${tool}`
+  const names = [...new Set(reason.filter(line => /refused/i.test(line)).map(line => line.split(' ')[0] ?? ''))]
+  if (names.length === 0) return undefined
+  const rules = names.flatMap(name =>
+    ['get_progress', 'list_courses'].map(tool => `"mcp__${name.replace(/[:.]/g, '_')}__${tool}"`),
+  )
 
-  return [
-    "The app refused the pane's read. Allow these in ~/.claude/settings.json:",
-    `permissions.allow: ["${rule('get_progress')}", "${rule('list_courses')}"]`,
-  ]
+  return ["The app refused the pane's read. Allow these in ~/.claude/settings.json:", `permissions.allow: [${rules.join(', ')}]`]
 }
 
 // Re-reads the progress and the courses from the server; toasts what changed since the last read.
