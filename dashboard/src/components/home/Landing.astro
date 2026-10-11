@@ -71,7 +71,8 @@ const reasons = [
       <p class="speaker">{t('thread.tutor')}</p>
       <h2 class="overline" id="video-heading">{t('landing.videoTitle')}</h2>
       <div class="card landing-video">
-        <!-- It has music, so it never plays by itself, and nothing is downloaded before "play". -->
+        <!-- It has music, so it never plays by itself (and starts at a gentle volume, see the script
+             below), and nothing is downloaded before "play". -->
         <video controls playsinline preload="none" poster="/teaser-poster.jpg" width="1920" height="1080" aria-label={t('landing.videoLabel')}>
           <source src="/teaser.mp4" type="video/mp4" />
           <a href="/teaser.mp4">{t('landing.videoFallback')}</a>
@@ -169,6 +170,13 @@ const reasons = [
     <p><a class="button landing-final__button" href={signIn}>{t('landing.ctaStart')}</a></p>
   </section>
 </div>
+
+<script>
+  // The music starts at 40% of the volume: HTML has no attribute for it. The visitor can still
+  // turn it up with the player's own control.
+  const video = document.querySelector<HTMLVideoElement>('.landing-video video');
+  if (video) video.volume = 0.4;
+</script>
 
 <style>
   .landing-ask {
