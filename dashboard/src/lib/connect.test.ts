@@ -114,7 +114,9 @@ describe('the learner plugin', () => {
     const marketplace = JSON.parse(read('.claude-plugin/marketplace.json'));
     const [entry] = marketplace.plugins;
     expect(marketplace.plugins).toHaveLength(1);
-    expect(entry.mcpServers.lessonfolk.url).toBe(PLUGIN_MCP_URL);
+    const mcp = JSON.parse(read('.claude/skills/lessonfolk-tutor/.mcp.json'));
+    expect(mcp.mcpServers.lessonfolk).toEqual({ type: 'http', url: PLUGIN_MCP_URL });
+    expect(entry.mcpServers).toBeUndefined();
     expect(`${entry.name}@${marketplace.name}`).toBe(PLUGIN.id);
     // The Course companion's Dashboard button opens the same instance by default.
     expect(read('.claude/skills/lessonfolk-tutor/hooks/companion.ts')).toContain(

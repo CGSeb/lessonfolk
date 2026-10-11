@@ -6,10 +6,7 @@
     {
       "name": "lessonfolk-tutor",
       "source": "./.claude/skills/lessonfolk-tutor",
-      "description": "Learn AI with LessonFolk: the learn, progress and review skills, the Course companion pane and the connection to lessonfolk.com",
-      "mcpServers": {
-        "lessonfolk": { "type": "http", "url": "https://lessonfolk.com/mcp" }
-      }
+      "description": "Learn AI with LessonFolk: the learn, progress and review skills, the Course companion pane and the connection to lessonfolk.com"
     }
   ]
 }
