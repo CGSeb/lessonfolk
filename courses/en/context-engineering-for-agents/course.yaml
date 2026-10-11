@@ -1,0 +1,15 @@
+id: context-engineering-for-agents
+title: Context Engineering for Long-Running Agents
+level: advanced
+theme: building-with-ai
+authors: [lessonfolk]
+description: "Keep an agent sharp over hours of work: treat the context window as a budget, compact history without losing the thread, keep memory outside the window, and delegate to sub-agents when it helps."
+estimatedHours: 2
+prerequisites: [ai-agents-and-tools]
+lessons:
+  - context-engineering-for-agents/01-why-long-tasks-go-wrong
+  - context-engineering-for-agents/02-budgeting-the-context-window
+  - context-engineering-for-agents/03-compaction
+  - context-engineering-for-agents/04-memory-outside-the-window
+  - context-engineering-for-agents/05-sub-agents
+  - context-engineering-for-agents/06-one-agent-or-several
