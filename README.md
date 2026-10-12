@@ -9,7 +9,8 @@
 
 <p align="center"><a href="https://lessonfolk.com"><strong>lessonfolk.com</strong></a></p>
 
-[![M8ven Score](https://m8ven.ai/badge/mcp/cgseb-lessonfolk-9h289l)](https://m8ven.ai/mcp/cgseb-lessonfolk-9h289l?variant=verified)
+[![M8ven Score](https://m8ven.ai/badge/mcp/cgseb-lessonfolk-9h289l)](https://m8ven.ai/mcp/cgseb-lessonfolk-9h289l?variant=verified) <a href="https://www.claudemarket.ai/plugins"><img src="https://www.claudemarket.ai/badge-claudemarket.svg" alt="Listed on Claude Market" width="190" height="44" /></a>
+
 
 https://github.com/user-attachments/assets/bc8eccbd-1f95-4d20-92f5-15d528b05d47
 
