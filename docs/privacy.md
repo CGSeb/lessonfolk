@@ -29,8 +29,36 @@ by an `on delete cascade` key, so deleting the user row deletes it all.
 | `progress_event` | history of every change to the progress | yes | |
 | `jwks`, `oauth_resource`, `oauth_client_assertion` | server keys and settings, no personal data | no | |
 
-Outside the database: server logs and database backups (below). The dashboard sets no analytics
-or advertising cookies, only the sign-in session cookie.
+Outside this database: server logs, database backups and the visit statistics (below). The
+dashboard sets no analytics or advertising cookies, only the sign-in session cookie.
+
+## Audience measurement (visit statistics)
+
+The hosted version counts visits with a self-hosted [Umami](https://umami.is), to learn which
+channels bring learners. It needs no consent banner because it reads and writes nothing on the
+learner's device (no cookie, no local storage) and the statistics are anonymous.
+
+- **What it records** per visit: page, referrer and UTM tags, approximate location (country,
+  region, city, from the IP address at the time of the request), browser, system, device type,
+  screen size, language, and a visitor code. The IP address is never stored; the code is a hash
+  of it, the browser and a salt that changes every month, so it cannot be followed for longer.
+- **Where it is not loaded**: `noindex` pages (sign-in, account, consent), "not found" pages,
+  while a learner is signed in, and when the browser sends Do Not Track. It is never linked to a
+  `user` row or a learner id; do not add that.
+- **Off by default**: the tag is only on when `UMAMI_WEBSITE_ID` is set
+  (`dashboard/src/lib/analytics.ts`), so a LessonFolk you run yourself measures nothing.
+- **Where it lives**: its own Postgres database `umami` and role on the same server (created by
+  `deploy/deploy.sh`; the app role cannot read it). The script and the collect endpoint are served
+  from the site's own address under `/u` (`deploy/Caddyfile`, the only two paths forwarded). The
+  Umami dashboard is not reachable from the internet: open it through an SSH tunnel
+  (`deploy/.env.example`).
+- **Retention**: 25 months at most. `deploy/purge-analytics.sh` deletes older rows; run it from
+  cron. Its database is in the nightly backup like the other one (35 days).
+- **Legal basis** in the notice: legitimate interest. The opt-out is Do Not Track.
+
+Keep the `/privacy` text (`privacy.measure` in `dashboard/src/i18n/en.ts`) in step with this list.
+The "Visit statistics" section only shows on a server where `UMAMI_WEBSITE_ID` is set, so a
+notice never says a server measures visits when it does not.
 
 ## Download all my data
 

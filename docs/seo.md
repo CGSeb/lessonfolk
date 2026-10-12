@@ -51,3 +51,17 @@ Pages are rendered on the server, so their text is in the HTML without JavaScrip
 ## For the site owner (needs your accounts)
 
 Once the site is public: add it to [Google Search Console](https://search.google.com/search-console) and [Bing Webmaster Tools](https://www.bing.com/webmasters), submit `/sitemap.xml`, and use the GitHub repository description and topics (for example `ai`, `education`, `mcp`, `ai-tutor`) with the same wording as the site.
+
+## Visit statistics and tagged links
+
+The hosted site counts visits with a self-hosted Umami (no cookie, see [privacy](privacy.md#audience-measurement-visit-statistics)). To see which channel brings people, put a UTM tag on every link you post, and use the same names every time so the channels add up:
+
+| Where you post | Link |
+|---|---|
+| TikTok bio | `https://<site>/?utm_source=tiktok&utm_medium=social` |
+| YouTube Shorts | `?utm_source=youtube&utm_medium=social` |
+| LinkedIn | `?utm_source=linkedin&utm_medium=social` |
+| Hacker News, Reddit | `?utm_source=hackernews&utm_medium=community` or `?utm_source=reddit&utm_medium=community` |
+| A directory or a list | `?utm_source=<its name>&utm_medium=directory` |
+
+Add `&utm_campaign=<short-name>` to tell two posts of the same channel apart (for example `utm_campaign=short-3`). Umami's Sources and UTM reports then show visits per tag.
