@@ -232,6 +232,13 @@ export const en = {
     finalTitle: 'Ready for your first lesson?',
     finalBody: 'Sign in, connect your AI chat and say hello to your tutor.',
   },
+  notFound: {
+    title: 'Page not found',
+    heading: 'We could not find this page',
+    body: 'The page you asked for does not exist. It may have been moved or removed, or the address may have a typo.',
+    home: 'Back to the home page',
+    courses: 'Browse the courses',
+  },
   home: {
     title: 'Home',
     heading: 'Welcome to LessonFolk',
