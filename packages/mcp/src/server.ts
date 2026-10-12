@@ -111,8 +111,10 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     }
   };
 
-  const readOnly = { readOnlyHint: true, openWorldHint: false } as const;
-  const writes = { readOnlyHint: false, destructiveHint: false, openWorldHint: false } as const;
+  // All four hints are set on every tool (some directories reject tools that leave one out).
+  // Every write sets the same end state when repeated, so all are idempotent.
+  const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
+  const writes = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 
   // --- Read tools ---------------------------------------------------------------
 
@@ -124,6 +126,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         "The learner's saved progress (progress.json v1 shape): profile (name, experience, goal, language, level, interests), " +
         'path with its reason, current lesson, and every started lesson with status, dates, score and notes. ' +
         'Empty profile and lessons mean a new learner: start with onboarding. Call this first in every session.',
+      inputSchema: z.object({}),
       annotations: readOnly,
     },
     () => read(() => store.getProgress(userId)),
@@ -138,6 +141,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'whose prerequisites are done or skipped, following the learner\'s path first ("next"). "all_done" means every lesson is finished; ' +
         '"blocked" means none is available. unknownPathIds lists path courses that no longer exist (tell the learner). ' +
         'Does not change anything: call start_lesson to begin it.',
+      inputSchema: z.object({}),
       annotations: readOnly,
     },
     () =>

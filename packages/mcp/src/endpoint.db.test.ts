@@ -103,6 +103,10 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     );
     for (const tool of tools) {
       expect(tool.description?.length).toBeGreaterThan(40);
+      // Every tool declares all four hints with explicit booleans (some directories reject the others).
+      for (const hint of ['readOnlyHint', 'destructiveHint', 'idempotentHint', 'openWorldHint'] as const) {
+        expect(typeof tool.annotations?.[hint], `${tool.name} ${hint}`).toBe('boolean');
+      }
       const properties = Object.keys((tool.inputSchema as { properties?: object }).properties ?? {});
       expect(properties.some((p) => /user/i.test(p))).toBe(false);
     }
@@ -157,6 +161,29 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
 
     const stored = JSON.parse(text(await call(client, 'get_progress')));
     expect(stored.lessons[L1].status).toBe('done');
+  });
+
+  it('skips a course after the level check, resets it, and imports a saved progress', async () => {
+    const client = await connect(await addUser(`placement-${era}`), era);
+    await call(client, 'set_profile', { name: 'Grace', level: 'intermediate' });
+
+    const placed = progressOf(await call(client, 'level_check_skip_course', { courseId: 'ai-foundations' }));
+    for (const id of [L1, L2, L3]) expect(placed.lessons[id].status).toBe('skipped');
+
+    const listed = JSON.parse(text(await call(client, 'list_courses')));
+    expect(listed[0].lessons.map((l: { status: string }) => l.status)).toEqual(Array(3).fill('skipped_after_level_check'));
+
+    const reset = progressOf(await call(client, 'reset_course', { courseId: 'ai-foundations' }));
+    for (const id of [L1, L2, L3]) expect(reset.lessons[id]).toBeUndefined();
+
+    await call(client, 'start_lesson', { lessonId: L1 });
+    await call(client, 'complete_lesson', { lessonId: L1, score: 0.8, notes: 'Clear.' });
+    const saved = JSON.parse(text(await call(client, 'get_progress')));
+
+    const other = await connect(await addUser(`import-${era}`), era);
+    const imported = progressOf(await call(other, 'import_progress', { progress: saved }));
+    expect(imported.profile).toMatchObject({ name: 'Grace', level: 'intermediate' });
+    expect(imported.lessons[L1]).toMatchObject({ status: 'done', score: 0.8 });
   });
 
   it('returns store errors as readable tool errors, and changes nothing', async () => {
