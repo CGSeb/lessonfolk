@@ -45,8 +45,28 @@ services:
       LESSONFOLK_OPERATOR: ${LESSONFOLK_OPERATOR:-}
       LESSONFOLK_PRIVACY_CONTACT: ${LESSONFOLK_PRIVACY_CONTACT:-}
       LESSONFOLK_DATA_LOCATION: ${LESSONFOLK_DATA_LOCATION:-}
+      # Id of the site in Umami (see .env.example). Without it, no page is measured.
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
     # No published port: Caddy reaches it on the internal network. Pending migrations are
     # applied by the image's start command before the server starts.
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+    restart: unless-stopped
+
+  # Audience measurement (docs/privacy.md): no cookie, no IP address stored. It has its own
+  # database and role (created by deploy.sh), which the app cannot read. Caddy forwards only the
+  # tracker script and the collect endpoint to it. Its dashboard is published on this server's
+  # loopback address only: open it through an SSH tunnel (see .env.example).
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest@sha256:85909afc45bdcda1917394594a087421fdbb05610fded0fa9f6fb861abb2f367
+    environment:
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD:?Set UMAMI_DB_PASSWORD in .env}@db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET in .env}
+      DISABLE_TELEMETRY: "1"
+    ports:
+      - "127.0.0.1:${UMAMI_PORT:-3001}:3000"
     depends_on:
       db:
         condition: service_healthy
@@ -67,6 +87,7 @@ services:
       - caddy-config:/config
     depends_on:
       - app
+      - umami
     logging: *logging
     restart: unless-stopped
 

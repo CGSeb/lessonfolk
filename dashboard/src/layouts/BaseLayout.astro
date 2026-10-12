@@ -10,6 +10,7 @@ import { t } from '../i18n/en';
 import CopyButtons from '../components/CopyButtons.astro';
 import LiveRefresh from '../components/LiveRefresh.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import { analyticsTag } from '../lib/analytics';
 import { signInHref } from '../lib/auth/redirect';
 import { SHARE_IMAGE_ALT, SHARE_IMAGE_PATH, absoluteUrl, serializeJsonLd } from '../lib/seo';
 import { siteOrigin } from '../lib/site-url';
@@ -56,6 +57,12 @@ const origin = siteOrigin(Astro.url);
 const canonical = absoluteUrl(origin, path === '/' ? '/' : path);
 const shareImage = absoluteUrl(origin, SHARE_IMAGE_PATH);
 const hidden = noindex || Astro.response.status === 404;
+// Audience measurement (Umami), public pages only; nothing unless UMAMI_WEBSITE_ID is set.
+const analytics = analyticsTag(origin, {
+  noindex,
+  notFound: Astro.response.status === 404,
+  signedIn: authMode === 'oauth' && Boolean(user),
+});
 ---
 
 <html lang="en">
@@ -87,6 +94,18 @@ const hidden = noindex || Astro.response.status === 404;
     <link rel="alternate" type="text/plain" href="/llms.txt" title="LessonFolk for AI assistants" />
     <title>{fullTitle}</title>
     {jsonLd && <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}
+    {
+      analytics && (
+        <script
+          is:inline
+          defer
+          src={analytics.src}
+          data-website-id={analytics.websiteId}
+          data-host-url={analytics.hostUrl}
+          data-do-not-track="true"
+        />
+      )
+    }
   </head>
   <body>
     <a class="skip-link" href="#main">{t('a11y.skipToContent')}</a>
@@ -159,7 +178,7 @@ const hidden = noindex || Astro.response.status === 404;
                 </details>
               ) : (
                 path !== '/sign-in' && (
-                  <a class="account__button" href={signInLink}>
+                  <a class="account__button" href={signInLink} data-umami-event="sign-in">
                     {t('auth.signIn')}
                   </a>
                 )
