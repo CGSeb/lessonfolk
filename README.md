@@ -9,7 +9,7 @@
 
 <p align="center"><a href="https://lessonfolk.com"><strong>lessonfolk.com</strong></a></p>
 
-[![M8ven Score](https://m8ven.ai/badge/mcp/cgseb-lessonfolk-9h289l?v=ec2840811d40b4d5505c9ea274bc62b6)](https://m8ven.ai/mcp/cgseb-lessonfolk-9h289l?s=readme)
+[![M8ven Score](https://m8ven.ai/badge/mcp/cgseb-lessonfolk-9h289l)](https://m8ven.ai/mcp/cgseb-lessonfolk-9h289l?variant=verified)
 
 https://github.com/user-attachments/assets/bc8eccbd-1f95-4d20-92f5-15d528b05d47
 
