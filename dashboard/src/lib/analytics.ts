@@ -12,6 +12,11 @@ export const ANALYTICS_PATH = '/u';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Whether this server measures visits at all (a valid UMAMI_WEBSITE_ID is set). */
+export function analyticsEnabled(env: Record<string, string | undefined> = process.env): boolean {
+  return UUID.test(env.UMAMI_WEBSITE_ID?.trim() ?? '');
+}
+
 export interface AnalyticsTag {
   /** Address of the tracker script. */
   src: string;
@@ -30,8 +35,8 @@ export function analyticsTag(
   page: { noindex: boolean; notFound: boolean; signedIn: boolean },
   env: Record<string, string | undefined> = process.env,
 ): AnalyticsTag | null {
-  const websiteId = env.UMAMI_WEBSITE_ID?.trim();
-  if (!websiteId || !UUID.test(websiteId)) return null;
+  if (!analyticsEnabled(env)) return null;
+  const websiteId = env.UMAMI_WEBSITE_ID!.trim();
   if (page.noindex || page.notFound || page.signedIn) return null;
   return { src: `${origin}${ANALYTICS_PATH}/script.js`, hostUrl: `${origin}${ANALYTICS_PATH}`, websiteId };
 }

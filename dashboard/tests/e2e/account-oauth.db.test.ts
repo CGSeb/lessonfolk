@@ -213,6 +213,8 @@ describe('signed in', () => {
     expect(privacy).toContain('What is collected');
     expect(privacy).toContain('How long');
     expect(privacy).toContain('Where it is stored');
+    // This server has no UMAMI_WEBSITE_ID: it measures nothing, so the notice must not say it does.
+    expect(privacy).not.toContain('Visit statistics');
     expect(privacy).toContain('IP address');
     expect(privacy).toContain('data protection authority');
     expect(privacy).toContain('Last updated');

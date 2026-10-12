@@ -57,6 +57,8 @@ learner's device (no cookie, no local storage) and the statistics are anonymous.
 - **Legal basis** in the notice: legitimate interest. The opt-out is Do Not Track.
 
 Keep the `/privacy` text (`privacy.measure` in `dashboard/src/i18n/en.ts`) in step with this list.
+The "Visit statistics" section only shows on a server where `UMAMI_WEBSITE_ID` is set, so a
+notice never says a server measures visits when it does not.
 
 ## Download all my data
 

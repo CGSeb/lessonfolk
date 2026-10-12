@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { analyticsTag } from './analytics';
+import { analyticsEnabled, analyticsTag } from './analytics';
 
 const ID = '3f0d6c1e-7a52-4c1b-9e0a-2d8f5b6a1c47';
 const PUBLIC = { noindex: false, notFound: false, signedIn: false };
 const ORIGIN = 'https://lessonfolk.example';
+
+describe('analyticsEnabled', () => {
+  it('is on only with a valid website id', () => {
+    expect(analyticsEnabled({ UMAMI_WEBSITE_ID: ID })).toBe(true);
+    expect(analyticsEnabled({})).toBe(false);
+    expect(analyticsEnabled({ UMAMI_WEBSITE_ID: 'not-an-id' })).toBe(false);
+  });
+});
 
 describe('analyticsTag', () => {
   it('points the tracker and its collect endpoint at the site itself', () => {
