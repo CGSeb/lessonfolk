@@ -127,8 +127,9 @@ Never commit `.progress/` or `.env`. Found a security problem? Report it private
 
 **Releases.** Publishing a GitHub release runs [`release.yml`](.github/workflows/release.yml):
 the same tests on the release's tag, then it publishes the Docker image to GHCR and deploys it
-to the hosted server (the files in [`deploy/`](deploy)). Before publishing, set `version` in
-`.claude/skills/lessonfolk-tutor/.claude-plugin/plugin.json` to the release number.
+to the hosted server (the files in [`deploy/`](deploy)). The learner plugin has its own version
+(`version` in `.claude/skills/lessonfolk-tutor/.claude-plugin/plugin.json`), independent of the
+release number: raise it only when the plugin changes.
 
 ## License
 

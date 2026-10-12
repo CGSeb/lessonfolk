@@ -127,9 +127,10 @@ building courses or contributing goes in it.
   procedure: edit `packages/mcp/prompts/*.md`, then run `npm run plugin:sync`.
 - **Names.** The plugin is not called `lessonfolk`, the name of the MCP server: the mod's own
   tools are `mcp__lessonfolk-tutor__*` and must not mix with the server's `mcp__lessonfolk__*`.
-- **Version.** `version` in the plugin's `plugin.json` is the LessonFolk release number.
-  Installed plugins update only when it changes, so set it to the new number before publishing
-  a release (the release workflow fails otherwise).
+- **Version.** `version` in the plugin's `plugin.json` is the plugin's own version, independent
+  of the LessonFolk release number. Installed plugins update only when it changes, so raise it
+  whenever the plugin changes (skills, companion, its MCP connection); a release that does not
+  touch the plugin leaves it as it is.
 
 ## Live refresh
 
