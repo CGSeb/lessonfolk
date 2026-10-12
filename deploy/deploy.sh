@@ -40,5 +40,9 @@ SQL
 
 # Pending database migrations run when the app container starts.
 $compose up -d --remove-orphans
+# Caddy reads its Caddyfile only when it starts, and `up` leaves it running when only that file
+# changed: reload it so a changed Caddyfile takes effect (no downtime; it keeps the old
+# configuration if the new one is invalid, and then this fails the deploy).
+$compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile
 docker image prune -f > /dev/null
 echo "Deployed $tag."
