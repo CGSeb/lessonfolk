@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../i18n/en';
+
+export const prerender = false;
+
+/** Shown by Astro for any address that matches no page. The layout keeps 404s out of search engines. */
+Astro.response.status = 404;
+---
+
+<BaseLayout title={t('notFound.title')}>
+  <section class="card stack not-found" aria-labelledby="not-found-heading">
+    <h1 id="not-found-heading">{t('notFound.heading')}</h1>
+    <p>{t('notFound.body')}</p>
+    <p>
+      <a href="/">{t('notFound.home')}</a> · <a href="/courses">{t('notFound.courses')}</a>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    max-width: 44rem;
+  }
+</style>

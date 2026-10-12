@@ -86,7 +86,9 @@ describe('path traversal', () => {
       const response = await fetch(`${server.url}/api/authors/${slug}/avatar`);
       const body = await response.text();
       expect(response.status, slug).toBe(404);
-      expect(body, slug).not.toContain('lessonfolk');
+      // The 404 page carries the site's name, so look for the file's content, not the name.
+      expect(body, slug).not.toContain('"workspaces"');
+      expect(body, slug).not.toContain('"name": "lessonfolk"');
     }
     for (const path of ['/..%2f..%2fpackage.json', '/%2e%2e/%2e%2e/package.json', '/.well-known/..%2f..%2fpackage.json']) {
       const response = await fetch(server.url + path);
