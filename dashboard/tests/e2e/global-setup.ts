@@ -28,7 +28,8 @@ export default function setup(project: TestProject) {
   const result = spawnSync(process.execPath, [astroBin, 'build', '--outDir', outDir], {
     cwd: dashboardDir,
     encoding: 'utf8',
-    env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0' },
+    // NODE_ENV=production: vitest sets it to "test", which would make import.meta.env.DEV true in the build (no CSP).
+    env: { ...process.env, NODE_ENV: 'production', NO_COLOR: '1', FORCE_COLOR: '0' },
   });
   const entry = join(outDir, 'server', 'entry.mjs');
   if (result.status !== 0 || !existsSync(entry)) {

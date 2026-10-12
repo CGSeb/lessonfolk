@@ -20,6 +20,14 @@ describe('securityHeaders', () => {
     expect(CONTENT_SECURITY_POLICY).not.toContain('form-action');
   });
 
+  it('leaves the CSP out in development only, keeping the other headers', () => {
+    const dev = securityHeaders(false, true);
+    expect(dev['Content-Security-Policy']).toBeUndefined();
+    expect(dev['X-Frame-Options']).toBe('DENY');
+    expect(securityHeaders(false, false)['Content-Security-Policy']).toBe(CONTENT_SECURITY_POLICY);
+    expect(securityHeaders(false)['Content-Security-Policy']).toBe(CONTENT_SECURITY_POLICY);
+  });
+
   it('sends HSTS only over HTTPS', () => {
     expect(securityHeaders(false)['Strict-Transport-Security']).toBeUndefined();
     expect(securityHeaders(true)['Strict-Transport-Security']).toMatch(/^max-age=\d{8,}/);

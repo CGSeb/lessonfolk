@@ -39,7 +39,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const response = early ?? ((await handle(context, next)) as Response);
   const settings = getAuthSettings();
   const https = settings.mode === 'oauth' && new URL(settings.baseURL).protocol === 'https:';
-  return withSecurityHeaders(response, https);
+  return withSecurityHeaders(response, https, import.meta.env.DEV);
 });
 
 /**
