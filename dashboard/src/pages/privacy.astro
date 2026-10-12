@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { t } from '../i18n/en';
+import { analyticsEnabled } from '../lib/analytics';
 
 export const prerender = false;
 
@@ -15,17 +16,21 @@ const contact = process.env.LESSONFOLK_PRIVACY_CONTACT?.trim();
 const location = process.env.LESSONFOLK_DATA_LOCATION?.trim();
 const operator = process.env.LESSONFOLK_OPERATOR?.trim();
 const where = location ? t('privacy.where', { location }) : t('privacy.whereUnknown');
-const sections = [
+// The visit statistics section is only true (and only shown) where the server measures visits.
+const measured = analyticsEnabled();
+const allSections = [
   {
     title: 'privacy.whatTitle',
     body: ['privacy.whatAccount', 'privacy.whatProgress', 'privacy.whatApps', 'privacy.whatTechnical', 'privacy.notCollected'],
   },
   { title: 'privacy.whyTitle', body: ['privacy.why'] },
   { title: 'privacy.howLongTitle', body: ['privacy.howLong'] },
+  { title: 'privacy.measureTitle', body: ['privacy.measure'] },
   { title: 'privacy.rightsTitle', body: ['privacy.rights'] },
   { title: 'privacy.sharedTitle', body: ['privacy.shared', 'privacy.aiApps'] },
   { title: 'privacy.ageTitle', body: ['privacy.age'] },
 ] as const;
+const sections = allSections.filter((section) => measured || section.title !== 'privacy.measureTitle');
 ---
 
 <BaseLayout title={t('privacy.title')} description={t('site.privacyDescription')}>
@@ -81,5 +86,11 @@ const sections = [
 <style>
   .privacy-page {
     max-width: 44rem;
+  }
+
+  /* Justified text is easier to read in these long paragraphs; hyphens avoid wide gaps. */
+  .privacy-page p {
+    text-align: justify;
+    hyphens: auto;
   }
 </style>

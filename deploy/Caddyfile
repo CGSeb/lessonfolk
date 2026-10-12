@@ -6,7 +6,21 @@
 	request_body {
 		max_size 8MB
 	}
-	reverse_proxy app:4321
+	# Audience measurement: only the tracker script and the collect endpoint of Umami are public,
+	# under the site's own address (the CSP allows nothing else). Its dashboard is not: it is
+	# reached through an SSH tunnel to the server's loopback port (see .env.example).
+	@umami path /u/script.js /u/api/send
+	handle @umami {
+		uri strip_prefix /u
+		reverse_proxy umami:3000
+	}
+	# Anything else under /u is not Umami's to serve.
+	handle /u/* {
+		respond 404
+	}
+	handle {
+		reverse_proxy app:4321
+	}
 }
 
 # www redirects to the bare domain. Its DNS record must point at this server too; until it does,
