@@ -406,6 +406,13 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(page.text).toContain('no-such-author');
   });
 
+  it('shows the custom 404 page for an unknown address', async () => {
+    const page = await getPage(server, '/no/such/page');
+    expect(page.status).toBe(404);
+    expect(page.text).toContain('We could not find this page');
+    expect(page.text).not.toContain('Astro');
+  });
+
   it('answers 404 for an unknown course', async () => {
     const page = await getPage(server, '/courses/no-such-course');
     expect(page.status).toBe(404);
