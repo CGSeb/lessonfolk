@@ -40,10 +40,12 @@ const HSTS = 'max-age=31536000; includeSubDomains';
 /**
  * Headers for a response. `https` is true when people reach the site over HTTPS (the public
  * address starts with `https://`): HSTS is only sent then, so a local `http://` run is never pinned.
+ * `dev` is true under `astro dev`: Astro adds no CSP there, and Vite injects inline `<style>` tags and
+ * a blob: worker (dev toolbar) that the strict CSP would block, so the CSP is left out. Builds keep it.
  */
-export function securityHeaders(https: boolean): Record<string, string> {
+export function securityHeaders(https: boolean, dev = false): Record<string, string> {
   return {
-    'Content-Security-Policy': CONTENT_SECURITY_POLICY,
+    ...(dev ? {} : { 'Content-Security-Policy': CONTENT_SECURITY_POLICY }),
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -54,8 +56,8 @@ export function securityHeaders(https: boolean): Record<string, string> {
 }
 
 /** A copy of `response` with the security headers added; headers a route already set are kept. */
-export function withSecurityHeaders(response: Response, https: boolean): Response {
+export function withSecurityHeaders(response: Response, https: boolean, dev = false): Response {
   const headers = new Headers(response.headers);
-  for (const [name, value] of Object.entries(securityHeaders(https))) if (!headers.has(name)) headers.set(name, value);
+  for (const [name, value] of Object.entries(securityHeaders(https, dev))) if (!headers.has(name)) headers.set(name, value);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
