@@ -1,0 +1,3 @@
+id: context-engineering-for-agents
+title: Ingénierie de contexte pour agents de longue durée
+description: "Gardez un agent affûté pendant des heures de travail : traitez la fenêtre de contexte comme un budget, compactez l’historique sans perdre le fil, gardez la mémoire en dehors de la fenêtre et déléguez à des sous-agents quand c’est utile."
