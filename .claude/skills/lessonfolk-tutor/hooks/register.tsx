@@ -15,9 +15,9 @@ import {
   TOOL_PREFIX,
   togglePick,
 } from './companion'
+import { type Lang, words } from './i18n'
 
 const PANE = 'course-companion'
-const TITLE = 'Course companion'
 // The tools this mod registers: `mcp__<plugin>__<tool>`.
 const OWN_PREFIX = 'mcp__lessonfolk-tutor__'
 const TOOL = 'mcp__lessonfolk-tutor__key_idea'
@@ -32,14 +32,6 @@ const snapshot = atom({ plugin: 'lessonfolk-tutor', key: 'snapshot' } as const, 
 const ideas = atom({ plugin: 'lessonfolk-tutor', key: 'ideas' } as const, NO_IDEAS)
 // The LessonFolk instance the Dashboard button opens (local or hosted).
 const instance = atom({ plugin: 'lessonfolk-tutor', key: 'instance' } as const, DEFAULT_INSTANCE)
-
-// The learner commands of AGENTS.md, offered as buttons above the prompt.
-const COMMANDS = [
-  { key: 'continue', label: 'Continue', text: 'continue' },
-  { key: 'quiz', label: 'Quiz me', text: 'quiz me' },
-  { key: 'skip', label: 'Skip', text: 'skip this' },
-  { key: 'progress', label: 'My progress', text: 'show my progress' },
-]
 
 const isSkill = (name: string | undefined, skill: string) => name === skill || name?.endsWith(`:${skill}`)
 
@@ -99,6 +91,9 @@ async function refresh($: EngineInterface, isQuiet = false) {
   const loaded = await load(callServer($, failures))
   if (loaded.view.state === 'offline') loaded.view = { ...loaded.view, reason: [...new Set(failures)].slice(0, 3) }
   const before = await read($, snapshot)
+  // Offline, the language of the last read is kept.
+  loaded.view.lang ??= lastLang
+  lastLang = loaded.view.lang
   const previous = before ? { snapshot: before, view: await read($, view) } : undefined
   await update($, view, () => loaded.view)
   await update($, snapshot, () => loaded.snapshot)
@@ -112,14 +107,18 @@ async function refresh($: EngineInterface, isQuiet = false) {
 // survives a restart, but the pane does not, so the pane opens once per run of the module.
 let hasOpened = false
 
+// The learner's language as of the last read, for words shown outside a render.
+let lastLang: Lang | undefined
+
 // Opens the pane; when the app keeps it waiting undrawn, says why instead of failing silently.
 async function openPane($: EngineInterface) {
   hasOpened = true
-  const opened = await $.ui.open({ id: PANE, title: TITLE }).catch((error: unknown) => ({
+  const text = words(lastLang)
+  const opened = await $.ui.open({ id: PANE, title: text.title }).catch((error: unknown) => ({
     isPlaced: false as const,
     reason: error instanceof Error ? error.message : String(error),
   }))
-  if (!opened.isPlaced) $.ui.toast(`${TITLE} waits: ${opened.reason}`)
+  if (!opened.isPlaced) $.ui.toast(text.waits(opened.reason))
 
   return opened
 }
@@ -225,7 +224,7 @@ export const register: Register = on => {
       ...ran,
       context: [
         ...(ran.context ?? []),
-        `A "${TITLE}" pane shows the learner their course, lessons and the current lesson's ` +
+        `A "Course companion" pane shows the learner their course, lessons and the current lesson's ` +
           `key ideas. It follows the LessonFolk server on its own. While you teach, call ` +
           `the ${TOOL} tool as you start each key idea (status "active") and once the learner ` +
           `has it (status "done"). After asking a question with a fixed set of answers ` +
@@ -300,24 +299,25 @@ export const register: Register = on => {
     if (!offered && !(await read($, isActive))) return next(e)
 
     const { Box, Button, Link, Text } = $.ui.resolve(e)
+    const text = words((await read($, view)).lang)
 
     // Always last: the pane, and the dashboard of the instance the tutor works with.
     const tools = [
       <Text key="sep" dimColor>·</Text>,
-      <Button key="pane" label="Companion" onPress={() => void openPane($)} />,
-      <Link key="dashboard" href={await read($, instance)} label="Dashboard ↗" />,
+      <Button key="pane" label={text.companion} onPress={() => void openPane($)} />,
+      <Link key="dashboard" href={await read($, instance)} label={text.dashboard} />,
     ]
 
     // The tutor's question takes the band until it is answered; then the commands come back.
     if (offered) {
-      const send = (text: string) => {
+      const send = (reply: string) => {
         void update($, choices, () => null)
-        void $.prompt.submit({ text, asUser: true })
+        void $.prompt.submit({ text: reply, asUser: true })
       }
 
       return (
         <Box flexWrap="wrap" gap={1}>
-          <Text dimColor>Answer:</Text>
+          <Text dimColor>{text.answer}</Text>
           {offered.options.map((o, i) => (
             <Button
               key={`choice-${i}`}
@@ -328,7 +328,7 @@ export const register: Register = on => {
             />
           ))}
           {offered.isMulti && offered.picked.length > 0 && (
-            <Button key="send" label="Send" onPress={() => send(replyOf(offered))} />
+            <Button key="send" label={text.send} onPress={() => send(replyOf(offered))} />
           )}
           {tools}
         </Box>
@@ -337,8 +337,8 @@ export const register: Register = on => {
 
     return (
       <Box gap={1}>
-        <Text dimColor>Say:</Text>
-        {COMMANDS.map(c => (
+        <Text dimColor>{text.say}</Text>
+        {text.commands.map(c => (
           <Button key={c.key} label={c.label} onPress={() => void $.prompt.submit({ text: c.text, asUser: true })} />
         ))}
         {tools}
@@ -350,18 +350,17 @@ export const register: Register = on => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const v = await read($, view)
     const marks = await read($, ideas)
+    const text = words(v.lang)
 
     if (v.state === 'no-progress' || v.state === 'offline' || v.state === 'all-done') {
       const lines = {
-        'no-progress': ['No course started yet.', 'Say "start" to begin.'],
-        offline: ['Your progress could not be read.', 'Check that the LessonFolk server is connected (/mcp).'],
-        'all-done': ['You have finished every course. Well done!', 'Ask the tutor what to explore next.'],
+        'no-progress': text.noProgress,
+        offline: text.offline,
+        'all-done': text.allDone,
       }[v.state]
 
       const rules = refusedRules(v.reason)
-      const hint = rules.length > 0
-        ? ["The app refused the pane's read.", 'Allow it in ~/.claude/settings.json (permissions.allow):']
-        : (v.reason ?? [])
+      const hint = rules.length > 0 ? text.refused : (v.reason ?? [])
 
       return (
         <Box flexDirection="column">
@@ -371,10 +370,10 @@ export const register: Register = on => {
           {rules.length > 0 && (
             <Button
               key="copy-rules"
-              label="Copy rules"
+              label={text.copyRules}
               onPress={async press => {
                 const { isCopied } = await $.ui.copy({ text: rulesSnippet(rules), surface: press.surface })
-                $.ui.toast(isCopied ? 'Copied: paste it into ~/.claude/settings.json' : 'Could not copy to the clipboard')
+                $.ui.toast(isCopied ? text.copied : text.copyFailed)
               }}
             />
           )}
@@ -393,20 +392,20 @@ export const register: Register = on => {
       <Box flexDirection="column">
         <Text bold>{v.courseTitle}</Text>
         {(v.themeTitle || v.level) && (
-          <Text dimColor>{[v.themeTitle, v.level].filter(Boolean).join(' · ')}</Text>
+          <Text dimColor>{[v.themeTitle, v.level && (text.levels[v.level] ?? v.level)].filter(Boolean).join(' · ')}</Text>
         )}
         <Text> </Text>
         <Text bold>
-          Lessons {finished}/{lessons.length}
+          {text.lessons} {finished}/{lessons.length}
         </Text>
         {lessons.map(l => (
           <Text dimColor={l.status !== 'current'} bold={l.status === 'current'}>
             {mark(l.status)} {l.title}
-            {l.status === 'skipped' ? ' (skipped)' : ''}
+            {l.status === 'skipped' ? ` ${text.skipped}` : ''}
           </Text>
         ))}
         {v.current && v.current.ideas.length > 0 && <Text> </Text>}
-        {v.current && v.current.ideas.length > 0 && <Text bold>Key ideas</Text>}
+        {v.current && v.current.ideas.length > 0 && <Text bold>{text.keyIdeas}</Text>}
         {v.current?.ideas.map((idea, i) => (
           <Text dimColor={ideaMark(i + 1) === '✓'} bold={ideaMark(i + 1) === '●'}>
             {ideaMark(i + 1)} {i + 1}. {idea}
@@ -415,7 +414,7 @@ export const register: Register = on => {
         {v.next && <Text> </Text>}
         {v.next && (
           <Text>
-            Next: {v.next.title}
+            {text.next} {v.next.title}
             {v.next.courseTitle ? ` (${v.next.courseTitle})` : ''}
           </Text>
         )}

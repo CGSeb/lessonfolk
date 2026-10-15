@@ -165,6 +165,28 @@ describe('course companion', () => {
     await ui.unmount()
   })
 
+  test('a French learner gets the pane, the commands band and the toasts in French', async ($, on) => {
+    const server = newServer()
+    const seen = engine(on, server)
+    await save($, server, progress('basics/01-one', { 'basics/01-one': 'in_progress' }, undefined, 'fr'), 't1')
+    await save($, server, progress('basics/02-two', { 'basics/01-one': 'done', 'basics/02-two': 'in_progress' }, undefined, 'fr'), 't2')
+
+    expect(seen.toasts).toContain('Leçon terminée : Lesson one')
+    const pane = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await pane.find({ type: 'Text', text: 'Understanding AI · débutant' })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: 'Leçons 1/2' })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: 'Suivante : Lesson three (Next Steps)' })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: 'Idées clés' })).toBeDefined()
+    await pane.unmount()
+
+    const band = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...BAND })
+    expect(await band.find({ type: 'Button', text: 'Interroge-moi' })).toBeDefined()
+    expect(await band.find({ type: 'Button', text: 'Quiz me' })).toBeUndefined()
+    await band.press({ key: 'quiz' })
+    await band.unmount()
+    expect(seen.prompts).toEqual(['interroge-moi'])
+  })
+
   test('a server that does not answer says so in the pane', async ($, on) => {
     const server = newServer(STARTED)
     server.isUp = false

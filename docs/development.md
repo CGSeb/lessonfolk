@@ -136,6 +136,10 @@ building courses or contributing goes in it.
   equal.
 - **Skills.** An installed plugin cannot read this repository, so each skill carries its
   procedure: edit `packages/mcp/prompts/*.md`, then run `npm run plugin:sync`.
+- **Language.** The companion shows its words (pane, buttons, toasts) in the learner's profile
+  language, English when it is unknown or not translated. They live in
+  `hooks/i18n.ts`: add a language there and in `langOf`. The skills' descriptions also list a few
+  trigger phrases in French. Everything the mod tells the model stays in English.
 - **Names.** The plugin is not called `lessonfolk`, the name of the MCP server: the mod's own
   tools are `mcp__lessonfolk-tutor__*` and must not mix with the server's `mcp__lessonfolk__*`.
 - **Version.** `version` in the plugin's `plugin.json` is the plugin's own version, independent

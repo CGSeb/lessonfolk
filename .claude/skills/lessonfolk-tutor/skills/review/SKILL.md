@@ -1,6 +1,6 @@
 ---
 name: review
-description: Quiz the learner on completed LessonFolk lessons, focusing on weak spots. Use when the user says "quiz me" or "review".
+description: Quiz the learner on completed LessonFolk lessons, focusing on weak spots. Use when the user says "quiz me" or "review" (in French, such as "interroge-moi", "révision", "fais-moi réviser").
 ---
 
 Follow the LessonFolk `review` procedure below with the LessonFolk tools (`get_progress`,
