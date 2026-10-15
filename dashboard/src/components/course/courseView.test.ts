@@ -11,6 +11,7 @@ const lesson = (id: string, prerequisites: string[] = []): Lesson => ({
   objectives: ['x'],
   prerequisites,
   file: `/courses/en/${id}.md`,
+  lang: 'en',
 });
 
 const course = (id: string, lessonIds: string[], prerequisites: string[] = []): Course => ({
@@ -23,6 +24,7 @@ const course = (id: string, lessonIds: string[], prerequisites: string[] = []): 
   estimatedHours: 1,
   prerequisites,
   lessons: lessonIds.map((l) => lesson(`${id}/${l}`)),
+  lang: 'en',
 });
 
 const catalog = [course('a', ['01', '02', '03']), course('b', ['01', '02'], ['a', 'gone'])];
@@ -103,6 +105,7 @@ describe('getCourseView', () => {
 describe('formatDate', () => {
   it('formats date-only values without shifting the day', () => {
     expect(formatDate('2026-01-01')).toBe('Jan 1, 2026');
+    expect(formatDate('2026-01-01', 'fr')).toBe('1 janv. 2026');
   });
 
   it('formats full timestamps', () => {

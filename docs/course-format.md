@@ -21,11 +21,38 @@ courses/
       course.yaml
       01-what-is-ai.md        # lesson file: NN-lesson-slug.md
       02-how-machines-learn.md
-  fr/                         # optional translation, same ids and file names
+  fr/                         # optional translation: only the files translated so far
+    themes.yaml               # optional
+    ai-foundations/
+      course.yaml             # optional
+      01-what-is-ai.md        # each lesson is optional too
 ```
 
 Translations reuse the same course, lesson and theme ids, so progress is shared across
-languages. A translation has its own `themes.yaml` with translated titles and descriptions.
+languages. `en` holds the courses; other languages are layered on top of it: see
+[Translations](#translations).
+
+## Translations
+
+A language folder (`courses/fr/`) holds only translated files, with the same names as in
+`courses/en/`. Whatever it lacks is shown in English, so a course can be translated one lesson
+at a time. The dashboard shows the pages in the visitor's language with this fallback. The
+tutor's course tools use the learner's profile language (saved as a code such as `fr`): they
+return the translated lesson, or the English one, which the tutor still teaches in the
+learner's language.
+
+- **What comes from English.** Which courses exist, their order (`index.yaml`, not needed in a
+  translation), lessons, levels, themes, authors, durations and prerequisites.
+- **`themes.yaml`**: the themes to translate, with their `id`, `title` and `description`.
+- **`course.yaml`**: `id`, `title` and `description`. Other fields are ignored, so you may copy
+  the whole English file.
+- **Lesson files**: a copy of the English lesson with its text translated. The frontmatter
+  `id` stays; `title` and `objectives` are translated (the other fields are read from English).
+  Keep the `##` section headings and the `Good answer:` labels in English: the tutor and
+  `check:courses` rely on them.
+
+`npm run check:courses` reports a translation file that matches no English course, lesson or
+theme, and a translated lesson whose sections are broken (the English one is shown instead).
 
 ## `index.yaml`
 

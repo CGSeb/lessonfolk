@@ -6,5 +6,9 @@ declare namespace App {
     authMode: import('./lib/auth/settings').AuthMode;
     /** The current user (`null` when signed out). Progress belongs to `user.id`. Set by src/middleware.ts. */
     user: import('./lib/auth/current-user').CurrentUser | null;
+    /** The visitor's interface language (cookie, then browser language, then English). Set by src/middleware.ts. */
+    lang: import('./i18n').Locale;
+    /** UI strings in `lang`, falling back to English. Set by src/middleware.ts. */
+    t: import('./i18n').Translate;
   }
 }

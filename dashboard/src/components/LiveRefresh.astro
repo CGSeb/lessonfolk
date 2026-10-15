@@ -1,11 +1,11 @@
 ---
+const { t } = Astro.locals;
 /**
  * Keeps the page live: listens to /api/events and, when the learner's progress is
  * saved (e.g. the tutor completes a lesson through MCP) or the course files change,
  * re-fetches the page and swaps the <main> content in place.
  * Progressive enhancement: without JavaScript the page simply stays as rendered.
  */
-import { t } from '../i18n/en';
 ---
 
 <div

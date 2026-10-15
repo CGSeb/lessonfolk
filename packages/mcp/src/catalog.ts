@@ -9,20 +9,30 @@ import {
   type Lesson,
   type Progress,
   CourseValidationError,
+  DEFAULT_LANG,
   getLessonStatus,
   inspectCatalog,
   isPlacementSkip,
+  languageCode,
   listLanguages,
 } from '@lessonfolk/core';
 
-export const DEFAULT_LANG = 'en';
+export { DEFAULT_LANG };
 
-/** The catalog of `lang`, or of `en` when there is no translation. Throws on broken course files. */
+/**
+ * The catalog of `lang`: translated text where `courses/<lang>/` has it, English for the rest
+ * (all English when there is no translation). Throws on broken course files.
+ */
 export function readCatalog(coursesDir: string, lang = DEFAULT_LANG): Catalog {
   const chosen = listLanguages(coursesDir).includes(lang) ? lang : DEFAULT_LANG;
   const { catalog, issues } = inspectCatalog(chosen, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog;
+}
+
+/** The course language to use: the one asked for, else the learner's profile language, else English. */
+export function learnerLang(progress: Progress, asked?: string): string {
+  return asked ?? languageCode(progress.profile.language) ?? DEFAULT_LANG;
 }
 
 /** Courses in `index.yaml` order of the default language: the catalog the progress rules use. */

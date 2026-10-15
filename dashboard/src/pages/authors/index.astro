@@ -3,11 +3,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Notice from '../../components/Notice.astro';
 import AuthorAvatar from '../../components/authors/AuthorAvatar.astro';
 import { getAuthorList } from '../../components/authors/authorView';
-import { t } from '../../i18n/en';
 import { authorsFilePath, inspectCatalog } from '@lessonfolk/core';
 
+const { t } = Astro.locals;
+
 // Read on every request so the page reflects the latest course files.
-const { catalog, issues } = inspectCatalog('en');
+const { catalog, issues } = inspectCatalog(Astro.locals.lang);
 const authors = getAuthorList(catalog.authors).map((item) => ({
   ...item,
   countText: t(item.courseCount === 1 ? 'author.courseCountOne' : 'author.courseCountOther', {

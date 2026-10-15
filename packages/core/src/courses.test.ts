@@ -1,6 +1,7 @@
 import {
   appendFileSync,
   cpSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -15,6 +16,7 @@ import {
   findLesson,
   inspectAllCourses,
   inspectCatalog,
+  languageCode,
   listLanguages,
   loadAuthors,
   loadCatalog,
@@ -91,8 +93,11 @@ describe('loadCatalog (real courses)', () => {
     expect(themes[0].courses.map((c) => c.id)).toContain('ai-foundations');
   });
 
-  it('throws a clear error for an unknown language', () => {
-    expect(() => loadCatalog('xx')).toThrow(/index\.yaml not found for language "xx"/);
+  it('shows the English courses for a language with no translation', () => {
+    const english = loadCatalog('en');
+    const unknown = inspectCatalog('xx');
+    expect(unknown.catalog.lang).toBe('xx');
+    expect(unknown.catalog.courses).toEqual(english);
   });
 });
 
@@ -493,3 +498,132 @@ describe('loadCatalog (live edits)', () => {
     );
   });
 });
+
+describe('translations', () => {
+  const lines = (...parts: string[]) => parts.join('\n') + '\n';
+  const unknownTheme = lines('themes:', '  - id: no-such-theme', '    title: X', '    description: Y');
+
+  /** A copy of the valid fixture with `files` (path → content) written under it. */
+  function withFiles(files: Record<string, string>): string {
+    const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-courses-'));
+    cpSync(validDir, dir, { recursive: true });
+    for (const [path, content] of Object.entries(files)) {
+      mkdirSync(join(dir, path, '..'), { recursive: true });
+      writeFileSync(join(dir, path), content);
+    }
+    return dir;
+  }
+
+  /** The English lesson with a French title and objectives (section headings stay English). */
+  function frenchLesson(dir: string, slug: string, title: string): string {
+    const english = readFileSync(join(dir, 'en', 'ai-foundations', `${slug}.md`), 'utf8').replaceAll('\r\n', '\n');
+    return english
+      .replace(/^title: .*$/m, `title: ${title}`)
+      .replace(/objectives:\n(?: {2}- .*\n)+/, 'objectives:\n  - Expliquer ce qu’est l’IA\n');
+  }
+
+  function writeLesson(dir: string, slug: string, text: string) {
+    mkdirSync(join(dir, 'fr', 'ai-foundations'), { recursive: true });
+    writeFileSync(join(dir, 'fr', 'ai-foundations', `${slug}.md`), text);
+  }
+
+  /** `inspectCatalog('fr')` on `dir`, which is then removed. */
+  function inspectFrench(dir: string) {
+    try {
+      return inspectCatalog('fr', dir);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it('uses the translated text and keeps English for the rest', () => {
+    const dir = withFiles({
+      'fr/themes.yaml': lines('themes:', '  - id: understanding-ai', '    title: Comprendre l’IA', '    description: Ce qu’est l’IA.'),
+      'fr/ai-foundations/course.yaml': lines('id: ai-foundations', 'title: Les bases de l’IA', 'description: Partir de zéro.'),
+    });
+    writeLesson(dir, '01-what-is-ai', frenchLesson(dir, '01-what-is-ai', 'Qu’est-ce que l’IA ?'));
+    const frenchFile = join(dir, 'fr', 'ai-foundations', '01-what-is-ai.md');
+    const { catalog, issues, warnings } = inspectFrench(dir);
+    expect(issues).toEqual([]);
+    expect(warnings).toHaveLength(inspectCatalog('en', validDir).warnings.length);
+
+    const [course] = catalog.courses;
+    expect(catalog.lang).toBe('fr');
+    expect(course).toMatchObject({ id: 'ai-foundations', title: 'Les bases de l’IA', lang: 'fr', level: 'beginner' });
+    expect(course.lessons.map((l) => [l.title, l.lang])).toEqual([
+      ['Qu’est-ce que l’IA ?', 'fr'],
+      ['How do machines learn?', 'en'],
+      ['What is a large language model?', 'en'],
+    ]);
+    expect(course.lessons[0]).toMatchObject({
+      id: 'ai-foundations/01-what-is-ai',
+      estimatedMinutes: 15,
+      objectives: ['Expliquer ce qu’est l’IA'],
+      file: frenchFile,
+    });
+
+    // Themes and authors point to the translated courses; untranslated themes stay English.
+    expect(catalog.themes.map((th) => th.title)).toEqual(['Comprendre l’IA', 'Using AI tools', 'Building with AI', 'AI and society']);
+    expect(catalog.themes[0].courses[0].title).toBe('Les bases de l’IA');
+    expect(catalog.authors[0].courses[0].title).toBe('Les bases de l’IA');
+  });
+
+  it('keeps the course text in English when only some lessons are translated', () => {
+    const dir = withFiles({});
+    writeLesson(dir, '02-how-machines-learn', frenchLesson(dir, '02-how-machines-learn', 'Comment les machines apprennent'));
+    const { catalog, issues } = inspectFrench(dir);
+    expect(issues).toEqual([]);
+    expect(catalog.courses[0]).toMatchObject({ title: 'AI Foundations', lang: 'en' });
+    expect(catalog.courses[0].lessons[1]).toMatchObject({ title: 'Comment les machines apprennent', lang: 'fr' });
+  });
+
+  it('reports translation files that match no English course, lesson or theme', () => {
+    const dir = withFiles({
+      'fr/index.yaml': lines('courses:', '  - ai-foundations'),
+      'fr/themes.yaml': unknownTheme,
+      'fr/no-such-course/course.yaml': lines('id: no-such-course', 'title: X', 'description: Y'),
+      'fr/ai-foundations/course.yaml': lines('id: wrong-id', 'title: X', 'description: Y'),
+      'fr/ai-foundations/09-extra.md': lines('---', 'id: ai-foundations/09-extra', 'title: X', '---'),
+    });
+    const rel = (file: string) => file.slice(dir.length + 1).replaceAll('\\', '/');
+    const { catalog, issues, warnings } = inspectFrench(dir);
+    expect(issues.map((i) => [rel(i.file), i.message])).toEqual([
+      ['fr/themes.yaml', 'theme "no-such-theme" is not in en/themes.yaml'],
+      ['fr/no-such-course', 'course "no-such-course" is not in en/index.yaml: translate an existing course'],
+      ['fr/ai-foundations/course.yaml', 'id "wrong-id" does not match its folder name "ai-foundations"'],
+      ['fr/ai-foundations/09-extra.md', 'lesson file is not listed in en/ai-foundations/course.yaml'],
+    ]);
+    expect(warnings.map((w) => rel(w.file))).toContain('fr/index.yaml');
+    // Whatever could not be used stays in English.
+    expect(catalog.courses[0].title).toBe('AI Foundations');
+  });
+
+  it('keeps the English lesson when the translation renames a section heading', () => {
+    const dir = withFiles({});
+    writeLesson(dir, '01-what-is-ai', frenchLesson(dir, '01-what-is-ai', 'Qu’est-ce que l’IA ?').replace('## Key ideas', '## Idées clés'));
+    const { catalog, issues } = inspectFrench(dir);
+    expect(issues.some((i) => i.message.startsWith('unknown section "## Idées clés"'))).toBe(true);
+    expect(catalog.courses[0].lessons[0]).toMatchObject({ title: 'What is AI?', lang: 'en' });
+  });
+
+  it('reports each translation problem once, without repeating the English ones', () => {
+    const dir = withFiles({ 'fr/themes.yaml': unknownTheme });
+    try {
+      expect(inspectAllCourses(dir).issues.map((i) => i.message)).toEqual(['theme "no-such-theme" is not in en/themes.yaml']);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('reads a language code from a profile language', () => {
+    expect(['fr', 'fr-FR', 'FR', 'Français', 'francais', 'French', 'French (France)'].map(languageCode)).toEqual(Array(7).fill('fr'));
+    expect(['en', 'en_GB', 'English', 'Anglais'].map(languageCode)).toEqual(Array(4).fill('en'));
+    expect(languageCode('de')).toBe('de');
+    expect([undefined, null, 42, '', '  ', 'Klingon please'].map(languageCode)).toEqual(Array(6).fill(undefined));
+  });
+
+  it('never reads a language folder outside the courses directory', () => {
+    expect(inspectCatalog('../en', validDir).catalog.courses[0].lang).toBe('en');
+  });
+});
+

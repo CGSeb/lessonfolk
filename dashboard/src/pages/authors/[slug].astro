@@ -4,14 +4,15 @@ import CourseCard from '../../components/CourseCard.astro';
 import Notice from '../../components/Notice.astro';
 import AuthorAvatar from '../../components/authors/AuthorAvatar.astro';
 import { courseAuthors, getAuthorView } from '../../components/authors/authorView';
-import { t } from '../../i18n/en';
 import { authorsFilePath, getPathCourseIds, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { loadProgressFor } from '../../lib/store';
+
+const { t } = Astro.locals;
 
 // Read on every request so the page reflects the tutor's latest writes. Public page:
 // signed out (`progressResult` null), courses are shown without progress.
 const slug = Astro.params.slug ?? '';
-const { catalog, issues } = inspectCatalog('en');
+const { catalog, issues } = inspectCatalog(Astro.locals.lang);
 const progressResult = await loadProgressFor(Astro.locals.user);
 const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
 const view = getAuthorView(catalog.courses, catalog.authors, slug, progress);

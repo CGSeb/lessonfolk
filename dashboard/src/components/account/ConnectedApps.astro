@@ -8,7 +8,8 @@ import Notice from '../Notice.astro';
 import { formatDate } from '../course/courseView';
 import { listConnectedApps } from '../../lib/connected-apps';
 import { getDatabase } from '../../lib/store';
-import { t } from '../../i18n/en';
+
+const { t } = Astro.locals;
 
 interface Props {
   userId: string;
@@ -48,7 +49,7 @@ const params = Astro.url.searchParams;
             <li class="connected-app">
               <div class="stack" style="--stack-space: var(--space-1)">
                 <strong>{name}</strong>
-                {app.since && <span class="muted account-small">{t('connectedApps.since', { date: formatDate(app.since.toISOString()) })}</span>}
+                {app.since && <span class="muted account-small">{t('connectedApps.since', { date: formatDate(app.since.toISOString(), Astro.locals.lang) })}</span>}
               </div>
               <form method="post" action="/api/account/disconnect-app">
                 <input type="hidden" name="consent" value={app.id} />

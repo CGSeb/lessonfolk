@@ -5,7 +5,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Notice from '../../components/Notice.astro';
 import { findLocalProgressFile, MAX_IMPORT_BYTES, previewImport, type ImportPreview, type ProgressSummary } from '../../lib/account';
 import { getProgressStore } from '../../lib/store';
-import { t } from '../../i18n/en';
+
+const { t } = Astro.locals;
 
 export const prerender = false;
 

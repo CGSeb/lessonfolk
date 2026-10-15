@@ -1,6 +1,7 @@
 ---
 import type { Course, Lesson } from '@lessonfolk/core';
-import { t } from '../i18n/en';
+
+const { t } = Astro.locals;
 
 /**
  * The lesson the tutor will teach next, in the spark bubble: title, linked course and

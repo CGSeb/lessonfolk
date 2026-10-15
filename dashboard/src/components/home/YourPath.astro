@@ -1,8 +1,9 @@
 ---
-import { t } from '../../i18n/en';
 import type { Course } from '@lessonfolk/core';
 import type { PathCourse } from './pathView';
 import PathRows from './PathRows.astro';
+
+const { t } = Astro.locals;
 
 /**
  * The learner's personal path: a bubble with the tutor's reason on demand, then one bubble per

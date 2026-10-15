@@ -1,0 +1,68 @@
+---
+import { LOCALES, LOCALE_NAMES } from '../i18n';
+
+const { t, lang } = Astro.locals;
+
+// Back to the same page after the switch.
+const next = Astro.url.pathname + Astro.url.search;
+---
+
+<!--
+  Interface language. A plain form, so it works without JavaScript: /api/language saves the
+  choice in a cookie and comes back to this page. Each language is named in itself.
+-->
+<form class="language-switcher" method="post" action="/api/language">
+  <input type="hidden" name="next" value={next} />
+  <fieldset class="language-switcher__group">
+    <legend class="visually-hidden">{t('language.label')}</legend>
+    {
+      LOCALES.map((locale) => (
+        <button
+          class="language-switcher__button"
+          type="submit"
+          name="lang"
+          value={locale}
+          lang={locale}
+          aria-pressed={locale === lang ? 'true' : 'false'}
+          title={locale === lang ? t('language.current', { language: LOCALE_NAMES[locale] }) : undefined}
+        >
+          {LOCALE_NAMES[locale]}
+        </button>
+      ))
+    }
+  </fieldset>
+</form>
+
+<style>
+  .language-switcher__group {
+    display: inline-flex;
+    gap: var(--space-1);
+    margin: 0;
+    padding: var(--space-1);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg);
+  }
+
+  .language-switcher__button {
+    min-height: 2.25rem;
+    padding: 0 var(--space-3);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .language-switcher__button:hover {
+    color: var(--color-accent);
+  }
+
+  .language-switcher__button[aria-pressed='true'] {
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 600;
+  }
+</style>

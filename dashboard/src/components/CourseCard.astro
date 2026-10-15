@@ -1,5 +1,4 @@
 ---
-import { t } from '../i18n/en';
 import type { Course, CourseStats } from '@lessonfolk/core';
 import CourseAuthors from './CourseAuthors.astro';
 import LevelBadge from './LevelBadge.astro';
@@ -7,6 +6,8 @@ import ThemeBadge from './ThemeBadge.astro';
 import type { AuthorLink } from './authors/authorView';
 import { courseStatusDisplay, finishedLessons, getCourseStatus, isCourseDone } from './course-status';
 import { themeToneClass } from './theme-tone';
+
+const { t } = Astro.locals;
 
 interface Props {
   /** One entry of `getStats(courses, progress).courses`. */

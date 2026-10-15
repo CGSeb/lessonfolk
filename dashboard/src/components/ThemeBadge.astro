@@ -1,7 +1,8 @@
 ---
-import { t } from '../i18n/en';
 import { coursesHref } from './catalog/catalogFilter';
 import { themeToneClass } from './theme-tone';
+
+const { t } = Astro.locals;
 
 interface Props {
   /** The course's theme; renders nothing when the theme is unknown. `position` picks its colour. */

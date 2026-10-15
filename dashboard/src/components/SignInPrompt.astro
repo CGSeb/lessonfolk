@@ -5,7 +5,8 @@
  */
 import Notice from './Notice.astro';
 import { signInHref } from '../lib/auth/redirect';
-import { t } from '../i18n/en';
+
+const { t } = Astro.locals;
 
 const { authMode, user } = Astro.locals;
 const show = authMode === 'oauth' && !user;

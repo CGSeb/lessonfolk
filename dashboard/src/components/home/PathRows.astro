@@ -1,8 +1,9 @@
 ---
-import { t } from '../../i18n/en';
 import type { Course } from '@lessonfolk/core';
 import type { PathCourse } from './pathView';
 import { pathStatusDisplay } from './pathView';
+
+const { t } = Astro.locals;
 
 /** Rows of the learner's path. `startAt` is the position of the first row in the whole path. */
 interface Props {

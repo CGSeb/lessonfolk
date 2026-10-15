@@ -49,6 +49,7 @@ export function getPathView<C extends CourseRef>(
   courses: C[],
   progress: Progress,
   next: NextLesson<C> | null,
+  locale = 'en',
 ): PathView<C> {
   const byId = new Map(courses.map((c) => [c.id, c]));
   const pathCourses = getPathCourseIds(byId.keys(), progress).map((id) => byId.get(id)!);
@@ -69,7 +70,7 @@ export function getPathView<C extends CourseRef>(
       return { course, status, isNext, finished: finishedLessons(counts), total, placementSkipped };
     }),
     reason: progress.pathReason?.trim() || undefined,
-    updatedOn: progress.pathUpdatedAt?.trim() ? formatDate(progress.pathUpdatedAt.trim()) : undefined,
+    updatedOn: progress.pathUpdatedAt?.trim() ? formatDate(progress.pathUpdatedAt.trim(), locale) : undefined,
   };
 }
 
