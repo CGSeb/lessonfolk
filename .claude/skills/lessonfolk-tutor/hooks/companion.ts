@@ -3,6 +3,7 @@
 // tests, with a local or a hosted instance.
 
 import type { Choices, IdeaMarks, LessonState, Snapshot, View } from '../types'
+import { langOf, words } from './i18n'
 
 // Calls a tool of the LessonFolk MCP server: the tool's text result, or undefined when it
 // failed or the server could not be reached.
@@ -15,7 +16,7 @@ export const TOOL_PREFIX = `mcp__${SERVER}__`
 export const PLUGIN_SERVER = `plugin:lessonfolk-tutor:${SERVER}`
 
 type Progress = {
-  profile?: { level?: string }
+  profile?: { level?: string; language?: string }
   path?: string[]
   current?: string | null
   lessons?: Record<string, { status?: string }>
@@ -74,10 +75,11 @@ export const load = async (call: Caller): Promise<Loaded> => {
   const catalog = parseJson<CourseSummary[]>(await call('list_courses'))
   const statuses = statusesOf(progress)
   const snapshot: Snapshot = { current: progress?.current ?? undefined, statuses }
+  const lang = progress ? langOf(progress.profile?.language) : undefined
 
-  if (!progress || !Array.isArray(catalog)) return { view: { state: 'offline' }, snapshot }
+  if (!progress || !Array.isArray(catalog)) return { view: { state: 'offline', lang }, snapshot }
   if (!progress.profile?.level && Object.keys(statuses).length === 0) {
-    return { view: { state: 'no-progress' }, snapshot }
+    return { view: { state: 'no-progress', lang }, snapshot }
   }
 
   const byId = new Map(catalog.map(course => [course.id, course]))
@@ -98,7 +100,7 @@ export const load = async (call: Caller): Promise<Loaded> => {
     ? progress.current
     : undefined
   const focus = current ?? next
-  if (!focus) return { view: { state: 'all-done' }, snapshot }
+  if (!focus) return { view: { state: 'all-done', lang }, snapshot }
 
   const courseId = courseOf(focus)
   const course = byId.get(courseId)
@@ -114,6 +116,7 @@ export const load = async (call: Caller): Promise<Loaded> => {
   return {
     view: {
       state: current ? 'lesson' : 'between',
+      lang,
       courseId,
       courseTitle: course?.title ?? courseId,
       themeTitle: course?.themeTitle,
@@ -155,11 +158,12 @@ export const changes = (previous: Loaded | undefined, loaded: Loaded): string[] 
   const { snapshot: before } = previous
   const { snapshot: after, view } = loaded
   const toasts: string[] = []
+  const text = words(view.lang)
   const titleOf = (id: string) =>
     [...(view.lessons ?? []), ...(previous.view.lessons ?? [])].find(l => l.id === id)?.title ?? id
 
   for (const [id, status] of Object.entries(after.statuses)) {
-    if (status === 'done' && before.statuses[id] !== 'done') toasts.push(`Lesson complete: ${titleOf(id)}`)
+    if (status === 'done' && before.statuses[id] !== 'done') toasts.push(text.lessonComplete(titleOf(id)))
   }
 
   const course = after.current ? courseOf(after.current) : undefined
@@ -167,7 +171,7 @@ export const changes = (previous: Loaded | undefined, loaded: Loaded): string[] 
     ([id, status]) => courseOf(id) === course && (isFinished(status) || id === before.current),
   )
   if (course && after.current !== before.current && !hadStarted && view.courseId === course) {
-    toasts.push(`New course: ${view.courseTitle}${view.themeTitle ? ` (${view.themeTitle})` : ''}`)
+    toasts.push(text.newCourse(view.courseTitle ?? course, view.themeTitle))
   }
 
   return toasts

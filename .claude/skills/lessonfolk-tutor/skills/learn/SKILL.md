@@ -1,6 +1,6 @@
 ---
 name: learn
-description: Start or resume a LessonFolk AI course — onboards new learners (level, interests, level check, personal path), finds the learner's next lesson and teaches it interactively. Use when the user says "start", "continue", "next lesson", "skip this", "reset <course>", "do <course> again", "recommend a path", "change my level", "update my interests", or wants to learn.
+description: Start or resume a LessonFolk AI course — onboards new learners (level, interests, level check, personal path), finds the learner's next lesson and teaches it interactively. Use when the user says "start", "continue", "next lesson", "skip this", "reset <course>", "do <course> again", "recommend a path", "change my level", "update my interests", or wants to learn. Also in French, such as "commencer", "continuer", "leçon suivante", "passer cette leçon", "recommande-moi un parcours", "changer mon niveau", "je veux apprendre".
 ---
 
 Follow the LessonFolk `learn` procedure below with the LessonFolk tools (`get_progress`,

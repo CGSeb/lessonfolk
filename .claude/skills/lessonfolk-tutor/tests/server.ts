@@ -34,15 +34,20 @@ export const CATALOG: Course[] = [
 ]
 
 export type Saved = {
-  profile?: { name?: string; level?: string }
+  profile?: { name?: string; level?: string; language?: string }
   path?: string[]
   current?: string | null
   lessons?: Record<string, { status: string }>
 }
 
 // A learner's saved progress: `current` and a status for each started lesson.
-export const progress = (current: string | null, lessons: Record<string, string>, path?: string[]): Saved => ({
-  profile: { name: 'Alex', level: 'beginner' },
+export const progress = (
+  current: string | null,
+  lessons: Record<string, string>,
+  path?: string[],
+  language?: string,
+): Saved => ({
+  profile: { name: 'Alex', level: 'beginner', ...(language ? { language } : {}) },
   ...(path ? { path } : {}),
   current,
   lessons: Object.fromEntries(Object.entries(lessons).map(([id, status]) => [id, { status }])),

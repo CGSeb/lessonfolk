@@ -6,6 +6,8 @@ export type LessonState = {
 
 export type View = {
   state: 'no-progress' | 'offline' | 'all-done' | 'lesson' | 'between'
+  // The learner's language (profile), for the words of the pane; unknown when offline.
+  lang?: 'en' | 'fr'
   courseId?: string
   courseTitle?: string
   themeTitle?: string

@@ -1,6 +1,6 @@
 ---
 name: progress
-description: Show the learner's LessonFolk progress across courses, or list the courses and themes. Use when the user asks where they are, how far they've got, or what they can learn.
+description: Show the learner's LessonFolk progress across courses, or list the courses and themes. Use when the user asks where they are, how far they've got, or what they can learn. Also in French, such as "où j'en suis ?", "ma progression", "qu'est-ce que je peux apprendre ?".
 ---
 
 Follow the LessonFolk `progress` procedure below with the LessonFolk tools (`get_progress`,

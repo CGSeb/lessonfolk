@@ -118,6 +118,32 @@ describe('changes', () => {
   })
 })
 
+describe('language', () => {
+  test('the view carries the language of the learner profile, English by default', async () => {
+    const fr = await load(caller(progress('basics/01-one', { 'basics/01-one': 'in_progress' }, undefined, 'fr-CA')))
+    const unset = await load(caller(progress('basics/01-one', { 'basics/01-one': 'in_progress' })))
+    const other = await load(caller(progress('basics/01-one', { 'basics/01-one': 'in_progress' }, undefined, 'de')))
+
+    expect(fr.view.lang).toBe('fr')
+    expect(unset.view.lang).toBe('en')
+    expect(other.view.lang).toBe('en')
+  })
+
+  test('toasts are in the learner language', async () => {
+    const before = await load(caller(progress('basics/02-two', { 'basics/01-one': 'done', 'basics/02-two': 'in_progress' }, undefined, 'fr')))
+    const after = await load(caller(progress('next-steps/01-three', {
+        'basics/01-one': 'done',
+        'basics/02-two': 'done',
+        'next-steps/01-three': 'in_progress',
+      }, undefined, 'fr')))
+
+    expect(changes(before, after)).toEqual([
+      'Leçon terminée : Lesson two',
+      'Nouveau cours : Next Steps (Using AI tools)',
+    ])
+  })
+})
+
 describe('markIdea', () => {
   test('active marks the earlier ideas covered; done covers it; a new lesson starts over', () => {
     const one = markIdea({ covered: [] }, 'a/1', 2, 'active')
