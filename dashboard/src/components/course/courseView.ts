@@ -57,7 +57,7 @@ export function formatDate(value: string, locale = 'en'): string {
  * `courses` is the whole catalog in index.yaml order (needed to find the next lesson
  * and the prerequisite courses).
  */
-export function getCourseView(courses: Course[], courseId: string, progress: Progress): CourseView | undefined {
+export function getCourseView(courses: Course[], courseId: string, progress: Progress, locale = 'en'): CourseView | undefined {
   const course = courses.find((c) => c.id === courseId);
   if (!course) return undefined;
 
@@ -72,7 +72,7 @@ export function getCourseView(courses: Course[], courseId: string, progress: Pro
       lesson,
       status,
       scorePercent: typeof entry?.score === 'number' ? Math.round(entry.score * 100) : null,
-      completedOn: entry?.completedAt ? formatDate(entry.completedAt) : null,
+      completedOn: entry?.completedAt ? formatDate(entry.completedAt, locale) : null,
       // The "placement" note is a marker for the badge, not a message for the learner.
       notes: status === 'skipped_placement' ? null : entry?.notes?.trim() || null,
       isNext: lesson.id === nextId,

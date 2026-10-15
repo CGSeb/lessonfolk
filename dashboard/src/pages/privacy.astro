@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { t } from '../i18n/en';
 import { analyticsEnabled } from '../lib/analytics';
+
+const { t } = Astro.locals;
 
 export const prerender = false;
 

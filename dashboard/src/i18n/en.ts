@@ -1,9 +1,10 @@
 /**
  * English UI strings for the dashboard.
  *
- * Every piece of interface text lives here so components never hard-code copy
- * and the interface can be translated later by adding a sibling file
- * (e.g. `fr.ts`) with the same `UiStrings` shape.
+ * Every piece of interface text lives here so components never hard-code copy.
+ * Translations are sibling files (`fr.ts`) with the same shape; a string they lack
+ * is shown in English. Pages and components use `Astro.locals.t`, which speaks the
+ * visitor's language (see `index.ts`); `t` below is always English.
  *
  * Placeholders use `{name}` and are filled by `t()`.
  */
@@ -29,6 +30,11 @@ export const en = {
     menuClose: 'Close menu',
     themeToDark: 'Switch to dark theme',
     themeToLight: 'Switch to light theme',
+  },
+  // Language switcher in the footer: each language is named in itself (src/i18n/index.ts).
+  language: {
+    label: 'Language',
+    current: '{language} (current language)',
   },
   copy: {
     button: 'Copy',
@@ -186,6 +192,9 @@ export const en = {
     notFoundHeading: 'We could not find this course',
     notFoundBody: 'There is no course with the id “{id}”. It may have been renamed or removed.',
     backToCourses: 'See all courses',
+    // Shown when the course, or some of its lessons, has no translation in the visitor's language.
+    notTranslated: 'This course is not translated into your language yet, so it is shown in English. Your tutor still teaches it in the language you speak.',
+    partlyTranslated: 'Some lessons of this course are not translated into your language yet, so they are shown in English. Your tutor still teaches them in the language you speak.',
   },
   footer: {
     about: 'LessonFolk is an open-source app developed by CG Seb. It teaches AI to anyone, through a conversation with an AI tutor.',
@@ -425,7 +434,7 @@ export const en = {
     whatTechnical:
       'Your sessions: the browser you signed in with, and the dates. The server also logs each request it receives, with your IP address and the page asked for.',
     notCollected:
-      'Not collected: passwords (there are none), your profile picture, your conversations with your AI app, analytics or advertising cookies. The only cookie is the one that keeps you signed in.',
+      'Not collected: passwords (there are none), your profile picture, your conversations with your AI app, analytics or advertising cookies. The only cookies are the one that keeps you signed in and the one that remembers the language you chose.',
     whereTitle: 'Where it is stored',
     where: 'In the database of this server, located in {location}. It is not copied to other services. Backups stay with the same host.',
     whereUnknown: 'In the database of this server, run by the person who runs this LessonFolk. It is not copied to other services.',
@@ -449,7 +458,7 @@ export const en = {
     operator: '{operator} runs this LessonFolk and decides what is done with your data.',
     ageTitle: 'Age',
     age: 'LessonFolk is not meant for children under 16. If you are younger, ask a parent or guardian before you sign in.',
-    updated: 'Last updated: 12 October 2026.',
+    updated: 'Last updated: 15 October 2026.',
     selfHostTitle: 'Prefer not to send your data?',
     selfHost:
       'LessonFolk is open source. You can run it on your own computer, with no sign-in, and nothing leaves it. The steps are in the project’s documentation on GitHub.',
@@ -563,23 +572,37 @@ type Paths<T, P extends string = ''> = {
 }[keyof T & string];
 export type UiKey = Paths<UiStrings>;
 
-const strings: UiStrings = en;
+/** A translation: the same keys as `en`, any of them left out (shown in English). */
+type DeepPartial<T> = { [K in keyof T]?: T[K] extends string ? string : DeepPartial<T[K]> };
+export type PartialUiStrings = DeepPartial<UiStrings>;
 
-/**
- * Look up a UI string by dotted key and fill `{placeholders}`.
- *
- * @example t('nav.home') // "Home"
- * @example t('site.titleTemplate', { page: 'Courses' }) // "Courses · LessonFolk"
- */
-export function t(key: UiKey, params?: Record<string, string | number>): string {
+/** Placeholder values for `t()`. */
+export type UiParams = Record<string, string | number>;
+
+/** The string at a dotted key, or `undefined` when `strings` lacks it. */
+export function lookup(strings: PartialUiStrings, key: UiKey): string | undefined {
   const value = key
     .split('.')
-    .reduce<unknown>((node, part) => (node as Record<string, unknown>)[part], strings);
-  if (typeof value !== 'string') {
-    throw new Error(`Missing UI string: ${key}`);
-  }
+    .reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], strings);
+  return typeof value === 'string' ? value : undefined;
+}
+
+/** Fill the `{placeholders}` of `value`; unknown names are left as they are. */
+export function fill(value: string, params?: UiParams): string {
   if (!params) return value;
   return value.replace(/\{(\w+)\}/g, (match, name: string) =>
     name in params ? String(params[name]) : match,
   );
+}
+
+/**
+ * Look up an English UI string by dotted key and fill `{placeholders}`.
+ *
+ * @example t('nav.home') // "Home"
+ * @example t('site.titleTemplate', { page: 'Courses' }) // "Courses · LessonFolk"
+ */
+export function t(key: UiKey, params?: UiParams): string {
+  const value = lookup(en, key);
+  if (value === undefined) throw new Error(`Missing UI string: ${key}`);
+  return fill(value, params);
 }

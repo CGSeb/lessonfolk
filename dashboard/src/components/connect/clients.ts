@@ -3,7 +3,8 @@
  * mode. Commands follow each app's documentation; where a menu label is not certain, the
  * text stays generic ("go to Settings, then Connectors").
  */
-import { t } from '../../i18n/en';
+import type { Translate } from '../../i18n';
+import { t as english } from '../../i18n/en';
 import { PLUGIN, type McpConnection } from '../../lib/connect';
 
 export interface ClientStep {
@@ -32,7 +33,8 @@ const TOKEN_HEADER = 'Authorization: Bearer <your token>';
 
 const json = (value: unknown) => JSON.stringify(value, null, 2);
 
-export function connectClients(connection: McpConnection): ConnectClient[] {
+/** `t` gives the texts in the visitor's language (English by default). */
+export function connectClients(connection: McpConnection, t: Translate = english): ConnectClient[] {
   const { url, mode, tokenRequired, reachableFromWeb, plugin } = connection;
   const oauth = mode === 'oauth';
   // The web-chat answer when this address is not public.

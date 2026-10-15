@@ -231,6 +231,10 @@ the **Account** page (import, export, erase).
 | **Connect** | `/connect` | The setup steps for each AI app, with this LessonFolk's address in them (see [Connect your AI chat](#connect-your-ai-chat)). |
 | **Account** | `/account` | Download, import or erase your progress (see [Account](#account-import-export-erase)). |
 
+The dashboard speaks English and French: it follows your browser's language, and the switch at
+the bottom of every page changes it (your choice is kept in a cookie). A course or lesson not
+translated yet is shown in English; your tutor still teaches it in the language you speak.
+
 Pages update by themselves within a few seconds when your tutor saves progress (no reload
 needed; the page keeps your scroll position and open sections). Lessons you skipped after the level check show as "Skipped after level check".
 

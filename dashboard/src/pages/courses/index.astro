@@ -14,14 +14,15 @@ import {
 } from '../../components/catalog/catalogFilter';
 import SignInPrompt from '../../components/SignInPrompt.astro';
 import { themeToneClass } from '../../components/theme-tone';
-import { t } from '../../i18n/en';
 import { getPathCourseIds, getStats, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
 import { loadProgressFor } from '../../lib/store';
 
+const { t } = Astro.locals;
+
 // Read on every request so the page reflects the tutor's latest writes. Public page:
 // signed out (`progressResult` null), courses are shown without progress.
-const { catalog, issues } = inspectCatalog('en');
+const { catalog, issues } = inspectCatalog(Astro.locals.lang);
 const progressResult = await loadProgressFor(Astro.locals.user);
 const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
 // Courses in the learner's personal path get a "Recommended for you" marker (order unchanged).

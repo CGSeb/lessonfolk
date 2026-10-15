@@ -72,7 +72,8 @@ author). Never edit other courses.
       `github` / `url` only if they give them: never invent links, ask or leave them out; an
       `avatar` only if they give you an image to publish, saved as `courses/authors/<slug>.<ext>`)
 
-   Write in `en` unless the author asks otherwise; translations are a separate task.
+   Write in `en`: other languages only translate existing English courses, file by file
+   ([Translations](docs/course-format.md#translations)), a separate task.
 3. **Outline.** Propose: course id (kebab-case, not already used), title, level, a one- or
    two-sentence description, theme, authors, `estimatedHours`, prerequisites, and 3–8 lessons, each with its
    file name (`NN-slug`), title, a one-line objective and `estimatedMinutes` (10–25).

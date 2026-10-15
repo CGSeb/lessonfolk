@@ -9,7 +9,6 @@ import SayPhrase from '../components/home/SayPhrase.astro';
 import SayTurn from '../components/home/SayTurn.astro';
 import YourPath from '../components/home/YourPath.astro';
 import { getHomeView } from '../components/home/homeView';
-import { t } from '../i18n/en';
 import { inspectCatalog } from '@lessonfolk/core';
 import { getPaths } from '../lib/paths';
 import Landing from '../components/home/Landing.astro';
@@ -19,16 +18,19 @@ import { siteOrigin } from '../lib/site-url';
 import { offerLocalImport } from '../lib/account';
 import LocalImportOffer from '../components/account/LocalImportOffer.astro';
 
+const { t } = Astro.locals;
+
 // Home is the learner's own progress. Signed out (LESSONFOLK_AUTH=oauth), it is a landing page.
 const { user } = Astro.locals;
 
 // Read on every request so the page reflects the tutor's latest writes.
-const { catalog, issues } = inspectCatalog('en');
+const { catalog, issues } = inspectCatalog(Astro.locals.lang);
 const progressResult = user ? await loadProgress(user.id) : { state: 'missing' as const };
 const { view, name, level, interests, path, suggestPath, lessons, progressError, progressWarnings } = getHomeView(
   catalog.courses,
   progressResult,
   catalog.themes,
+  Astro.locals.lang,
 );
 // First run without sign-in: nothing in the database yet, but the tutor's progress file exists.
 const offerImport = offerLocalImport(Astro.locals.authMode, progressResult.state);

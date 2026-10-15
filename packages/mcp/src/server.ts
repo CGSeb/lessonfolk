@@ -18,7 +18,7 @@ import {
 import { describeErrorForLog } from '@lessonfolk/db';
 import { McpServer, ResourceTemplate, type CallToolResult } from '@modelcontextprotocol/server';
 import { z } from 'zod';
-import { DEFAULT_LANG, courseSummary, findLesson, lessonStatus, readCatalog, readCourses, readLessonText } from './catalog.ts';
+import { DEFAULT_LANG, courseSummary, findLesson, learnerLang, lessonStatus, readCatalog, readLessonText } from './catalog.ts';
 import { INSTRUCTIONS, registerPrompts } from './prompts.ts';
 import type { RateLimiter } from './rate-limit.ts';
 import { SCOPE_READ, SCOPE_WRITE, accessFromScopes } from './scopes.ts';
@@ -42,7 +42,12 @@ export interface LessonfolkServerOptions {
 export const LIMITS = { id: 200, lang: 35, short: 200, text: 4000, listItems: 100, json: 1_000_000 } as const;
 
 const lessonId = z.string().min(1).max(LIMITS.id).describe('Lesson id: "<course-id>/<lesson file name>", e.g. "ai-foundations/01-what-is-ai".');
-const lang = z.string().min(2).max(LIMITS.lang).optional().describe('Course language code (default "en"); falls back to "en" when there is no translation.');
+const lang = z
+  .string()
+  .min(2)
+  .max(LIMITS.lang)
+  .optional()
+  .describe("Course language code, e.g. \"fr\". Defaults to the learner's profile language; English where there is no translation.");
 
 const json = (value: unknown) => JSON.stringify(value, null, 2);
 const ok = (text: string): CallToolResult => ({ content: [{ type: 'text', text }] });
@@ -147,7 +152,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     () =>
       read(async () => {
         const progress = await store.getProgress(userId);
-        const courses = readCourses(coursesDir);
+        // Same courses and order in every language; the titles in the learner's.
+        const courses = readCatalog(coursesDir, learnerLang(progress)).courses;
         const next = nextLesson(progress, courses);
         if (next.kind === 'all_done' || next.kind === 'blocked') return next;
         return {
@@ -175,11 +181,11 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     },
     ({ lessonId: id, lang: language }) =>
       read(async () => {
-        const catalog = readCatalog(coursesDir, language);
+        const progress = await store.getProgress(userId);
+        const catalog = readCatalog(coursesDir, learnerLang(progress, language));
         const found = findLesson(catalog, id);
         if (!found) throw new ProgressStoreError('unknown_lesson', `Unknown lesson "${id}". Use list_courses to see the lesson ids.`, { lessonId: id });
-        const progress = await store.getProgress(userId);
-        const header = `<!-- LessonFolk: lesson ${found.lesson.id} of course "${found.course.title}" (${found.course.id}), language ${catalog.lang}; learner status: ${lessonStatus(progress, id)} -->`;
+        const header = `<!-- LessonFolk: lesson ${found.lesson.id} of course "${found.course.title}" (${found.course.id}), language ${found.lesson.lang}${found.lesson.lang === catalog.lang ? '' : ` (not translated into "${catalog.lang}" yet)`}; learner status: ${lessonStatus(progress, id)} -->`;
         return `${header}\n${readLessonText(found.lesson)}`;
       }),
   );
@@ -197,8 +203,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     },
     ({ theme, lang: language }) =>
       read(async () => {
-        const catalog = readCatalog(coursesDir, language);
         const progress = await store.getProgress(userId);
+        const catalog = readCatalog(coursesDir, learnerLang(progress, language));
         if (theme && !catalog.themes.some((t) => t.id === theme)) {
           throw new ProgressStoreError('unknown_course', `Unknown theme "${theme}". Themes: ${catalog.themes.map((t) => t.id).join(', ')}.`);
         }
@@ -217,15 +223,16 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       annotations: readOnly,
     },
     ({ lang: language }) =>
-      read(() =>
-        readCatalog(coursesDir, language).themes.map((theme) => ({
+      read(async () => {
+        const progress = await store.getProgress(userId);
+        return readCatalog(coursesDir, learnerLang(progress, language)).themes.map((theme) => ({
           id: theme.id,
           title: theme.title,
           description: theme.description,
           courseIds: theme.courses.map((c) => c.id),
           comingSoon: theme.courses.length === 0,
-        })),
-      ),
+        }));
+      }),
   );
 
   // --- Write tools --------------------------------------------------------------
@@ -243,7 +250,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         name: nullableText,
         experience: nullableText,
         goal: nullableText,
-        language: nullableText.describe('Preferred language for the sessions, e.g. "English".'),
+        language: nullableText.describe('Preferred language for the sessions, as a language code, e.g. "en" or "fr". The course tools then use it by default.'),
         level: z.enum(['beginner', 'intermediate', 'advanced']).nullable().optional(),
         interests: z.array(z.string().min(1).max(LIMITS.id)).max(LIMITS.listItems).nullable().optional().describe('Theme ids.'),
       }),

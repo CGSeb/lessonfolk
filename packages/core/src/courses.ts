@@ -7,14 +7,42 @@ import { getCoursesDir } from './paths.ts';
 import {
   authorsSchema,
   courseFileSchema,
+  courseTranslationSchema,
   formatIssues,
   indexSchema,
   lessonFrontmatterSchema,
+  lessonTranslationSchema,
   themesSchema,
   type Level,
 } from './schemas.ts';
 
 export type { Level } from './schemas.ts';
+
+/**
+ * The language courses are written in. A translation (`courses/<lang>/`) only holds the
+ * translated files; anything it lacks is read from this language.
+ */
+export const DEFAULT_LANG = 'en';
+
+/** Names a learner may give for a course language (lower case, without accents). */
+const LANGUAGE_NAMES: Readonly<Record<string, string>> = {
+  english: 'en',
+  anglais: 'en',
+  french: 'fr',
+  francais: 'fr',
+};
+
+/**
+ * The language code of a profile's `language`: a code ("fr", "fr-FR") or a language name
+ * ("French", "Français"). `undefined` when it is empty or not recognised.
+ */
+export function languageCode(language: unknown): string | undefined {
+  if (typeof language !== 'string') return undefined;
+  const value = language.trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  const name = LANGUAGE_NAMES[value.split(/[^a-z]/)[0] ?? ''];
+  if (name) return name;
+  return /^([a-z]{2,3})(?:[-_][a-z0-9]{2,8})*$/.exec(value)?.[1];
+}
 
 export interface Lesson {
   /** `<course-id>/<file name without .md>` */
@@ -27,6 +55,8 @@ export interface Lesson {
   prerequisites: string[];
   /** Absolute path of the lesson Markdown file. */
   file: string;
+  /** Language of `file`, title and objectives: the catalog's, or `DEFAULT_LANG` when not translated. */
+  lang: string;
 }
 
 export interface Course {
@@ -43,6 +73,8 @@ export interface Course {
   prerequisites: string[];
   /** Lessons in `course.yaml` order. */
   lessons: Lesson[];
+  /** Language of the title and description: the catalog's, or `DEFAULT_LANG` when not translated. */
+  lang: string;
 }
 
 export interface Theme {
@@ -156,15 +188,31 @@ function isDir(path: string): boolean {
   return existsSync(path) && statSync(path).isDirectory();
 }
 
+type Inspection = { catalog: Catalog; issues: CourseIssue[]; warnings: CourseIssue[] };
+
 /**
- * Load and check one language. Never throws for content problems: they are
+ * Load and check the catalog in one language. Never throws for content problems: they are
  * returned in `issues` and the catalog contains whatever could be loaded.
  * `warnings` lists drift from the writing guidelines; it never blocks loading.
+ *
+ * The courses, their order and their lessons always come from `DEFAULT_LANG`. Another
+ * language replaces the text of whatever `courses/<lang>/` translates (theme, course and
+ * lesson files) and keeps the English text for the rest, so a partial translation works.
  */
-export function inspectCatalog(
-  lang = 'en',
-  coursesDir: string = getCoursesDir(),
-): { catalog: Catalog; issues: CourseIssue[]; warnings: CourseIssue[] } {
+export function inspectCatalog(lang = DEFAULT_LANG, coursesDir: string = getCoursesDir()): Inspection {
+  const base = inspectBaseCatalog(coursesDir);
+  if (lang === DEFAULT_LANG) return base;
+  const translation = translateCatalog(base.catalog, lang, coursesDir);
+  return {
+    catalog: translation.catalog,
+    issues: [...base.issues, ...translation.issues],
+    warnings: [...base.warnings, ...translation.warnings],
+  };
+}
+
+/** The catalog of `DEFAULT_LANG`: the course structure every language shares. */
+function inspectBaseCatalog(coursesDir: string): Inspection {
+  const lang = DEFAULT_LANG;
   const issues: CourseIssue[] = [];
   const warnings: CourseIssue[] = [];
   const catalog: Catalog = { lang, courses: [], themes: [], authors: [] };
@@ -217,6 +265,117 @@ export function inspectCatalog(
   readThemes(langDir, catalog, issues, warnings);
   readAuthors(coursesDir, langDir, catalog, issues);
   return { catalog, issues, warnings };
+}
+
+/** Language folder names: an ISO 639-1 code, optionally with a region (`pt-br`). */
+const LANG_FOLDER = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/;
+
+/**
+ * Replace the text of `base` with what `courses/<lang>/` translates. Only reports problems
+ * of the translation's own files; a file that cannot be used keeps the English text.
+ */
+function translateCatalog(base: Catalog, lang: string, coursesDir: string): Inspection {
+  const issues: CourseIssue[] = [];
+  const warnings: CourseIssue[] = [];
+  const langDir = join(coursesDir, lang);
+  if (!LANG_FOLDER.test(lang) || !isDir(langDir)) {
+    return { catalog: { ...base, lang }, issues, warnings };
+  }
+
+  const indexFile = join(langDir, 'index.yaml');
+  if (existsSync(indexFile)) {
+    warnings.push({
+      file: indexFile,
+      message: `not used: the courses and their order come from ${DEFAULT_LANG}/index.yaml`,
+    });
+  }
+
+  const themeText = new Map<string, { title: string; description: string }>();
+  const themesFile = join(langDir, 'themes.yaml');
+  if (existsSync(themesFile)) {
+    const file = validate(themesSchema, readYaml(themesFile, issues), themesFile, issues);
+    for (const { id, title, description } of file?.themes ?? []) {
+      if (base.themes.some((theme) => theme.id === id)) themeText.set(id, { title, description });
+      else issues.push({ file: themesFile, message: `theme "${id}" is not in ${DEFAULT_LANG}/themes.yaml` });
+    }
+  }
+
+  const known = new Set(base.courses.map((course) => course.id));
+  for (const name of readdirSync(langDir)) {
+    if (isDir(join(langDir, name)) && !known.has(name)) {
+      issues.push({
+        file: join(langDir, name),
+        message: `course "${name}" is not in ${DEFAULT_LANG}/index.yaml: translate an existing course`,
+      });
+    }
+  }
+
+  const courses = base.courses.map((course) => translateCourse(course, langDir, lang, issues, warnings));
+  const byId = new Map(courses.map((course) => [course.id, course]));
+  const swap = (list: Course[]) => list.map((course) => byId.get(course.id) ?? course);
+  return {
+    catalog: {
+      lang,
+      courses,
+      themes: base.themes.map((theme) => ({ ...theme, ...themeText.get(theme.id), courses: swap(theme.courses) })),
+      authors: base.authors.map((author) => ({ ...author, courses: swap(author.courses) })),
+    },
+    issues,
+    warnings,
+  };
+}
+
+/** One course with the text of its translated `course.yaml` and lesson files, when present. */
+function translateCourse(
+  course: Course,
+  langDir: string,
+  lang: string,
+  issues: CourseIssue[],
+  warnings: CourseIssue[],
+): Course {
+  const courseDir = join(langDir, course.id);
+  if (!isDir(courseDir)) return course;
+  let translated: Course = course;
+
+  const courseFile = join(courseDir, 'course.yaml');
+  if (existsSync(courseFile)) {
+    const meta = validate(courseTranslationSchema, readYaml(courseFile, issues), courseFile, issues);
+    if (meta && meta.id !== course.id) {
+      issues.push({ file: courseFile, message: `id "${meta.id}" does not match its folder name "${course.id}"` });
+    } else if (meta) {
+      translated = { ...course, title: meta.title, description: meta.description, lang };
+    }
+  }
+
+  const slugs = new Set<string>();
+  const lessons = course.lessons.map((lesson) => {
+    const slug = lesson.id.slice(course.id.length + 1);
+    slugs.add(slug);
+    const file = join(courseDir, `${slug}.md`);
+    if (!existsSync(file)) return lesson;
+    const text = readLessonFile(file, issues);
+    const front = validate(lessonTranslationSchema, text.front, file, issues);
+    if (!front) return lesson;
+    if (front.id !== lesson.id) {
+      issues.push({ file, message: `id "${front.id}" does not match its path; expected "${lesson.id}"` });
+      return lesson;
+    }
+    const body = checkLessonBody(text.body, lesson.estimatedMinutes);
+    for (const message of body.errors) issues.push({ file, message });
+    for (const message of body.warnings) warnings.push({ file, message });
+    if (body.errors.length) return lesson;
+    return { ...lesson, title: front.title, objectives: front.objectives ?? lesson.objectives, file, lang };
+  });
+
+  for (const name of readdirSync(courseDir)) {
+    if (name.endsWith('.md') && !slugs.has(name.slice(0, -3))) {
+      issues.push({
+        file: join(courseDir, name),
+        message: `lesson file is not listed in ${DEFAULT_LANG}/${course.id}/course.yaml`,
+      });
+    }
+  }
+  return { ...translated, lessons };
 }
 
 /** Folder of author avatar images, next to `authors.yaml`; never a language. */
@@ -408,7 +567,7 @@ function loadCourseDir(
     const body = checkLessonBody(lessonText.body, front.estimatedMinutes);
     for (const message of body.errors) issues.push({ file: lessonFile, message });
     for (const message of body.warnings) warnings.push({ file: lessonFile, message });
-    lessons.push({ ...front, file: lessonFile });
+    lessons.push({ ...front, file: lessonFile, lang: DEFAULT_LANG });
   }
 
   // Lesson files present on disk but not listed in course.yaml are likely mistakes.
@@ -445,6 +604,7 @@ function loadCourseDir(
     estimatedHours: meta.estimatedHours,
     prerequisites: meta.prerequisites,
     lessons,
+    lang: DEFAULT_LANG,
   };
 }
 
@@ -453,7 +613,7 @@ function loadCourseDir(
  * `course.yaml` order. Files are read on every call (no caching), so edits show
  * up without a restart. Throws CourseValidationError naming each faulty file.
  */
-export function loadCatalog(lang = 'en', coursesDir: string = getCoursesDir()): Course[] {
+export function loadCatalog(lang = DEFAULT_LANG, coursesDir: string = getCoursesDir()): Course[] {
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.courses;
@@ -463,7 +623,7 @@ export function loadCatalog(lang = 'en', coursesDir: string = getCoursesDir()): 
  * Load the themes of a language in `themes.yaml` order, each with its courses in
  * `index.yaml` order. Empty themes are included. Throws like `loadCatalog`.
  */
-export function loadThemes(lang = 'en', coursesDir: string = getCoursesDir()): Theme[] {
+export function loadThemes(lang = DEFAULT_LANG, coursesDir: string = getCoursesDir()): Theme[] {
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.themes;
@@ -473,7 +633,7 @@ export function loadThemes(lang = 'en', coursesDir: string = getCoursesDir()): T
  * Load the authors in `authors.yaml` order, each with their courses of this
  * language in `index.yaml` order. Authors with no course are included. Throws like `loadCatalog`.
  */
-export function loadAuthors(lang = 'en', coursesDir: string = getCoursesDir()): Author[] {
+export function loadAuthors(lang = DEFAULT_LANG, coursesDir: string = getCoursesDir()): Author[] {
   const { catalog, issues } = inspectCatalog(lang, coursesDir);
   if (issues.length) throw new CourseValidationError(issues, coursesDir);
   return catalog.authors;
@@ -482,7 +642,7 @@ export function loadAuthors(lang = 'en', coursesDir: string = getCoursesDir()): 
 /** Load one course by id, or `undefined` if it is not in the catalog. */
 export function loadCourse(
   courseId: string,
-  lang = 'en',
+  lang = DEFAULT_LANG,
   coursesDir: string = getCoursesDir(),
 ): Course | undefined {
   return loadCatalog(lang, coursesDir).find((c) => c.id === courseId);
@@ -491,7 +651,7 @@ export function loadCourse(
 /** Find a lesson by id across the catalog, with the course it belongs to. */
 export function findLesson(
   lessonId: string,
-  lang = 'en',
+  lang = DEFAULT_LANG,
   coursesDir: string = getCoursesDir(),
 ): { course: Course; lesson: Lesson } | undefined {
   for (const course of loadCatalog(lang, coursesDir)) {
@@ -518,7 +678,20 @@ export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
   if (!langs.length) {
     return { issues: [{ file: coursesDir, message: 'no language folders found' }], warnings: [] };
   }
-  const results = langs.map((lang) => inspectCatalog(lang, coursesDir));
+  if (!langs.includes(DEFAULT_LANG)) {
+    return {
+      issues: [{ file: join(coursesDir, DEFAULT_LANG), message: `the "${DEFAULT_LANG}" courses are missing: every translation is based on them` }],
+      warnings: [],
+    };
+  }
+  // Translations only report their own files: the English courses are checked once.
+  const base = inspectBaseCatalog(coursesDir);
+  const results = [
+    base,
+    ...langs
+      .filter((lang) => lang !== DEFAULT_LANG)
+      .map((lang) => translateCatalog(base.catalog, lang, coursesDir)),
+  ];
   const warnings = results.flatMap((r) => r.warnings);
 
   // authors.yaml is shared: an author needs a course in at least one language.
@@ -526,7 +699,7 @@ export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
   const withCourses = new Set(
     results.flatMap((r) => r.catalog.authors.filter((a) => a.courses.length).map((a) => a.slug)),
   );
-  for (const author of results[0].catalog.authors) {
+  for (const author of base.catalog.authors) {
     if (!withCourses.has(author.slug)) {
       warnings.push({ file: authorsFile, message: `author "${author.slug}" has no course yet` });
     }

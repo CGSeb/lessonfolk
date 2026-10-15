@@ -91,6 +91,23 @@ export const lessonFrontmatterSchema = z.strictObject({
 });
 export type LessonFrontmatter = z.infer<typeof lessonFrontmatterSchema>;
 
+/**
+ * `courses/<lang>/<course>/course.yaml` of a translation: only the text is read (the rest
+ * comes from the English course), so other fields of a copied file are ignored.
+ */
+export const courseTranslationSchema = z.object({
+  id: courseIdSchema,
+  title: z.string().min(1),
+  description: z.string().min(1),
+});
+
+/** Frontmatter of a translated lesson: only the text is read, like `courseTranslationSchema`. */
+export const lessonTranslationSchema = z.object({
+  id: lessonIdSchema,
+  title: z.string().min(1),
+  objectives: z.array(z.string().min(1)).min(1).optional(),
+});
+
 /** Render zod issues as `field: message` lines. */
 export function formatIssues(error: z.ZodError): string[] {
   return error.issues.map((issue) => {

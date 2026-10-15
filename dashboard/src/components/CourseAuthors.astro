@@ -1,7 +1,8 @@
 ---
 /** "By <author>, <author>" byline; each name links to the author's page. */
-import { t } from '../i18n/en';
 import type { AuthorLink } from './authors/authorView';
+
+const { t } = Astro.locals;
 
 interface Props {
   /** The course's authors in `course.yaml` order; renders nothing when empty. */

@@ -140,6 +140,8 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     const lesson = text(await call(client, 'get_lesson', { lessonId: L1 }));
     expect(lesson).toContain('learner status: in_progress');
     expect(lesson).toContain('## Teaching notes');
+    // No French translation in the fixture: the English lesson, saying so.
+    expect(text(await call(client, 'get_lesson', { lessonId: L1, lang: 'fr' }))).toContain(', language en; learner status');
 
     const notes = progressOf(await call(client, 'save_lesson_notes', { lessonId: L1, notes: 'Stopped after key idea 2.' }));
     expect(notes.lessons[L1].notes).toBe('Stopped after key idea 2.');

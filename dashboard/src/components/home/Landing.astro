@@ -6,12 +6,13 @@
  */
 import CourseCard from '../CourseCard.astro';
 import { courseAuthors } from '../authors/authorView';
-import { t } from '../../i18n/en';
 import { getStats, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { signInHref } from '../../lib/auth/redirect';
 
+const { t } = Astro.locals;
+
 const FEATURED_COURSES = 3;
-const { catalog } = inspectCatalog('en');
+const { catalog } = inspectCatalog(Astro.locals.lang);
 const allStats = getStats(catalog.courses, progressOrEmpty({ state: 'missing' })).courses;
 // Mix the levels: take the first course of each level in turn (beginner, intermediate, advanced),
 // then the next of each, until there are enough; shown in catalog order.

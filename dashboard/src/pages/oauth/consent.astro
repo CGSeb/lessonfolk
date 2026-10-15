@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { isLoopbackHost, requestedAccess, verifyOAuthQueryParams } from '@lessonfolk/mcp';
-import { t } from '../../i18n/en';
 import { getAuth } from '../../lib/auth/auth';
 import { getAuthSettings } from '../../lib/auth/current-user';
+
+const { t } = Astro.locals;
 
 export const prerender = false;
 

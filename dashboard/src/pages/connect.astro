@@ -5,13 +5,14 @@ import SayPhrase from '../components/home/SayPhrase.astro';
 import { connectClients } from '../components/connect/clients';
 import { getAuthSettings } from '../lib/auth/current-user';
 import { mcpConnection } from '../lib/connect';
-import { t } from '../i18n/en';
+
+const { t } = Astro.locals;
 
 export const prerender = false;
 
 // Open to everyone: it only shows how to connect, never anyone's data.
 const connection = mcpConnection(getAuthSettings(), Astro.url);
-const clients = connectClients(connection);
+const clients = connectClients(connection, t);
 // The first tool that works here opens by default.
 const selected = clients.find((client) => client.available) ?? clients[0]!;
 ---

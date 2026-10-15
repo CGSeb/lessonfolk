@@ -55,6 +55,7 @@ export function getHomeView<C extends CourseRef>(
   courses: C[],
   result: ProgressResult,
   themes: ThemeRef<C>[] = [],
+  locale = 'en',
 ): HomeView<C> {
   const progress = progressOrEmpty(result);
   const stats = getStats(courses, progress);
@@ -67,7 +68,7 @@ export function getHomeView<C extends CourseRef>(
   else if (stats.overall.completed) view = { state: 'done' };
   else view = { state: 'blocked' };
 
-  const path = getPathView(courses, progress, next);
+  const path = getPathView(courses, progress, next, locale);
 
   return {
     view,

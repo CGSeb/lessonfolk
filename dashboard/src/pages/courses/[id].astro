@@ -11,27 +11,29 @@ import SignInPrompt from '../../components/SignInPrompt.astro';
 import { courseAuthors } from '../../components/authors/authorView';
 import { themeToneClass } from '../../components/theme-tone';
 import { getCourseView, issuesForCourse } from '../../components/course/courseView';
-import { t } from '../../i18n/en';
-import { inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
+import { DEFAULT_LANG, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
 import { loadProgressFor } from '../../lib/store';
 import { courseJsonLd } from '../../lib/seo';
 import { siteOrigin } from '../../lib/site-url';
 
+const { t } = Astro.locals;
+
 // Read on every request so the page reflects the tutor's latest writes. Public page:
 // signed out (`progressResult` null), the lessons are shown without progress.
 const id = Astro.params.id ?? '';
-const lang = 'en';
+const { lang } = Astro.locals;
 const { catalog, issues } = inspectCatalog(lang);
 const progressResult = await loadProgressFor(Astro.locals.user);
 const showProgress = progressResult !== null;
-const view = getCourseView(catalog.courses, id, progressOrEmpty(progressResult ?? { state: 'missing' }));
+const view = getCourseView(catalog.courses, id, progressOrEmpty(progressResult ?? { state: 'missing' }), lang);
 
 if (!view) Astro.response.status = 404;
 
 const MAX_ISSUES = 5;
 const { root, courses: coursesDir } = getPaths();
-const courseIssues = issuesForCourse(issues, join(coursesDir, lang, id));
+// The English course and its translation, when the page is in another language.
+const courseIssues = [...new Set([DEFAULT_LANG, lang])].flatMap((dir) => issuesForCourse(issues, join(coursesDir, dir, id)));
 const shownIssues = courseIssues.slice(0, MAX_ISSUES).map(({ file, message }) => ({
   file: (relative(root, file) || file).replaceAll('\\', '/'),
   message,
@@ -40,6 +42,16 @@ const shownIssues = courseIssues.slice(0, MAX_ISSUES).map(({ file, message }) =>
 const course = view?.course;
 const theme = course && catalog.themes.find((th) => th.id === course.theme);
 const authors = course ? courseAuthors(course, catalog.authors) : [];
+// Text still in English on a page in another language: say so, and mark it for screen readers.
+const otherLang = (textLang: string) => (textLang === lang ? undefined : textLang);
+const untranslatedLessons = course?.lessons.filter((lesson) => lesson.lang !== lang).length ?? 0;
+const translationNote = !course || lang === DEFAULT_LANG
+  ? undefined
+  : course.lang !== lang && untranslatedLessons === course.lessons.length
+    ? t('course.notTranslated')
+    : course.lang !== lang || untranslatedLessons > 0
+      ? t('course.partlyTranslated')
+      : undefined;
 const total = view?.stats.total ?? 0;
 const progressText = t('courses.lessonsProgress', { done: view?.finished ?? 0, total });
 const hoursText = course
@@ -103,17 +115,18 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
       ) : (
         <>
           <header class:list={['card', 'stack', 'course-head', themeToneClass(theme?.position)]} style="--stack-space: var(--space-3)">
-            <h1>{course.title}</h1>
+            <h1 lang={otherLang(course.lang)}>{course.title}</h1>
             <CourseAuthors authors={authors} />
             <div class="cluster" style="--cluster-space: var(--space-2)">
               <ThemeBadge theme={theme} />
               <LevelBadge level={course.level} />
               {showProgress && <StatusBadge status={view.status} />}
             </div>
-            <p class="course-lead">{course.description}</p>
+            <p class="course-lead" lang={otherLang(course.lang)}>{course.description}</p>
             <p class="course-meta">
               {hoursText} <span aria-hidden="true">·</span> {lessonCountText}
             </p>
+            {translationNote && <p class="course-translation">{translationNote}</p>}
           </header>
 
           <div class="course-columns">
@@ -172,7 +185,7 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
                 >
                   {row.isNext && <p class="overline">{t('course.nextUp')}</p>}
                   <div class="lesson__head">
-                    <h3 class="lesson__title">{row.lesson.title}</h3>
+                    <h3 class="lesson__title" lang={otherLang(row.lesson.lang)}>{row.lesson.title}</h3>
                     {showProgress && <StatusBadge status={row.status} />}
                   </div>
                   <p class="cluster lesson__meta" style="--cluster-space: var(--space-1) var(--space-3)">
@@ -244,6 +257,11 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
   .course-meta {
     font-size: var(--text-sm);
     font-weight: var(--weight-bold);
+  }
+
+  .course-translation {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
   }
 
   .course-columns {

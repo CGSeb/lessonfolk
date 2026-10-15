@@ -30,7 +30,8 @@ by an `on delete cascade` key, so deleting the user row deletes it all.
 | `jwks`, `oauth_resource`, `oauth_client_assertion` | server keys and settings, no personal data | no | |
 
 Outside this database: server logs, database backups and the visit statistics (below). The
-dashboard sets no analytics or advertising cookies, only the sign-in session cookie.
+dashboard sets no analytics or advertising cookies, only the sign-in session cookie and the
+`lessonfolk-lang` cookie that keeps the interface language chosen in the footer (`en` or `fr`, one year).
 
 ## Audience measurement (visit statistics)
 

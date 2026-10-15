@@ -1,8 +1,9 @@
 ---
-import { t } from '../../i18n/en';
 import type { Level } from '@lessonfolk/core';
 import LevelBadge from '../LevelBadge.astro';
 import ThemeBadge from '../ThemeBadge.astro';
+
+const { t } = Astro.locals;
 
 /** The learner's level and interests, as set by the tutor. Renders nothing when both are missing. */
 interface Props {

@@ -6,6 +6,7 @@ import { crossSiteFormResponse, foreignHostResponse } from './lib/auth/origin-ch
 import { createRateLimiter, limitRequest, callerAddress, type RateLimiter } from '@lessonfolk/mcp';
 import { bodySizeResponse, routeLimit } from './lib/rate-limit';
 import { isPrivatePath } from './lib/seo';
+import { LOCALE_COOKIE, pickLocale, translator } from './i18n';
 import { withSecurityHeaders } from './lib/security-headers';
 
 // Crawler files: no session needed.
@@ -29,9 +30,12 @@ function connectionAddress(context: { clientAddress: string }): string | undefin
   }
 }
 
-/** Security headers on every response, and the size and rate limits of the form and API routes. */
+/** The interface language, security headers on every response, and the size and rate limits of the form and API routes. */
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
+  const lang = pickLocale(context.cookies.get(LOCALE_COOKIE)?.value, context.request.headers.get('accept-language'));
+  context.locals.lang = lang;
+  context.locals.t = translator(lang);
   const tooLarge = bodySizeResponse(context.request, pathname);
   const rule = rateLimitOn() ? routeLimit(context.request.method, pathname) : undefined;
   const tooMany = rule && limitRequest(limiterFor(rule.group, rule.limit, rule.windowMs), callerAddress(context.request, { clientAddress: connectionAddress(context) }));
@@ -39,7 +43,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const response = early ?? ((await handle(context, next)) as Response);
   const settings = getAuthSettings();
   const https = settings.mode === 'oauth' && new URL(settings.baseURL).protocol === 'https:';
-  return withSecurityHeaders(response, https, import.meta.env.DEV);
+  const secured = withSecurityHeaders(response, https, import.meta.env.DEV);
+  // Pages speak the visitor's language, picked from these request headers.
+  if (secured.headers.get('content-type')?.startsWith('text/html')) {
+    secured.headers.set('Content-Language', lang);
+    secured.headers.append('Vary', 'Cookie, Accept-Language');
+  }
+  return secured;
 });
 
 /**
