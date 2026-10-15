@@ -30,9 +30,11 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Schema.org data of the page, written as JSON-LD. */
   jsonLd?: object | object[];
+  /** Re-fetch and swap the page when progress or courses change (default). Off for pages whose script state a swap would reset. */
+  live?: boolean;
 }
 
-const { title, description = t('site.description'), noindex = false, ogType = 'website', jsonLd } = Astro.props;
+const { title, description = t('site.description'), noindex = false, ogType = 'website', jsonLd, live = true } = Astro.props;
 const fullTitle = title ? t('site.titleTemplate', { page: title }) : t('site.title');
 
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
@@ -262,7 +264,7 @@ const analytics = analyticsTag(origin, {
       </div>
       </div>
     </footer>
-    {user && <LiveRefresh />}
+    {user && live && <LiveRefresh />}
     <CopyButtons />
     <script>
       // Mobile menu: collapsed behind a button once JavaScript runs; without JavaScript the
