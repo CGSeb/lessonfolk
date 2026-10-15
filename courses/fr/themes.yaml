@@ -1,0 +1,14 @@
+# Traduction française des thèmes (mêmes ids que courses/en/themes.yaml).
+themes:
+  - id: understanding-ai
+    title: Comprendre l’IA
+    description: Ce qu’est l’IA, comment elle apprend et ce qui se passe vraiment quand vous l’utilisez.
+  - id: using-ai
+    title: Utiliser les outils d’IA
+    description: Les compétences pratiques pour obtenir des résultats utiles et fiables avec les assistants IA.
+  - id: building-with-ai
+    title: Construire avec l’IA
+    description: Créez vos propres applications, outils et agents à partir de modèles d’IA.
+  - id: ai-and-society
+    title: L’IA et la société
+    description: Les risques, l’éthique et l’impact de l’IA sur les personnes, le travail et le monde.
