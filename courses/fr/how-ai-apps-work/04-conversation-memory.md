@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/04-conversation-memory
+id: how-ai-apps-work/04-conversation-memory
 title: La mémoire de conversation et les limites de contexte
 level: intermediate
 estimatedMinutes: 15
@@ -8,7 +8,7 @@ objectives:
   - Expliquer comment l’envoi de l’historique entretient une conversation
   - Nommer des moyens de rester dans la limite de la fenêtre de contexte
 prerequisites:
-  - build-with-ai/03-structured-output
+  - how-ai-apps-work/03-structured-output
 ---
 
 ## Key ideas

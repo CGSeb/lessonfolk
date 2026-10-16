@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/03-structured-output
+id: how-ai-apps-work/03-structured-output
 title: Structured output (JSON)
 level: intermediate
 estimatedMinutes: 15
@@ -8,7 +8,7 @@ objectives:
   - Explain how code parses and validates the output
   - Say what code should do with invalid output
 prerequisites:
-  - build-with-ai/02-system-prompts
+  - how-ai-apps-work/02-system-prompts
 ---
 
 ## Key ideas

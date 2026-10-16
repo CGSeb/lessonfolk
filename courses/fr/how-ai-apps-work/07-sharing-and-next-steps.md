@@ -1,14 +1,14 @@
 ---
-id: build-with-ai/07-sharing-and-next-steps
-title: Partager et prochaines étapes
+id: how-ai-apps-work/07-sharing-and-next-steps
+title: Avant de partager une application d’IA
 level: intermediate
 estimatedMinutes: 15
 objectives:
-  - Savoir quoi vérifier avant de laisser d’autres utiliser votre application d’IA
+  - Savoir quoi vérifier avant de laisser d’autres utiliser une application d’IA
   - Choisir un moyen simple de la partager
   - Planifier ce qu’il faut apprendre ensuite
 prerequisites:
-  - build-with-ai/06-build-a-small-chatbot
+  - how-ai-apps-work/06-design-a-small-chatbot
 ---
 
 ## Key ideas
@@ -43,16 +43,16 @@ prerequisites:
   utilisés ; les limites protègent à la fois votre budget et vos utilisateurs.
 - Ne donnez pas de conseils juridiques sur les règles de vie privée ; dites à l’apprenant que les règles
   diffèrent selon les pays et de les vérifier avant de collecter les données d’autres personnes.
-- Concluez le cours : récapitulez le chemin d’un simple appel d’API à un chatbot testé, et suggérez des
+- Concluez le cours : récapitulez le chemin d’un simple appel d’API à un chatbot conçu et testé, et suggérez des
   prochaines étapes adaptées à leurs objectifs (Agents IA et outils, évaluation plus poussée, récupération
   dans des documents comme sujets).
 
 ## Check your understanding
 1. Pourquoi la clé d’API ne doit-elle pas figurer dans le code d’une page web qui appelle directement le modèle ?
    Good answer: tout ce qui est envoyé au navigateur de l’utilisateur peut être lu, donc la clé pourrait être volée et utilisée ; l’appel doit passer par un backend qui garde la clé secrète.
-2. Citez deux limites que vous fixeriez avant de partager publiquement votre chatbot, et pourquoi.
+2. Citez deux limites que vous fixeriez avant de partager publiquement un chatbot, et pourquoi.
    Good answer: deux éléments parmi un plafond de dépense ou de consommation chez le fournisseur, des limites de messages ou de débit par utilisateur, une longueur maximale de message ; elles protègent le budget et préviennent les abus.
-3. Que faut-il dire aux utilisateurs de votre chatbot ?
+3. Que faut-il dire aux utilisateurs d’un chatbot ?
    Good answer: que c’est une IA et qu’elle peut se tromper, quelles données sont stockées et pour combien de temps, et si leurs messages sont envoyés à un fournisseur de modèles.
 
 ## Completion criteria

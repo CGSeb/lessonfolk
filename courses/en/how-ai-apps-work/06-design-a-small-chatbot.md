@@ -1,14 +1,14 @@
 ---
-id: build-with-ai/06-build-a-small-chatbot
-title: Build a small chatbot
+id: how-ai-apps-work/06-design-a-small-chatbot
+title: Design a small chatbot
 level: intermediate
 estimatedMinutes: 15
 objectives:
-  - Combine a system prompt, history and error handling in one program
-  - Design a small terminal chatbot with a clear purpose and a test plan
+  - Combine a system prompt, history and error handling in one design
+  - Design a small chatbot on paper, with a clear purpose and a test plan
   - Choose one feature to add, and say why
 prerequisites:
-  - build-with-ai/05-errors-cost-and-latency
+  - how-ai-apps-work/05-errors-cost-and-latency
 ---
 
 ## Key ideas
@@ -17,7 +17,7 @@ prerequisites:
    prompt, test and trust than a "does everything" assistant.
 2. **The core is a loop.** Read the user's message, add it to the history, send the trimmed
    history with the system prompt, show the reply, add it to the history, repeat until the
-   user quits. Every earlier lesson is one part of this loop.
+   user quits. Every earlier lesson is one part of this loop, and designing it means deciding what each part will do.
 3. **Put the pieces together.** The system prompt from lesson 2 sets the purpose; the history
    and trimming from lesson 4 keep the conversation going; the retries and messages from
    lesson 5 keep it from crashing; structured output from lesson 3 is useful if the bot must
@@ -30,9 +30,10 @@ prerequisites:
    "mode" in the system prompt. Small, finished features beat large, half-done ones.
 
 ## Teaching notes
-- This lesson is a design session. Let the learner choose the chatbot's purpose, and keep
-  your explanations short; ask questions about their design rather than designing it for
-  them. If they write code on their own, review it with the same questions.
+- This lesson is a design session on paper: the learner writes no code and builds nothing.
+  Let them choose the chatbot's purpose, and keep your explanations short; ask questions
+  about their design rather than designing it for them. If they want to build it for real,
+  tell them hands-on practice lives in the projects section of the LessonFolk website.
 - Analogy that works: **assembling furniture**. Every part comes from an earlier lesson; now
   you follow the order and tighten the screws. Test it before putting weight on it.
 - Misconception: "it works on my three questions, so it works". Idea 4: systematic testing
@@ -56,4 +57,4 @@ its system prompt, how it keeps the history, how it handles errors, the kinds of
 test it with, and one feature to add.
 
 ## Going further
-- Next lesson: sharing your chatbot safely, and where to go next.
+- Next lesson: sharing an AI app safely, and where to go next.

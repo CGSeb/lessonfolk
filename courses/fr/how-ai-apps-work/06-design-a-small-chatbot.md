@@ -1,14 +1,14 @@
 ---
-id: build-with-ai/06-build-a-small-chatbot
-title: Construire un petit chatbot
+id: how-ai-apps-work/06-design-a-small-chatbot
+title: Concevoir un petit chatbot
 level: intermediate
 estimatedMinutes: 15
 objectives:
-  - Combiner un prompt système, un historique et une gestion d’erreurs dans un seul programme
-  - Concevoir un petit chatbot en terminal avec un objectif clair et un plan de test
+  - Combiner un prompt système, un historique et une gestion d’erreurs dans une seule conception
+  - Concevoir un petit chatbot sur le papier, avec un objectif clair et un plan de test
   - Choisir une fonctionnalité à ajouter, et dire pourquoi
 prerequisites:
-  - build-with-ai/05-errors-cost-and-latency
+  - how-ai-apps-work/05-errors-cost-and-latency
 ---
 
 ## Key ideas
@@ -17,7 +17,7 @@ prerequisites:
    est plus facile à prompter, tester et croire qu’un assistant « qui fait tout ».
 2. **Le cœur est une boucle.** Lire le message de l’utilisateur, l’ajouter à l’historique, envoyer
    l’historique réduit avec le prompt système, afficher la réponse, l’ajouter à l’historique, répéter
-   jusqu’à ce que l’utilisateur quitte. Chaque leçon précédente est une partie de cette boucle.
+   jusqu’à ce que l’utilisateur quitte. Chaque leçon précédente est une partie de cette boucle, et la concevoir, c’est décider ce que fera chaque partie.
 3. **Assemblez les pièces.** Le prompt système de la leçon 2 fixe l’objectif ; l’historique et sa
    réduction de la leçon 4 entretiennent la conversation ; les nouvelles tentatives et messages de la
    leçon 5 l’empêchent de planter ; la sortie structurée de la leçon 3 est utile si le bot doit produire
@@ -31,9 +31,10 @@ prerequisites:
    grandes à moitié faites.
 
 ## Teaching notes
-- Cette leçon est une séance de conception. Laissez l’apprenant choisir l’objectif du chatbot, et gardez
-  vos explications courtes ; posez des questions sur sa conception plutôt que de la concevoir à sa place.
-  S’il écrit du code seul, relisez-le avec les mêmes questions.
+- Cette leçon est une séance de conception sur le papier : l’apprenant n’écrit aucun code et ne construit
+  rien. Laissez-le choisir l’objectif du chatbot, et gardez vos explications courtes ; posez des questions
+  sur sa conception plutôt que de la concevoir à sa place. S’il veut le construire pour de vrai, dites-lui
+  que la pratique se trouve dans la section projets du site LessonFolk.
 - Analogie qui fonctionne : **monter un meuble**. Chaque pièce vient d’une leçon précédente ; maintenant
   vous suivez l’ordre et serrez les vis. Testez avant de mettre du poids dessus.
 - Idée reçue : « ça marche avec mes trois questions, donc ça marche ». Idée 4 : des tests systématiques
@@ -58,4 +59,4 @@ système, comment il garde l’historique, comment il gère les erreurs, les typ
 tester et une fonctionnalité à ajouter.
 
 ## Going further
-- Leçon suivante : partager votre chatbot en toute sécurité, et la suite.
+- Leçon suivante : partager une application d’IA en toute sécurité, et la suite.

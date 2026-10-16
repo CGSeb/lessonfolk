@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/02-system-prompts
+id: how-ai-apps-work/02-system-prompts
 title: Les prompts système et le comportement
 level: intermediate
 estimatedMinutes: 15
@@ -8,7 +8,7 @@ objectives:
   - Rédiger un prompt système et prévoir comment le tester
   - Savoir pourquoi un prompt système n’est pas une barrière de sécurité
 prerequisites:
-  - build-with-ai/01-how-an-api-call-works
+  - how-ai-apps-work/01-how-an-api-call-works
 ---
 
 ## Key ideas

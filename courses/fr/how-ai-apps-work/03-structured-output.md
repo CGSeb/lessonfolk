@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/03-structured-output
+id: how-ai-apps-work/03-structured-output
 title: La sortie structurée (JSON)
 level: intermediate
 estimatedMinutes: 15
@@ -8,7 +8,7 @@ objectives:
   - Expliquer comment le code analyse et valide la sortie
   - Dire ce que le code doit faire d’une sortie invalide
 prerequisites:
-  - build-with-ai/02-system-prompts
+  - how-ai-apps-work/02-system-prompts
 ---
 
 ## Key ideas

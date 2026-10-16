@@ -8,7 +8,7 @@ objectives:
   - Placer un système sur le spectre allant du chatbot au workflow puis à l’agent
   - Décider quand un agent n’est pas nécessaire
 prerequisites:
-  - build-with-ai/07-sharing-and-next-steps
+  - how-ai-apps-work/07-sharing-and-next-steps
 ---
 
 ## Key ideas

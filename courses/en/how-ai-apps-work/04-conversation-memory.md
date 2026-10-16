@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/04-conversation-memory
+id: how-ai-apps-work/04-conversation-memory
 title: Conversation memory and context limits
 level: intermediate
 estimatedMinutes: 15
@@ -8,7 +8,7 @@ objectives:
   - Explain how sending the history keeps a conversation going
   - Name ways to stay within the context window limit
 prerequisites:
-  - build-with-ai/03-structured-output
+  - how-ai-apps-work/03-structured-output
 ---
 
 ## Key ideas
