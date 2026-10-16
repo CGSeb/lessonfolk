@@ -44,10 +44,10 @@ prerequisites: []
 - Analogie : un métier est une boîte à outils, et l’IA un nouvel outil qui entre dans certains
   compartiments. On vide rarement toute la boîte d’un coup, mais ce que l’on utilise le plus
   souvent peut changer.
-- Exercice à faire dans la conversation : demandez à l’apprenant de nommer son métier (ou un
-  métier qu’il connaît) et d’en lister cinq ou six tâches. Pour chacune : l’IA pourrait-elle la
-  remplacer, l’aider, ou pas vraiment ? C’est le moment le plus utile de la leçon, il rend l’idée
-  personnelle.
+- Scénario à raisonner avec l’apprenant (rien à produire) : prenez un métier qu’il connaît
+  (infirmier, comptable, enseignante) et passez en revue cinq ou six de ses tâches. Pour chacune,
+  demandez si l’IA pourrait la remplacer, l’aider, ou pas vraiment, et pourquoi. Rendre l’idée
+  concrète sur un vrai métier est le moment le plus utile de la leçon.
 - Idée reçue : « l’IA prend les emplois » ou « l’IA ne change rien ». Les deux sont trop
   simples. Gardez la discussion équilibrée, sans alarmisme ni réassurance ; la réponse honnête
   est « ça dépend, et c’est inégal ».

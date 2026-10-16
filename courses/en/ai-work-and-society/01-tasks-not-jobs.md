@@ -39,9 +39,10 @@ prerequisites: []
 ## Teaching notes
 - Analogy: a job is a toolbox, and AI is a new tool that fits some compartments. The whole
   box is rarely emptied at once, but what you reach for most often can change.
-- Exercise to run in the chat: ask the learner to name their job (or one they know) and list
-  five or six tasks. For each, ask: could AI replace it, help with it, or not really? This
-  is the most useful moment of the lesson, and it makes the idea personal.
+- Scenario to reason through with the learner (no task to do): take a job they know (a nurse,
+  an accountant, a teacher) and walk through five or six of its tasks one by one. For each, ask
+  whether AI could replace it, help with it, or not really, and why. Making the idea concrete
+  on a real job is the most useful moment of the lesson.
 - Misconception: "AI takes jobs" or "AI changes nothing". Both are too simple. Keep the
   discussion balanced and avoid either alarm or reassurance; the honest answer is "it
   depends, and it is uneven".

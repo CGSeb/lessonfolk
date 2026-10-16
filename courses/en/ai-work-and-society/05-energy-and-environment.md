@@ -37,8 +37,9 @@ prerequisites:
 ## Teaching notes
 - Analogy: streaming video felt weightless, yet it also relies on data centres. AI is like
   streaming with a much hungrier engine: small per use, large in total.
-- Exercise: ask the learner to compare two claims ("AI will drain the planet" and "AI's
-  footprint is nothing") and say what question each one avoids.
+- Scenario to reason through with the learner (no task to do): two people argue, one saying "AI
+  will drain the planet", the other "AI's footprint is nothing". Ask which question each
+  one avoids and what a fair statement would look like.
 - Misconception: "my one chat is the problem" or "my one chat is nothing". The honest framing is
   that individual use is small, the total is large and growing, and system choices matter most.
 - Keep the tone calm and balanced: avoid alarm, avoid dismissal, and respect that

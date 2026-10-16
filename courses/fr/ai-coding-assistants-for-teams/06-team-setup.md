@@ -55,7 +55,7 @@ prerequisites:
   construisez les idées 4 et 5 à partir de ses réponses. Les apprenants qui travaillent seuls peuvent
   appliquer les idées 1 à 3 à leurs propres projets et garder l’idée 4 pour plus tard.
 - C’est la dernière leçon : récapitulez le cours (instructions, portées, commandes et skills, garde-fous,
-  configuration d’équipe) et célébrez. Suggérez la suite : Construire avec l’IA pour ajouter de l’IA à leurs
+  configuration d’équipe) et célébrez. Suggérez la suite : Comment fonctionnent les applications d’IA pour ajouter de l’IA à leurs
   propres applications, et Agents IA et outils pour comprendre comment leur assistant fonctionne de
   l’intérieur.
 
@@ -72,6 +72,6 @@ L’apprenant répond correctement aux vérifications et a rédigé, ou sait dé
 qui couvre les fichiers partagés, la maintenance, la vérification des plugins et une charte de travail.
 
 ## Going further
-- Construire avec l’IA : votre première application d’IA, pour ajouter des fonctionnalités d’IA à vos propres projets.
+- Comment fonctionnent les applications d’IA, pour ajouter des fonctionnalités d’IA à vos propres projets.
 - Agents IA et outils, pour comprendre comment les assistants de type agent fonctionnent de l’intérieur.
 - La documentation de votre assistant sur les réglages d’équipe et d’organisation.

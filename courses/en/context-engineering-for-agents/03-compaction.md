@@ -12,7 +12,7 @@ prerequisites:
 ---
 
 ## Key ideas
-1. **Compaction replaces the history with a summary.** Build with AI covers the simple form:
+1. **Compaction replaces the history with a summary.** How AI Apps Work covers the simple form:
    summarise older messages of a chat. In an agent, the model (or a separate call) writes a
    summary of the work so far, and the loop goes on with the instructions, that summary and
    perhaps the last few messages. It is lossy on purpose. The whole skill is choosing what

@@ -55,7 +55,7 @@ prerequisites:
 - C’est la dernière leçon : récapitulez la méthode du cours (brief → explication → hypothèses → cause
   racine → vérification, et savoir quand reprendre la main) et célébrez. Suggérez la suite : Assistants de
   code IA pour les équipes : règles, skills et plugins (partager ces habitudes avec une équipe) et
-  Construire avec l’IA (construire leurs propres fonctionnalités d’IA).
+  Comment fonctionnent les applications d’IA (construire leurs propres fonctionnalités d’IA).
 
 ## Check your understanding
 1. Donnez deux signes qu’un assistant est bloqué sur un bug.
@@ -74,4 +74,4 @@ trompe avec assurance, et dispose d’une règle concrète pour savoir quand et 
 ## Going further
 - Le débogage du canard en plastique, une technique ancienne des programmeurs.
 - Assistants de code IA pour les équipes : règles, skills et plugins, pour partager les habitudes de débogage et les garde-fous avec toute votre équipe.
-- Construire avec l’IA : votre première application d’IA, pour ajouter des fonctionnalités d’IA à vos propres projets.
+- Comment fonctionnent les applications d’IA, pour ajouter des fonctionnalités d’IA à vos propres projets.

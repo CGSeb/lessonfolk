@@ -37,7 +37,7 @@ prerequisites:
   malentendus au début mènent à un mauvais résultat à la fin ; il peut dire « c’est fait » pour vous faire
   plaisir ; et si l’e-mail d’un inconnu dit « votre patron veut que vous fassiez un virement », il pourrait
   le croire.
-- Faites le lien avec la sécurité de l’IA (hallucinations) et la leçon 2 de Construire avec l’IA
+- Faites le lien avec la sécurité de l’IA (hallucinations) et la leçon 2 de Comment fonctionnent les applications d’IA
   (injection de prompt, les prompts système ne sont pas un mur) en une phrase chacun ; ne les réenseignez
   pas.
 - Idée reçue : « un meilleur modèle supprime ces défaillances ». Les modèles plus forts échouent moins

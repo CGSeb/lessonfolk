@@ -40,9 +40,10 @@ prerequisites:
 - Analogie : imprimer coûtait autrefois cher, donc la plupart des documents imprimés avaient un
   éditeur derrière eux. Aujourd’hui, tout le monde peut produire une page soignée : la question
   passe de « est-ce que ça a l’air professionnel ? » à « qui est derrière, et peut-on le confirmer ? ».
-- Exercice : montrez une courte affirmation inventée (« une ville a interdit toutes les voitures
-  après une nouvelle étude ») et demandez à l’apprenant de lister trois étapes pour la vérifier
-  avant de la partager.
+- Scénario à raisonner avec l’apprenant (rien à produire) : un ami partage une affirmation
+  inventée (« une ville a interdit toutes les voitures après une nouvelle étude ») et veut la
+  republier. Demandez ce qui devrait faire douter et quelles vérifications trancheraient avant
+  de partager.
 - Idée reçue : « je reconnais les images d’IA aux mains ou à l’aspect brillant ». Ces indices
   changent à mesure que les outils progressent ; ce sont au mieux de faibles pistes.
 - Idée reçue : « un détecteur d’IA me le dira ». Présentez clairement l’idée 4 ; les fausses

@@ -68,6 +68,6 @@ The learner can name the main trade-offs, distinguish open-weight from closed an
 from cloud, and describe a simple test on their own examples (checks 1-3).
 
 ## Going further
-- The "Handling errors, cost and latency" lesson of *Build with AI* shows cost and speed
+- The "Handling errors, cost and latency" lesson of *How AI Apps Work* shows cost and speed
   from a developer's side.
 - *AI Coding Assistants in Practice* covers working with tools for code.

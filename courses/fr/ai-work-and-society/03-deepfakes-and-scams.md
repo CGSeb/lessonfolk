@@ -43,9 +43,9 @@ prerequisites:
 - Analogie : une signature falsifiée était autrefois difficile à faire et facile à comparer.
   Aujourd’hui, n’importe qui peut falsifier une voix. On fait donc comme les banques avec les
   signatures : on confirme par un second canal de confiance.
-- Exercice : donnez à l’apprenant un court scénario (« un message de votre responsable vous demande
-  d’acheter des cartes cadeaux aujourd’hui et de garder le secret ») et demandez-lui quels signes il
-  remarque et ce qu’il ferait en premier.
+- Scénario à raisonner avec l’apprenant (rien à produire) : « un message de votre responsable
+  vous demande d’acheter des cartes cadeaux aujourd’hui et de garder le secret ». Demandez quels
+  signes il remarque et quel devrait être le premier réflexe.
 - Idée reçue : « je reconnaîtrais la voix de ma mère ». Une voix clonée peut tromper sous le
   stress. La défense, c’est la procédure, pas l’oreille.
 - Idée reçue : « seules les personnes âgées se font avoir ». Tout le monde peut l’être,

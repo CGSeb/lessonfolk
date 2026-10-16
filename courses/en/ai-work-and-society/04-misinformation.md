@@ -36,8 +36,9 @@ prerequisites:
 - Analogy: printing used to be expensive, so most printed things had a publisher behind them.
   Now everyone can produce a polished page, so the question moves from "does it look
   professional?" to "who is behind it and can it be confirmed?".
-- Exercise: show a short, invented claim ("a town banned all cars after a new study") and ask the
-  learner to list three steps they would take to check it before sharing.
+- Scenario to reason through with the learner (no task to do): a friend shares an invented claim
+  ("a town banned all cars after a new study") and wants to repost it. Ask what would make
+  you doubt it and what checks would settle it before sharing.
 - Misconception: "I can tell AI images by the hands or the shine". Such tells change as tools
   improve; treat them as weak hints at best.
 - Misconception: "an AI detector will tell me". Present idea 4 clearly; false accusations

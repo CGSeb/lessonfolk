@@ -26,7 +26,7 @@ prerequisites:
 5. **Use what your tool offers, carefully.** Some assistants let you save standing
    instructions, reusable setups or recurring tasks. They can save time, but anything that
    runs without you looking still needs a check now and then. Building real automations that
-   connect tools usually takes code, which is the subject of the Build with AI course.
+   connect tools usually takes code, which is the subject of the How AI Apps Work course.
 
 ## Teaching notes
 - Analogy that works: **a recipe card**. The first time you cook a dish you improvise; once
@@ -41,7 +41,7 @@ prerequisites:
 - Misconception: "I need to code to save time with AI". Templates and batching need no code
   and cover most everyday repetition.
 - For technical learners, mention that the next step (APIs, scripts, connected tools) is in
-  Build with AI, and keep this lesson no-code.
+  How AI Apps Work, and keep this lesson no-code.
 
 ## Check your understanding
 1. Which of these is the best candidate for a reusable AI template, and why: a weekly team update, a one-off apology to an upset client, or writing your company's annual strategy?
@@ -57,4 +57,4 @@ task they really do.
 
 ## Going further
 - Next lesson: putting it all together into your own AI routine.
-- Build with AI, for automations that connect tools using code.
+- How AI Apps Work, for automations that connect tools using code.

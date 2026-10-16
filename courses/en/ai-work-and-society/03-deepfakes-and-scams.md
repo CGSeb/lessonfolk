@@ -37,8 +37,9 @@ prerequisites:
 ## Teaching notes
 - Analogy: a forged signature used to be hard to make and easy to compare. Now anyone can forge
   a voice. So we do what banks did with signatures: confirm through a second, trusted channel.
-- Exercise: give the learner a short scenario ("a message from your manager asks you to buy gift
-  cards today and keep it quiet") and ask which signs they notice and what they would do first.
+- Scenario to reason through with the learner (no task to do): "a message from your manager
+  asks you to buy gift cards today and keep it quiet". Ask which signs they notice and what
+  the first move should be.
 - Misconception: "I would recognise my own mother's voice". A cloned voice can fool people
   under stress. The defence is the procedure, not the ear.
 - Misconception: "only older people fall for it". Anyone does, especially when tired,

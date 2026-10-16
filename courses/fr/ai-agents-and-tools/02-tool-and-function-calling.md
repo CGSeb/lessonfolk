@@ -30,7 +30,7 @@ prerequisites:
    `tools` dans la requête). Certains modèles, surtout les petits modèles locaux, ne le font pas. Vous
    pouvez alors décrire les outils dans le prompt système et demander au modèle de répondre avec du JSON
    comme `{"tool": "check_stock", "arguments": {...}}`, que votre code analyse et valide comme dans
-   Construire avec l’IA.
+   Comment fonctionnent les applications d’IA.
 
 ## Teaching notes
 - La leçon ne demande aucune installation. Si l’apprenant l’essaie en code et que son modèle ne gère pas

@@ -72,6 +72,6 @@ L’apprenant peut nommer les principaux compromis, distinguer à poids ouverts 
 cloud, et décrire un test simple sur ses propres exemples (vérifications 1-3).
 
 ## Going further
-- La leçon « Gérer les erreurs, le coût et la latence » de *Construire avec l’IA* montre le coût
+- La leçon « Gérer les erreurs, le coût et la latence » de *Comment fonctionnent les applications d’IA* montre le coût
   et la rapidité du côté du développeur.
 - *Les assistants de code IA en pratique* traite du travail avec les outils pour le code.

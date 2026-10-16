@@ -30,7 +30,7 @@ prerequisites:
    parameter in the request). Some models, especially small local ones, do not. Then you can
    describe the tools in the system prompt and ask the model to reply with JSON like
    `{"tool": "check_stock", "arguments": {...}}`, which your code parses and validates as in
-   Build with AI.
+   How AI Apps Work.
 
 ## Teaching notes
 - The lesson needs no setup. If the learner tries it in code and their model does not support
