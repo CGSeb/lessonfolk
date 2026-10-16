@@ -36,7 +36,8 @@ prerequisites:
   greet customers and what they are allowed to do; customers never read it, but they feel
   it. And a determined customer can still sometimes talk an employee into bending a rule.
 - Live demo: you can show the effect in this chat by role-playing two system prompts for the
-  same user question, then ask the learner to write a system prompt of their own.
+  same user question, then ask which one the bot follows better and what the vague one leaves open (nothing for the
+  learner to write).
 - Misconception: "the system prompt guarantees behaviour". It strongly influences it; it
   does not guarantee it (idea 5). Models also differ in how closely they follow it.
 - Misconception: "longer system prompts are better". Contradictory or bloated instructions

@@ -36,7 +36,8 @@ prerequisites:
   il accueille les clients et ce qu’il a le droit de faire ; les clients ne le lisent jamais, mais ils le
   ressentent. Et un client déterminé peut parfois convaincre un employé de plier une règle.
 - Démo en direct : vous pouvez montrer l’effet dans ce chat en jouant deux prompts système pour la même
-  question d’utilisateur, puis demander à l’apprenant d’écrire le sien.
+  question d’utilisateur, puis demander lequel le bot suit le mieux et ce que le prompt vague laisse ouvert (rien à écrire
+  pour l’apprenant).
 - Idée reçue : « le prompt système garantit le comportement ». Il l’influence fortement ; il ne le garantit
   pas (idée 5). Les modèles diffèrent aussi dans la fidélité avec laquelle ils le suivent.
 - Idée reçue : « un prompt système plus long est meilleur ». Des instructions contradictoires ou gonflées
