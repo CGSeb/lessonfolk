@@ -31,8 +31,9 @@ prerequisites:
 5. **Les embeddings servent aussi hors du modèle.** Un texte entier, pas seulement un mot,
    peut être transformé en un seul embedding. Comparer les embeddings d’une question et de
    nombreux documents permet de retrouver les documents les plus proches par le sens, même
-   sans mot en commun. Cette « recherche par le sens » est le moteur de la technique de
-   réponse à partir de documents vue dans *Agents IA et outils*.
+   sans mot en commun. Cette « recherche par le sens » est l’une des deux façons de retrouver
+   des passages dans la technique de réponse à partir de documents (RAG) vue dans *Agents IA
+   et outils*, l’autre étant la recherche par mots-clés.
 6. **Ils captent la ressemblance, pas la vérité.** Deux phrases peuvent être proches parce
    qu’elles parlent du même sujet tout en disant le contraire. Et les embeddings absorbent
    les régularités du texte dont ils sont issus, y compris ses biais.

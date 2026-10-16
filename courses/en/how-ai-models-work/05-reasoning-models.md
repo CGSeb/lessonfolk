@@ -22,8 +22,8 @@ prerequisites:
    "think step by step" often helps too.
 3. **They are trained for it.** Reasoning models are typically given extra training on
    problems whose answers can be checked, such as maths puzzles and code that must
-   pass tests, and rewarded when the final answer is right. Over time they learn habits
-   such as backtracking when a path looks wrong.
+   pass tests, and rewarded when the final answer is right. Over time they pick up habits
+   such as re-checking their work and trying another path when one looks wrong.
 4. **The price is time and tokens.** The thinking text takes time to generate and usually
    counts toward the cost. A quick lookup or a short email gains almost nothing from it.
    Multi-step maths, tricky code, planning with constraints and careful analysis gain
@@ -68,6 +68,6 @@ The learner can explain writing steps as the difference, choose when to use a re
 model, and say why its visible steps do not prove correctness (checks 1-3).
 
 ## Going further
-- The "Hypotheses, not guesses" lesson of *Debugging with AI* applies the same idea of
-  working in steps.
+- The "What prompting cannot fix" lesson of *Prompting Basics* shows other tasks (exact
+  counting, precise calculation) where predicting text reaches its limits.
 - The "Where agents fail" lesson of *AI Agents and Tools* shows what happens when plans go wrong.

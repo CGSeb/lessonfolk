@@ -29,7 +29,8 @@ prerequisites:
 5. **Embeddings also work outside the model.** A whole text, not just a word, can be turned
    into one embedding. Comparing the embeddings of a question and of many documents finds
    the documents closest in meaning, even with no shared words. This "search by meaning" is
-   the engine of the document-answering technique covered in *AI Agents and Tools*.
+   one of the two ways to find passages in the document-answering technique (RAG) covered in
+   *AI Agents and Tools*, the other being keyword search.
 6. **They capture similarity, not truth.** Two sentences can be close because they discuss
    the same subject while saying opposite things. And embeddings absorb the patterns of
    the text they were learned from, including its biases.

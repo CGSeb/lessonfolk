@@ -24,8 +24,8 @@ prerequisites:
 3. **Ils sont entraînés pour cela.** Les modèles de raisonnement reçoivent en général un
    entraînement supplémentaire sur des problèmes dont la réponse peut être vérifiée, comme des
    énigmes de maths ou du code qui doit passer des tests, et sont récompensés quand la réponse
-   finale est juste. Avec le temps, ils prennent des habitudes comme revenir en arrière quand une
-   piste semble mauvaise.
+   finale est juste. Avec le temps, ils prennent des habitudes comme revérifier leur travail et
+   essayer une autre piste quand une semble mauvaise.
 4. **Le prix, c’est du temps et des tokens.** Le texte de réflexion prend du temps à générer et
    compte en général dans le coût. Une recherche rapide ou un court e-mail n’en tirent presque
    rien. Les maths en plusieurs étapes, le code délicat, la planification sous contraintes et
@@ -79,7 +79,7 @@ modèle de raisonnement, et dire pourquoi ses étapes visibles ne prouvent pas l
 (vérifications 1-3).
 
 ## Going further
-- La leçon « Des hypothèses, pas des suppositions » de *Déboguer avec l’IA* applique la même idée
-  de travail par étapes.
+- La leçon « Ce que le prompting ne peut pas corriger » de *Les bases du prompting* montre
+  d’autres tâches (comptage exact, calcul précis) où prédire du texte atteint ses limites.
 - La leçon « Où les agents échouent » d’*Agents IA et outils* montre ce qui se passe quand les
   plans tournent mal.
