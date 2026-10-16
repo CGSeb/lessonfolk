@@ -1,0 +1,14 @@
+id: connecting-ai-with-mcp
+title: Connecting AI to Your Tools with MCP
+level: intermediate
+theme: building-with-ai
+authors: [lessonfolk]
+description: What the Model Context Protocol (MCP) is, how servers, tools and resources fit together, how to choose and connect them well, and how to keep your data safe from untrusted servers and prompt injection. No code needed.
+estimatedHours: 1.25
+prerequisites: [ai-agents-and-tools]
+lessons:
+  - connecting-ai-with-mcp/01-the-connection-problem
+  - connecting-ai-with-mcp/02-servers-tools-and-resources
+  - connecting-ai-with-mcp/03-local-and-remote-servers
+  - connecting-ai-with-mcp/04-choosing-servers-well
+  - connecting-ai-with-mcp/05-trust-and-prompt-injection
