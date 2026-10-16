@@ -36,8 +36,9 @@ prerequisites:
 - Analogy: a calculator did not remove the need to understand numbers; it moved the
   value to knowing which calculation to run and whether the result makes sense. AI does
   the same for writing, summarising and first drafts.
-- Exercise: ask the learner to choose one skill from their work they want to keep strong, and
-  one task they would happily hand to AI. Then ask how they would keep the first one in practice.
+- Scenario to reason through with the learner (no task to do): someone hands every first draft
+  to AI and, a year later, struggles to write one alone. Ask which skill faded, which task
+  was fine to hand over, and what that suggests about the skills worth keeping in practice.
 - Misconception: "learn the one AI tool and you are set". Tools change quickly; habits last.
 - Misconception: "soft skills are safe forever". Do not promise safety; say these skills tend
   to gain value, and that nobody can be sure.

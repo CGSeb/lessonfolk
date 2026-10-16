@@ -69,5 +69,5 @@ explain how narrow permissions and revocable sign-in limit a connection (checks 
 ## Going further
 - The "Privacy: what not to paste into a chat" lesson of *Using AI Safely and Wisely* covers what
   data should not leave your hands.
-- The "Your team's AI setup" lesson of *AI Coding Assistants for Teams* applies the same caution to
+- The "Your team's AI setup" lesson of *AI Coding Assistants for Teams: Rules, Skills and Plugins* applies the same caution to
   plugins and servers at team level.

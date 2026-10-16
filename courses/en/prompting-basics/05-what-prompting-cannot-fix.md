@@ -60,4 +60,4 @@ between what a better prompt can improve and what it cannot.
 
 ## Going further
 - Using AI Safely and Wisely: hallucinations, how to check answers, privacy, bias and honest use.
-- Build with AI: Your First AI App: system prompts and using models through code go beyond chat prompting.
+- How AI Apps Work: system prompts and using models through code go beyond chat prompting.

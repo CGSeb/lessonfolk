@@ -12,7 +12,7 @@ prerequisites:
 ---
 
 ## Key ideas
-1. **La compaction remplace l’historique par un résumé.** Construire avec l’IA couvre la forme simple :
+1. **La compaction remplace l’historique par un résumé.** Comment fonctionnent les applications d’IA couvre la forme simple :
    résumer les anciens messages d’un chat. Dans un agent, le modèle (ou un appel séparé) rédige un résumé
    du travail accompli, et la boucle continue avec les instructions, ce résumé et peut-être les derniers
    messages. Elle perd de l’information, volontairement. Toute la compétence est de choisir ce qu’on perd.

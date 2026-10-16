@@ -43,8 +43,9 @@ prerequisites:
 - Analogie : le streaming vidéo paraissait immatériel, mais il repose lui aussi sur des centres
   de données. L’IA, c’est du streaming avec un moteur bien plus gourmand : petit à chaque usage,
   grand au total.
-- Exercice : demandez à l’apprenant de comparer deux affirmations (« l’IA va épuiser la planète »
-  et « l’empreinte de l’IA n’est rien ») et de dire quelle question chacune évite.
+- Scénario à raisonner avec l’apprenant (rien à produire) : deux personnes débattent, l’une
+  disant « l’IA va épuiser la planète », l’autre « l’empreinte de l’IA n’est rien ». Demandez
+  quelle question chacune évite et à quoi ressemblerait une formulation juste.
 - Idée reçue : « mon seul message est le problème » ou « mon seul message n’est rien ». Le cadrage
   honnête : l’usage individuel est petit, le total est grand et en croissance, et les choix du
   système comptent le plus.

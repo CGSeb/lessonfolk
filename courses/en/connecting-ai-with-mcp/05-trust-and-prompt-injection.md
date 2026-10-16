@@ -15,7 +15,7 @@ prerequisites:
 1. **A connected server acts with your access.** Whatever it can reach, a careless or hostile one can read,
    change or send away. Adding a server is like installing software and handing it a key, so treat it as a
    dependency: know its source, read what it does, and keep a short approved list (see *AI Coding
-   Assistants for Teams*).
+   Assistants for Teams: Rules, Skills and Plugins*).
 2. **Anything a tool returns can contain instructions.** A web page, an email, a ticket or a document
    fetched through a server is just text to the model, and the model cannot reliably tell your
    instructions from instructions hidden in the data. This is *prompt injection* (covered in
@@ -78,5 +78,5 @@ through tool descriptions, identify the risky combination in a scenario, and nam
 ## Going further
 - The "Guardrails and human oversight" lesson of *AI Agents and Tools* covers keeping people in charge of
   agent actions.
-- The "Your team's AI setup" lesson of *AI Coding Assistants for Teams* covers treating servers and
+- The "Your team's AI setup" lesson of *AI Coding Assistants for Teams: Rules, Skills and Plugins* covers treating servers and
   plugins as dependencies.

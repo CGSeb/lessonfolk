@@ -14,7 +14,7 @@ prerequisites:
 ## Key ideas
 1. **The window is working memory; what must last lives outside.** Anything that exists only
    in the context disappears at the next compaction or when the session ends. A notes file,
-   a task list or a database row does not. Build with AI covers the principle (memory across
+   a task list or a database row does not. How AI Apps Work covers the principle (memory across
    sessions is data your app stores); here the agent writes and reads that data itself, with
    tools, during the task.
 2. **Store what cannot be worked out again.** Three kinds of content earn their place: the

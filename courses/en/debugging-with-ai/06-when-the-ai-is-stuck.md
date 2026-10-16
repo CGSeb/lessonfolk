@@ -74,4 +74,4 @@ assistant, and has a concrete rule for when and how to change approach.
 - Rubber duck debugging, a long-standing programmer technique.
 - AI Coding Assistants for Teams: Rules, Skills and Plugins, to share debugging habits and
   guardrails with your whole team.
-- Build with AI: Your First AI App, to add AI features to your own projects.
+- How AI Apps Work, to add AI features to your own projects.

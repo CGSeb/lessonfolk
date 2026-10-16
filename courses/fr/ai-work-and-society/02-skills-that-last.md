@@ -40,9 +40,10 @@ prerequisites:
 - Analogie : la calculatrice n’a pas supprimé le besoin de comprendre les nombres ; elle a
   déplacé la valeur vers le fait de savoir quel calcul faire et si le résultat est cohérent.
   L’IA fait la même chose pour l’écriture, les résumés et les premiers jets.
-- Exercice : demandez à l’apprenant de choisir une compétence de son travail qu’il veut garder
-  solide, et une tâche qu’il confierait volontiers à l’IA. Demandez ensuite comment il
-  entretiendrait la première dans la pratique.
+- Scénario à raisonner avec l’apprenant (rien à produire) : quelqu’un confie tous ses premiers
+  jets à l’IA et, un an plus tard, peine à en écrire un seul. Demandez quelle compétence s’est
+  érodée, quelle tâche pouvait être confiée sans risque, et ce que cela dit des compétences à
+  entretenir dans la pratique.
 - Idée reçue : « apprenez l’outil d’IA et vous êtes tranquille ». Les outils changent vite ;
   les habitudes durent.
 - Idée reçue : « les compétences humaines sont à l’abri pour toujours ». Ne promettez pas la

@@ -33,7 +33,7 @@ prerequisites:
 
 ## Teaching notes
 - Concluez le cours et le parcours d’apprentissage : reliez les garde-fous au cours sur la sécurité
-  (jugement humain, vérifier ce qui compte) et à Construire avec l’IA (clés, limites, information sur les
+  (jugement humain, vérifier ce qui compte) et à Comment fonctionnent les applications d’IA (clés, limites, information sur les
   données). Les agents sont puissants quand ils sont bornés.
 - Analogie qui fonctionne : **le badge d’accès d’un nouvel employé**. Le premier jour, il peut entrer dans
   le bâtiment mais pas dans la salle des serveurs ; les paiements demandent la signature d’un responsable ;

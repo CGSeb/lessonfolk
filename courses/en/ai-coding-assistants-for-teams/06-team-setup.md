@@ -54,7 +54,7 @@ prerequisites:
   4 and 5 from their answers. Learners working alone can apply ideas 1–3 to their own
   projects and keep idea 4 for later.
 - This is the last lesson: recap the course (instructions, scopes, commands and skills,
-  guardrails, team setup) and celebrate. Suggest next steps: Build with AI to add AI to their
+  guardrails, team setup) and celebrate. Suggest next steps: How AI Apps Work to add AI to their
   own apps, and AI Agents and Tools to understand how their assistant works inside.
 
 ## Check your understanding
@@ -70,6 +70,6 @@ The learner answers the checks correctly and has written, or can describe, a tea
 covers shared files, maintenance, plugin vetting and a working agreement.
 
 ## Going further
-- Build with AI: Your First AI App, to add AI features to your own projects.
+- How AI Apps Work, to add AI features to your own projects.
 - AI Agents and Tools, to understand how agent-style assistants work inside.
 - Your assistant's documentation on team and organisation settings.

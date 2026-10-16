@@ -34,8 +34,9 @@ prerequisites:
 ## Teaching notes
 - Analogy: cars are regulated by risk and use: a bicycle and a lorry do not face the same rules,
   and everyone is still bound by general laws such as those on dangerous driving.
-- Exercise: ask the learner to pick an AI use they know (CV screening, a school writing tool, a
-  chatbot on a shop site) and place it as low, medium or high risk with a reason.
+- Scenario to reason through with the learner (no task to do): a company uses AI to screen CVs
+  (or a school adds a writing tool, or a shop adds a chatbot). Ask whether the risk is low,
+  medium or high, and which fact about the use decides it.
 - Misconception: "AI is unregulated". Many general laws already apply, and AI-specific ones exist
   in some places. The picture is patchy, not empty.
 - Misconception: "regulation just blocks innovation" or "it will fix everything". Present the

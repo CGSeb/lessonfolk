@@ -75,7 +75,7 @@ The learner can explain what a token is, use it to explain why a model miscounts
 and say why context limits and costs are measured in tokens (checks 1-3).
 
 ## Going further
-- The "Conversation memory and context limits" lesson of *Build with AI* shows how
+- The "Conversation memory and context limits" lesson of *How AI Apps Work* shows how
   developers manage the token budget.
 - Search for a "tokenizer" demo page from a model provider to see your own text cut into
   tokens.

@@ -33,7 +33,7 @@ prerequisites:
 
 ## Teaching notes
 - Close the course and the learning path: connect guardrails back to the safety course (human
-  judgement, checking what matters) and to Build with AI (keys, limits, data notice). Agents
+  judgement, checking what matters) and to How AI Apps Work (keys, limits, data notice). Agents
   are powerful when they are bounded.
 - Analogy that works: **a new employee's access badge**. On day one they can enter the
   building but not the server room; payments need a manager's signature; everything is logged.

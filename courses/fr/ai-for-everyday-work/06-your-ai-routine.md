@@ -56,5 +56,5 @@ L’apprenant répond correctement aux vérifications et rédige une courte rout
 des règles de vérification et une date de révision.
 
 ## Going further
-- Construire avec l’IA, pour créer vos propres outils et automatisations.
+- Comment fonctionnent les applications d’IA, pour créer vos propres outils et automatisations.
 - Demandez au tuteur de vous « interroger » pour réviser les leçons de ce cours.

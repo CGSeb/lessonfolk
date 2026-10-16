@@ -29,7 +29,7 @@ prerequisites:
    instructions permanentes, des configurations réutilisables ou des tâches récurrentes. Cela peut faire
    gagner du temps, mais tout ce qui tourne sans que vous regardiez demande un contrôle de temps en temps.
    Construire de vraies automatisations qui relient des outils demande en général du code, ce qui est le
-   sujet du cours Construire avec l’IA.
+   sujet du cours Comment fonctionnent les applications d’IA.
 
 ## Teaching notes
 - Analogie qui fonctionne : **une fiche de recette**. La première fois que vous cuisinez un plat, vous
@@ -45,7 +45,7 @@ prerequisites:
 - Idée reçue : « il faut coder pour gagner du temps avec l’IA ». Les modèles et le traitement par lots ne
   demandent aucun code et couvrent l’essentiel des répétitions du quotidien.
 - Pour les apprenants techniques, mentionnez que l’étape suivante (API, scripts, outils connectés) se
-  trouve dans Construire avec l’IA, et gardez cette leçon sans code.
+  trouve dans Comment fonctionnent les applications d’IA, et gardez cette leçon sans code.
 
 ## Check your understanding
 1. Lequel de ces cas est le meilleur candidat à un modèle d’IA réutilisable, et pourquoi : un point hebdomadaire d’équipe, des excuses ponctuelles à un client mécontent, ou la rédaction de la stratégie annuelle de votre entreprise ?
@@ -61,4 +61,4 @@ tâche qu’il fait réellement.
 
 ## Going further
 - Leçon suivante : tout rassembler dans votre propre routine d’IA.
-- Construire avec l’IA, pour des automatisations qui relient des outils par le code.
+- Comment fonctionnent les applications d’IA, pour des automatisations qui relient des outils par le code.

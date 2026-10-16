@@ -15,7 +15,7 @@ prerequisites:
 1. **Un serveur connecté agit avec vos accès.** Tout ce qu’il peut atteindre, un serveur négligent ou hostile peut le
    lire, le modifier ou l’envoyer ailleurs. Ajouter un serveur, c’est comme installer un logiciel et lui remettre une
    clé : traitez-le comme une dépendance, connaissez sa source, lisez ce qu’il fait, et gardez une courte liste
-   approuvée (voir *Assistants de code IA pour les équipes*).
+   approuvée (voir *Assistants de code IA pour les équipes : règles, skills et plugins*).
 2. **Tout ce qu’un outil renvoie peut contenir des instructions.** Une page web, un e-mail, un ticket ou un document
    récupéré par un serveur n’est que du texte pour le modèle, et le modèle ne sait pas distinguer de façon fiable vos
    instructions de celles cachées dans les données. C’est l’*injection de prompt* (vue dans *Agents IA et outils*) :
@@ -78,5 +78,5 @@ les descriptions d’outils, repérer la combinaison risquée dans un scénario,
 ## Going further
 - La leçon « Garde-fous et supervision humaine » d’*Agents IA et outils* traite de la façon de garder les personnes aux
   commandes des actions d’un agent.
-- La leçon « La configuration IA de votre équipe » d’*Assistants de code IA pour les équipes* traite des serveurs et
+- La leçon « La configuration IA de votre équipe » d’*Assistants de code IA pour les équipes : règles, skills et plugins* traite des serveurs et
   des plugins comme des dépendances.

@@ -36,7 +36,7 @@ prerequisites:
 - Analogy that works: **a new intern with a long to-do list**. Small misunderstandings early
   lead to a wrong result at the end; they may say "done" to please you; and if a stranger's
   email says "your boss wants you to wire money", they might believe it.
-- Link to AI Safety (hallucinations) and Build with AI lesson 2 (prompt injection, system
+- Link to Using AI Safely and Wisely (hallucinations) and How AI Apps Work lesson 2 (prompt injection, system
   prompts are not a wall) in one sentence each; do not re-teach them.
 - Misconception: "a better model removes these failures". Stronger models fail less often,
   but the failure modes remain; systems must be designed for them (lesson 6).

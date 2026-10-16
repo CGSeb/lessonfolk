@@ -39,9 +39,9 @@ prerequisites:
 - Analogie : les véhicules sont réglementés selon le risque et l’usage : un vélo et un camion
   n’ont pas les mêmes règles, et tout le monde reste soumis aux lois générales, comme celles sur
   la conduite dangereuse.
-- Exercice : demandez à l’apprenant de choisir un usage d’IA qu’il connaît (tri de CV, outil
-  d’écriture à l’école, chatbot sur le site d’une boutique) et de le classer en risque faible,
-  moyen ou élevé, avec une raison.
+- Scénario à raisonner avec l’apprenant (rien à produire) : une entreprise trie des CV avec
+  l’IA (ou une école ajoute un outil d’écriture, ou une boutique un chatbot). Demandez si le
+  risque est faible, moyen ou élevé, et quel fait sur cet usage tranche.
 - Idée reçue : « l’IA n’est pas réglementée ». De nombreuses lois générales s’appliquent déjà, et
   des lois propres à l’IA existent à certains endroits. Le paysage est inégal, pas vide.
 - Idée reçue : « la régulation ne fait que freiner l’innovation » ou « elle va tout résoudre ».
