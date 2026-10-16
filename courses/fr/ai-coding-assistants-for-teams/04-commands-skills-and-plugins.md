@@ -65,8 +65,8 @@ prerequisites:
   qu’il y en a plusieurs.
 - Idée reçue : « un skill, c’est du code ». Un skill est surtout des instructions textuelles ; les scripts
   sont des aides facultatives qu’il peut lancer.
-- Gardez MCP au niveau de « ce qu’il connecte » ; le fonctionnement interne de l’appel d’outils et de MCP
-  est enseigné dans le cours Agents IA et outils.
+- Gardez MCP au niveau de « ce qu’il connecte » ; le fonctionnement interne de MCP est enseigné
+  dans le cours Connecter l’IA à vos outils avec MCP.
 - Pour les apprenants qui préfèrent faire plutôt que lire, écrivez ensemble une petite commande ou un
   skill pendant la leçon et lancez-le.
 
@@ -86,5 +86,6 @@ le fichier d’instructions, une commande, un skill, un sous-agent et un plugin,
 
 ## Going further
 - Le cours Agents IA et outils, pour l’appel d’outils et la façon dont les agents utilisent des systèmes extérieurs.
+- Connecter l’IA à vos outils avec MCP, pour le fonctionnement des serveurs MCP.
 - La documentation de votre assistant sur les commandes, skills, sous-agents et plugins.
 - La documentation du Model Context Protocol : modelcontextprotocol.io
