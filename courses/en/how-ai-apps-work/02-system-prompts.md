@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/02-system-prompts
+id: how-ai-apps-work/02-system-prompts
 title: System prompts and behaviour
 level: intermediate
 estimatedMinutes: 15
@@ -8,7 +8,7 @@ objectives:
   - Write a system prompt and plan how to test it
   - Know why a system prompt is not a security boundary
 prerequisites:
-  - build-with-ai/01-how-an-api-call-works
+  - how-ai-apps-work/01-how-an-api-call-works
 ---
 
 ## Key ideas

@@ -1,0 +1,16 @@
+id: how-ai-apps-work
+title: "How AI Apps Work"
+level: intermediate
+theme: building-with-ai
+authors: [lessonfolk]
+description: Understand how AI apps are built — what an API call to a model contains, how a system prompt shapes behaviour, how apps get structured output and keep conversations going, and what to plan for before sharing one. No coding required.
+estimatedHours: 2
+prerequisites: [prompting-basics]
+lessons:
+  - how-ai-apps-work/01-how-an-api-call-works
+  - how-ai-apps-work/02-system-prompts
+  - how-ai-apps-work/03-structured-output
+  - how-ai-apps-work/04-conversation-memory
+  - how-ai-apps-work/05-errors-cost-and-latency
+  - how-ai-apps-work/06-design-a-small-chatbot
+  - how-ai-apps-work/07-sharing-and-next-steps

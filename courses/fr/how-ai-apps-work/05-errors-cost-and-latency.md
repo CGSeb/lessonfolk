@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/05-errors-cost-and-latency
+id: how-ai-apps-work/05-errors-cost-and-latency
 title: Gérer les erreurs, le coût et la latence
 level: intermediate
 estimatedMinutes: 20
@@ -8,7 +8,7 @@ objectives:
   - Expliquer ce qui détermine le coût et le temps de réponse
   - Garder le contrôle des clés d’API et de la consommation
 prerequisites:
-  - build-with-ai/04-conversation-memory
+  - how-ai-apps-work/04-conversation-memory
 ---
 
 ## Key ideas
@@ -46,8 +46,7 @@ prerequisites:
   limites de débit ; le backoff est la méthode polie et efficace.
 - Idée reçue : « le streaming rend le modèle plus rapide ». Il améliore la vitesse perçue, pas la vitesse
   de génération.
-- Le code de streaming varie selon l’outil ; décrivez le concept et laissez l’apprenant suivre la
-  documentation de son outil s’il veut essayer.
+- Décrivez le streaming comme un concept seulement ; la façon de le faire varie selon l’outil.
 - Pour les apprenants qui ont déjà construit des services web, reliez à ce qu’ils connaissent : délais
   d’attente, nouvelles tentatives, idempotence, gestion des secrets.
 

@@ -1,14 +1,14 @@
 ---
-id: build-with-ai/07-sharing-and-next-steps
-title: Sharing and next steps
+id: how-ai-apps-work/07-sharing-and-next-steps
+title: Before you share an AI app
 level: intermediate
 estimatedMinutes: 15
 objectives:
-  - Know what to check before letting others use your AI app
+  - Know what to check before letting others use an AI app
   - Choose a simple way to share it
   - Plan what to learn next
 prerequisites:
-  - build-with-ai/06-build-a-small-chatbot
+  - how-ai-apps-work/06-design-a-small-chatbot
 ---
 
 ## Key ideas
@@ -41,16 +41,16 @@ prerequisites:
   used; limits protect both your budget and your users.
 - Do not give legal advice on privacy rules; tell the learner that rules differ by country
   and to check them before collecting other people's data.
-- Close the course: recap the path from a single API call to a tested chatbot, and suggest
+- Close the course: recap the path from a single API call to a designed, tested chatbot, and suggest
   next steps that fit their goals (AI Agents and Tools, deeper evaluation, retrieval over
   documents as topics).
 
 ## Check your understanding
 1. Why must the API key not be in the code of a web page that calls the model directly?
    Good answer: anything sent to the user's browser can be read, so the key could be stolen and used; the call should go through a backend that keeps the key secret.
-2. Name two limits you would set before sharing your chatbot publicly, and why.
+2. Name two limits you would set before sharing a chatbot publicly, and why.
    Good answer: any two of a spending or usage cap at the provider, per-user message or rate limits, a maximum message length; they protect the budget and prevent abuse.
-3. What should users of your chatbot be told?
+3. What should users of a chatbot be told?
    Good answer: that it is an AI and can be wrong, what data is stored and for how long, and whether their messages are sent to a model provider.
 
 ## Completion criteria

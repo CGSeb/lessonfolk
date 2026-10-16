@@ -1,5 +1,5 @@
 ---
-id: build-with-ai/05-errors-cost-and-latency
+id: how-ai-apps-work/05-errors-cost-and-latency
 title: Handling errors, cost and latency
 level: intermediate
 estimatedMinutes: 20
@@ -8,7 +8,7 @@ objectives:
   - Explain what drives cost and response time
   - Keep API keys and usage under control
 prerequisites:
-  - build-with-ai/04-conversation-memory
+  - how-ai-apps-work/04-conversation-memory
 ---
 
 ## Key ideas
@@ -43,8 +43,7 @@ prerequisites:
   limits worse; backoff is the polite and effective way.
 - Misconception: "streaming makes the model faster". It improves perceived speed, not
   generation speed.
-- Streaming code varies by tool; describe the concept and let the learner follow their tool's
-  documentation if they want to try it.
+- Describe streaming as a concept only; how it is done varies by tool.
 - For learners who have built web services, connect to what they know: timeouts, retries,
   idempotency, secrets management.
 
@@ -59,7 +58,7 @@ prerequisites:
    Good answer: revoke the key and create a new one at once; a spending or usage limit at the provider caps what a leaked key or a bug can cost.
 
 ## Completion criteria
-The learner answers the checks correctly and can describe a model call with a timeout,
+The learner answers the checks correctly and can describe how an app should make a model call, with a timeout,
 retries with backoff for temporary errors, and a clear error message.
 
 ## Going further
