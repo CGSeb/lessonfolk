@@ -1,0 +1,15 @@
+id: how-ai-models-work
+title: How AI Models Really Work
+level: intermediate
+theme: understanding-ai
+authors: [lessonfolk]
+description: Look inside the model behind your chat assistant — how text becomes tokens, how meaning becomes numbers, how training turns a text predictor into an assistant, what reasoning models add, and how to choose a model. No code or math needed.
+estimatedHours: 1.5
+prerequisites: [ai-foundations]
+lessons:
+  - how-ai-models-work/01-text-to-tokens
+  - how-ai-models-work/02-embeddings-meaning-as-numbers
+  - how-ai-models-work/03-pre-training
+  - how-ai-models-work/04-post-training
+  - how-ai-models-work/05-reasoning-models
+  - how-ai-models-work/06-choosing-a-model
