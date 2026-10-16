@@ -73,5 +73,5 @@ expliquer comment des autorisations étroites et une connexion révocable limite
 ## Going further
 - La leçon « Vie privée : ce qu’il ne faut pas coller dans un chat » d’*Utiliser l’IA en toute sécurité et avec
   discernement* traite des données qui ne doivent pas quitter vos mains.
-- La leçon « La configuration IA de votre équipe » d’*Assistants de code IA pour les équipes* applique la même
+- La leçon « La configuration IA de votre équipe » d’*Assistants de code IA pour les équipes : règles, skills et plugins* applique la même
   prudence aux plugins et aux serveurs à l’échelle d’une équipe.

@@ -67,8 +67,8 @@ prerequisites:
   sont des aides facultatives qu’il peut lancer.
 - Gardez MCP au niveau de « ce qu’il connecte » ; le fonctionnement interne de MCP est enseigné
   dans le cours Connecter l’IA à vos outils avec MCP.
-- Pour les apprenants qui préfèrent faire plutôt que lire, écrivez ensemble une petite commande ou un
-  skill pendant la leçon et lancez-le.
+- Scénario à raisonner avec l’apprenant (rien à produire) : une équipe répète chaque semaine la même
+  liste de contrôle de livraison. Demandez si elle doit devenir une commande, un skill ou un plugin, et pourquoi.
 
 ## Check your understanding
 1. Votre équipe a une procédure de 30 lignes pour préparer une release. Pourquoi la mettre dans une commande ou un skill plutôt que dans AGENTS.md ?

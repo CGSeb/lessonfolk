@@ -66,8 +66,8 @@ prerequisites:
   optional helpers it can run.
 - Keep MCP at the level of "what it connects"; how MCP works inside is taught in the
   Connecting AI to Your Tools with MCP course.
-- For learners who prefer doing over reading, write a small command or skill together during
-  the lesson and run it.
+- Scenario to reason through with the learner (no task to do): a team repeats the same release
+  checklist every week. Ask whether it should be a command, a skill or a plugin, and why.
 
 ## Check your understanding
 1. Your team has a 30-line procedure for preparing a release. Why put it in a command or skill rather than in AGENTS.md?
