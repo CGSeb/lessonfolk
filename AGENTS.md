@@ -104,19 +104,29 @@ author). Never edit other courses.
    After the first lesson, summarise it in a few lines and offer the author a look before
    you write the rest.
 5. **Register** the course id in `courses/<lang>/index.yaml` at the agreed position.
-6. **Translate to French.** Once the English course is final (outline approved, first lesson
-   reviewed), translate it without asking again: create `courses/fr/<course>/` with
+6. **Fact-check** the English lessons before they are translated, without asking again:
+   - List every checkable claim (rules of thumb, how a technique works, what a study found,
+     what a tool or method does) and the cross-references to other lessons ("covered in …").
+   - Verify each claim against a primary or well-known source with a web search (official
+     documentation, the paper itself), and open each referenced lesson to confirm it says
+     what you claim. Never rely on memory alone for a number, a name or a finding.
+   - Fix what is wrong, overstated or too precise. Keep fast-aging details out rather than
+     correcting them.
+   - Keep the sources and the claims you could not verify for step 9.
+7. **Translate to French.** Once the English course is fact-checked (outline approved, first
+   lesson reviewed), translate it without asking again: create `courses/fr/<course>/` with
    `course.yaml` (translated `title` and `description`) and one file per lesson, following
    [Translations](docs/course-format.md#translations). Keep ids, `##` headings and
    `Good answer:` labels in English; translate `title`, `objectives` and the text. Write
    natural French (not word for word), address the learner as « vous » like the existing
    French courses, and reuse their vocabulary (read one translated lesson first). Add a
    French theme only if you added an English one. Skip this step only if the author says so.
-7. **Validate.** Run `npm run check:courses` (run `npm install` first if dependencies are
+8. **Validate.** Run `npm run check:courses` (run `npm install` first if dependencies are
    missing). Fix every error and run it again until it passes. Fix warnings too, or tell the
    author why one is kept ("theme … has no course yet" is expected for themes still waiting
    for their first course).
-8. **Hand back**: list the files created (English and French), any facts the author should double-check, and a
+9. **Hand back**: list the files created (English and French), the fact-check result (what
+   you verified with its source, what you corrected, what you could not verify), and a
    commit message in the format below (`feat: :sparkles: Add <title> course`). Suggest
    previewing it with `npm run dashboard`. Do not commit unless the author asks.
 
