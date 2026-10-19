@@ -130,7 +130,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       description:
         "The learner's saved progress (progress.json v1 shape): profile (name, experience, goal, language, level, interests), " +
         'path with its reason, current lesson, and every started lesson with status, dates, score and notes. ' +
-        'Empty profile and lessons mean a new learner: start with onboarding. Call this first in every session.',
+        'Empty profile and lessons mean a new learner who has not been onboarded yet.',
       inputSchema: z.object({}),
       annotations: { ...readOnly, title: 'Get progress' },
     },
@@ -144,8 +144,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       description:
         'The lesson to teach now, by the LessonFolk rules: the current lesson if unfinished ("resume"), otherwise the first unfinished lesson ' +
         'whose prerequisites are done or skipped, following the learner\'s path first ("next"). "all_done" means every lesson is finished; ' +
-        '"blocked" means none is available. unknownPathIds lists path courses that no longer exist (tell the learner). ' +
-        'Does not change anything: call start_lesson to begin it.',
+        '"blocked" means none is available. unknownPathIds lists path courses that no longer exist. ' +
+        'Does not change anything; start_lesson begins the lesson.',
       inputSchema: z.object({}),
       annotations: { ...readOnly, title: 'Get next lesson' },
     },
@@ -173,9 +173,9 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     {
       title: 'Get lesson',
       description:
-        'The full lesson file: frontmatter, content, key ideas, teaching notes (for you, the tutor, never to paste), ' +
+        'The full lesson file: frontmatter, content, key ideas, teaching notes (written for the tutor, not the learner), ' +
         '"Check your understanding" questions with good-answer hints, and completion criteria. ' +
-        "Starts with a short header giving the course and the learner's status for this lesson. Read it in full before teaching.",
+        "Starts with a short header giving the course and the learner's status for this lesson.",
       inputSchema: z.object({ lessonId, lang }),
       annotations: { ...readOnly, title: 'Get lesson' },
     },
@@ -218,7 +218,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'List themes',
       description:
         'The themes that group courses, in order (themes.yaml): id, title, description and their course ids. ' +
-        'A theme with no course yet is "coming soon". Use the ids for the profile interests and list_courses.',
+        'A theme with no course yet is "coming soon". The ids are the values used for profile interests and by list_courses.',
       inputSchema: z.object({ lang }),
       annotations: { ...readOnly, title: 'List themes' },
     },
@@ -244,8 +244,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Set profile',
       description:
         "Change the learner's profile. Each field given replaces the saved one, null removes it, fields left out are kept. " +
-        'level must be beginner, intermediate or advanced (from the experience answer: none / used ChatGPT-like tools -> beginner; ' +
-        'some technical / developer -> intermediate; ML practitioner -> advanced). interests are theme ids from list_themes.',
+        'level must be beginner, intermediate or advanced. interests are theme ids from list_themes.',
       inputSchema: z.object({
         name: nullableText,
         experience: nullableText,
@@ -265,7 +264,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Set path',
       description:
         'Save the learning path the learner agreed to: course ids in order, with the reason (2-3 sentences for the learner). ' +
-        'Only call it after the learner agrees. Every course must come after its prerequisites, and an unfinished prerequisite may not be dropped.',
+        'Saved only once the learner has agreed to it. Every course must come after its prerequisites, and an unfinished prerequisite may not be dropped.',
       inputSchema: z.object({
         path: z.array(z.string().min(1).max(LIMITS.id)).max(LIMITS.listItems).describe('Course ids, in order.'),
         reason: z.string().min(1).max(LIMITS.text).describe('Why this path, in 2-3 sentences for the learner.'),
@@ -281,7 +280,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Start lesson',
       description:
         'Start (or resume) a lesson: it becomes the current lesson, status in_progress. Fails if its prerequisites are not done or skipped, ' +
-        'or if it is already done or skipped. Usually the lesson from get_next_lesson.',
+        'or if it is already done or skipped. Takes a lesson id such as the one get_next_lesson returns.',
       inputSchema: z.object({ lessonId }),
       annotations: { ...writes, title: 'Start lesson' },
     },
@@ -293,7 +292,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     {
       title: 'Complete lesson',
       description:
-        'Mark a lesson done once its completion criteria are met: score is your honest estimate from the checks (0 to 1), ' +
+        'Mark a lesson done once its completion criteria are met: score is the estimate from the checks (0 to 1), ' +
         'notes are one or two sentences on what the learner found easy or hard (used for later review). Clears the current lesson.',
       inputSchema: z.object({
         lessonId,
@@ -310,8 +309,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     {
       title: 'Skip lesson',
       description:
-        'Skip one lesson the learner already knows, after they answered 1-2 of its check questions well. reason is saved as the lesson notes. ' +
-        'For the level check use level_check_skip_course instead.',
+        'Mark one lesson the learner already knows as skipped. reason is saved as the lesson notes. ' +
+        'level_check_skip_course skips the lessons of a whole course after the level check.',
       inputSchema: z.object({ lessonId, reason: z.string().min(1).max(LIMITS.text).describe('Why it was skipped, saved as the notes.') }),
       annotations: { ...writes, title: 'Skip lesson' },
     },
@@ -337,7 +336,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Reset a course',
       description:
         'Reset a course so the learner can take it again from its first lesson: all its lessons go back to not started and their scores and notes are removed. ' +
-        'Other courses and the path are not changed. Only call it after showing the learner what will be reset and getting a clear yes.',
+        'Other courses and the path are not changed. Requires explicit confirmation from the learner of what will be reset.',
       inputSchema: z.object({ courseId: z.string().min(1).max(LIMITS.id).describe('Course id, e.g. "ai-foundations".') }),
       annotations: { ...writes, destructiveHint: true, title: 'Reset a course' },
     },
@@ -349,7 +348,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     {
       title: 'Save lesson notes',
       description:
-        'Save short notes on a started lesson, e.g. where you stopped when the session ends mid-lesson. Replaces the previous notes.',
+        'Save short notes on a started lesson, e.g. where a session stopped mid-lesson. Replaces the previous notes.',
       inputSchema: z.object({ lessonId, notes: z.string().min(1).max(LIMITS.text) }),
       annotations: { ...writes, title: 'Save lesson notes' },
     },
@@ -374,7 +373,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Import progress',
       description:
         "Replace the learner's whole saved progress with a progress.json file (version 1), e.g. to move local progress to this server. " +
-        'Everything saved before is replaced. Ask the learner to confirm first.',
+        'Everything saved before is replaced. Requires explicit confirmation from the learner.',
       inputSchema: z.object({
         progress: z
           .union([z.string().min(1).max(LIMITS.json), z.record(z.string(), z.unknown())])
