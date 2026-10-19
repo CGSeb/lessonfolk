@@ -54,6 +54,13 @@ describe('tool declarations', () => {
     }
   });
 
+  it('sets annotations.title on every tool, the same as its title', async () => {
+    for (const tool of await listTools()) {
+      expect(tool.title, tool.name).toBeTruthy();
+      expect(tool.annotations?.title, tool.name).toBe(tool.title);
+    }
+  });
+
   it('gives every tool an object input schema', async () => {
     for (const tool of await listTools()) expect(tool.inputSchema.type, tool.name).toBe('object');
   });
