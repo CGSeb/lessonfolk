@@ -116,7 +116,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     }
   };
 
-  // All four hints are set on every tool (some directories reject tools that leave one out).
+  // All four hints and the title are set on every tool (some directories reject tools that leave one out).
   // Every write sets the same end state when repeated, so all are idempotent.
   const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
   const writes = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
@@ -132,7 +132,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'path with its reason, current lesson, and every started lesson with status, dates, score and notes. ' +
         'Empty profile and lessons mean a new learner: start with onboarding. Call this first in every session.',
       inputSchema: z.object({}),
-      annotations: readOnly,
+      annotations: { ...readOnly, title: 'Get progress' },
     },
     () => read(() => store.getProgress(userId)),
   );
@@ -147,7 +147,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         '"blocked" means none is available. unknownPathIds lists path courses that no longer exist (tell the learner). ' +
         'Does not change anything: call start_lesson to begin it.',
       inputSchema: z.object({}),
-      annotations: readOnly,
+      annotations: { ...readOnly, title: 'Get next lesson' },
     },
     () =>
       read(async () => {
@@ -177,7 +177,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         '"Check your understanding" questions with good-answer hints, and completion criteria. ' +
         "Starts with a short header giving the course and the learner's status for this lesson. Read it in full before teaching.",
       inputSchema: z.object({ lessonId, lang }),
-      annotations: readOnly,
+      annotations: { ...readOnly, title: 'Get lesson' },
     },
     ({ lessonId: id, lang: language }) =>
       read(async () => {
@@ -199,7 +199,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         "plus the learner's status for each course and lesson (not_started, in_progress, done, skipped, skipped_after_level_check). " +
         'Give a theme id to list only that theme (see list_themes).',
       inputSchema: z.object({ theme: z.string().min(1).max(LIMITS.id).optional().describe('Theme id, e.g. "foundations".'), lang }),
-      annotations: readOnly,
+      annotations: { ...readOnly, title: 'List courses' },
     },
     ({ theme, lang: language }) =>
       read(async () => {
@@ -220,7 +220,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'The themes that group courses, in order (themes.yaml): id, title, description and their course ids. ' +
         'A theme with no course yet is "coming soon". Use the ids for the profile interests and list_courses.',
       inputSchema: z.object({ lang }),
-      annotations: readOnly,
+      annotations: { ...readOnly, title: 'List themes' },
     },
     ({ lang: language }) =>
       read(async () => {
@@ -254,7 +254,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         level: z.enum(['beginner', 'intermediate', 'advanced']).nullable().optional(),
         interests: z.array(z.string().min(1).max(LIMITS.id)).max(LIMITS.listItems).nullable().optional().describe('Theme ids.'),
       }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Set profile' },
     },
     (profile) => write('Profile saved.', () => store.setProfile(userId, profile, writeOptions)),
   );
@@ -270,7 +270,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         path: z.array(z.string().min(1).max(LIMITS.id)).max(LIMITS.listItems).describe('Course ids, in order.'),
         reason: z.string().min(1).max(LIMITS.text).describe('Why this path, in 2-3 sentences for the learner.'),
       }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Set path' },
     },
     ({ path, reason }) => write('Path saved.', () => store.setPath(userId, path, reason, writeOptions)),
   );
@@ -283,7 +283,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'Start (or resume) a lesson: it becomes the current lesson, status in_progress. Fails if its prerequisites are not done or skipped, ' +
         'or if it is already done or skipped. Usually the lesson from get_next_lesson.',
       inputSchema: z.object({ lessonId }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Start lesson' },
     },
     ({ lessonId: id }) => write(`Lesson ${id} started.`, () => store.startLesson(userId, id, writeOptions)),
   );
@@ -300,7 +300,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         score: z.number().min(0).max(1).describe('0 to 1.'),
         notes: z.string().min(1).max(LIMITS.text).describe('What the learner found easy or hard.'),
       }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Complete lesson' },
     },
     ({ lessonId: id, score, notes }) => write(`Lesson ${id} completed.`, () => store.completeLesson(userId, id, { score, notes }, writeOptions)),
   );
@@ -313,7 +313,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'Skip one lesson the learner already knows, after they answered 1-2 of its check questions well. reason is saved as the lesson notes. ' +
         'For the level check use level_check_skip_course instead.',
       inputSchema: z.object({ lessonId, reason: z.string().min(1).max(LIMITS.text).describe('Why it was skipped, saved as the notes.') }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Skip lesson' },
     },
     ({ lessonId: id, reason }) => write(`Lesson ${id} skipped.`, () => store.skipLesson(userId, id, reason, writeOptions)),
   );
@@ -326,7 +326,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'After the level check (intermediate and advanced learners only), mark every unfinished lesson of a course the learner clearly passed ' +
         'as skipped after the level check. Only courses below the learner\'s level can be skipped this way.',
       inputSchema: z.object({ courseId: z.string().min(1).max(LIMITS.id).describe('Course id, e.g. "ai-foundations".') }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Skip a course after the level check' },
     },
     ({ courseId }) => write(`Course ${courseId} skipped after the level check.`, () => store.placementSkip(userId, courseId, writeOptions)),
   );
@@ -339,7 +339,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'Reset a course so the learner can take it again from its first lesson: all its lessons go back to not started and their scores and notes are removed. ' +
         'Other courses and the path are not changed. Only call it after showing the learner what will be reset and getting a clear yes.',
       inputSchema: z.object({ courseId: z.string().min(1).max(LIMITS.id).describe('Course id, e.g. "ai-foundations".') }),
-      annotations: { ...writes, destructiveHint: true },
+      annotations: { ...writes, destructiveHint: true, title: 'Reset a course' },
     },
     ({ courseId }) => write(`Course ${courseId} reset.`, () => store.resetCourse(userId, courseId, writeOptions)),
   );
@@ -351,7 +351,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       description:
         'Save short notes on a started lesson, e.g. where you stopped when the session ends mid-lesson. Replaces the previous notes.',
       inputSchema: z.object({ lessonId, notes: z.string().min(1).max(LIMITS.text) }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Save lesson notes' },
     },
     ({ lessonId: id, notes }) => write(`Notes saved on ${id}.`, () => store.saveNotes(userId, id, notes, writeOptions)),
   );
@@ -363,7 +363,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       description:
         'After a review quiz on a done lesson, record the new score (0 to 1). The saved score only goes up: a lower score is ignored.',
       inputSchema: z.object({ lessonId, score: z.number().min(0).max(1) }),
-      annotations: writes,
+      annotations: { ...writes, title: 'Record review score' },
     },
     ({ lessonId: id, score }) => write(`Review score recorded for ${id}.`, () => store.recordReviewScore(userId, id, score, writeOptions)),
   );
@@ -380,7 +380,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
           .union([z.string().min(1).max(LIMITS.json), z.record(z.string(), z.unknown())])
           .describe('The progress.json content, as JSON text or as an object.'),
       }),
-      annotations: { ...writes, destructiveHint: true },
+      annotations: { ...writes, destructiveHint: true, title: 'Import progress' },
     },
     ({ progress }) => write('Progress imported.', () => store.importProgress(userId, progress, writeOptions)),
   );
