@@ -14,7 +14,7 @@ prerequisites:
 ## Key ideas
 1. **La fenêtre est la mémoire de travail ; ce qui doit durer vit à l’extérieur.** Tout ce qui n’existe
    que dans le contexte disparaît à la prochaine compaction ou à la fin de la session. Un fichier de notes,
-   une liste de tâches ou une ligne de base de données, non. Construire avec l’IA couvre le principe (la
+   une liste de tâches ou une ligne de base de données, non. Comment fonctionnent les applications d’IA couvre le principe (la
    mémoire entre sessions est de la donnée que votre application stocke) ; ici, l’agent écrit et lit lui-même
    ces données, avec des outils, pendant la tâche.
 2. **Stockez ce qui ne peut pas être retrouvé par le calcul.** Trois types de contenu méritent leur place :

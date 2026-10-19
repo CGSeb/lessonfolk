@@ -1,0 +1,15 @@
+id: ai-work-and-society
+title: AI, Work and Society
+level: beginner
+theme: ai-and-society
+authors: [lessonfolk]
+description: What AI changes for jobs and skills, how to spot fake voices, faces and news, what AI costs the environment, and who sets the rules — a clear-eyed look at AI's impact on people and the world.
+estimatedHours: 1.5
+prerequisites: [ai-safety]
+lessons:
+  - ai-work-and-society/01-tasks-not-jobs
+  - ai-work-and-society/02-skills-that-last
+  - ai-work-and-society/03-deepfakes-and-scams
+  - ai-work-and-society/04-misinformation
+  - ai-work-and-society/05-energy-and-environment
+  - ai-work-and-society/06-rules-and-regulation

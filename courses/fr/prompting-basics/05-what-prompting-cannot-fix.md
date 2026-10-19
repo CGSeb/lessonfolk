@@ -61,4 +61,4 @@ entre ce qu’un meilleur prompt peut améliorer et ce qu’il ne peut pas.
 
 ## Going further
 - Utiliser l’IA en toute sécurité et avec discernement : hallucinations, vérification des réponses, vie privée, biais et usage honnête.
-- Construire avec l’IA : votre première application d’IA : les prompts système et l’usage des modèles par le code vont au-delà du prompting en chat.
+- Comment fonctionnent les applications d’IA : les prompts système et l’usage des modèles par le code vont au-delà du prompting en chat.

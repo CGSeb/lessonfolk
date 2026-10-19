@@ -44,7 +44,7 @@ prerequisites:
   reciting the list; the result should feel like their workflow, not the course's.
 - This is the last lesson: leave time to recap the course and celebrate. Suggest next steps:
   AI Coding Assistants for Teams: Rules, Skills and Plugins (setting up the assistant for a whole
-  team with shared rules, skills and guardrails), Build with AI (adding AI features to their own apps) and AI Agents and Tools (how
+  team with shared rules, skills and guardrails), How AI Apps Work (adding AI features to their own apps) and AI Agents and Tools (how
   agent-style assistants work inside).
 
 ## Check your understanding
@@ -60,7 +60,7 @@ The learner answers the checks correctly, can justify a mode choice by clarity, 
 of checking, and has described a workflow that uses the habits of the course.
 
 ## Going further
-- Build with AI: Your First AI App, to add AI features to your own projects.
+- How AI Apps Work, to add AI features to your own projects.
 - AI Agents and Tools, to understand how agent-style assistants work inside.
 - AI Coding Assistants for Teams: Rules, Skills and Plugins, to share rules, skills and guardrails with
   your whole team.

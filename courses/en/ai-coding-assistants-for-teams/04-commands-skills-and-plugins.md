@@ -64,10 +64,10 @@ prerequisites:
   dilutes the rules that matter; move procedures to skills or commands once there are several.
 - Misconception: "a skill is code". A skill is mostly text instructions; scripts are
   optional helpers it can run.
-- Keep MCP at the level of "what it connects"; how tool calling and MCP work inside is taught
-  in the AI Agents and Tools course.
-- For learners who prefer doing over reading, write a small command or skill together during
-  the lesson and run it.
+- Keep MCP at the level of "what it connects"; how MCP works inside is taught in the
+  Connecting AI to Your Tools with MCP course.
+- Scenario to reason through with the learner (no task to do): a team repeats the same release
+  checklist every week. Ask whether it should be a command, a skill or a plugin, and why.
 
 ## Check your understanding
 1. Your team has a 30-line procedure for preparing a release. Why put it in a command or skill rather than in AGENTS.md?
@@ -85,5 +85,6 @@ the instructions file, a command, a skill, a subagent and a plugin, with a reaso
 
 ## Going further
 - The AI Agents and Tools course, for tool calling and how agents use outside systems.
+- Connecting AI to Your Tools with MCP, for how MCP servers work.
 - Your assistant's documentation on commands, skills, subagents and plugins.
 - The Model Context Protocol documentation: modelcontextprotocol.io

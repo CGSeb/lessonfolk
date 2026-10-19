@@ -44,7 +44,7 @@ prerequisites:
   plutôt que de réciter la liste ; le résultat doit ressembler à sa méthode, pas à celle du cours.
 - C’est la dernière leçon : gardez du temps pour récapituler le cours et célébrer. Suggérez la suite :
   Assistants de code IA pour les équipes : règles, skills et plugins (configurer l’assistant pour toute une
-  équipe avec des règles, skills et garde-fous partagés), Construire avec l’IA (ajouter des fonctionnalités
+  équipe avec des règles, skills et garde-fous partagés), Comment fonctionnent les applications d’IA (ajouter des fonctionnalités
   d’IA à leurs propres applications) et Agents IA et outils (comment les assistants de type agent
   fonctionnent de l’intérieur).
 
@@ -61,6 +61,6 @@ L’apprenant répond correctement aux vérifications, sait justifier un choix d
 et la facilité de vérification, et a décrit une méthode qui utilise les habitudes du cours.
 
 ## Going further
-- Construire avec l’IA : votre première application d’IA, pour ajouter des fonctionnalités d’IA à vos propres projets.
+- Comment fonctionnent les applications d’IA, pour ajouter des fonctionnalités d’IA à vos propres projets.
 - Agents IA et outils, pour comprendre comment les assistants de type agent fonctionnent de l’intérieur.
 - Assistants de code IA pour les équipes : règles, skills et plugins, pour partager règles, skills et garde-fous avec toute votre équipe.

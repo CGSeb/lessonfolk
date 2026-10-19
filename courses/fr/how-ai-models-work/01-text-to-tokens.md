@@ -80,7 +80,7 @@ trompe en comptant des lettres, et dire pourquoi les limites de contexte et les 
 mesurent en tokens (vérifications 1-3).
 
 ## Going further
-- La leçon « La mémoire de conversation et les limites de contexte » de *Construire avec l’IA*
+- La leçon « La mémoire de conversation et les limites de contexte » de *Comment fonctionnent les applications d’IA*
   montre comment les développeurs gèrent le budget de tokens.
 - Cherchez une page de démonstration de « tokenizer » chez un fournisseur de modèles pour voir
   votre propre texte découpé en tokens.

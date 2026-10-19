@@ -1,0 +1,15 @@
+id: evaluating-ai-output
+title: Evaluating AI Output
+level: intermediate
+theme: using-ai
+authors: [lessonfolk]
+description: How to tell whether a prompt, a model or an AI tool is really good — define what "good" means, understand what makes a solid test set, score answers with checks, people and AI judges, and catch problems when something changes. No code needed.
+estimatedHours: 1.5
+prerequisites: [prompting-basics]
+lessons:
+  - evaluating-ai-output/01-looked-fine-is-not-enough
+  - evaluating-ai-output/02-defining-good
+  - evaluating-ai-output/03-what-makes-a-good-test-set
+  - evaluating-ai-output/04-scoring-methods
+  - evaluating-ai-output/05-comparing-and-regressions
+  - evaluating-ai-output/06-evaluating-in-real-use

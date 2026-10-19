@@ -54,5 +54,5 @@ The learner answers the checks correctly and writes a short personal routine wit
 checking rules and a review date.
 
 ## Going further
-- Build with AI, to create your own tools and automations.
+- How AI Apps Work, to create your own tools and automations.
 - Ask the tutor to "quiz me" to review the lessons of this course.

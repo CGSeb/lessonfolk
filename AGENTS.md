@@ -74,7 +74,7 @@ author). Never edit other courses.
       `avatar` only if they give you an image to publish, saved as `courses/authors/<slug>.<ext>`)
 
    Write the course in `en` first: it is the source of truth. Other languages are translations
-   of the English files ([Translations](docs/course-format.md#translations)); step 6 produces
+   of the English files ([Translations](docs/course-format.md#translations)); step 7 produces
    the French one.
 3. **Outline.** Propose: course id (kebab-case, not already used), title, level, a one- or
    two-sentence description, theme, authors, `estimatedHours`, prerequisites, and 3–8 lessons, each with its
@@ -90,6 +90,10 @@ author). Never edit other courses.
      `Good answer:` line describing what a correct answer contains (not a verbatim answer).
    - No `## Exercise` section: lessons are taught and checked in the conversation. Put a
      question that applies the ideas to a case in the checks instead.
+   - Lesson titles, objectives and checks are phrased as understanding and judgement ("what
+     makes a good X", "spot the flaw in this Y"), never as a task for the learner ("build /
+     collect / make your own X"). Activities suggested in Teaching notes are conversation-only
+     scenarios with nothing to produce, build, install or run.
    - `## Completion criteria`: tied to the checks, so the tutor can decide objectively; never
      require the learner to build or install something.
    - `## Going further` (optional): prefer topics or stable, well-known sources; never
