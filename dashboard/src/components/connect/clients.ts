@@ -14,7 +14,7 @@ export interface ClientStep {
 }
 
 export interface ConnectClient {
-  id: 'claude-code' | 'codex' | 'cursor' | 'claude-desktop' | 'claude-ai' | 'chatgpt';
+  id: 'claude-code' | 'chatgpt' | 'cursor' | 'claude-desktop' | 'claude-ai';
   name: string;
   /** False when this app cannot reach this instance (web chats and a local address). */
   available: boolean;
@@ -73,18 +73,17 @@ export function connectClients(connection: McpConnection, t: Translate = english
       }
     : { id: 'claude-code', name: 'Claude Code', available: true, steps: claudeCodeManual, extra: companion };
 
-  const codex: ConnectClient = {
-    id: 'codex',
-    name: 'Codex',
+  // The ChatGPT desktop app and chatgpt.com: the same Plugins page, where a custom MCP server is added.
+  const chatgpt: ConnectClient = {
+    id: 'chatgpt',
+    name: 'ChatGPT',
     available: true,
     steps: [
-      {
-        text: t('connect.codex.add'),
-        code: `codex mcp add lessonfolk --url ${url}${tokenRequired ? ' --bearer-token-env-var LESSONFOLK_MCP_TOKEN' : ''}`,
-      },
-      oauth ? { text: t('connect.codex.checkOauth'), code: 'codex mcp login lessonfolk' } : { text: t('connect.codex.checkNone') },
+      { text: t('connect.chatgptApp.add') },
+      { text: t(oauth ? 'connect.chatgptApp.fillOauth' : 'connect.chatgptApp.fillNone'), code: url },
+      { text: t(oauth ? 'connect.chatgptApp.createOauth' : 'connect.chatgptApp.createNone') },
     ],
-    note: tokenRequired ? t('connect.codex.tokenNote') : undefined,
+    note: tokenRequired ? t('connect.chatgptApp.tokenNote') : undefined,
   };
 
   const cursor: ConnectClient = {
@@ -147,13 +146,5 @@ export function connectClients(connection: McpConnection, t: Translate = english
     steps: reachableFromWeb ? [{ text: t('connect.claudeAi.steps'), code: url }] : [{ text: unavailable }],
   };
 
-  const chatgpt: ConnectClient = {
-    id: 'chatgpt',
-    name: 'ChatGPT',
-    available: reachableFromWeb,
-    steps: reachableFromWeb ? [{ text: t('connect.chatgpt.steps') }] : [{ text: unavailable }],
-    note: reachableFromWeb ? t('connect.chatgpt.note') : undefined,
-  };
-
-  return [claudeCode, codex, cursor, claudeDesktop, claudeAi, chatgpt];
+  return [claudeCode, chatgpt, cursor, claudeDesktop, claudeAi];
 }

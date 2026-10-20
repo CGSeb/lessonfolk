@@ -54,16 +54,16 @@ describe('signed out', () => {
     expect(page).toContain(`${baseURL}/mcp`);
     expect(page).toContain('Everyone signs in as themselves');
     expect(page).not.toContain('Web chats cannot reach this address');
-    expect(page).toContain('codex mcp login lessonfolk');
+    expect(page).toContain('Continue to LessonFolk');
     expect(page).not.toContain('LESSONFOLK_MCP_TOKEN');
   });
 
-  it('keeps the six app tabs, with the web chats unavailable on a non-public address', async () => {
+  it('keeps the five app tabs, with the web chats unavailable on a non-public address', async () => {
     const html = await (await new Browser(server.url).request('/connect')).text();
-    expect(html.match(/<a [^>]*role="tab"/g)).toHaveLength(6);
-    expect(html.match(/<section [^>]*role="tabpanel"/g)).toHaveLength(6);
+    expect(html.match(/<a [^>]*role="tab"/g)).toHaveLength(5);
+    expect(html.match(/<section [^>]*role="tabpanel"/g)).toHaveLength(5);
     expect(html).toMatch(/id="tab-claude-code"[^>]*aria-selected="true"/);
-    expect(html.match(/Not available here/g)).toHaveLength(2);
+    expect(html.match(/Not available here/g)).toHaveLength(1);
   });
 
   it('keeps the account pages and data routes for signed-in users', async () => {
