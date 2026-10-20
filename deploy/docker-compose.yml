@@ -47,6 +47,8 @@ services:
       LESSONFOLK_DATA_LOCATION: ${LESSONFOLK_DATA_LOCATION:-}
       # Id of the site in Umami (see .env.example). Without it, no page is measured.
       UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
+      # Token of the OpenAI plugin directory's domain check, served at /.well-known/openai-apps-challenge.
+      OPENAI_APPS_CHALLENGE: ${OPENAI_APPS_CHALLENGE:-}
     # No published port: Caddy reaches it on the internal network. Pending migrations are
     # applied by the image's start command before the server starts.
     depends_on:

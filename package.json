@@ -18,7 +18,8 @@
     "progress:import": "npm run progress:import --workspace dashboard --",
     "check:courses": "npm run check:courses --workspace dashboard --",
     "review:courses": "npm run review:courses --workspace dashboard --",
-    "plugin:sync": "npm run plugin:sync --workspace @lessonfolk/mcp"
+    "plugin:sync": "npm run plugin:sync --workspace @lessonfolk/mcp",
+    "plugin:openai": "npm run plugin:openai --workspace @lessonfolk/mcp"
   },
   "overrides": {
     "esbuild": "^0.28.1"

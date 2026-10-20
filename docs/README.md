@@ -11,6 +11,7 @@
 | [Sign-in for developers](auth-dev.md) | The `LESSONFOLK_AUTH` modes, and how to try GitHub and Google sign-in on your machine. |
 | [Privacy and personal data](privacy.md) | Data map (what is stored where), download-all and delete-account, retention of logs and backups. |
 | [Search engines and AI search](seo.md) | What the public pages send to crawlers: robots.txt, sitemap, llms.txt, meta tags, structured data, the AI crawler policy, and how to check it. |
+| [OpenAI plugin directory](openai-plugin.md) | Listing LessonFolk in the ChatGPT and Codex directory: what the repository already provides, building the upload, the domain check, the portal steps. |
 | [Brand](brand.md) | Logo, colours, type, shape and the do's and don'ts of the LessonFolk look. |
 
 The tutor's own instructions are in [`packages/mcp/prompts/`](../packages/mcp/prompts); [`AGENTS.md`](../AGENTS.md) has the course authoring procedures.
