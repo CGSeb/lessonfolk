@@ -25,6 +25,34 @@ your progress live.
 - The Dashboard link shown under the prompt points to the LessonFolk site; the plugin opens nothing by itself. Nothing else leaves your computer.
 - No secrets are stored in the plugin, and it runs no downloaded code.
 
+## What the Course companion does
+
+The Course companion is a small mod (`hooks/register.tsx`, readable source, no bundled or
+downloaded code). It runs no shell command and starts no process. Here is everything it does:
+
+- **Calls to the LessonFolk server.** To fill the pane it calls three read-only tools of the
+  LessonFolk MCP server, `get_progress`, `list_courses` and `get_lesson`, with the session's own
+  connection and sign-in. It does this when a session starts, when you open the pane, after the
+  `learn`, `review` or `progress` skill runs, and after the tutor itself calls a LessonFolk tool.
+  Nothing is sent to any other server.
+- **Local file read.** It reads the `.mcp.json` of the folder you are working in, only to find
+  which LessonFolk server (local or hosted) the Dashboard link should open. The content of that
+  file is not sent anywhere.
+- **What it sees of the conversation.** Like any mod, it is notified of every tool call, but it
+  acts only on the calls of the `learn`, `review` and `progress` skills, of the LessonFolk tools
+  and of its own two tools, and ignores the others. It does not read or send the text of your
+  messages or of Claude's replies.
+- **Its own tools.** It adds two tools for the tutor, `key_idea` (marks a key idea of the current
+  lesson in the pane) and `choices` (shows the answers to a question as buttons above the
+  prompt). The mod answers these calls itself and they only update the pane and the buttons.
+  It also adds the `/course-companion` command and, when the `learn` skill starts, a short note
+  to Claude explaining these two tools.
+- **Prompts it submits.** When you press a button, it submits the text of that button as your
+  message, such as an answer the tutor offered or one of the commands shown under the prompt
+  (`continue`, `quiz me`, `skip this`, `show my progress`). It adds nothing else to the prompt.
+- **Clipboard.** On the pane's "copy" button only, it copies a `permissions.allow` snippet for
+  the LessonFolk tools. It never writes your settings itself.
+
 ## Install
 
 ```bash
