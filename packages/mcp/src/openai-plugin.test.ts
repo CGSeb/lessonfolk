@@ -73,6 +73,8 @@ describe('the OpenAI plugin upload', () => {
     expect(listing.shortDescription.length).toBeLessThanOrEqual(30);
     expect(listing.longDescription.length).toBeLessThanOrEqual(4000);
     expect(listing.developerName.length).toBeLessThanOrEqual(80);
+    // One of the categories the portal accepts (its list of errors names them).
+    expect(['Productivity', 'Creativity', 'Developer Tools', 'Business & Operations', 'Data & Analytics', 'Communication', 'Education & Research', 'Security', 'Finance', 'Healthcare', 'Travel', 'Entertainment', 'Other']).toContain(listing.category);
     expect(listing.defaultPrompt.length).toBeLessThanOrEqual(3);
     for (const prompt of listing.defaultPrompt) expect(prompt.length).toBeLessThanOrEqual(128);
     for (const url of [listing.websiteURL, listing.supportURL, listing.privacyPolicyURL, listing.termsOfServiceURL]) {
