@@ -25,6 +25,8 @@ export const MCP_URL = 'https://lessonfolk.com/mcp';
 const SITE = 'https://lessonfolk.com';
 /** What the app asks for at sign-in: the OpenID scopes (the email) and the LessonFolk ones. */
 const SCOPES = ['openid', 'email', 'lessonfolk:read', 'lessonfolk:write'];
+/** The portal only accepts a category of its own list (`Education & Research`, `Productivity`, `Other`…). */
+export const CATEGORY = 'Education & Research';
 
 const DESCRIPTION =
   'Learn AI with LessonFolk: the learn, progress and review skills of an AI tutor, with the courses and your progress kept on the LessonFolk server.';
@@ -108,7 +110,7 @@ export function openAiManifest(source: Record<string, unknown>, options: OpenAiO
           shortDescription: SHORT_DESCRIPTION,
           longDescription: LONG_DESCRIPTION,
           developerName: 'LessonFolk',
-          category: 'Education',
+          category: CATEGORY,
           websiteURL: SITE,
           supportURL: source.supportUrl,
           privacyPolicyURL: source.privacyPolicyUrl,
