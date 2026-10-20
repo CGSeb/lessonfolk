@@ -363,9 +363,9 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     {
       title: 'Record review score',
       description:
-        'After a review quiz on a done lesson, record the new score (0 to 1). The saved score only goes up: a lower score is ignored.',
+        'After a review quiz on a done lesson, record the new score (0 to 1). It replaces the saved score when it is higher, and the old score is lost; a lower score is ignored.',
       inputSchema: z.object({ lessonId, score: z.number().min(0).max(1) }),
-      annotations: { ...writes, title: 'Record review score' },
+      annotations: { ...overwrites, title: 'Record review score' },
     },
     ({ lessonId: id, score }) => write(`Review score recorded for ${id}.`, () => store.recordReviewScore(userId, id, score, writeOptions)),
   );
