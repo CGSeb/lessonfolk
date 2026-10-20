@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:unit": "vitest run --exclude \"**/*.db.test.ts\"",
     "check": "tsc --noEmit",
-    "plugin:sync": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/sync-plugin-skills.ts"
+    "plugin:sync": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/sync-plugin-skills.ts",
+    "plugin:openai": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/build-openai-plugin.ts"
   },
   "dependencies": {
     "@better-auth/mcp": "1.7.7",

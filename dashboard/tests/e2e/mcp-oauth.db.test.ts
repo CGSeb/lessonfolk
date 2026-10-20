@@ -31,6 +31,7 @@ beforeAll(async () => {
     LESSONFOLK_BASE_URL: baseURL,
     BETTER_AUTH_SECRET: 'test-secret-that-is-long-enough-1234567890',
     LESSONFOLK_TEST_OAUTH_URL: fake.url,
+    OPENAI_APPS_CHALLENGE: 'test-challenge-token-1234',
   });
 });
 
@@ -262,6 +263,32 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
         await client.close();
       }
     }
+  });
+
+  it('gives an app the email of the learner at the UserInfo endpoint, as OpenAI\'s plugin directory requires', async () => {
+    // The OpenID configuration advertises the endpoint and the openid and email scopes.
+    const configuration = await (await fetch(`${baseURL}/.well-known/openid-configuration`)).json();
+    expect(configuration.userinfo_endpoint).toBeTruthy();
+    expect(configuration.scopes_supported).toEqual(expect.arrayContaining(['openid', 'email']));
+
+    const d = await discover();
+    const clientId = await register(d);
+    fake.signInAs({ sub: 'fake-robin', name: 'Robin Tester', email: 'robin@example.test' });
+    const token = await authorize(d, clientId, true, { scope: 'openid email lessonfolk:read' });
+
+    const info = await fetch(configuration.userinfo_endpoint, { headers: { Authorization: `Bearer ${token.access_token}` } });
+    expect(info.status, await info.clone().text()).toBe(200);
+    expect(await info.json()).toMatchObject({ email: 'robin@example.test', email_verified: true });
+
+    // Without a token, nothing.
+    expect((await fetch(configuration.userinfo_endpoint)).status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("serves the domain verification token of OpenAI's plugin directory as plain text", async () => {
+    const response = await fetch(`${baseURL}/.well-known/openai-apps-challenge`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('text/plain');
+    expect(await response.text()).toBe('test-challenge-token-1234');
   });
 
   it('sends the app an error when the learner denies access', async () => {
