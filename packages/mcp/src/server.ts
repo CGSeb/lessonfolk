@@ -267,12 +267,12 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Set path',
       description:
         'Save the learning path the learner agreed to: course ids in order, with the reason (2-3 sentences for the learner). ' +
-        'Saved only once the learner has agreed to it. Every course must come after its prerequisites, and an unfinished prerequisite may not be dropped.',
+        'Replaces the previous path. Saved only once the learner has agreed to it. Every course must come after its prerequisites, and an unfinished prerequisite may not be dropped.',
       inputSchema: z.object({
         path: z.array(z.string().min(1).max(LIMITS.id)).max(LIMITS.listItems).describe('Course ids, in order.'),
         reason: z.string().min(1).max(LIMITS.text).describe('Why this path, in 2-3 sentences for the learner.'),
       }),
-      annotations: { ...writes, title: 'Set path' },
+      annotations: { ...overwrites, title: 'Set path' },
     },
     ({ path, reason }) => write('Path saved.', () => store.setPath(userId, path, reason, writeOptions)),
   );
