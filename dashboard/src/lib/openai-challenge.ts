@@ -1,5 +1,5 @@
 /**
- * Domain verification for OpenAI's plugin directory (docs/openai-plugin.md): the submission portal
+ * Domain verification for OpenAI's plugin directory: the submission portal
  * gives a token, and checks that `/.well-known/openai-apps-challenge` on this host returns it as
  * plain text. The route answers only when OPENAI_APPS_CHALLENGE is set, so a LessonFolk you run
  * yourself serves nothing there.

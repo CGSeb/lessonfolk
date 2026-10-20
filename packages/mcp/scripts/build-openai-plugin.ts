@@ -1,5 +1,5 @@
 /**
- * Builds the upload for OpenAI's plugin directory (docs/openai-plugin.md) from the learner plugin
+ * Builds the upload for OpenAI's plugin directory from the learner plugin
  * of Claude Code (.claude/skills/lessonfolk-tutor): the three skills and the manifest, as a
  * folder and a .zip in dist/openai-plugin/. OpenAI does not take hooks, so the Course companion
  * mod stays out, together with what only it needs (.mcp.json, types, tests); the MCP server is

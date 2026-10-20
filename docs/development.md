@@ -62,7 +62,6 @@ Run root scripts from the repository root. Run a workspace script with `-w <work
 | `npm run check:courses` | Validate every course and lesson file. Add `-- <folder>` to check another courses folder. |
 | `npm run review:courses` | Print the brief your agent follows to review lessons (rubric, lessons to read, catalog outline). Add `-- <course-id or lesson-id>…` to pick lessons. Calls no AI service. |
 | `npm run plugin:sync` | Copy the tutor procedures (`packages/mcp/prompts/*.md`) into the learner plugin's skills. Run it after editing a prompt; a test fails otherwise. |
-| `npm run plugin:openai` | Build the upload for OpenAI's plugin directory (`dist/openai-plugin/lessonfolk-tutor.zip`): the three skills and the manifest, without the Course companion mod. See [OpenAI plugin directory](openai-plugin.md). |
 | `npm run progress:import` | Copy a `progress.json` (default: the old `.progress/progress.json`, or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. |
 | `npm run check -w <workspace>` | Type-check one workspace (`dashboard`, `packages/core`, `@lessonfolk/db` or `@lessonfolk/mcp`). |
 | `npm test -w <workspace>` | Run one workspace's tests. |
