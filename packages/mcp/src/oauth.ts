@@ -18,9 +18,8 @@ export { mcpAuthSchema } from '@lessonfolk/db';
 export { verifyOAuthQueryParams } from '@better-auth/oauth-provider';
 
 /**
- * The authorization server metadata at the root well-known paths too. The issuer is
- * `<base URL>/api/auth`, so RFC 8414 puts it at `/.well-known/oauth-authorization-server/api/auth`
- * (served by Better Auth), but some MCP clients only look at the root.
+ * The authorization server metadata at the root well-known paths, where RFC 8414 puts it for
+ * the issuer `<base URL>` (`mcpIssuer`); the endpoints themselves are under `/api/auth`.
  */
 export function rootDiscoveryHandler(auth: Parameters<typeof oauthProviderAuthServerMetadata>[0] & Parameters<typeof oauthProviderOpenIdConfigMetadata>[0]) {
   const authorizationServer = oauthProviderAuthServerMetadata(auth);
@@ -38,6 +37,16 @@ export const MCP_PATH = '/mcp';
 /** Where the authorization flow sends people to sign in, and to approve a client (dashboard routes). */
 export const OAUTH_SIGN_IN_PATH = '/oauth/sign-in';
 export const OAUTH_CONSENT_PATH = '/oauth/consent';
+
+/**
+ * The issuer identifier: the public origin, without the `/api/auth` path where the endpoints
+ * live. Some MCP clients (ChatGPT and Codex) remember the origin they discovered the server
+ * from and refuse an authorization response whose `iss` (RFC 9207) has a path. The metadata is
+ * served at the root well-known paths (`rootDiscoveryHandler`).
+ */
+export function mcpIssuer(baseURL: string): string {
+  return baseURL.replace(/\/$/, '');
+}
 
 /** The MCP endpoint URL, which is also the resource identifier tokens are bound to. */
 export function mcpResource(baseURL: string): string {
@@ -58,7 +67,7 @@ export function mcpAuthPlugins(baseURL: string, options: { purgeUnusedClients?: 
   return [
     nativeLoopbackClients(),
     ...(options.purgeUnusedClients ? [unusedClientCleanup(options.purgeUnusedClients)] : []),
-    jwt(),
+    jwt({ jwt: { issuer: mcpIssuer(baseURL) } }),
     mcp({
       resource: mcpResource(baseURL),
       loginPage: OAUTH_SIGN_IN_PATH,
@@ -167,6 +176,6 @@ export function oauthGate(auth: McpAuthServer, baseURL: string, tokenAllowed?: T
         }
         return next({ userId: claims.sub, client: clientId ? `mcp:${clientId}` : 'mcp', scopes: parseScopeClaim(claims.scope) });
       },
-      { resource: mcpResource(baseURL) },
+      { resource: mcpResource(baseURL), issuer: mcpIssuer(baseURL) },
     )(request);
 }
