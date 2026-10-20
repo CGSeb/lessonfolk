@@ -35,6 +35,7 @@ Details in [Sign-in for developers](auth-dev.md).
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | (none) | `oauth`: your Google OAuth client. Set both or neither. |
 | `LESSONFOLK_OPERATOR` | (none) | `oauth`: who runs this LessonFolk and is responsible for the data (a name and a country, e.g. `Jane Doe, France`), shown on the `/privacy` page. Without it the page has no "Who runs" section. |
 | `LESSONFOLK_PRIVACY_CONTACT` | (none) | `oauth`: who learners write to about their data (an email address or a page), shown on the `/privacy` page. |
+| `LESSONFOLK_GOVERNING_LAW` | (none) | `oauth`: the law that governs the terms of use (e.g. `French law`), shown on the `/terms` page. Without it the page states no governing law. |
 | `LESSONFOLK_DATA_LOCATION` | (none) | `oauth`: the country or region where the server and its backups are, shown on the `/privacy` page (e.g. `Canada`). |
 | `UMAMI_WEBSITE_ID` | (none) | The id of the site in a self-hosted [Umami](https://umami.is). When set, the public pages carry its tracker (no cookie, no IP address stored; never on sign-in, account or consent pages, nor for a signed-in learner); the script and the collect requests go to `/u` on this site, which the reverse proxy must forward (`deploy/Caddyfile`). Without it nothing is measured, which is the default for a LessonFolk you run yourself. |
 | `LESSONFOLK_MCP_TOKEN` | (none) | `none` only: when set, the MCP server at `/mcp` requires `Authorization: Bearer <token>`. Without it, `/mcp` only answers this computer. (`oauth` uses OAuth access tokens instead.) |

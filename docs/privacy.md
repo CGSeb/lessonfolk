@@ -100,7 +100,7 @@ real values. The `/privacy` page must never state a period the host does not app
 
 The `/privacy` page is linked from the footer, the sign-in page and the Account page, and points
 learners who would rather not send data to self-hosting ([using-lessonfolk](using-lessonfolk.md)).
-There are no separate terms of service.
+The terms of use are a separate page, `/terms` (`dashboard/src/pages/terms.astro`, strings in `dashboard/src/i18n/en.ts`), linked from the footer. They reuse `LESSONFOLK_OPERATOR` and `LESSONFOLK_PRIVACY_CONTACT`, and state a governing law only when `LESSONFOLK_GOVERNING_LAW` is set. A human must review them before the hosted version opens to learners.
 
 Who runs the server (shown in "Who runs this LessonFolk") is `LESSONFOLK_OPERATOR`: a host on the hosted version must set it, because the person responsible for the data has to be named. The contact shown on `/privacy` is the `LESSONFOLK_PRIVACY_CONTACT` environment variable, and the
 "Where it is stored" section says the country or region of the server from `LESSONFOLK_DATA_LOCATION`

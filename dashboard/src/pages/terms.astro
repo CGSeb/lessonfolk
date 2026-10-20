@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const { t } = Astro.locals;
+
+export const prerender = false;
+
+/**
+ * The terms of use of the hosted LessonFolk. Public (no sign-in). The text is in src/i18n/en.ts.
+ * Who runs it comes from LESSONFOLK_OPERATOR, the contact from LESSONFOLK_PRIVACY_CONTACT, and the
+ * governing law from LESSONFOLK_GOVERNING_LAW (the section is left out without it, so no law is
+ * ever stated by default). A human must review the text before the hosted version opens to learners.
+ */
+const oauth = Astro.locals.authMode === 'oauth';
+const operator = process.env.LESSONFOLK_OPERATOR?.trim();
+const contact = process.env.LESSONFOLK_PRIVACY_CONTACT?.trim();
+const law = process.env.LESSONFOLK_GOVERNING_LAW?.trim();
+const sections = [
+  { title: 'terms.serviceTitle', body: 'terms.service' },
+  { title: 'terms.accountTitle', body: 'terms.account' },
+  { title: 'terms.ageTitle', body: 'terms.age' },
+  { title: 'terms.useTitle', body: 'terms.use' },
+  { title: 'terms.aiTitle', body: 'terms.ai' },
+  { title: 'terms.asIsTitle', body: 'terms.asIs' },
+  { title: 'terms.licenseTitle', body: 'terms.license' },
+  { title: 'terms.changesTitle', body: 'terms.changes' },
+] as const;
+---
+
+<BaseLayout title={t('terms.title')} description={t('site.termsDescription')}>
+  <div class="stack terms-page" style="--stack-space: var(--space-5)">
+    <header class="stack" style="--stack-space: var(--space-2)">
+      <h1>{t('terms.heading')}</h1>
+      {!oauth && <p class="muted">{t('terms.introNone')}</p>}
+    </header>
+    {
+      oauth && (
+        <>
+          {operator && (
+            <section class="stack" style="--stack-space: var(--space-2)">
+              <h2>{t('terms.operatorTitle')}</h2>
+              <p>{t('terms.operator', { operator })}</p>
+            </section>
+          )}
+          {sections.map((section) => (
+            <section class="stack" style="--stack-space: var(--space-2)">
+              <h2>{t(section.title)}</h2>
+              <p>{t(section.body)}</p>
+            </section>
+          ))}
+          {law && (
+            <section class="stack" style="--stack-space: var(--space-2)">
+              <h2>{t('terms.lawTitle')}</h2>
+              <p>{t('terms.law', { law })}</p>
+            </section>
+          )}
+          <section class="stack" style="--stack-space: var(--space-2)">
+            <h2>{t('terms.contactTitle')}</h2>
+            <p>{contact ? t('terms.contact', { contact }) : t('terms.contactMissing')}</p>
+          </section>
+          <p class="muted">{t('terms.updated')}</p>
+        </>
+      )
+    }
+    <p>
+      <a href="/privacy">{t('terms.privacyLink')}</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .terms-page {
+    max-width: 44rem;
+  }
+
+  /* Justified text is easier to read in these long paragraphs; hyphens avoid wide gaps. */
+  .terms-page p {
+    text-align: justify;
+    hyphens: auto;
+  }
+</style>
