@@ -62,7 +62,7 @@ async function discover(): Promise<Discovery> {
   const resourceMetadata = await (await fetch(metadataUrl!)).json();
   expect(resourceMetadata.resource).toBe(`${baseURL}/mcp`);
   const issuer = new URL(resourceMetadata.authorization_servers[0]);
-  expect(issuer.origin).toBe(baseURL);
+  expect(issuer.href).toBe(`${baseURL}/`); // The issuer is the bare origin: the metadata is at the root well-known path.
 
   // RFC 8414: the issuer's path goes after the well-known name.
   const asMetadataResponse = await fetch(`${issuer.origin}/.well-known/oauth-authorization-server${issuer.pathname.replace(/\/$/, '')}`);
@@ -168,6 +168,8 @@ async function authorize(
   const back = new URL(location(decided));
   expect(back.origin + back.pathname).toBe(REDIRECT_URI);
   expect(back.searchParams.get('state')).toBe(state);
+  // RFC 9207: the redirect names the issuer of the metadata, the bare origin (ChatGPT and Codex check it).
+  expect(back.searchParams.get('iss'), 'iss of the redirect').toBe(baseURL);
   if (!accept) return { access_token: '', error: back.searchParams.get('error') };
 
   const code = back.searchParams.get('code')!;
@@ -195,6 +197,7 @@ describe('MCP with LESSONFOLK_AUTH=oauth', () => {
     fake.signInAs({ sub: 'fake-robin', name: 'Robin Tester', email: 'robin@example.test' });
     const robin = await authorize(d, clientId);
     expect(robin.access_token.split('.')).toHaveLength(3); // A JWT bound to /mcp.
+    expect(JSON.parse(Buffer.from(robin.access_token.split('.')[1], 'base64url').toString()).iss).toBe(baseURL);
 
     const client = await connectMcp(baseURL, robin.access_token);
     try {
