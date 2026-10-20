@@ -208,6 +208,19 @@ describe('signed in', () => {
     expect(location(await pat.browser.post('/api/account/delete', { confirm: 'delete' }))).toBe('/account?deleted=1');
   });
 
+  it('serves the terms of use, linked from the footer, without stating a law nobody chose', async () => {
+    const page = await new Browser(server.url).request('/terms');
+    expect(page.status).toBe(200);
+    const terms = await text(page);
+    expect(terms).toContain('Terms of use');
+    expect(terms).toContain('at least 16');
+    expect(terms).toContain('The tutor is an AI');
+    expect(terms).toContain('Last updated');
+    // No LESSONFOLK_GOVERNING_LAW on this server: the page names no governing law.
+    expect(terms).not.toContain('Governing law');
+    expect(await (await new Browser(server.url).request('/')).text()).toContain('href="/terms"');
+  });
+
   it('links the privacy notice from the footer and the account page', async () => {
     const privacy = await text(await new Browser(server.url).request('/privacy'));
     expect(privacy).toContain('What is collected');

@@ -69,6 +69,7 @@ export function publicPaths(courseIds: string[], authorSlugs: string[]): string[
     ...authorSlugs.map((slug) => `/authors/${encodeURIComponent(slug)}`),
     '/connect',
     '/privacy',
+    '/terms',
   ];
 }
 
@@ -114,6 +115,7 @@ export function buildLlmsTxt(origin: string, courses: SeoCourse[], siteDescripti
     `- [Connect your AI chat](${absoluteUrl(origin, '/connect')}): how to connect a chat app to the LessonFolk tutor (MCP server: ${absoluteUrl(origin, '/mcp')})`,
     `- [Authors](${absoluteUrl(origin, '/authors')}): who writes the courses`,
     `- [Privacy](${absoluteUrl(origin, '/privacy')}): what is stored and how to delete it`,
+    `- [Terms of use](${absoluteUrl(origin, '/terms')}): the rules for using the hosted LessonFolk`,
     '- [Source code](https://github.com/CGSeb/lessonfolk): open source, MIT license',
     '',
     '## Courses',
