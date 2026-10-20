@@ -120,6 +120,9 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
   // Every write sets the same end state when repeated, so all are idempotent.
   const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
   const writes = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
+  // A write that replaces or removes what was saved is destructive, even when it is repeatable: a
+  // directory scan flags a tool whose description says it replaces data but is not marked so.
+  const overwrites = { ...writes, destructiveHint: true } as const;
 
   // --- Read tools ---------------------------------------------------------------
 
@@ -253,7 +256,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         level: z.enum(['beginner', 'intermediate', 'advanced']).nullable().optional(),
         interests: z.array(z.string().min(1).max(LIMITS.id)).max(LIMITS.listItems).nullable().optional().describe('Theme ids.'),
       }),
-      annotations: { ...writes, title: 'Set profile' },
+      annotations: { ...overwrites, title: 'Set profile' },
     },
     (profile) => write('Profile saved.', () => store.setProfile(userId, profile, writeOptions)),
   );
@@ -338,7 +341,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'Reset a course so the learner can take it again from its first lesson: all its lessons go back to not started and their scores and notes are removed. ' +
         'Other courses and the path are not changed. Requires explicit confirmation from the learner of what will be reset.',
       inputSchema: z.object({ courseId: z.string().min(1).max(LIMITS.id).describe('Course id, e.g. "ai-foundations".') }),
-      annotations: { ...writes, destructiveHint: true, title: 'Reset a course' },
+      annotations: { ...overwrites, title: 'Reset a course' },
     },
     ({ courseId }) => write(`Course ${courseId} reset.`, () => store.resetCourse(userId, courseId, writeOptions)),
   );
@@ -350,7 +353,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       description:
         'Save short notes on a started lesson, e.g. where a session stopped mid-lesson. Replaces the previous notes.',
       inputSchema: z.object({ lessonId, notes: z.string().min(1).max(LIMITS.text) }),
-      annotations: { ...writes, title: 'Save lesson notes' },
+      annotations: { ...overwrites, title: 'Save lesson notes' },
     },
     ({ lessonId: id, notes }) => write(`Notes saved on ${id}.`, () => store.saveNotes(userId, id, notes, writeOptions)),
   );
@@ -379,7 +382,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
           .union([z.string().min(1).max(LIMITS.json), z.record(z.string(), z.unknown())])
           .describe('The progress.json content, as JSON text or as an object.'),
       }),
-      annotations: { ...writes, destructiveHint: true, title: 'Import progress' },
+      annotations: { ...overwrites, title: 'Import progress' },
     },
     ({ progress }) => write('Progress imported.', () => store.importProgress(userId, progress, writeOptions)),
   );
