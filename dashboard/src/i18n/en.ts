@@ -391,12 +391,6 @@ export const en = {
       checkNone: 'Start Claude Code (claude) and type /mcp: lessonfolk shows as connected.',
       checkOauth: 'Start Claude Code (claude), type /mcp, choose lessonfolk and authenticate. Your browser opens: sign in, then allow.',
     },
-    codex: {
-      add: 'In a terminal, run:',
-      tokenNote: 'Codex reads the token from the LESSONFOLK_MCP_TOKEN environment variable: set it in the terminal where you start Codex.',
-      checkNone: 'Start Codex (codex): the LessonFolk tools are there in every chat.',
-      checkOauth: 'Then run this command. Your browser opens: sign in, then allow.',
-    },
     cursor: {
       add: 'Open Cursor’s MCP settings and add a server, or add this to the file ~/.cursor/mcp.json (in your home folder):',
       checkNone: 'Cursor lists lessonfolk with its tools in its MCP settings.',
@@ -414,10 +408,14 @@ export const en = {
     claudeAi: {
       steps: 'In claude.ai, go to Settings, then Connectors, and choose Add custom connector. Type a name (for example LessonFolk), paste this address as the URL, and click Add. Then click Connect on the new connector: sign in, then allow.',
     },
-    chatgpt: {
-      steps:
-        'In ChatGPT, open Settings, then Apps, and turn on developer mode in the advanced settings. Create an app with your address and OAuth authentication, then sign in and allow when asked.',
-      note: 'Developer mode is not available on every ChatGPT plan.',
+    chatgptApp: {
+      add: 'In the ChatGPT desktop app or on chatgpt.com, open Plugins in the sidebar. Click Add, then Add custom MCP server.',
+      fillOauth: 'Type a name (for example LessonFolk), keep Server URL, paste this address, and keep OAuth as the authentication:',
+      fillNone: 'Type a name (for example LessonFolk), keep Server URL and paste this address. This LessonFolk has no sign-in: choose no authentication.',
+      createOauth:
+        'Tick “I understand and want to continue”, then click Create as a plugin and Continue to LessonFolk. Your browser opens: sign in, then allow. When your browser asks, reopen ChatGPT.',
+      createNone: 'Tick “I understand and want to continue”, then click Create as a plugin. The LessonFolk tools are then available in your chats.',
+      tokenNote: 'This LessonFolk needs a token: in the Authentication field, choose the option that sends a token and paste yours.',
     },
   },
   privacy: {

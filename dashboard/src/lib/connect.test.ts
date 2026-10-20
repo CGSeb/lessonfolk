@@ -45,30 +45,29 @@ describe('connectClients', () => {
 
   it('lists every app, and web chats as not available on this computer', () => {
     const clients = byId(connectClients(mcpConnection({ mode: 'none' }, page, {})));
-    expect(Object.keys(clients)).toEqual(['claude-code', 'codex', 'cursor', 'claude-desktop', 'claude-ai', 'chatgpt']);
+    expect(Object.keys(clients)).toEqual(['claude-code', 'chatgpt', 'cursor', 'claude-desktop', 'claude-ai']);
     expect(clients['claude-code'].steps[0].code).toBe('claude mcp add --transport http lessonfolk http://127.0.0.1:4321/mcp');
-    expect(clients['codex'].steps[0].code).toBe('codex mcp add lessonfolk --url http://127.0.0.1:4321/mcp');
+    expect(clients['chatgpt'].steps[1].code).toBe('http://127.0.0.1:4321/mcp');
     expect(JSON.parse(clients['cursor'].steps[0].code!)).toEqual({ mcpServers: { lessonfolk: { url: 'http://127.0.0.1:4321/mcp' } } });
     // Claude Desktop's connectors come from Anthropic's servers: a local bridge instead.
     expect(clients['claude-desktop'].steps[0].code).toContain('mcp-remote');
     expect(clients['claude-ai'].available).toBe(false);
-    expect(clients['chatgpt'].available).toBe(false);
+    expect(clients['chatgpt'].available).toBe(true);
   });
 
   it('adds the token header where each app takes it', () => {
     const clients = byId(connectClients(mcpConnection({ mode: 'none' }, page, { LESSONFOLK_MCP_TOKEN: 't' })));
     expect(clients['claude-code'].steps[0].code).toContain('--header "Authorization: Bearer <your token>"');
-    expect(clients['codex'].steps[0].code).toContain('--bearer-token-env-var LESSONFOLK_MCP_TOKEN');
+    expect(clients['chatgpt'].note).toContain('needs a token');
     expect(JSON.parse(clients['cursor'].steps[0].code!).mcpServers.lessonfolk.headers).toEqual({ Authorization: 'Bearer <your token>' });
   });
 
   it('offers web chats and the sign-in steps on a public https address', () => {
     const clients = byId(connectClients(mcpConnection(oauth('https://learn.example.org'), page, {})));
     expect(clients['claude-ai'].available).toBe(true);
-    expect(clients['chatgpt'].available).toBe(true);
     expect(clients['claude-desktop'].steps[0].code).toBe('https://learn.example.org/mcp');
     expect(clients['claude-ai'].steps[0].code).toBe('https://learn.example.org/mcp');
-    expect(clients['codex'].steps[1].code).toBe('codex mcp login lessonfolk');
+    expect(clients['chatgpt'].steps[1].code).toBe('https://learn.example.org/mcp'); // Added in the app's interface.
     expect(clients['claude-code'].steps[0].code).toBe('claude mcp add --transport http lessonfolk https://learn.example.org/mcp');
   });
 
@@ -100,7 +99,7 @@ describe('connectClients', () => {
     // The manual setup stays, as the alternative.
     expect(clients['claude-code'].alternative?.steps[0].code).toBe('claude mcp add --transport http lessonfolk https://lessonfolk.com/mcp');
     expect(clients['claude-desktop'].alternative?.steps[0].code).toBe('https://lessonfolk.com/mcp');
-    for (const id of ['codex', 'cursor', 'claude-ai', 'chatgpt'] as const) {
+    for (const id of ['chatgpt', 'cursor', 'claude-ai'] as const) {
       expect(clients[id].alternative).toBeUndefined();
       expect(JSON.stringify(clients[id])).not.toContain('claude plugin');
     }

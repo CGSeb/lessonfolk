@@ -3,7 +3,7 @@
 This guide is for learners. It takes you from nothing to your first lesson, then shows the
 dashboard, the things you can say to your tutor, and how to run LessonFolk yourself.
 
-Your **tutor** is the AI chat you already use (Claude Code, Codex, Claude Desktop, Cursor…),
+Your **tutor** is the AI chat you already use (Claude Code, ChatGPT, Claude Desktop, Cursor…),
 connected to LessonFolk with [MCP](https://modelcontextprotocol.io) (Model Context Protocol, a
 standard way for AI apps to use tools). Through it, your chat reads the courses and the tutor's
 instructions, and saves your progress in LessonFolk. The LessonFolk website (the **dashboard**)
@@ -25,7 +25,7 @@ shows your courses and progress.
 |---|---|---|
 | What you do | Sign in on the hosted LessonFolk with GitHub or Google | Run LessonFolk on your computer with Docker |
 | Your progress | Saved on the hosted server, with your account | Saved in a database on your computer; nothing is sent to us |
-| AI chats | Any app that supports MCP, including web chats (claude.ai, ChatGPT) | Apps that run on your computer (Claude Code, Codex, Claude Desktop, Cursor) |
+| AI chats | Any app that supports MCP, including web chats (claude.ai) | Apps that run on your computer (Claude Code, ChatGPT, Claude Desktop, Cursor) |
 
 With the hosted version, sign in, open the **Connect** page and follow the steps for your app,
 then go to [Your first session](#your-first-session).
@@ -80,8 +80,8 @@ Without Docker, with [Node.js](https://nodejs.org) 22 or later and your own Post
 ## Connect your AI chat
 
 The dashboard's **Connect** page (`/connect`) shows your exact address, then one tab per app
-(Claude Code, Codex, Cursor, Claude Desktop, claude.ai, ChatGPT) with the short steps for the one
-you pick. A tab can be linked to, e.g. `/connect#codex`. Web chats (claude.ai, ChatGPT)
+(Claude Code, ChatGPT, Cursor, Claude Desktop, claude.ai) with the short steps for the one
+you pick. A tab can be linked to, e.g. `/connect#chatgpt`. Web chats (claude.ai)
 connect from their company's servers, so they cannot reach LessonFolk on your computer: when
 self-hosting without sign-in, use an app that runs on your computer.
 
@@ -105,12 +105,6 @@ can keep it: Claude Code connects to the same address once.
 **Claude Code in the LessonFolk folder.** Run `claude` in the folder you cloned: its `.mcp.json`
 already lists the `lessonfolk` server at `http://localhost:4321/mcp`. Approve it when Claude
 Code asks (`/mcp` shows it connected). That's all.
-
-**Codex**, once:
-
-```bash
-codex mcp add lessonfolk --url http://localhost:4321/mcp
-```
 
 **From any folder** (Claude Code):
 
@@ -195,7 +189,7 @@ The companion reads your progress and the courses from the LessonFolk MCP server
 the tutor uses, so it works the same with a local or a hosted instance and refreshes each time the
 tutor calls the server. It needs that server connected (`/mcp` lists it); otherwise the pane says
 your progress could not be read. If your Claude Code does not show the pane, nothing is lost:
-everything works in the chat. Codex has no companion.
+everything works in the chat. ChatGPT has no companion.
 
 The pane's own calls (`get_progress` and `list_courses`) need a permission like any tool call.
 In the LessonFolk folder, the project's `.claude/settings.json` allows them. If the pane still
@@ -278,7 +272,7 @@ learner, without the preview.
 - **Hosted**: your progress is saved on the hosted server, with your account. Each learner only
   ever sees their own progress, and you can download or delete it at any time on the
   **Account** page.
-- Your conversations go to your AI app's provider (Anthropic for Claude Code, OpenAI for Codex…),
+- Your conversations go to your AI app's provider (Anthropic for Claude Code, OpenAI for ChatGPT…),
   as with any use of that app. The tutor sends LessonFolk only what it saves: your profile, path,
   lesson statuses, scores and its short notes.
 - To start over, erase your progress on the **Account** page. Download it first if you want to

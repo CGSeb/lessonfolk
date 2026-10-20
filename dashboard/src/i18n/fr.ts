@@ -381,12 +381,6 @@ export const fr = {
       checkNone: 'Lancez Claude Code (claude) et tapez /mcp : lessonfolk apparaît comme connecté.',
       checkOauth: 'Lancez Claude Code (claude), tapez /mcp, choisissez lessonfolk et authentifiez-vous. Votre navigateur s’ouvre : connectez-vous, puis autorisez.',
     },
-    codex: {
-      add: 'Dans un terminal, lancez :',
-      tokenNote: 'Codex lit le jeton dans la variable d’environnement LESSONFOLK_MCP_TOKEN : définissez-la dans le terminal où vous lancez Codex.',
-      checkNone: 'Lancez Codex (codex) : les outils LessonFolk sont disponibles dans chaque chat.',
-      checkOauth: 'Puis lancez cette commande. Votre navigateur s’ouvre : connectez-vous, puis autorisez.',
-    },
     cursor: {
       add: 'Ouvrez les réglages MCP de Cursor et ajoutez un serveur, ou ajoutez ceci au fichier ~/.cursor/mcp.json (dans votre dossier personnel) :',
       checkNone: 'Cursor affiche lessonfolk et ses outils dans ses réglages MCP.',
@@ -404,10 +398,14 @@ export const fr = {
     claudeAi: {
       steps: 'Sur claude.ai, allez dans Settings, puis Connectors, et choisissez Add custom connector. Tapez un nom (par exemple LessonFolk), collez cette adresse comme URL, puis cliquez sur Add. Cliquez ensuite sur Connect sur le nouveau connecteur : connectez-vous, puis autorisez.',
     },
-    chatgpt: {
-      steps:
-        'Dans ChatGPT, ouvrez Settings, puis Apps, et activez le mode développeur dans les réglages avancés. Créez une application avec votre adresse et l’authentification OAuth, puis connectez-vous et autorisez quand on vous le demande.',
-      note: 'Le mode développeur n’est pas disponible avec toutes les offres ChatGPT.',
+    chatgptApp: {
+      add: 'Dans l’application de bureau ChatGPT ou sur chatgpt.com, ouvrez Plugins dans la barre latérale. Cliquez sur Add, puis sur Add custom MCP server.',
+      fillOauth: 'Tapez un nom (par exemple LessonFolk), gardez Server URL, collez cette adresse et gardez OAuth comme authentification :',
+      fillNone: 'Tapez un nom (par exemple LessonFolk), gardez Server URL et collez cette adresse. Ce LessonFolk n’a pas de connexion : choisissez aucune authentification.',
+      createOauth:
+        'Cochez « I understand and want to continue », puis cliquez sur Create as a plugin et sur Continue to LessonFolk. Votre navigateur s’ouvre : connectez-vous, puis autorisez. Quand le navigateur le propose, rouvrez ChatGPT.',
+      createNone: 'Cochez « I understand and want to continue », puis cliquez sur Create as a plugin. Les outils LessonFolk sont ensuite disponibles dans vos chats.',
+      tokenNote: 'Ce LessonFolk demande un jeton : dans le champ Authentication, choisissez l’option qui envoie un jeton et collez le vôtre.',
     },
   },
   privacy: {

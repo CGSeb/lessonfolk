@@ -15,7 +15,7 @@
 https://github.com/user-attachments/assets/bc8eccbd-1f95-4d20-92f5-15d528b05d47
 
 LessonFolk is a collection of open-source AI courses designed to be taught *by* an AI. Connect
-your AI chat ([Claude Code](https://claude.com/claude-code), [Codex](https://openai.com/codex),
+your AI chat ([Claude Code](https://claude.com/claude-code), [ChatGPT](https://chatgpt.com),
 Claude Desktop, Cursor…) to LessonFolk, say "let's start", and it guides you through lessons in a
 conversation: explaining, asking questions, adapting to your level, and saving your progress.
 
@@ -56,7 +56,6 @@ docker compose up -d --build
 Open http://127.0.0.1:4321 to see the dashboard. Then start your AI chat **in this folder**:
 
 - **Claude Code:** run `claude` and approve the `lessonfolk` MCP server when asked.
-- **Codex:** run `codex mcp add lessonfolk --url http://localhost:4321/mcp` once, then `codex`.
 - **Other apps:** follow the dashboard's **Connect** page.
 
 Then say:

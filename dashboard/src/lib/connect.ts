@@ -1,6 +1,6 @@
 /**
  * What the "Connect your AI chat" page (/connect) shows: this instance's MCP URL and whether
- * web chats (claude.ai, ChatGPT), which connect from their provider's servers, can reach it.
+ * web chats (claude.ai), which connect from their provider's servers, can reach it.
  */
 import { isLoopback, type AuthSettings } from './auth/settings.ts';
 

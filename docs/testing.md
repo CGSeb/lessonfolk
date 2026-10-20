@@ -119,7 +119,7 @@ real sign-in works. Run the check that matches what you changed:
 
 | After a change to… | Run |
 |---|---|
-| `AGENTS.md`, the skills, `.mcp.json`, `packages/mcp/prompts/`, the MCP tools, the progress format or the dashboard's progress pages | [A first session](#a-first-session), in **Claude Code** and in **Codex** |
+| `AGENTS.md`, the skills, `.mcp.json`, `packages/mcp/prompts/`, the MCP tools, the progress format or the dashboard's progress pages | [A first session](#a-first-session), in **Claude Code** and in **ChatGPT** |
 | The level check, paths or onboarding | Also the [variants](#variants) |
 | `packages/mcp`, the OAuth setup, sign-in, the auth tables, or a Better Auth upgrade | [Sign-in with GitHub and Google](#manual-check-sign-in-with-github-and-google) |
 | The Connect or Account pages | [Connect and Account pages](#connect-and-account-pages) |
@@ -141,8 +141,7 @@ real sign-in works. Run the check that matches what you changed:
       "What is AI?" as your first lesson. The course page shows "0 of 3 lessons" and every lesson
       "Not started".
 - [ ] **Connect.** In the repository folder, run `claude` and approve the `lessonfolk` server of
-      `.mcp.json`: `/mcp` shows it connected with its tools. Codex:
-      `codex mcp add lessonfolk --url http://localhost:4321/mcp` once, then `codex`.
+      `.mcp.json`: `/mcp` shows it connected with its tools.
 - [ ] **Not connected.** Stop the app (`docker compose stop app`), start a new chat and say
       *Let's start learning AI*: the tutor does not teach from the files and tells you to start
       LessonFolk and connect. Start the app again (`docker compose start app`), then a new chat.
@@ -247,7 +246,7 @@ credentials), then run `docker compose up --build`.
 - [ ] **An AI chat.** `claude mcp remove lessonfolk`, add it again, then `/mcp` → `lessonfolk` →
       authenticate. The browser shows sign-in, then "Allow this app to use LessonFolk?", with the app name (for example Claude Code) below it.
       Allow: the tools act on your signed-in user. Deny once: Claude Code reports that the
-      authorization failed. Repeat with Codex.
+      authorization failed. Repeat with the ChatGPT app.
 - [ ] **No sign-in mode.** Set `LESSONFOLK_AUTH=none`: no **Sign in** button, `/sign-in` sends
       you home. Set `LESSONFOLK_BIND=0.0.0.0` too: the app refuses to start ("only runs on
       127.0.0.1").
@@ -258,7 +257,7 @@ Put `.env` back the way it was when you are done, and never commit it.
 
 With `npm run dashboard` (no sign-in) and a copy of your own `progress.json` kept somewhere safe:
 
-- [ ] **Connect** (`/connect`) shows `http://127.0.0.1:4321/mcp`, marks claude.ai and ChatGPT as
+- [ ] **Connect** (`/connect`) shows `http://127.0.0.1:4321/mcp`, marks claude.ai as
       not available, and its Claude Code command connects.
 - [ ] **Account** (`/account`): **Download progress.json** saves the file; importing it back shows
       a preview, then **Replace my progress** imports it; a file that is not JSON shows "This file

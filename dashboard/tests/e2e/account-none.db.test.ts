@@ -64,7 +64,7 @@ describe('the Connect page', () => {
     expect(page.text).toContain(`${server.url}/mcp`);
     expect(page.text).not.toContain('Your LessonFolk address');
     expect(page.text).not.toContain('Only apps on this computer can connect');
-    for (const app of ['Claude Code', 'Codex', 'Cursor', 'Claude Desktop', 'claude.ai', 'ChatGPT']) expect(page.text).toContain(app);
+    for (const app of ['Claude Code', 'ChatGPT', 'Cursor', 'Claude Desktop', 'claude.ai']) expect(page.text).toContain(app);
     expect(page.text).toContain(`claude mcp add --transport http lessonfolk ${server.url}/mcp`);
     expect(page.text).toContain('Web chats cannot reach a LessonFolk that runs on this computer');
     expect(page.text).not.toContain('Optional: to make sure only your own apps connect');
@@ -77,16 +77,16 @@ describe('the Connect page', () => {
   it('has one tab and one panel per app, Claude Code first, web chats marked not available', async () => {
     const page = await getPage(server, '/connect');
     expect(page.html).toContain('role="tablist"');
-    expect(page.html.match(/<a [^>]*role="tab"/g)).toHaveLength(6);
-    expect(page.html.match(/<section [^>]*role="tabpanel"/g)).toHaveLength(6);
-    for (const id of ['claude-code', 'codex', 'cursor', 'claude-desktop', 'claude-ai', 'chatgpt']) {
+    expect(page.html.match(/<a [^>]*role="tab"/g)).toHaveLength(5);
+    expect(page.html.match(/<section [^>]*role="tabpanel"/g)).toHaveLength(5);
+    for (const id of ['claude-code', 'chatgpt', 'cursor', 'claude-desktop', 'claude-ai']) {
       expect(page.html, id).toContain(`href="#${id}"`);
       expect(page.html, id).toContain(`aria-controls="${id}"`);
     }
     expect(page.html).toMatch(/id="tab-claude-code"[^>]*aria-selected="true"/);
     expect(page.html).toMatch(/id="tab-chatgpt"[^>]*aria-selected="false"/);
-    expect(page.html.match(/Not available here/g)).toHaveLength(2);
-    expect(page.html.match(/class="badge badge--warning"[^>]*>Not available here/g)).toHaveLength(2);
+    expect(page.html.match(/Not available here/g)).toHaveLength(1);
+    expect(page.html.match(/class="badge badge--warning"[^>]*>Not available here/g)).toHaveLength(1);
   });
 
   it('says a token is needed when LESSONFOLK_MCP_TOKEN is set, without showing it', async () => {
