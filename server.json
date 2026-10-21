@@ -1,0 +1,14 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.CGSeb/lessonfolk",
+  "title": "LessonFolk",
+  "description": "Open-source AI courses taught by your AI tutor in conversation, with progress saved by MCP tools.",
+  "repository": {
+    "url": "https://github.com/CGSeb/lessonfolk",
+    "source": "github"
+  },
+  "version": "1.2.5",
+  "remotes": [
+    { "type": "streamable-http", "url": "https://lessonfolk.com/mcp" }
+  ]
+}
