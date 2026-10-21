@@ -47,7 +47,9 @@ const isLessonfolkTool = (tool: string) =>
 // Calls a tool of the LessonFolk MCP server with the session's own connection (and sign-in),
 // so it reads the same progress as the tutor, from a local or a hosted instance.
 const callServer = ($: EngineInterface, failures: string[] = []) => async (tool: string, args?: Record<string, unknown>) => {
-  for (const name of server ? [server] : [SERVER, PLUGIN_SERVER]) {
+  // The name learned from the tutor first, then the two known ones: a wrong guess never blinds the pane.
+  for (const name of [...new Set([server, SERVER, PLUGIN_SERVER])]) {
+    if (!name) continue
     try {
       const { content, isError } = await $.mcp.call(name, tool, args)
       const text = content.flatMap(block => (block.type === 'text' ? [block.text] : [])).join('\n')
@@ -281,7 +283,9 @@ export const register: Register = on => {
     const ran = await next(e)
     if (isRefreshing || ran.deny !== undefined || ran.isError) return ran
 
-    server = e.tool.split('__')[1] ?? server
+    // A tool's name spells the server with `:` and `.` replaced by `_`: the plugin's real name has colons.
+    const spelled = e.tool.split('__')[1]
+    server = spelled === PLUGIN_SERVER.replace(/[:.]/g, '_') ? PLUGIN_SERVER : spelled ?? server
     isRefreshing = true
     try {
       await refresh($)
