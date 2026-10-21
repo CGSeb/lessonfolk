@@ -42,6 +42,7 @@ declare module 'claude-code' {
       view: View
       snapshot: Snapshot | null
       ideas: IdeaMarks
+      detailsOpen: boolean
     }
   }
 }

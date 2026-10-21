@@ -29,6 +29,8 @@ const isActive = atom({ plugin: 'lessonfolk-tutor', key: 'isActive' } as const, 
 const choices = atom({ plugin: 'lessonfolk-tutor', key: 'choices' } as const, null as Choices | null)
 const view = atom({ plugin: 'lessonfolk-tutor', key: 'view' } as const, { state: 'no-progress' } as View)
 const snapshot = atom({ plugin: 'lessonfolk-tutor', key: 'snapshot' } as const, null)
+// Whether the technical details of an unreadable progress are unfolded in the pane.
+const detailsOpen = atom({ plugin: 'lessonfolk-tutor', key: 'detailsOpen' } as const, false)
 const ideas = atom({ plugin: 'lessonfolk-tutor', key: 'ideas' } as const, NO_IDEAS)
 // The LessonFolk instance the Dashboard button opens (local or hosted).
 const instance = atom({ plugin: 'lessonfolk-tutor', key: 'instance' } as const, DEFAULT_INSTANCE)
@@ -373,13 +375,24 @@ export const register: Register = on => {
       }[v.state]
 
       const rules = refusedRules(v.reason)
-      const hint = rules.length > 0 ? text.refused : (v.reason ?? [])
+      const hint = rules.length > 0 ? text.refused : []
+      // The raw errors stay folded: they help to report a problem, not to use the pane.
+      const details = rules.length > 0 ? [] : (v.reason ?? [])
+      const isOpen = details.length > 0 && (await read($, detailsOpen))
 
       return (
         <Box flexDirection="column">
           {[...lines, ...hint, ...rules].map(line => (
             <Text dimColor>{line}</Text>
           ))}
+          {details.length > 0 && (
+            <Button
+              key="details"
+              label={isOpen ? text.hideDetails : text.showDetails}
+              onPress={() => void update($, detailsOpen, open => !open)}
+            />
+          )}
+          {isOpen && details.map(line => <Text dimColor>{line}</Text>)}
           {rules.length > 0 && (
             <Button
               key="copy-rules"
