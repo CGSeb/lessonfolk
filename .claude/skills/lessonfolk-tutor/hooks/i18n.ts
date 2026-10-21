@@ -26,6 +26,8 @@ type Words = {
   offline: string[]
   allDone: string[]
   refused: string[]
+  showDetails: string
+  hideDetails: string
   copyRules: string
   copied: string
   copyFailed: string
@@ -53,9 +55,15 @@ const en: Words = {
   skipped: '(skipped)',
   levels: {},
   noProgress: ['No course started yet.', 'Say "start" to begin.'],
-  offline: ['Your progress could not be read.', 'Check that the LessonFolk server is connected (/mcp).'],
+  offline: [
+    'Waiting for the tutor.',
+    'This pane fills in once the tutor reads your progress: say "continue" to start or resume a lesson.',
+    'Still empty after that? Check that the LessonFolk server is connected (/mcp).',
+  ],
   allDone: ['You have finished every course. Well done!', 'Ask the tutor what to explore next.'],
   refused: ["The app refused the pane's read.", 'Allow it in ~/.claude/settings.json (permissions.allow):'],
+  showDetails: 'Show details ▸',
+  hideDetails: 'Hide details ▾',
   copyRules: 'Copy rules',
   copied: 'Copied: paste it into ~/.claude/settings.json',
   copyFailed: 'Could not copy to the clipboard',
@@ -83,9 +91,15 @@ const fr: Words = {
   skipped: '(passée)',
   levels: { beginner: 'débutant', intermediate: 'intermédiaire', advanced: 'avancé' },
   noProgress: ['Aucun cours commencé pour l’instant.', 'Dites « commencer » pour démarrer.'],
-  offline: ['Votre progression n’a pas pu être lue.', 'Vérifiez que le serveur LessonFolk est connecté (/mcp).'],
+  offline: [
+    'En attente du tuteur.',
+    'Ce panneau se remplit dès que le tuteur lit votre progression : dites « continue » pour démarrer ou reprendre une leçon.',
+    'Toujours vide après ça ? Vérifiez que le serveur LessonFolk est connecté (/mcp).',
+  ],
   allDone: ['Vous avez terminé tous les cours. Bravo !', 'Demandez au tuteur quoi explorer ensuite.'],
   refused: ['L’application a refusé la lecture du panneau.', 'Autorisez-la dans ~/.claude/settings.json (permissions.allow) :'],
+  showDetails: 'Afficher les détails ▸',
+  hideDetails: 'Masquer les détails ▾',
   copyRules: 'Copier les règles',
   copied: 'Copié : collez-le dans ~/.claude/settings.json',
   copyFailed: 'Impossible de copier dans le presse-papiers',

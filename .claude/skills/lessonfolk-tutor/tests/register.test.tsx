@@ -224,7 +224,7 @@ describe('course companion', () => {
     await save($, server, STARTED, 't1')
 
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
-    expect(await ui.find({ type: 'Text', text: 'Your progress could not be read.' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Waiting for the tutor.' })).toBeDefined()
     await ui.unmount()
   })
 
@@ -235,9 +235,13 @@ describe('course companion', () => {
     await save($, server, STARTED, 't1')
 
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
-    expect(await ui.find({ type: 'Text', text: 'Your progress could not be read.' })).toBeDefined()
-    const lines = (await ui.findAll({ type: 'Text' })).map(node => node.text)
-    expect(lines.some(line => line?.startsWith('lessonfolk get_progress: '))).toBe(true)
+    expect(await ui.find({ type: 'Text', text: 'Waiting for the tutor.' })).toBeDefined()
+    const textOf = async () => (await ui.findAll({ type: 'Text' })).map(node => node.text)
+    expect((await textOf()).some(line => line?.startsWith('lessonfolk get_progress: '))).toBe(false)
+    await ui.press({ key: 'details' })
+    expect((await textOf()).some(line => line?.startsWith('lessonfolk get_progress: '))).toBe(true)
+    await ui.press({ key: 'details' })
+    expect((await textOf()).some(line => line?.startsWith('lessonfolk get_progress: '))).toBe(false)
     await ui.unmount()
   })
 
