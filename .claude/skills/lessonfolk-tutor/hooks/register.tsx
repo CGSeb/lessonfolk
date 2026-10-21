@@ -40,9 +40,18 @@ const isSkill = (name: string | undefined, skill: string) => name === skill || n
 // learned from the tutor's first call to it. Until one answers, both known names are tried.
 let server: string | undefined
 
+// The server's own tools: a connector added in the desktop app is named by an id, not "lessonfolk",
+// so the tool's name, not the server's, tells it is the tutor's.
+const SERVER_TOOLS = new Set([
+  'get_progress', 'list_courses', 'list_themes', 'get_next_lesson', 'get_lesson', 'start_lesson',
+  'complete_lesson', 'skip_lesson', 'save_lesson_notes', 'set_path', 'set_profile', 'reset_course',
+  'level_check_skip_course', 'record_review_score', 'import_progress',
+])
+
 const isLessonfolkTool = (tool: string) =>
   tool.startsWith(TOOL_PREFIX) ||
-  (/^mcp__[^_].*lessonfolk.*?__/i.test(tool) && !tool.startsWith(OWN_PREFIX) && !tool.startsWith('mcp__course-'))
+  (/^mcp__[^_].*lessonfolk.*?__/i.test(tool) && !tool.startsWith(OWN_PREFIX) && !tool.startsWith('mcp__course-')) ||
+  (tool.startsWith('mcp__') && !tool.startsWith(OWN_PREFIX) && SERVER_TOOLS.has(tool.split('__')[2] ?? ''))
 
 // Calls a tool of the LessonFolk MCP server with the session's own connection (and sign-in),
 // so it reads the same progress as the tutor, from a local or a hosted instance.

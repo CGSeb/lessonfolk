@@ -145,6 +145,18 @@ describe('course companion', () => {
     await ui.unmount()
   })
 
+  test('a connector named by an id is recognised by the tutor\'s tool names', async ($, on) => {
+    const id = 'c7d0b443-30eb-4e13-9b06-6e6e2aae9b8d'
+    const server = { ...newServer(), names: [id] }
+    engine(on, server)
+    await save($, server, STARTED, 't1', `mcp__${id}__start_lesson`)
+
+    expect(server.asked.every(call => call.startsWith(`${id}:`))).toBe(true)
+    const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await ui.find({ type: 'Text', text: '● Lesson one' })).toBeDefined()
+    await ui.unmount()
+  })
+
   test('a hosted server added under another name is asked by that name', async ($, on) => {
     const server = newServer()
     engine(on, server)
