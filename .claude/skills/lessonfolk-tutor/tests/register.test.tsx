@@ -127,6 +127,24 @@ describe('course companion', () => {
     await ui.unmount()
   })
 
+  test('a save through the plugin\'s tools keeps the pane current under the plugin name', async ($, on) => {
+    const server = { ...newServer(), names: ['plugin:lessonfolk-tutor:lessonfolk'] }
+    engine(on, server)
+    await save($, server, STARTED, 't1', 'mcp__plugin_lessonfolk-tutor_lessonfolk__start_lesson')
+    await save(
+      $,
+      server,
+      progress('basics/02-two', { 'basics/01-one': 'done', 'basics/02-two': 'in_progress' }),
+      't2',
+      'mcp__plugin_lessonfolk-tutor_lessonfolk__complete_lesson',
+    )
+
+    expect(server.asked.every(call => call.startsWith('plugin:lessonfolk-tutor:lessonfolk:'))).toBe(true)
+    const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await ui.find({ type: 'Text', text: '● Lesson two' })).toBeDefined()
+    await ui.unmount()
+  })
+
   test('a hosted server added under another name is asked by that name', async ($, on) => {
     const server = newServer()
     engine(on, server)
