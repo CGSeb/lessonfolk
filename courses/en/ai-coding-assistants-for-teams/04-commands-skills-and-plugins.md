@@ -19,7 +19,7 @@ prerequisites:
 2. **Commands: a saved prompt you call by name.** Most tools let you save a prompt in a file
    in the repository and run it as a slash command (`/release-notes`) or prompt file, often
    with arguments. The whole team then runs the same, reviewed prompt instead of retyping
-   their own version.
+   their own version. Some tools are folding commands into skills, so the two are converging.
 3. **Skills: instructions the assistant picks up when relevant.** A **skill** is a folder with
    a `SKILL.md` file (a name, a one-line description, then instructions) and optionally
    scripts or templates. Only the description sits in context; the assistant reads the rest
@@ -54,8 +54,8 @@ prerequisites:
 
   | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI |
   |---|---|---|---|---|---|
-  | Saved prompts | slash commands (part of skills) | custom prompts | `.github/prompts/*.prompt.md` | `.cursor/commands/` | `.gemini/commands/*.toml` |
-  | Skills (`SKILL.md`) | `.claude/skills/` | supported | supported | check docs | check docs |
+  | Saved prompts | slash commands (part of skills) | replaced by skills (custom prompts were removed in 2026) | `.github/prompts/*.prompt.md` | `.cursor/commands/`, now converted to skills by `/migrate-to-skills` | `.gemini/commands/*.toml` |
+  | Skills (`SKILL.md`) | `.claude/skills/` | supported | supported | supported (`.cursor/skills/`) | check docs |
   | Subagents | `.claude/agents/` | check docs | custom agents (`.github/agents/`) | check docs | check docs |
   | Bundles | plugins and marketplaces | check docs | check docs | check docs | extensions |
   | MCP servers | yes | yes | yes | yes | yes |

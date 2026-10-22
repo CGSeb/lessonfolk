@@ -16,7 +16,8 @@ prerequisites:
    travail.** Avant la réponse finale, il produit un long passage de texte intermédiaire
    (planification, essais d’approches, vérifications). Ce texte est généré token par token comme
    n’importe quel autre, et il donne au modèle la place de travailler par étapes au lieu de
-   sauter à une réponse.
+   sauter à une réponse. La plupart des produits ne vous montrent pas ce texte tel qu’il a été écrit :
+   ils en montrent un résumé, ou rien.
 2. **Pourquoi écrire des étapes aide.** Chaque token est produit avec une quantité fixe de
    calcul. Un problème difficile ne se résout pas en un seul token, mais il peut se résoudre en
    des centaines, chacun s’appuyant sur les précédents. C’est pourquoi demander à un modèle
@@ -30,9 +31,9 @@ prerequisites:
    compte en général dans le coût. Une recherche rapide ou un court e-mail n’en tirent presque
    rien. Les maths en plusieurs étapes, le code délicat, la planification sous contraintes et
    l’analyse minutieuse en profitent le plus.
-5. **Un raisonnement visible est un outil, pas une preuve.** Les étapes affichées peuvent être
-   utiles à lire et à vérifier, mais elles ne sont pas un compte rendu garanti de la façon dont
-   le modèle est vraiment arrivé à la réponse, et un modèle de raisonnement peut aboutir à une
+5. **Un raisonnement visible est un outil, pas une preuve.** Les étapes affichées (en général un résumé
+   du travail du modèle, pas le texte brut) peuvent être utiles à lire et à vérifier, mais elles ne
+   sont pas un compte rendu garanti de la façon dont le modèle est vraiment arrivé à la réponse, et un modèle de raisonnement peut aboutir à une
    mauvaise réponse avec des étapes convaincantes. Vérifiez le résultat, surtout quand l’enjeu
    est élevé.
 6. **Souvent, vous pouvez choisir l’effort.** Beaucoup d’outils permettent de régler combien le
@@ -50,7 +51,8 @@ prerequisites:
   meilleur sur les problèmes en plusieurs étapes, plus coûteux et plus lent sur les simples ;
   pour l’écriture créative ou courante, le gain est faible.
 - Idée reçue : « je peux lire ses pensées, donc je sais pourquoi il a dit ça ». Présentez
-  l’idée 5 calmement : les étapes sont utiles, ce n’est pas une fenêtre sur un esprit.
+  l’idée 5 calmement : les étapes sont utiles, ce n’est pas une fenêtre sur un esprit. Beaucoup d’assistants n’affichent
+  qu’un résumé de la réflexion, ou la cachent : ne promettez pas à l’apprenant qu’il peut tout lire.
 - Ne citez ni modèles précis, ni versions, ni benchmarks, ni prix.
 - Débutants : concentrez-vous sur les idées 1, 4 et sur une règle simple (« à utiliser pour les
   tâches difficiles en plusieurs étapes »). Apprenants avancés : discutez de l’entraînement sur

@@ -53,8 +53,8 @@ prerequisites:
   as the place to go deeper.
 - This is the last lesson: recap the course method (brief → explain → hypotheses → root
   cause → verify, and knowing when to take over) and celebrate. Suggest next steps: AI Coding
-  Assistants for Teams: Rules, Skills and Plugins (sharing these habits with a team) and Build
-  with AI (building their own AI features).
+  Assistants for Teams: Rules, Skills and Plugins (sharing these habits with a team) and How AI
+  Apps Work (building their own AI features).
 
 ## Check your understanding
 1. Give two signs that an assistant is stuck on a bug.
