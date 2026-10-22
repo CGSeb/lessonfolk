@@ -21,11 +21,13 @@ type Words = {
   keyIdeas: string
   next: string
   skipped: string
+  inProgress: string
   levels: Record<string, string>
   noProgress: string[]
   offline: string[]
   allDone: string[]
   refused: string[]
+  progressAlt: (finished: number, total: number) => string
   showDetails: string
   hideDetails: string
   copyRules: string
@@ -51,8 +53,9 @@ const en: Words = {
   dashboard: 'Dashboard ↗',
   lessons: 'Lessons',
   keyIdeas: 'Key ideas',
-  next: 'Next:',
+  next: 'Next lesson:',
   skipped: '(skipped)',
+  inProgress: 'In progress',
   levels: {},
   noProgress: ['No course started yet.', 'Say "start" to begin.'],
   offline: [
@@ -62,6 +65,7 @@ const en: Words = {
   ],
   allDone: ['You have finished every course. Well done!', 'Ask the tutor what to explore next.'],
   refused: ["The app refused the pane's read.", 'Allow it in ~/.claude/settings.json (permissions.allow):'],
+  progressAlt: (finished, total) => `${finished} of ${total} lessons finished`,
   showDetails: 'Show details ▸',
   hideDetails: 'Hide details ▾',
   copyRules: 'Copy rules',
@@ -87,8 +91,9 @@ const fr: Words = {
   dashboard: 'Tableau de bord ↗',
   lessons: 'Leçons',
   keyIdeas: 'Idées clés',
-  next: 'Suivante :',
+  next: 'Prochaine leçon :',
   skipped: '(passée)',
+  inProgress: 'En cours',
   levels: { beginner: 'débutant', intermediate: 'intermédiaire', advanced: 'avancé' },
   noProgress: ['Aucun cours commencé pour l’instant.', 'Dites « commencer » pour démarrer.'],
   offline: [
@@ -98,6 +103,7 @@ const fr: Words = {
   ],
   allDone: ['Vous avez terminé tous les cours. Bravo !', 'Demandez au tuteur quoi explorer ensuite.'],
   refused: ['L’application a refusé la lecture du panneau.', 'Autorisez-la dans ~/.claude/settings.json (permissions.allow) :'],
+  progressAlt: (finished, total) => `${finished} leçons terminées sur ${total}`,
   showDetails: 'Afficher les détails ▸',
   hideDetails: 'Masquer les détails ▾',
   copyRules: 'Copier les règles',
