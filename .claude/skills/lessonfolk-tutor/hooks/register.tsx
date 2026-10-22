@@ -453,46 +453,49 @@ export const register: Register = on => {
           <Text dimColor>{[v.themeTitle, v.level && (text.levels[v.level] ?? v.level)].filter(Boolean).join(' · ')}</Text>
         )}
         <Text> </Text>
-        <Text bold>
-          {text.lessons} {finished}/{lessons.length}
-        </Text>
-        {hasSvg && lessons.length > 0 && (
-          <Svg
-            source={progressBar(finished, lessons.length)}
-            alt={text.progressAlt(finished, lessons.length)}
-            width={PROGRESS_WIDTH}
-            height={8}
-          />
-        )}
-        {/* The terminal's borders already separate the cards; the other surfaces need a gap. */}
+        {/* On the desktop the title, the bar and the cards are spaced apart; the terminal packs them. */}
         <Box flexDirection="column" gap={hasSvg ? 1 : 0}>
-          {lessons.map(l => {
-            const isCurrent = l.status === 'current'
-            const faded = l.status === 'done' || l.status === 'skipped'
+          <Text bold>
+            {text.lessons} {finished}/{lessons.length}
+          </Text>
+          {hasSvg && lessons.length > 0 && (
+            <Svg
+              source={progressBar(finished, lessons.length)}
+              alt={text.progressAlt(finished, lessons.length)}
+              width={PROGRESS_WIDTH}
+              height={8}
+            />
+          )}
+          {/* The terminal's borders already separate the cards; the other surfaces need a gap. */}
+          <Box flexDirection="column" gap={hasSvg ? 1 : 0}>
+            {lessons.map(l => {
+              const isCurrent = l.status === 'current'
+              const faded = l.status === 'done' || l.status === 'skipped'
 
-            // One small rounded card per lesson: the current one is filled with the logo's indigo
-            // and its text takes the logo's amber; finished ones carry a green tick.
-            return (
-              <Box
-                flexDirection="row"
-                gap={1}
-                paddingX={1}
-                borderStyle="round"
-                borderColor={isCurrent ? BRAND.indigo : BRAND.border}
-                borderDimColor={!isCurrent}
-                backgroundColor={isCurrent ? BRAND.indigo : undefined}
-              >
-                <Text bold color={isCurrent ? BRAND.amber : l.status === 'done' ? BRAND.success : undefined} dimColor={l.status === 'todo' || l.status === 'skipped'}>
-                  {mark(l.status)}
-                </Text>
-                <Text bold={isCurrent} color={isCurrent ? BRAND.amber : undefined} dimColor={faded}>
-                  {l.title}
-                </Text>
-                {l.status === 'skipped' && <Text dimColor>{text.skipped}</Text>}
-                {isCurrent && <Text bold color={BRAND.amber}>· {text.inProgress}</Text>}
-              </Box>
-            )
-          })}
+              // One small rounded card per lesson: the current one is filled with the logo's indigo
+              // and its text takes the logo's amber; finished ones carry a green tick.
+              return (
+                <Box
+                  flexDirection="row"
+                  gap={1}
+                  paddingX={1}
+                  borderStyle="round"
+                  borderColor={isCurrent ? BRAND.indigo : BRAND.border}
+                  borderDimColor={!isCurrent}
+                  backgroundColor={isCurrent ? BRAND.indigo : undefined}
+                >
+                  <Text bold color={isCurrent ? BRAND.amber : l.status === 'done' ? BRAND.success : undefined} dimColor={l.status === 'todo' || l.status === 'skipped'}>
+                    {mark(l.status)}
+                  </Text>
+                  <Text bold={isCurrent} color={isCurrent ? BRAND.amber : undefined} dimColor={faded}>
+                    {l.title}
+                  </Text>
+                  {l.status === 'skipped' && <Text dimColor>{text.skipped}</Text>}
+                  {isCurrent && <Text bold color={BRAND.amber}>· {text.inProgress}</Text>}
+                </Box>
+              )
+            })}
+          </Box>
         </Box>
         {v.current && v.current.ideas.length > 0 && <Text> </Text>}
         {v.current && v.current.ideas.length > 0 && <Text bold>{text.keyIdeas}</Text>}
