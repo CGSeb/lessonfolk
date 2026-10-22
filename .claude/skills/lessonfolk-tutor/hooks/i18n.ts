@@ -21,6 +21,7 @@ type Words = {
   keyIdeas: string
   next: string
   skipped: string
+  inProgress: string
   levels: Record<string, string>
   noProgress: string[]
   offline: string[]
@@ -54,6 +55,7 @@ const en: Words = {
   keyIdeas: 'Key ideas',
   next: 'Next lesson:',
   skipped: '(skipped)',
+  inProgress: 'In progress',
   levels: {},
   noProgress: ['No course started yet.', 'Say "start" to begin.'],
   offline: [
@@ -91,6 +93,7 @@ const fr: Words = {
   keyIdeas: 'Idées clés',
   next: 'Prochaine leçon :',
   skipped: '(passée)',
+  inProgress: 'En cours',
   levels: { beginner: 'débutant', intermediate: 'intermédiaire', advanced: 'avancé' },
   noProgress: ['Aucun cours commencé pour l’instant.', 'Dites « commencer » pour démarrer.'],
   offline: [

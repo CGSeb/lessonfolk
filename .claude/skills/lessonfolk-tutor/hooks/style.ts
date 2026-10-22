@@ -10,6 +10,11 @@ export const BRAND = {
   surface: '#f1f1f8',
   // Text on that bubble (--color-text).
   ink: '#1a1c33',
+  // Finished: the site's success green (--color-success).
+  success: '#16a34a',
+  // In progress: the site's info bubble and its text (--color-info-bg, --color-info).
+  infoBg: '#e0e7ff',
+  info: '#4338ca',
 }
 
 // `assets/brand/icon.svg`: the mark, the same in light and dark.

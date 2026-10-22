@@ -107,8 +107,9 @@ describe('course companion', () => {
       expect(await ui.find({ type: 'Text', text: 'Basics' })).toBeDefined()
       expect(await ui.find({ type: 'Text', text: 'Understanding AI · beginner' })).toBeDefined()
       expect(await ui.find({ type: 'Text', text: 'Lessons 0/2' })).toBeDefined()
-      expect(await ui.find({ type: 'Text', text: '● Lesson one' })).toBeDefined()
-      expect(await ui.find({ type: 'Text', text: '○ 1. What AI is' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: 'Lesson one' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: '· In progress' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: '1. What AI is' })).toBeDefined()
       expect(await ui.find({ type: 'Text', text: 'Next lesson: Lesson two' })).toBeDefined()
       await ui.unmount()
     }
@@ -124,7 +125,7 @@ describe('course companion', () => {
 
     expect(server.asked).toContain('plugin:lessonfolk-tutor:lessonfolk:get_progress')
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
-    expect(await ui.find({ type: 'Text', text: '● Lesson one' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Lesson one' })).toBeDefined()
     await ui.unmount()
   })
 
@@ -142,7 +143,7 @@ describe('course companion', () => {
 
     expect(server.asked.every(call => call.startsWith('plugin:lessonfolk-tutor:lessonfolk:'))).toBe(true)
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
-    expect(await ui.find({ type: 'Text', text: '● Lesson two' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Lesson two' })).toBeDefined()
     await ui.unmount()
   })
 
@@ -154,7 +155,7 @@ describe('course companion', () => {
 
     expect(server.asked.every(call => call.startsWith(`${id}:`))).toBe(true)
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
-    expect(await ui.find({ type: 'Text', text: '● Lesson one' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Lesson one' })).toBeDefined()
     await ui.unmount()
   })
 
@@ -165,7 +166,7 @@ describe('course companion', () => {
 
     expect(server.asked.every(call => call.startsWith('claude_ai_LessonFolk:'))).toBe(true)
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'desktop', ...PANE })
-    expect(await ui.find({ type: 'Text', text: '● Lesson one' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Lesson one' })).toBeDefined()
     await ui.unmount()
   })
 
@@ -177,8 +178,8 @@ describe('course companion', () => {
     expect(ran.deny).toBeUndefined()
 
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
-    expect(await ui.find({ type: 'Text', text: '✓ 1. What AI is' })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: '● 2. Narrow vs general' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: '1. What AI is' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: '2. Narrow vs general' })).toBeDefined()
     await ui.unmount()
   })
 
@@ -190,8 +191,8 @@ describe('course companion', () => {
 
     expect(seen.toasts).toContain('Lesson complete: Lesson one')
     const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
-    expect(await ui.find({ type: 'Text', text: '✓ Lesson one' })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: '● Lesson two' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Lesson one' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Lesson two' })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: 'Lessons 1/2' })).toBeDefined()
     await ui.unmount()
   })

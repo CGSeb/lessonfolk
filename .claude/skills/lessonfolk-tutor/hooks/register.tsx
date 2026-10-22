@@ -465,25 +465,34 @@ export const register: Register = on => {
           />
         )}
         {lessons.map(l => (
-          <Text
-            dimColor={l.status !== 'current'}
-            bold={l.status === 'current'}
-            color={l.status === 'current' ? BRAND.accent : undefined}
+          // As on the site: finished lessons turn green, the current one is the "In progress" bubble.
+          <Box
+            flexDirection="row"
+            gap={1}
+            paddingX={l.status === 'current' ? 1 : 0}
+            backgroundColor={l.status === 'current' ? BRAND.infoBg : undefined}
           >
-            {mark(l.status)} {l.title}
-            {l.status === 'skipped' ? ` ${text.skipped}` : ''}
-          </Text>
+            <Text bold color={l.status === 'done' ? BRAND.success : l.status === 'current' ? BRAND.info : undefined} dimColor={l.status === 'todo' || l.status === 'skipped'}>
+              {mark(l.status)}
+            </Text>
+            <Text bold={l.status === 'current'} color={l.status === 'current' ? BRAND.info : undefined} dimColor={l.status === 'done' || l.status === 'skipped'}>
+              {l.title}
+            </Text>
+            {l.status === 'skipped' && <Text dimColor>{text.skipped}</Text>}
+            {l.status === 'current' && <Text bold color={BRAND.info}>· {text.inProgress}</Text>}
+          </Box>
         ))}
         {v.current && v.current.ideas.length > 0 && <Text> </Text>}
         {v.current && v.current.ideas.length > 0 && <Text bold>{text.keyIdeas}</Text>}
         {v.current?.ideas.map((idea, i) => (
-          <Text
-            dimColor={ideaMark(i + 1) === '✓'}
-            bold={ideaMark(i + 1) === '●'}
-            color={ideaMark(i + 1) === '●' ? BRAND.accent : undefined}
-          >
-            {ideaMark(i + 1)} {i + 1}. {idea}
-          </Text>
+          <Box flexDirection="row" gap={1}>
+            <Text bold color={ideaMark(i + 1) === '✓' ? BRAND.success : ideaMark(i + 1) === '●' ? BRAND.accent : undefined} dimColor={ideaMark(i + 1) === '○'}>
+              {ideaMark(i + 1)}
+            </Text>
+            <Text dimColor={ideaMark(i + 1) === '✓'} bold={ideaMark(i + 1) === '●'} color={ideaMark(i + 1) === '●' ? BRAND.accent : undefined}>
+              {i + 1}. {idea}
+            </Text>
+          </Box>
         ))}
         {v.next && <Text> </Text>}
         {v.next && (
