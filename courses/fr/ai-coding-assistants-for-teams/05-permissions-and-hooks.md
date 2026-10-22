@@ -52,10 +52,10 @@ prerequisites:
   | Outil | Permissions et bac à sable | Hooks |
   |---|---|---|
   | Claude Code | règles allow / ask / deny dans `.claude/settings.json` (partagé) et un fichier de réglages local ; mode bac à sable | hooks dans les réglages (avant et après l’usage d’un outil, à l’arrêt…), aussi fournis par les plugins |
-  | OpenAI Codex | modes d’approbation et réglages de bac à sable dans `config.toml` | voir la doc |
-  | GitHub Copilot | approbations d’outils dans l’éditeur ; l’agent cloud tourne dans un environnement restreint | voir la doc |
+  | OpenAI Codex | modes d’approbation et réglages de bac à sable dans `config.toml` | pris en charge (voir la doc pour le format) |
+  | GitHub Copilot | approbations d’outils dans l’éditeur ; l’agent cloud tourne dans un environnement restreint | fichiers JSON dans `.github/hooks/` |
   | Cursor | liste d’autorisations et réglages d’exécution automatique pour les commandes de terminal | `hooks.json` |
-  | Gemini CLI | dossiers de confiance, réglages d’autorisation / d’exclusion d’outils, bac à sable | voir la doc |
+  | Gemini CLI (comptes professionnels et clés d’API uniquement) | dossiers de confiance, réglages d’autorisation / d’exclusion d’outils, bac à sable | voir la doc |
 
 - Idée reçue : « l’assistant demande avant tout, donc c’est sûr ». La fatigue des permissions est réelle :
   on clique sur « autoriser » sans lire. Autorisez explicitement les actions sûres et fréquentes pour que

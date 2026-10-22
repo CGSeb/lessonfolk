@@ -20,8 +20,9 @@ prerequisites: []
    connectors, each built, secured and maintained separately. A connector made for one
    assistant is no use to another.
 3. **A shared standard turns a product into a sum.** The **Model Context Protocol (MCP)** is an
-   open standard for how an assistant talks to a tool or data source. It was introduced by
-   Anthropic and has since been adopted by many assistants and tools. A tool is wrapped once
+   open standard for how an assistant talks to a tool or data source. It was created by one company
+   and is now governed in the open, under the Linux Foundation, and has been
+   adopted by many assistants and tools. A tool is wrapped once
    as an MCP server, and any assistant that speaks MCP can use it: three assistants and five
    tools need eight pieces instead of fifteen. Think of a common socket shape that every
    plug fits.

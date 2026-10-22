@@ -21,7 +21,8 @@ prerequisites: []
    assistant ne sert à aucun autre.
 3. **Un standard partagé transforme un produit en somme.** Le **Model Context Protocol (MCP)** est un
    standard ouvert qui décrit comment un assistant dialogue avec un outil ou une source de données. Il a
-   été introduit par Anthropic et adopté depuis par de nombreux assistants et outils. Un outil est emballé
+   été créé par une entreprise, il est aujourd’hui gouverné de façon ouverte sous l’égide de la Linux
+   Foundation, et il a été adopté par de nombreux assistants et outils. Un outil est emballé
    une fois sous forme de serveur MCP, et tout assistant qui parle MCP peut l’utiliser : trois assistants
    et cinq outils demandent huit éléments au lieu de quinze. Pensez à une forme de prise commune dans
    laquelle tous les branchements s’emboîtent.

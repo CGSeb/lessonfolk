@@ -52,10 +52,10 @@ prerequisites:
   | Tool | Permissions and sandbox | Hooks |
   |---|---|---|
   | Claude Code | allow / ask / deny rules in `.claude/settings.json` (shared) and a local settings file; sandbox mode | hooks in settings (before and after tool use, at stop…), also shipped by plugins |
-  | OpenAI Codex | approval modes and sandbox settings in `config.toml` | check docs |
-  | GitHub Copilot | tool approvals in the editor; the cloud agent runs in a restricted environment | check docs |
+  | OpenAI Codex | approval modes and sandbox settings in `config.toml` | supported (check docs for the format) |
+  | GitHub Copilot | tool approvals in the editor; the cloud agent runs in a restricted environment | JSON files in `.github/hooks/` |
   | Cursor | allow list and auto-run settings for terminal commands | `hooks.json` |
-  | Gemini CLI | trusted folders, tool allow / exclude settings, sandbox | check docs |
+  | Gemini CLI (work accounts and API keys only) | trusted folders, tool allow / exclude settings, sandbox | check docs |
 
 - Misconception: "the assistant asks before everything, so it is safe". Permission fatigue is
   real: people click "allow" without reading. Allow the safe, frequent actions explicitly so

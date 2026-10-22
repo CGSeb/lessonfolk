@@ -43,6 +43,8 @@ declare module 'claude-code' {
       snapshot: Snapshot | null
       ideas: IdeaMarks
       detailsOpen: boolean
+      // The language the learner picked in the pane, over the profile's.
+      langChoice: 'en' | 'fr' | null
     }
   }
 }
