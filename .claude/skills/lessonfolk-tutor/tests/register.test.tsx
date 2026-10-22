@@ -23,9 +23,9 @@ const BAND = {
 // The LessonFolk server as the mod sees it: the learner's saved progress, whether it answers,
 // who asked it, the project's .mcp.json, if any, and the only names it is connected under
 // (any name when absent), and the refusal it answers every call with, if any.
-type Server = { saved: Saved; isUp: boolean; asked: string[]; mcpJson?: string; names?: string[]; refusal?: string }
+type Server = { saved: Saved; isUp: boolean; asked: string[]; askedArgs: { tool: string; lang?: unknown }[]; mcpJson?: string; names?: string[]; refusal?: string }
 
-const newServer = (saved: Saved = { lessons: {}, current: null }): Server => ({ saved, isUp: true, asked: [] })
+const newServer = (saved: Saved = { lessons: {}, current: null }): Server => ({ saved, isUp: true, asked: [], askedArgs: [] })
 
 // The engine beneath the mod: the server from memory, every tool call succeeding, what the
 // mod shows (toasts, panes, prompts) recorded.
@@ -44,6 +44,7 @@ const engine = (on: On, server: Server, unplaced?: string) => {
     if (server.refusal) return { value: { content: [{ type: 'text', text: server.refusal }], isError: true } } as never
     if (server.names && !server.names.includes(e.server)) throw new Error(`No MCP server named ${e.server}`)
     server.asked.push(`${e.server}:${e.tool}`)
+    server.askedArgs.push({ tool: e.tool, lang: e.args?.lang })
     const text = server.isUp ? answer(() => server.saved, e.tool, e.args) : undefined
 
     return {
@@ -108,7 +109,7 @@ describe('course companion', () => {
       expect(await ui.find({ type: 'Text', text: 'Lessons 0/2' })).toBeDefined()
       expect(await ui.find({ type: 'Text', text: '● Lesson one' })).toBeDefined()
       expect(await ui.find({ type: 'Text', text: '○ 1. What AI is' })).toBeDefined()
-      expect(await ui.find({ type: 'Text', text: 'Next: Lesson two' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: 'Next lesson: Lesson two' })).toBeDefined()
       await ui.unmount()
     }
     expect(server.asked).toContain('lessonfolk:get_progress')
@@ -205,7 +206,7 @@ describe('course companion', () => {
     const pane = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
     expect(await pane.find({ type: 'Text', text: 'Understanding AI · débutant' })).toBeDefined()
     expect(await pane.find({ type: 'Text', text: 'Leçons 1/2' })).toBeDefined()
-    expect(await pane.find({ type: 'Text', text: 'Suivante : Lesson three (Next Steps)' })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: 'Prochaine leçon : Lesson three (Next Steps)' })).toBeDefined()
     expect(await pane.find({ type: 'Text', text: 'Idées clés' })).toBeDefined()
     await pane.unmount()
 
@@ -242,6 +243,7 @@ describe('course companion', () => {
     expect(await ui.find({ type: 'Text', text: 'Lessons 0/2' })).toBeDefined()
     await ui.press({ key: 'lang' })
     expect(await ui.find({ type: 'Text', text: 'Leçons 0/2' })).toBeDefined()
+    expect(server.askedArgs.some(a => a.tool === 'list_courses' && a.lang === 'fr')).toBe(true)
     await save($, server, STARTED, 't2')
     expect(await ui.find({ type: 'Text', text: 'Leçons 0/2' })).toBeDefined()
     await ui.press({ key: 'lang' })

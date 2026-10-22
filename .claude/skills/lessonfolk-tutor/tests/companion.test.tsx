@@ -26,6 +26,18 @@ describe('parsing', () => {
 })
 
 describe('load', () => {
+  test('the language picked in the pane is asked of the course tools', async () => {
+    const asked: Record<string, unknown>[] = []
+    const call: Caller = async (tool, args) => {
+      if (tool === 'list_courses') asked.push(args ?? {})
+
+      return answer(() => progress('basics/01-one', { 'basics/01-one': 'in_progress' }), tool, args)
+    }
+    await load(call, 'fr')
+    await load(call)
+    expect(asked).toEqual([{ lang: 'fr' }, {}])
+  })
+
   test('a new learner is invited to start', async () => {
     const { view } = await load(caller({ lessons: {}, current: null }))
     expect(view.state).toBe('no-progress')

@@ -103,11 +103,12 @@ async function refresh($: EngineInterface, isQuiet = false) {
   await update($, instance, () => instanceUrl(config))
 
   const failures: string[] = []
-  const loaded = await load(callServer($, failures))
+  const picked = (await read($, langChoice)) ?? undefined
+  const loaded = await load(callServer($, failures), picked)
   if (loaded.view.state === 'offline') loaded.view = { ...loaded.view, reason: [...new Set(failures)].slice(0, 3) }
   const before = await read($, snapshot)
   // Offline, the language of the last read is kept.
-  loaded.view.lang = (await read($, langChoice)) ?? loaded.view.lang ?? lastLang
+  loaded.view.lang = picked ?? loaded.view.lang ?? lastLang
   lastLang = loaded.view.lang
   const previous = before ? { snapshot: before, view: await read($, view) } : undefined
   await update($, view, () => loaded.view)
@@ -382,8 +383,12 @@ export const register: Register = on => {
           label={other === 'fr' ? 'Français' : 'English'}
           dimColor
           onPress={() => {
-            void update($, langChoice, () => other)
-            void update($, view, current => ({ ...current, lang: other }))
+            void (async () => {
+              await update($, langChoice, () => other)
+              await update($, view, current => ({ ...current, lang: other }))
+              // The course and lesson titles come from the server in that language.
+              await refresh($, true)
+            })()
           }}
         />
       </Box>

@@ -3,7 +3,7 @@
 // tests, with a local or a hosted instance.
 
 import type { Choices, IdeaMarks, LessonState, Snapshot, View } from '../types'
-import { langOf, words } from './i18n'
+import { type Lang, langOf, words } from './i18n'
 
 // Calls a tool of the LessonFolk MCP server: the tool's text result, or undefined when it
 // failed or the server could not be reached.
@@ -70,9 +70,11 @@ export type Loaded = { view: View; snapshot: Snapshot }
 // Builds the pane's view: the course in focus (the current lesson's, else the next lesson's),
 // its lessons, the current lesson's key ideas and the next lesson, following the order of
 // "Start or resume" (the learner's path first, then the catalog order of list_courses).
-export const load = async (call: Caller): Promise<Loaded> => {
+export const load = async (call: Caller, picked?: Lang): Promise<Loaded> => {
   const progress = parseJson<Progress>(await call('get_progress'))
-  const catalog = parseJson<CourseSummary[]>(await call('list_courses'))
+  // The language the learner picked in the pane: the course titles follow it, not the profile's.
+  const asked = picked ? { lang: picked } : undefined
+  const catalog = parseJson<CourseSummary[]>(await call('list_courses', asked))
   const statuses = statusesOf(progress)
   const snapshot: Snapshot = { current: progress?.current ?? undefined, statuses }
   const lang = progress ? langOf(progress.profile?.language) : undefined
@@ -111,7 +113,7 @@ export const load = async (call: Caller): Promise<Loaded> => {
       ? 'current'
       : isFinished(statuses[lesson.id]) ? (statuses[lesson.id] === 'done' ? 'done' : 'skipped') : 'todo',
   }))
-  const ideas = current ? keyIdeas((await call('get_lesson', { lessonId: current })) ?? '') : []
+  const ideas = current ? keyIdeas((await call('get_lesson', { lessonId: current, ...asked })) ?? '') : []
 
   return {
     view: {
