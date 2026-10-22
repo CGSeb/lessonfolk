@@ -487,8 +487,8 @@ export const register: Register = on => {
         ))}
         {v.next && <Text> </Text>}
         {v.next && (
-          // The spark: the amber bubble is for the next lesson, and only that.
-          <Box paddingX={1} backgroundColor={BRAND.amber}>
+          // A soft off-white bubble: the next lesson stands out without shouting.
+          <Box paddingX={1} backgroundColor={BRAND.surface}>
             <Text color={BRAND.ink}>
               {text.next} {v.next.title}
               {v.next.courseTitle ? ` (${v.next.courseTitle})` : ''}

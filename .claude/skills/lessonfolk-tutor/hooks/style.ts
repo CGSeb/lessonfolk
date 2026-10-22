@@ -6,9 +6,9 @@ export const BRAND = {
   indigo: '#4f46e5',
   // The accent: the learner's side (the current lesson, the key idea in progress).
   accent: '#818cf8',
-  // The spark: the next lesson, and only that.
-  amber: '#fbbf24',
-  // Dark text on the amber bubble.
+  // The tutor's neutral bubble (--neutral-50): the next lesson's background.
+  surface: '#f1f1f8',
+  // Text on that bubble (--color-text).
   ink: '#1a1c33',
 }
 
