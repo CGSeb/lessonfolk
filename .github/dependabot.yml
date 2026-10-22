@@ -8,7 +8,9 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
+      interval: weekly   
+    assignees:
+      - "CGSeb"
     open-pull-requests-limit: 5
     groups:
       minor-and-patch:
