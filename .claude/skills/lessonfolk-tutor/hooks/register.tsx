@@ -16,6 +16,7 @@ import {
   togglePick,
 } from './companion'
 import { type Lang, words } from './i18n'
+import { BRAND, LOGO, PROGRESS_WIDTH, progressBar } from './style'
 
 const PANE = 'course-companion'
 // The tools this mod registers: `mcp__<plugin>__<tool>`.
@@ -31,6 +32,7 @@ const view = atom({ plugin: 'lessonfolk-tutor', key: 'view' } as const, { state:
 const snapshot = atom({ plugin: 'lessonfolk-tutor', key: 'snapshot' } as const, null)
 // Whether the technical details of an unreadable progress are unfolded in the pane.
 const detailsOpen = atom({ plugin: 'lessonfolk-tutor', key: 'detailsOpen' } as const, false)
+const langChoice = atom({ plugin: 'lessonfolk-tutor', key: 'langChoice' } as const, null as Lang | null)
 const ideas = atom({ plugin: 'lessonfolk-tutor', key: 'ideas' } as const, NO_IDEAS)
 // The LessonFolk instance the Dashboard button opens (local or hosted).
 const instance = atom({ plugin: 'lessonfolk-tutor', key: 'instance' } as const, DEFAULT_INSTANCE)
@@ -105,7 +107,7 @@ async function refresh($: EngineInterface, isQuiet = false) {
   if (loaded.view.state === 'offline') loaded.view = { ...loaded.view, reason: [...new Set(failures)].slice(0, 3) }
   const before = await read($, snapshot)
   // Offline, the language of the last read is kept.
-  loaded.view.lang ??= lastLang
+  loaded.view.lang = (await read($, langChoice)) ?? loaded.view.lang ?? lastLang
   lastLang = loaded.view.lang
   const previous = before ? { snapshot: before, view: await read($, view) } : undefined
   await update($, view, () => loaded.view)
@@ -362,10 +364,30 @@ export const register: Register = on => {
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const { Box, Button, Text } = $.ui.resolve(e)
+    const { Box, Button, Text, Svg } = $.ui.resolve(e)
     const v = await read($, view)
     const marks = await read($, ideas)
     const text = words(v.lang)
+    // The terminal draws no vector images: there the logo is left out and the bar is text.
+    const hasSvg = e.surface !== 'terminal'
+
+    // The logo and the name, with the switch to the other language.
+    const other: Lang = v.lang === 'fr' ? 'en' : 'fr'
+    const header = (
+      <Box flexDirection="row" gap={1} alignItems="center">
+        {hasSvg && <Svg source={LOGO} alt="LessonFolk" width={24} height={24} />}
+        <Text bold color={BRAND.accent}>LessonFolk</Text>
+        <Button
+          key="lang"
+          label={other === 'fr' ? 'Français' : 'English'}
+          dimColor
+          onPress={() => {
+            void update($, langChoice, () => other)
+            void update($, view, current => ({ ...current, lang: other }))
+          }}
+        />
+      </Box>
+    )
 
     if (v.state === 'no-progress' || v.state === 'offline' || v.state === 'all-done') {
       const lines = {
@@ -382,8 +404,11 @@ export const register: Register = on => {
 
       return (
         <Box flexDirection="column">
-          {[...lines, ...hint, ...rules].map(line => (
-            <Text dimColor>{line}</Text>
+          {header}
+          <Text> </Text>
+          {[...lines, ...hint, ...rules].map((line, i) => (
+            // The first line is the message, the rest explains it.
+            <Text dimColor={i > 0}>{line}</Text>
           ))}
           {details.length > 0 && (
             <Button
@@ -416,6 +441,8 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="column">
+        {header}
+        <Text> </Text>
         <Text bold>{v.courseTitle}</Text>
         {(v.themeTitle || v.level) && (
           <Text dimColor>{[v.themeTitle, v.level && (text.levels[v.level] ?? v.level)].filter(Boolean).join(' · ')}</Text>
@@ -424,8 +451,20 @@ export const register: Register = on => {
         <Text bold>
           {text.lessons} {finished}/{lessons.length}
         </Text>
+        {hasSvg && lessons.length > 0 && (
+          <Svg
+            source={progressBar(finished, lessons.length)}
+            alt={text.progressAlt(finished, lessons.length)}
+            width={PROGRESS_WIDTH}
+            height={8}
+          />
+        )}
         {lessons.map(l => (
-          <Text dimColor={l.status !== 'current'} bold={l.status === 'current'}>
+          <Text
+            dimColor={l.status !== 'current'}
+            bold={l.status === 'current'}
+            color={l.status === 'current' ? BRAND.accent : undefined}
+          >
             {mark(l.status)} {l.title}
             {l.status === 'skipped' ? ` ${text.skipped}` : ''}
           </Text>
@@ -433,16 +472,23 @@ export const register: Register = on => {
         {v.current && v.current.ideas.length > 0 && <Text> </Text>}
         {v.current && v.current.ideas.length > 0 && <Text bold>{text.keyIdeas}</Text>}
         {v.current?.ideas.map((idea, i) => (
-          <Text dimColor={ideaMark(i + 1) === '✓'} bold={ideaMark(i + 1) === '●'}>
+          <Text
+            dimColor={ideaMark(i + 1) === '✓'}
+            bold={ideaMark(i + 1) === '●'}
+            color={ideaMark(i + 1) === '●' ? BRAND.accent : undefined}
+          >
             {ideaMark(i + 1)} {i + 1}. {idea}
           </Text>
         ))}
         {v.next && <Text> </Text>}
         {v.next && (
-          <Text>
-            {text.next} {v.next.title}
-            {v.next.courseTitle ? ` (${v.next.courseTitle})` : ''}
-          </Text>
+          // The spark: the amber bubble is for the next lesson, and only that.
+          <Box paddingX={1} backgroundColor={BRAND.amber}>
+            <Text color={BRAND.ink}>
+              {text.next} {v.next.title}
+              {v.next.courseTitle ? ` (${v.next.courseTitle})` : ''}
+            </Text>
+          </Box>
         )}
       </Box>
     )

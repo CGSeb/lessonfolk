@@ -217,6 +217,38 @@ describe('course companion', () => {
     expect(seen.prompts).toEqual(['interroge-moi'])
   })
 
+  test('the pane carries the logo and a progress bar on the desktop, text only in the terminal', async ($, on) => {
+    const server = newServer()
+    engine(on, server)
+    await save($, server, STARTED, 't1')
+
+    const desktop = await $.ui.mount({ plugin: PLUGIN, surface: 'desktop', ...PANE })
+    expect(await desktop.find({ type: 'Svg', alt: 'LessonFolk' })).toBeDefined()
+    expect(await desktop.find({ type: 'Svg', alt: '0 of 2 lessons finished' })).toBeDefined()
+    await desktop.unmount()
+
+    const terminal = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await terminal.find({ type: 'Text', text: 'LessonFolk' })).toBeDefined()
+    expect(await terminal.find({ type: 'Svg' })).toBeUndefined()
+    await terminal.unmount()
+  })
+
+  test('a button in the pane switches its language, and the pick outlives the next read', async ($, on) => {
+    const server = newServer()
+    engine(on, server)
+    await save($, server, STARTED, 't1')
+
+    const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await ui.find({ type: 'Text', text: 'Lessons 0/2' })).toBeDefined()
+    await ui.press({ key: 'lang' })
+    expect(await ui.find({ type: 'Text', text: 'Leçons 0/2' })).toBeDefined()
+    await save($, server, STARTED, 't2')
+    expect(await ui.find({ type: 'Text', text: 'Leçons 0/2' })).toBeDefined()
+    await ui.press({ key: 'lang' })
+    expect(await ui.find({ type: 'Text', text: 'Lessons 0/2' })).toBeDefined()
+    await ui.unmount()
+  })
+
   test('a server that does not answer says so in the pane', async ($, on) => {
     const server = newServer(STARTED)
     server.isUp = false

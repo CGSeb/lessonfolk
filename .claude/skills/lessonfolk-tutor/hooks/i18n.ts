@@ -26,6 +26,7 @@ type Words = {
   offline: string[]
   allDone: string[]
   refused: string[]
+  progressAlt: (finished: number, total: number) => string
   showDetails: string
   hideDetails: string
   copyRules: string
@@ -62,6 +63,7 @@ const en: Words = {
   ],
   allDone: ['You have finished every course. Well done!', 'Ask the tutor what to explore next.'],
   refused: ["The app refused the pane's read.", 'Allow it in ~/.claude/settings.json (permissions.allow):'],
+  progressAlt: (finished, total) => `${finished} of ${total} lessons finished`,
   showDetails: 'Show details ▸',
   hideDetails: 'Hide details ▾',
   copyRules: 'Copy rules',
@@ -98,6 +100,7 @@ const fr: Words = {
   ],
   allDone: ['Vous avez terminé tous les cours. Bravo !', 'Demandez au tuteur quoi explorer ensuite.'],
   refused: ['L’application a refusé la lecture du panneau.', 'Autorisez-la dans ~/.claude/settings.json (permissions.allow) :'],
+  progressAlt: (finished, total) => `${finished} leçons terminées sur ${total}`,
   showDetails: 'Afficher les détails ▸',
   hideDetails: 'Masquer les détails ▾',
   copyRules: 'Copier les règles',
