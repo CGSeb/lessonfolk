@@ -12,9 +12,10 @@ export const BRAND = {
   ink: '#1a1c33',
   // Finished: the site's success green (--color-success).
   success: '#16a34a',
-  // In progress: the site's info bubble and its text (--color-info-bg, --color-info).
-  infoBg: '#e0e7ff',
-  info: '#4338ca',
+  // The spark: the text on the current lesson's indigo card, as the mark's sparkle on its square.
+  amber: '#fbbf24',
+  // The border of the cards that are not the current one (--neutral-400).
+  border: '#9496b0',
 }
 
 // `assets/brand/icon.svg`: the mark, the same in light and dark.

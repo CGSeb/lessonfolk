@@ -464,24 +464,33 @@ export const register: Register = on => {
             height={8}
           />
         )}
-        {lessons.map(l => (
-          // As on the site: finished lessons turn green, the current one is the "In progress" bubble.
-          <Box
-            flexDirection="row"
-            gap={1}
-            paddingX={l.status === 'current' ? 1 : 0}
-            backgroundColor={l.status === 'current' ? BRAND.infoBg : undefined}
-          >
-            <Text bold color={l.status === 'done' ? BRAND.success : l.status === 'current' ? BRAND.info : undefined} dimColor={l.status === 'todo' || l.status === 'skipped'}>
-              {mark(l.status)}
-            </Text>
-            <Text bold={l.status === 'current'} color={l.status === 'current' ? BRAND.info : undefined} dimColor={l.status === 'done' || l.status === 'skipped'}>
-              {l.title}
-            </Text>
-            {l.status === 'skipped' && <Text dimColor>{text.skipped}</Text>}
-            {l.status === 'current' && <Text bold color={BRAND.info}>· {text.inProgress}</Text>}
-          </Box>
-        ))}
+        {lessons.map(l => {
+          const isCurrent = l.status === 'current'
+          const faded = l.status === 'done' || l.status === 'skipped'
+
+          // One small rounded card per lesson: the current one is filled with the logo's indigo
+          // and its text takes the logo's amber; finished ones carry a green tick.
+          return (
+            <Box
+              flexDirection="row"
+              gap={1}
+              paddingX={1}
+              borderStyle="round"
+              borderColor={isCurrent ? BRAND.indigo : BRAND.border}
+              borderDimColor={!isCurrent}
+              backgroundColor={isCurrent ? BRAND.indigo : undefined}
+            >
+              <Text bold color={isCurrent ? BRAND.amber : l.status === 'done' ? BRAND.success : undefined} dimColor={l.status === 'todo' || l.status === 'skipped'}>
+                {mark(l.status)}
+              </Text>
+              <Text bold={isCurrent} color={isCurrent ? BRAND.amber : undefined} dimColor={faded}>
+                {l.title}
+              </Text>
+              {l.status === 'skipped' && <Text dimColor>{text.skipped}</Text>}
+              {isCurrent && <Text bold color={BRAND.amber}>· {text.inProgress}</Text>}
+            </Box>
+          )
+        })}
         {v.current && v.current.ideas.length > 0 && <Text> </Text>}
         {v.current && v.current.ideas.length > 0 && <Text bold>{text.keyIdeas}</Text>}
         {v.current?.ideas.map((idea, i) => (
@@ -497,7 +506,7 @@ export const register: Register = on => {
         {v.next && <Text> </Text>}
         {v.next && (
           // A soft off-white bubble: the next lesson stands out without shouting.
-          <Box paddingX={1} backgroundColor={BRAND.surface}>
+          <Box paddingX={1} borderStyle="round" borderColor={BRAND.surface} backgroundColor={BRAND.surface}>
             <Text color={BRAND.ink}>
               {text.next} {v.next.title}
               {v.next.courseTitle ? ` (${v.next.courseTitle})` : ''}
