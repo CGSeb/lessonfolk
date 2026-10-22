@@ -14,7 +14,8 @@ prerequisites:
 1. **Un prompt, c’est simplement le message que vous envoyez à un assistant IA.** Ce peut être une
    question, une consigne ou un texte sur lequel travailler. « Faire du prompting », c’est juste bien
    rédiger ce message.
-2. **L’assistant ne sait que ce qui figure dans la conversation.** Il ne voit ni votre écran, ni votre
+2. **L’assistant ne sait que ce qu’on lui a donné.** C’est surtout la conversation (et les fichiers que
+   vous ajoutez) ; certains assistants gardent aussi une mémoire des conversations passées. Il ne voit ni votre écran, ni votre
    situation, ni ce que vous avez en tête. Si une information compte pour la réponse et que vous ne
    l’avez pas donnée, l’assistant doit deviner — et il choisira le plus souvent l’option la plus générique.
 3. **Donnez du contexte** : l’arrière-plan dont l’assistant a besoin. Qui vous êtes, dans quelle situation
@@ -41,8 +42,9 @@ prerequisites:
   directement dans le chat.
 - Idée reçue : « les bons prompts utilisent des mots-clés secrets ou une formule spéciale ». Non — un
   langage simple et clair fonctionne le mieux. (La leçon 5 revient sur les « phrases magiques ».)
-- Idée reçue : « l’IA me connaît / se souvient de ce que je voulais dire ». Elle n’a que la conversation
-  en cours (et la mémoire ou les fichiers qu’un outil donné fournit explicitement).
+- Idée reçue : « l’IA me connaît / se souvient de ce que je voulais dire ». Elle a surtout la conversation
+  en cours. Beaucoup d’assistants ont désormais une mémoire des conversations passées, activée par
+  défaut, mais elle est partielle et peut être fausse ou périmée : redites ce qui compte.
 - Avec des apprenants qui utilisent déjà beaucoup les assistants de chat, allez plus vite et concentrez-vous
   sur l’objectif et le public, qu’ils oublient le plus souvent.
 - Restez léger et pratique ; l’essentiel de la leçon doit être l’apprenant qui réécrit des prompts.

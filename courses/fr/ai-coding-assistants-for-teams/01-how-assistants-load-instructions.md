@@ -62,7 +62,7 @@ prerequisites:
   | OpenAI Codex | `AGENTS.md` | `~/.codex/AGENTS.md` |
   | GitHub Copilot | `AGENTS.md`, `.github/copilot-instructions.md` | instructions personnelles dans les paramètres |
   | Cursor | `AGENTS.md`, `.cursor/rules/` | règles utilisateur dans les paramètres |
-  | Gemini CLI | `GEMINI.md` (peut être réglé pour lire `AGENTS.md`) | `~/.gemini/GEMINI.md` |
+  | Gemini CLI (comptes professionnels et clés d’API uniquement) | `GEMINI.md` (peut être réglé pour lire `AGENTS.md`) | `~/.gemini/GEMINI.md` |
 
 - Pour les apprenants nouveaux avec les outils de type agent, passez du temps sur l’idée 1 et l’exemple en
   direct. Pour ceux qui ont déjà un fichier d’instructions, allez plus vite et demandez-leur d’apporter le
