@@ -132,6 +132,9 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
 
     const next = JSON.parse(text(await call(client, 'get_next_lesson')));
     expect(next).toMatchObject({ kind: 'next', lessonId: L1, courseId: 'ai-foundations', status: 'not_started' });
+    // A chat that only gets the tools (no skill, no server instructions) is told which calls save progress.
+    expect(next.nextStep).toContain(`start_lesson("${L1}")`);
+    expect(next.nextStep).toContain(`complete_lesson("${L1}"`);
 
     const started = progressOf(await call(client, 'start_lesson', { lessonId: L1 }));
     expect(started.current).toBe(L1);
@@ -139,6 +142,8 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
 
     const lesson = text(await call(client, 'get_lesson', { lessonId: L1 }));
     expect(lesson).toContain('learner status: in_progress');
+    expect(lesson).toContain('complete_lesson as soon as');
+    expect(lesson).toContain('never give the answer');
     expect(lesson).toContain('## Teaching notes');
     // No French translation in the fixture: the English lesson, saying so.
     expect(text(await call(client, 'get_lesson', { lessonId: L1, lang: 'fr' }))).toContain(', language en; learner status');

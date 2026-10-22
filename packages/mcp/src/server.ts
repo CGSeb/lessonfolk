@@ -133,7 +133,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       description:
         "The learner's saved progress (progress.json v1 shape): profile (name, experience, goal, language, level, interests), " +
         'path with its reason, current lesson, and every started lesson with status, dates, score and notes. ' +
-        'Empty profile and lessons mean a new learner who has not been onboarded yet.',
+        'Empty profile and lessons mean a new learner who has not been onboarded yet: onboard them and save their profile with set_profile before teaching. ' +
+        'Call this first in every session. Nothing the learner does is saved unless you call the write tools (set_profile, set_path, start_lesson, complete_lesson…).',
       inputSchema: z.object({}),
       annotations: { ...readOnly, title: 'Get progress' },
     },
@@ -148,7 +149,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         'The lesson to teach now, by the LessonFolk rules: the current lesson if unfinished ("resume"), otherwise the first unfinished lesson ' +
         'whose prerequisites are done or skipped, following the learner\'s path first ("next"). "all_done" means every lesson is finished; ' +
         '"blocked" means none is available. unknownPathIds lists path courses that no longer exist. ' +
-        'Does not change anything; start_lesson begins the lesson.',
+        'Does not change anything; start_lesson begins the lesson. The answer ends with nextStep: the calls that save the learner\'s progress around this lesson.',
       inputSchema: z.object({}),
       annotations: { ...readOnly, title: 'Get next lesson' },
     },
@@ -167,6 +168,9 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
           courseTitle: next.course.title,
           status: lessonStatus(progress, next.lesson.id),
           unknownPathIds: next.unknownPathIds,
+          nextStep:
+            (next.kind === 'next' ? `Call start_lesson("${next.lesson.id}") now, then get_lesson to read it. ` : 'Call get_lesson to read it, and teach from where the notes say it stopped. ') +
+            `When the learner meets its completion criteria, call complete_lesson("${next.lesson.id}", score, notes) right away, before moving on: progress is saved only by these calls.`,
         };
       }),
   );
@@ -188,7 +192,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         const catalog = readCatalog(coursesDir, learnerLang(progress, language));
         const found = findLesson(catalog, id);
         if (!found) throw new ProgressStoreError('unknown_lesson', `Unknown lesson "${id}". Use list_courses to see the lesson ids.`, { lessonId: id });
-        const header = `<!-- LessonFolk: lesson ${found.lesson.id} of course "${found.course.title}" (${found.course.id}), language ${found.lesson.lang}${found.lesson.lang === catalog.lang ? '' : ` (not translated into "${catalog.lang}" yet)`}; learner status: ${lessonStatus(progress, id)} -->`;
+        const header = `<!-- LessonFolk: lesson ${found.lesson.id} of course "${found.course.title}" (${found.course.id}), language ${found.lesson.lang}${found.lesson.lang === catalog.lang ? '' : ` (not translated into "${catalog.lang}" yet)`}; learner status: ${lessonStatus(progress, id)}. Progress is saved only by the write tools: start_lesson before teaching a lesson that is not started, complete_lesson as soon as its completion criteria are met. Ask each question of "Check your understanding" alone and wait for the learner's own answer: never give the answer, a list of answers to pick from or suggested replies, and never show the "Good answer" hints -->`;
         return `${header}\n${readLessonText(found.lesson)}`;
       }),
   );
@@ -247,7 +251,9 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Set profile',
       description:
         "Change the learner's profile. Each field given replaces the saved one, null removes it, fields left out are kept. " +
-        'level must be beginner, intermediate or advanced. interests are theme ids from list_themes.',
+        'level must be beginner, intermediate or advanced. interests are theme ids from list_themes. ' +
+        'Call it during onboarding of a new learner (empty profile in get_progress) as soon as you know their name, experience, goal, language, level or interests, ' +
+        'and again whenever they change one. Without this call the profile stays empty.',
       inputSchema: z.object({
         name: nullableText,
         experience: nullableText,
@@ -266,7 +272,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     {
       title: 'Set path',
       description:
-        'Save the learning path the learner agreed to: course ids in order, with the reason (2-3 sentences for the learner). ' +
+        'Save the learning path the learner agreed to: course ids in order, with the reason (2-3 sentences for the learner). Call it at the end of onboarding, once they agreed. ' +
         'Replaces the previous path. Saved only once the learner has agreed to it. Every course must come after its prerequisites, and an unfinished prerequisite may not be dropped.',
       inputSchema: z.object({
         path: z.array(z.string().min(1).max(LIMITS.id)).max(LIMITS.listItems).describe('Course ids, in order.'),
@@ -282,7 +288,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     {
       title: 'Start lesson',
       description:
-        'Start (or resume) a lesson: it becomes the current lesson, status in_progress. Fails if its prerequisites are not done or skipped, ' +
+        'Start (or resume) a lesson: it becomes the current lesson, status in_progress. Call it before teaching a lesson that is not started yet. Fails if its prerequisites are not done or skipped, ' +
         'or if it is already done or skipped. Takes a lesson id such as the one get_next_lesson returns.',
       inputSchema: z.object({ lessonId }),
       annotations: { ...writes, title: 'Start lesson' },
@@ -296,7 +302,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Complete lesson',
       description:
         'Mark a lesson done once its completion criteria are met: score is the estimate from the checks (0 to 1), ' +
-        'notes are one or two sentences on what the learner found easy or hard (used for later review). Clears the current lesson.',
+        'notes are one or two sentences on what the learner found easy or hard (used for later review). Clears the current lesson. ' +
+        'Call it right when the learner meets the completion criteria, before moving on to anything else, not at the end of the session: a lesson that is not completed here does not count as done.',
       inputSchema: z.object({
         lessonId,
         score: z.number().min(0).max(1).describe('0 to 1.'),
