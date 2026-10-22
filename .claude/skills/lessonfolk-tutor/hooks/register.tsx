@@ -464,33 +464,36 @@ export const register: Register = on => {
             height={8}
           />
         )}
-        {lessons.map(l => {
-          const isCurrent = l.status === 'current'
-          const faded = l.status === 'done' || l.status === 'skipped'
+        {/* The terminal's borders already separate the cards; the other surfaces need a gap. */}
+        <Box flexDirection="column" gap={hasSvg ? 1 : 0}>
+          {lessons.map(l => {
+            const isCurrent = l.status === 'current'
+            const faded = l.status === 'done' || l.status === 'skipped'
 
-          // One small rounded card per lesson: the current one is filled with the logo's indigo
-          // and its text takes the logo's amber; finished ones carry a green tick.
-          return (
-            <Box
-              flexDirection="row"
-              gap={1}
-              paddingX={1}
-              borderStyle="round"
-              borderColor={isCurrent ? BRAND.indigo : BRAND.border}
-              borderDimColor={!isCurrent}
-              backgroundColor={isCurrent ? BRAND.indigo : undefined}
-            >
-              <Text bold color={isCurrent ? BRAND.amber : l.status === 'done' ? BRAND.success : undefined} dimColor={l.status === 'todo' || l.status === 'skipped'}>
-                {mark(l.status)}
-              </Text>
-              <Text bold={isCurrent} color={isCurrent ? BRAND.amber : undefined} dimColor={faded}>
-                {l.title}
-              </Text>
-              {l.status === 'skipped' && <Text dimColor>{text.skipped}</Text>}
-              {isCurrent && <Text bold color={BRAND.amber}>· {text.inProgress}</Text>}
-            </Box>
-          )
-        })}
+            // One small rounded card per lesson: the current one is filled with the logo's indigo
+            // and its text takes the logo's amber; finished ones carry a green tick.
+            return (
+              <Box
+                flexDirection="row"
+                gap={1}
+                paddingX={1}
+                borderStyle="round"
+                borderColor={isCurrent ? BRAND.indigo : BRAND.border}
+                borderDimColor={!isCurrent}
+                backgroundColor={isCurrent ? BRAND.indigo : undefined}
+              >
+                <Text bold color={isCurrent ? BRAND.amber : l.status === 'done' ? BRAND.success : undefined} dimColor={l.status === 'todo' || l.status === 'skipped'}>
+                  {mark(l.status)}
+                </Text>
+                <Text bold={isCurrent} color={isCurrent ? BRAND.amber : undefined} dimColor={faded}>
+                  {l.title}
+                </Text>
+                {l.status === 'skipped' && <Text dimColor>{text.skipped}</Text>}
+                {isCurrent && <Text bold color={BRAND.amber}>· {text.inProgress}</Text>}
+              </Box>
+            )
+          })}
+        </Box>
         {v.current && v.current.ideas.length > 0 && <Text> </Text>}
         {v.current && v.current.ideas.length > 0 && <Text bold>{text.keyIdeas}</Text>}
         {v.current?.ideas.map((idea, i) => (
