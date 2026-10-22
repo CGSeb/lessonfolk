@@ -37,8 +37,10 @@ prerequisites:
   native tool calling, point them to the JSON fallback of idea 5 rather than spending the
   lesson on setup.
 - When you show an example, follow the common chat-completions format for tools (`tools`,
-  `tool_calls`, `role: "tool"` with `tool_call_id`). If the learner's API differs, say so;
-  the concept is identical.
+  `tool_calls`, `role: "tool"` with `tool_call_id`). It is widely copied by other providers
+  and local servers, which is why it is used here. Some providers now recommend a newer
+  interface for new projects (OpenAI recommends its Responses API, which uses different item
+  names). If the learner's API differs, say so; the concept is identical.
 - Analogy that works: **a manager and an assistant**. The manager (the model) says "please
   check the stock of blue mugs"; the assistant (your code) goes to the warehouse and reports
   back. The manager never touches the shelves.

@@ -19,7 +19,8 @@ prerequisites:
 2. **Commandes : un prompt enregistré que vous appelez par son nom.** La plupart des outils permettent
    d’enregistrer un prompt dans un fichier du dépôt et de le lancer comme commande slash
    (`/release-notes`) ou fichier de prompt, souvent avec des arguments. Toute l’équipe lance alors le même
-   prompt relu au lieu de retaper sa propre version.
+   prompt relu au lieu de retaper sa propre version. Certains outils intègrent les commandes aux skills :
+   les deux tendent à se rejoindre.
 3. **Skills : des instructions que l’assistant récupère quand elles sont pertinentes.** Un **skill** est
    un dossier avec un fichier `SKILL.md` (un nom, une description d’une ligne, puis des instructions) et
    éventuellement des scripts ou des modèles. Seule la description reste dans le contexte ; l’assistant lit
@@ -54,8 +55,8 @@ prerequisites:
 
   | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI |
   |---|---|---|---|---|---|
-  | Prompts enregistrés | commandes slash (intégrées aux skills) | prompts personnalisés | `.github/prompts/*.prompt.md` | `.cursor/commands/` | `.gemini/commands/*.toml` |
-  | Skills (`SKILL.md`) | `.claude/skills/` | pris en charge | pris en charge | voir la doc | voir la doc |
+  | Prompts enregistrés | commandes slash (intégrées aux skills) | remplacés par les skills (les prompts personnalisés ont été supprimés en 2026) | `.github/prompts/*.prompt.md` | `.cursor/commands/`, désormais converties en skills par `/migrate-to-skills` | `.gemini/commands/*.toml` |
+  | Skills (`SKILL.md`) | `.claude/skills/` | pris en charge | pris en charge | pris en charge (`.cursor/skills/`) | voir la doc |
   | Sous-agents | `.claude/agents/` | voir la doc | agents personnalisés (`.github/agents/`) | voir la doc | voir la doc |
   | Lots | plugins et marketplaces | voir la doc | voir la doc | voir la doc | extensions |
   | Serveurs MCP | oui | oui | oui | oui | oui |

@@ -19,8 +19,8 @@ prerequisites:
    tool (act), and reads the result (observe). Asking it in the system prompt to state a short
    plan before acting often makes its choices more sensible and easier for you to follow.
 3. **The history is the agent's memory.** Every tool call and result is added to the
-   messages, so the model can see what it has already tried. This is the history from Build
-   with AI, growing faster: long tasks need trimming or summaries, and cost more.
+   messages, so the model can see what it has already tried. This is the history from How AI
+   Apps Work, growing faster: long tasks need trimming or summaries, and cost more.
 4. **Always set a step limit.** A model can loop: calling the same tool again and again or
    never deciding it is done. A maximum number of steps (and ideally a time or token budget)
    guarantees the loop ends, with a clear message when it hits the limit.

@@ -19,8 +19,8 @@ prerequisites:
    un outil (agir) et lit le résultat (observer). Lui demander dans le prompt système d’énoncer un court
    plan avant d’agir rend souvent ses choix plus sensés et plus faciles à suivre pour vous.
 3. **L’historique est la mémoire de l’agent.** Chaque appel d’outil et chaque résultat sont ajoutés aux
-   messages, si bien que le modèle voit ce qu’il a déjà essayé. C’est l’historique de Construire avec
-   l’IA, qui grossit plus vite : les longues tâches demandent de la réduction ou des résumés, et coûtent plus
+   messages, si bien que le modèle voit ce qu’il a déjà essayé. C’est l’historique de Comment
+   fonctionnent les applications d’IA, qui grossit plus vite : les longues tâches demandent de la réduction ou des résumés, et coûtent plus
    cher.
 4. **Fixez toujours une limite d’étapes.** Un modèle peut tourner en rond : appeler le même outil encore
    et encore ou ne jamais décider qu’il a fini. Un nombre maximal d’étapes (et idéalement un budget de

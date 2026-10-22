@@ -47,7 +47,7 @@ prerequisites:
   | OpenAI Codex | nested `AGENTS.md` (closest to the edited file wins) | native |
   | GitHub Copilot | `.github/instructions/*.instructions.md` with `applyTo` patterns | reads `AGENTS.md` |
   | Cursor | `.cursor/rules/` files with glob patterns or "always apply" | reads `AGENTS.md` |
-  | Gemini CLI | `GEMINI.md` in sub-folders | `contextFileName` setting can point to `AGENTS.md` |
+  | Gemini CLI (work accounts and API keys only) | `GEMINI.md` in sub-folders | `contextFileName` setting can point to `AGENTS.md` |
 
 - Misconception: "a symbolic link solves everything". It works, but symlinks behave badly on
   some systems (Windows checkouts in particular); an import line or a setting is often more
