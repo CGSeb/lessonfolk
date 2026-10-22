@@ -48,7 +48,7 @@ prerequisites:
   | OpenAI Codex | `AGENTS.md` imbriqués (le plus proche du fichier modifié l’emporte) | natif |
   | GitHub Copilot | `.github/instructions/*.instructions.md` avec motifs `applyTo` | lit `AGENTS.md` |
   | Cursor | fichiers `.cursor/rules/` avec motifs glob ou « toujours appliquer » | lit `AGENTS.md` |
-  | Gemini CLI | `GEMINI.md` dans des sous-dossiers | le réglage `contextFileName` peut pointer vers `AGENTS.md` |
+  | Gemini CLI (comptes professionnels et clés d’API uniquement) | `GEMINI.md` dans des sous-dossiers | le réglage `contextFileName` peut pointer vers `AGENTS.md` |
 
 - Idée reçue : « un lien symbolique règle tout ». Cela marche, mais les liens symboliques se comportent mal
   sur certains systèmes (surtout les copies de travail sous Windows) ; une ligne d’import ou un réglage est

@@ -16,6 +16,8 @@ prerequisites:
    Before the final answer, it produces a long stretch of intermediate text (planning,
    trying approaches, checking itself). That text is generated token by token like any
    other, and it gives the model room to work in steps instead of jumping to an answer.
+   Most products do not show you this text as it was written: they show a summary of it, or
+   nothing.
 2. **Why writing steps helps.** Each token is produced with a fixed amount of computing.
    A hard problem cannot be solved in a single token, but it can be solved across
    hundreds, each building on the previous ones. This is why asking a standard model to
@@ -28,9 +30,9 @@ prerequisites:
    counts toward the cost. A quick lookup or a short email gains almost nothing from it.
    Multi-step maths, tricky code, planning with constraints and careful analysis gain
    the most.
-5. **Visible reasoning is a tool, not proof.** The displayed steps can be useful to read
-   and to check, but they are not a guaranteed record of how the model really reached the
-   answer, and a reasoning model can still reach a wrong answer with convincing steps.
+5. **Visible reasoning is a tool, not proof.** Any displayed steps (usually a summary of the
+   model's work, not the raw text) can be useful to read and to check, but they are not a
+   guaranteed record of how the model really reached the answer, and a reasoning model can still reach a wrong answer with convincing steps.
    Check the result, especially when stakes are high.
 6. **Often you can choose the effort.** Many tools let you pick how much to think, or
    switch it on only for hard questions. Match effort to difficulty.
@@ -44,7 +46,8 @@ prerequisites:
   multi-step problems, and costlier and slower on simple ones; for creative or casual
   writing the gain is small.
 - Misconception: "I can read its thoughts, so I know why it said that". Present
-  idea 5 calmly: the steps are helpful, not a window into a mind.
+  idea 5 calmly: the steps are helpful, not a window into a mind. Many assistants show only a
+  summary of the thinking, or hide it; do not promise the learner they can read all of it.
 - Do not name specific models, versions, benchmarks or prices.
 - Beginners: focus on ideas 1, 4 and a simple rule of thumb ("use it for hard,
   multi-step tasks"). Advanced learners: discuss training on checkable answers and
