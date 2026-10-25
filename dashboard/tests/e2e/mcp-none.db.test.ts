@@ -61,7 +61,7 @@ describe('MCP with LESSONFOLK_AUTH=none, no token', () => {
 
     const client = await connectMcp(server.url);
     try {
-      await callJson(client, 'complete_lesson', { lessonId: 'ai-foundations/01-what-is-ai', score: 0.9, notes: 'Easy.' });
+      await callJson(client, 'record_check', { lessonId: 'ai-foundations/01-what-is-ai', question: 1, verdict: 'correct' });
     } finally {
       await client.close();
     }

@@ -50,6 +50,8 @@ describe('progress saved during a tutoring session', () => {
   });
 
   it('shows the completed lesson and lesson 2 next', async () => {
+    // The tutor records a verdict on each of the lesson's checks before completing it.
+    for (const question of [1, 2, 3]) await store.recordCheck(LOCAL, 'ai-foundations/01-what-is-ai', question, 'correct', options);
     await store.completeLesson(LOCAL, 'ai-foundations/01-what-is-ai', { score: 0.75, notes: 'Liked the spam filter example.' }, options);
 
     const home = await getPage(server, '/');

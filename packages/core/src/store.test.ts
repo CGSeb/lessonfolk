@@ -87,6 +87,22 @@ describe('parseImportedProgress', () => {
     expect(parseImportedProgress({ profile: { name: 'A' } }).profile).toEqual({ name: 'A' });
   });
 
+  it('accepts lessons with check verdicts, and older ones without', () => {
+    const lessons = {
+      'basics/01-a': { status: 'done', score: 0.9, notes: 'Old.' },
+      'basics/02-b': { status: 'in_progress', checks: { '1': 'correct', '2': 'partial' } },
+    };
+    expect(parseImportedProgress({ lessons }).lessons).toEqual(lessons);
+  });
+
+  it('rejects unknown check verdicts or question numbers', () => {
+    for (const checks of [{ '1': 'great' }, { '0': 'correct' }, { one: 'correct' }, ['correct']]) {
+      expect(codeOf(() => parseImportedProgress({ lessons: { 'basics/01-a': { status: 'in_progress', checks } } })), JSON.stringify(checks)).toBe(
+        'invalid_progress',
+      );
+    }
+  });
+
   it('rejects invalid JSON, shapes and versions', () => {
     expect(codeOf(() => parseImportedProgress('{'))).toBe('invalid_progress');
     expect(codeOf(() => parseImportedProgress({ lessons: { x: { status: 'nope' } } }))).toBe('invalid_progress');

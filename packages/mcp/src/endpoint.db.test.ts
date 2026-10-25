@@ -92,6 +92,7 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
         'level_check_skip_course',
         'list_courses',
         'list_themes',
+        'record_check',
         'record_review_score',
         'reset_course',
         'save_lesson_notes',
@@ -134,6 +135,8 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     expect(next).toMatchObject({ kind: 'next', lessonId: L1, courseId: 'ai-foundations', status: 'not_started' });
     // A chat that only gets the tools (no skill, no server instructions) is told which calls save progress.
     expect(next.nextStep).toContain(`start_lesson("${L1}")`);
+    expect(next.nextStep).toContain(`record_check("${L1}"`);
+    expect(next.nextStep).toContain('3 "Check your understanding" questions one at a time');
     expect(next.nextStep).toContain(`complete_lesson("${L1}"`);
 
     const started = progressOf(await call(client, 'start_lesson', { lessonId: L1 }));
@@ -142,7 +145,8 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
 
     const lesson = text(await call(client, 'get_lesson', { lessonId: L1 }));
     expect(lesson).toContain('learner status: in_progress');
-    expect(lesson).toContain('complete_lesson as soon as');
+    expect(lesson).toContain('3 "Check your understanding" questions; no verdict recorded yet; next to ask: question 1');
+    expect(lesson).toContain('complete_lesson once every check has a verdict');
     expect(lesson).toContain('never give the answer');
     expect(lesson).toContain('## Teaching notes');
     // No French translation in the fixture: the English lesson, saying so.
@@ -151,8 +155,32 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     const notes = progressOf(await call(client, 'save_lesson_notes', { lessonId: L1, notes: 'Stopped after key idea 2.' }));
     expect(notes.lessons[L1].notes).toBe('Stopped after key idea 2.');
 
+    // The topics were covered, but no check was asked: the lesson cannot be completed.
+    const early = await call(client, 'complete_lesson', { lessonId: L1, score: 0.7, notes: 'Covered the topics.' });
+    expect(early.isError).toBe(true);
+    expect(text(early)).toContain('(checks_incomplete)');
+    expect(text(early)).toContain('Questions with no recorded verdict: 1, 2, 3.');
+
+    // One question at a time, in order: question 2 before question 1 is refused.
+    const skippedAhead = await call(client, 'record_check', { lessonId: L1, question: 2, verdict: 'correct' });
+    expect(skippedAhead.isError).toBe(true);
+    expect(text(skippedAhead)).toContain('(checks_out_of_order)');
+
+    const first = await call(client, 'record_check', { lessonId: L1, question: 1, verdict: 'partial' });
+    expect(first.isError, text(first)).toBeFalsy();
+    expect(text(first)).toContain('Check 1 of ai-foundations/01-what-is-ai recorded: partial. Next: question 2');
+    expect(text(first)).toContain('ask it again and record the new verdict');
+    expect(progressOf(await call(client, 'record_check', { lessonId: L1, question: 2, verdict: 'correct' })).lessons[L1].checks).toEqual({
+      '1': 'partial',
+      '2': 'correct',
+    });
+    expect(text(await call(client, 'get_lesson', { lessonId: L1 }))).toContain('verdicts recorded: 1 partial, 2 correct; next to ask: question 3');
+    expect(text(await call(client, 'complete_lesson', { lessonId: L1, score: 0.7, notes: 'x' }))).toContain('Questions with no recorded verdict: 3.');
+    const last = await call(client, 'record_check', { lessonId: L1, question: 3, verdict: 'correct' });
+    expect(text(last)).toContain('Every question has a verdict');
+
     const done = progressOf(await call(client, 'complete_lesson', { lessonId: L1, score: 0.7, notes: 'Easy analogies, unsure about narrow AI.' }));
-    expect(done.lessons[L1]).toMatchObject({ status: 'done', score: 0.7 });
+    expect(done.lessons[L1]).toMatchObject({ status: 'done', score: 0.7, checks: { '1': 'partial', '2': 'correct', '3': 'correct' } });
     expect(done.current ?? null).toBeNull();
 
     const reviewed = progressOf(await call(client, 'record_review_score', { lessonId: L1, score: 0.9 }));
@@ -184,6 +212,7 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     for (const id of [L1, L2, L3]) expect(reset.lessons[id]).toBeUndefined();
 
     await call(client, 'start_lesson', { lessonId: L1 });
+    for (const question of [1, 2, 3]) await call(client, 'record_check', { lessonId: L1, question, verdict: 'correct' });
     await call(client, 'complete_lesson', { lessonId: L1, score: 0.8, notes: 'Clear.' });
     const saved = JSON.parse(text(await call(client, 'get_progress')));
 
@@ -317,6 +346,7 @@ describe('users are kept apart', () => {
     const bob = await connect(await addUser('bob2'));
     await call(alice, 'set_profile', { name: 'Alice', level: 'beginner' });
     await call(alice, 'start_lesson', { lessonId: L1 });
+    for (const question of [1, 2, 3]) await call(alice, 'record_check', { lessonId: L1, question, verdict: 'correct' });
     await call(alice, 'complete_lesson', { lessonId: L1, score: 0.9, notes: 'alice private note' });
     await call(alice, 'start_lesson', { lessonId: L2 });
     const before = JSON.parse(text(await call(alice, 'get_progress')));
@@ -330,6 +360,7 @@ describe('users are kept apart', () => {
       ['set_profile', { name: 'Bob' }],
       ['start_lesson', { lessonId: L1 }],
       ['save_lesson_notes', { lessonId: L1, notes: 'bob note' }],
+      ['record_check', { lessonId: L1, question: 1, verdict: 'incorrect' }],
       ['complete_lesson', { lessonId: L1, score: 0.1, notes: 'bob done' }],
       ['record_review_score', { lessonId: L1, score: 1 }],
       ['skip_lesson', { lessonId: L2, reason: 'bob skips' }],

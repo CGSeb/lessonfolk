@@ -1,10 +1,12 @@
 import { levelSchema, type Level } from './schemas.ts';
 import {
+  type CheckVerdict,
   type CourseRef,
   type LessonProgress,
   type NextLesson,
   type Progress,
   PLACEMENT_NOTE,
+  checkVerdictSchema,
   emptyProgress,
   getLessonStatus,
   getLevel,
@@ -55,7 +57,15 @@ export type TutorErrorCode =
   /** The path breaks the path rules (listed in `issues`). */
   | 'invalid_path'
   /** None of the course's lessons has an entry in the progress: nothing to reset. */
-  | 'nothing_to_reset';
+  | 'nothing_to_reset'
+  /** A check is recorded on a lesson that is not in progress (start it first). */
+  | 'not_in_progress'
+  /** Not a question number of the lesson, or not a known verdict. */
+  | 'invalid_check'
+  /** A check is recorded before the questions that come before it (listed in `missingChecks`). */
+  | 'checks_out_of_order'
+  /** The lesson is completed before every check has a verdict (listed in `missingChecks`). */
+  | 'checks_incomplete';
 
 export interface TutorError {
   code: TutorErrorCode;
@@ -67,6 +77,8 @@ export interface TutorError {
   missing?: string[];
   /** For `invalid_path`: every problem found. */
   issues?: PathIssue[];
+  /** For `checks_out_of_order` and `checks_incomplete`: the question numbers with no verdict yet, in order. */
+  missingChecks?: number[];
 }
 
 export type TutorResult = { ok: true; progress: Progress } | { ok: false; error: TutorError };
@@ -366,6 +378,60 @@ export function startLesson<C extends CourseRef>(
   return { ok: true, progress: withLesson(base, lessonId, entry, lessonId) };
 }
 
+/** Question numbers (1 to `count`) of the lesson's checks that have no verdict in `entry`. */
+export function missingChecks(entry: LessonProgress | undefined, count: number): number[] {
+  const missing: number[] = [];
+  for (let question = 1; question <= count; question++) {
+    if (!entry?.checks?.[String(question)]) missing.push(question);
+  }
+  return missing;
+}
+
+/**
+ * Record the verdict on the learner's answer to one "Check your understanding" question
+ * (numbered from 1, in the lesson's order). The questions are asked one at a time, so a
+ * question can only be recorded once every question before it has a verdict; recording one
+ * again (after re-explaining) replaces its verdict. Fails if the lesson is unknown, not in
+ * progress, the question is not one of the lesson's, or questions before it have no verdict.
+ */
+export function recordCheck<C extends CourseRef>(
+  progress: MaybeProgress,
+  courses: readonly C[],
+  lessonId: string,
+  question: number,
+  verdict: CheckVerdict,
+): TutorResult {
+  const base = progress ?? emptyProgress();
+  const found = findLesson(courses, lessonId);
+  if (!found) return fail({ code: 'unknown_lesson', message: `Unknown lesson "${lessonId}".`, lessonId });
+  const entry = base.lessons[lessonId];
+  if (entry?.status === 'done' || entry?.status === 'skipped') {
+    return fail({ code: 'already_finished', message: `Lesson "${lessonId}" is already ${entry.status}.`, lessonId });
+  }
+  if (entry?.status !== 'in_progress') {
+    return fail({ code: 'not_in_progress', message: `Lesson "${lessonId}" has not been started: start it before its checks.`, lessonId });
+  }
+  const count = found.lesson.checks;
+  if (!Number.isInteger(question) || question < 1 || (count !== undefined && question > count)) {
+    const range = count === undefined ? 'a whole number from 1' : `1 to ${count}`;
+    return fail({ code: 'invalid_check', message: `Question must be ${range} (got ${String(question)}).`, lessonId });
+  }
+  if (!checkVerdictSchema.safeParse(verdict).success) {
+    return fail({ code: 'invalid_check', message: `Verdict must be correct, partial or incorrect (got ${String(verdict)}).`, lessonId });
+  }
+  const before = missingChecks(entry, question - 1);
+  if (before.length) {
+    return fail({
+      code: 'checks_out_of_order',
+      message: `Ask the checks one at a time, in order: question ${before.join(', ')} of "${lessonId}" has no verdict yet.`,
+      lessonId,
+      missingChecks: before,
+    });
+  }
+  const next: LessonProgress = { ...entry, checks: { ...entry.checks, [String(question)]: verdict } };
+  return { ok: true, progress: withLesson(base, lessonId, next, base.current) };
+}
+
 export interface CompleteLessonInput extends DateOptions {
   /** Honest estimate from the checks, 0 to 1. */
   score: number;
@@ -376,7 +442,9 @@ export interface CompleteLessonInput extends DateOptions {
 /**
  * Complete a lesson: status `done`, `completedAt`, `score` (0–1) and `notes`; `current` is
  * cleared if it pointed to this lesson. Fails if the lesson is unknown, already finished,
- * its prerequisites are not met, the score is outside 0–1 or the notes are empty.
+ * its prerequisites are not met, one of its checks has no recorded verdict (`recordCheck`;
+ * only for a lesson that gives its `checks` count), the score is outside 0–1 or the notes
+ * are empty. The verdicts are kept on the done lesson for later review.
  */
 export function completeLesson<C extends CourseRef>(
   progress: MaybeProgress,
@@ -394,6 +462,17 @@ export function completeLesson<C extends CourseRef>(
   }
   const notes = input.notes?.trim();
   if (!notes) return fail({ code: 'invalid_notes', message: 'Notes must say what the learner found easy or hard.', lessonId });
+  const unchecked = missingChecks(base.lessons[lessonId], checked.found.lesson.checks ?? 0);
+  if (unchecked.length) {
+    return fail({
+      code: 'checks_incomplete',
+      message:
+        `Lesson "${lessonId}" cannot be completed yet: question ${unchecked.join(', ')} of "Check your understanding" ` +
+        'has no recorded verdict. Ask each one alone, judge the answer and give feedback, record it, then complete the lesson.',
+      lessonId,
+      missingChecks: unchecked,
+    });
+  }
 
   const entry: LessonProgress = {
     ...base.lessons[lessonId],

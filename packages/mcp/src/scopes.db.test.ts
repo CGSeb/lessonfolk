@@ -74,6 +74,7 @@ const WRITE_TOOLS: [string, Record<string, unknown>][] = [
   ['set_profile', { level: 'beginner' }],
   ['set_path', { path: ['ai-foundations'], reason: 'Start here.' }],
   ['start_lesson', { lessonId: L1 }],
+  ['record_check', { lessonId: L1, question: 1, verdict: 'correct' }],
   ['complete_lesson', { lessonId: L1, score: 1, notes: 'Fine.' }],
   ['skip_lesson', { lessonId: L1, reason: 'Known.' }],
   ['level_check_skip_course', { courseId: 'ai-foundations' }],

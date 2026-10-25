@@ -11,6 +11,7 @@ const WRITE_TOOLS = [
   'set_profile',
   'set_path',
   'start_lesson',
+  'record_check',
   'complete_lesson',
   'skip_lesson',
   'level_check_skip_course',
@@ -19,8 +20,8 @@ const WRITE_TOOLS = [
   'record_review_score',
   'import_progress',
 ];
-/** They replace or remove what was saved (a profile field, the notes, the path, a score, a course, everything). */
-const DESTRUCTIVE_TOOLS = ['reset_course', 'import_progress', 'set_profile', 'save_lesson_notes', 'set_path', 'record_review_score'];
+/** They replace or remove what was saved (a profile field, the notes, the path, a score, a check verdict, a course, everything). */
+const DESTRUCTIVE_TOOLS = ['reset_course', 'import_progress', 'set_profile', 'save_lesson_notes', 'set_path', 'record_review_score', 'record_check'];
 
 const clients: Client[] = [];
 afterAll(() => Promise.all(clients.map((c) => c.close().catch(() => {}))));

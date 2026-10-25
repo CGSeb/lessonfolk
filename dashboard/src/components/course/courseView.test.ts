@@ -12,6 +12,7 @@ const lesson = (id: string, prerequisites: string[] = []): Lesson => ({
   prerequisites,
   file: `/courses/en/${id}.md`,
   lang: 'en',
+  checks: 2,
 });
 
 const course = (id: string, lessonIds: string[], prerequisites: string[] = []): Course => ({
