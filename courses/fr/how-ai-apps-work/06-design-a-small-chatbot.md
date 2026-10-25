@@ -59,4 +59,4 @@ système, comment il garde l’historique, comment il gère les erreurs, les typ
 tester et une fonctionnalité à ajouter.
 
 ## Going further
-- Leçon suivante : partager une application d’IA en toute sécurité, et la suite.
+- Leçon suivante : partager une application d’IA en toute sécurité. Ce n’est pas la dernière leçon : ne concluez pas le cours ici.

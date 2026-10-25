@@ -57,4 +57,4 @@ its system prompt, how it keeps the history, how it handles errors, the kinds of
 test it with, and one feature to add.
 
 ## Going further
-- Next lesson: sharing an AI app safely, and where to go next.
+- Next lesson: sharing an AI app safely. This is not the last lesson: do not wrap up the course here.

@@ -20,7 +20,7 @@ import {
 import { describeErrorForLog } from '@lessonfolk/db';
 import { McpServer, ResourceTemplate, type CallToolResult } from '@modelcontextprotocol/server';
 import { z } from 'zod';
-import { DEFAULT_LANG, courseSummary, findLesson, learnerLang, lessonStatus, readCatalog, readLessonText } from './catalog.ts';
+import { DEFAULT_LANG, courseSummary, findLesson, learnerLang, lessonPosition, lessonStatus, readCatalog, readLessonText } from './catalog.ts';
 import { compactProgress, progressReceipt } from './progress-view.ts';
 import { INSTRUCTIONS, registerPrompts } from './prompts.ts';
 import type { RateLimiter } from './rate-limit.ts';
@@ -170,7 +170,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       description:
         'The lesson to teach now, by the LessonFolk rules: the current lesson if unfinished ("resume"), otherwise the first unfinished lesson ' +
         'whose prerequisites are done or skipped, following the learner\'s path first ("next"). "all_done" means every lesson is finished; ' +
-        '"blocked" means none is available. unknownPathIds lists path courses that no longer exist. ' +
+        '"blocked" means none is available. lessonNumber, totalLessons and isLastLesson give the place of the lesson in its course. unknownPathIds lists path courses that no longer exist. ' +
         'Does not change anything; start_lesson begins the lesson. The answer ends with nextStep: the calls that save the learner\'s progress around this lesson.',
       inputSchema: z.object({}),
       annotations: { ...readOnly, title: 'Get next lesson' },
@@ -189,6 +189,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
           courseId: next.course.id,
           courseTitle: next.course.title,
           status: lessonStatus(progress, next.lesson.id),
+          ...lessonPosition(next.course, next.lesson),
           unknownPathIds: next.unknownPathIds,
           nextStep:
             (next.kind === 'next' ? `Call start_lesson("${next.lesson.id}") now, then get_lesson to read it. ` : 'Call get_lesson to read it, and teach from where the notes say it stopped. ') +
@@ -222,7 +223,9 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
           `${found.lesson.checks} "Check your understanding" questions; ` +
           (recorded.length ? `verdicts recorded: ${recorded.join(', ')}` : 'no verdict recorded yet') +
           (unchecked.length ? `; next to ask: question ${unchecked[0]}` : '');
-        const header = `<!-- LessonFolk: lesson ${found.lesson.id} of course "${found.course.title}" (${found.course.id}), language ${found.lesson.lang}${found.lesson.lang === catalog.lang ? '' : ` (not translated into "${catalog.lang}" yet)`}; learner status: ${lessonStatus(progress, id)}; ${checks}. Progress is saved only by the write tools: start_lesson before teaching a lesson that is not started; record_check after each check; complete_lesson once every check has a verdict and the completion criteria are met (it is refused before). Teach the key ideas first. Then ask each question of "Check your understanding" alone, in order, and wait for the learner's own answer: never give the answer, a list of answers to pick from or suggested replies, and never show the "Good answer" hints. Judge the answer against its hint, give your feedback, call record_check, and only then ask the next question -->`;
+        const position = lessonPosition(found.course, found.lesson);
+        const where = `lesson ${position.lessonNumber} of ${position.totalLessons}${position.isLastLesson ? ', the last lesson of the course' : ', not the last lesson of the course'}`;
+        const header = `<!-- LessonFolk: lesson ${found.lesson.id} (${where}) of course "${found.course.title}" (${found.course.id}), language ${found.lesson.lang}${found.lesson.lang === catalog.lang ? '' : ` (not translated into "${catalog.lang}" yet)`}; learner status: ${lessonStatus(progress, id)}; ${checks}. Progress is saved only by the write tools: start_lesson before teaching a lesson that is not started; record_check after each check; complete_lesson once every check has a verdict and the completion criteria are met (it is refused before). Teach the key ideas first. Then ask each question of "Check your understanding" alone, in order, and wait for the learner's own answer: never give the answer, a list of answers to pick from or suggested replies, and never show the "Good answer" hints. Judge the answer against its hint, give your feedback, call record_check, and only then ask the next question -->`;
         return `${header}\n${readLessonText(found.lesson)}`;
       }),
   );

@@ -48,6 +48,13 @@ export function findLesson(catalog: Catalog, lessonId: string): { course: Course
   return undefined;
 }
 
+/** Where a lesson stands in its course, so the tutor never has to guess whether it is the last one. */
+export function lessonPosition(course: Course, lesson: Lesson): { lessonNumber: number; totalLessons: number; isLastLesson: boolean } {
+  const totalLessons = course.lessons.length;
+  const lessonNumber = course.lessons.findIndex((l) => l.id === lesson.id) + 1;
+  return { lessonNumber, totalLessons, isLastLesson: lessonNumber === totalLessons };
+}
+
 export type LearnerStatus = 'not_started' | 'in_progress' | 'done' | 'skipped' | 'skipped_after_level_check';
 
 export function lessonStatus(progress: Progress, lessonId: string): LearnerStatus {

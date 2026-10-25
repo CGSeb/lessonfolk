@@ -137,7 +137,7 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     expect(path).toMatchObject({ path: ['ai-foundations'], pathReason: 'Start with the basics.' });
 
     const next = JSON.parse(text(await call(client, 'get_next_lesson')));
-    expect(next).toMatchObject({ kind: 'next', lessonId: L1, courseId: 'ai-foundations', status: 'not_started' });
+    expect(next).toMatchObject({ kind: 'next', lessonId: L1, courseId: 'ai-foundations', status: 'not_started', lessonNumber: 1, totalLessons: 3, isLastLesson: false });
     // A chat that only gets the tools (no skill, no server instructions) is told which calls save progress.
     expect(next.nextStep).toContain(`start_lesson("${L1}")`);
     expect(next.nextStep).toContain(`record_check("${L1}"`);
