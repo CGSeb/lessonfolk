@@ -198,10 +198,10 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
                     )}
                   </p>
                   {row.notes && (
-                    <div class="lesson__notes stack" style="--stack-space: var(--space-1)">
-                      <p class="lesson__notes-label">{t('course.tutorNotes')}</p>
-                      <p>{row.notes}</p>
-                    </div>
+                    <details class="lesson__notes">
+                      <summary class="lesson__notes-label">{t('course.tutorNotes')}</summary>
+                      <p class="lesson__notes-body">{row.notes}</p>
+                    </details>
                   )}
                   {row.isNext && <SayPhrase instruction={t('course.continueHint')} phrase={t('course.continuePhrase')} />}
                 </li>
@@ -361,7 +361,12 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
     background: var(--color-surface-sunken);
   }
 
+  .lesson__notes-body {
+    margin-top: var(--space-2);
+  }
+
   .lesson__notes-label {
+    cursor: pointer;
     color: var(--color-text-muted);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
