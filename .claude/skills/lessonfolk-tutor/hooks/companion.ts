@@ -19,7 +19,7 @@ type Progress = {
   profile?: { level?: string; language?: string }
   path?: string[]
   current?: string | null
-  lessons?: Record<string, { status?: string }>
+  lessons?: Record<string, { status?: string; completedAt?: string }>
 }
 
 type CourseSummary = {
@@ -93,9 +93,28 @@ export const load = async (call: Caller, picked?: Lang): Promise<Loaded> => {
 
   // The first unfinished lesson whose prerequisites are finished; `current` counts as finished.
   const done = (id: string) => isFinished(statuses[id]) || id === progress.current
-  const next = order
-    .flatMap(id => byId.get(id)?.lessons ?? [])
-    .find(lesson => !done(lesson.id) && (lesson.prerequisites ?? []).every(done))?.id
+  const eligible = (lessons: CourseSummary['lessons']) =>
+    lessons.find(lesson => !done(lesson.id) && (lesson.prerequisites ?? []).every(done))?.id
+
+  // Like the server, stay in the partly finished course whose last lesson was done most
+  // recently (even outside the path), before walking the path and the catalog.
+  let started: CourseSummary | undefined
+  let startedAt = ''
+  for (const course of order.map(id => byId.get(id))) {
+    if (!course) continue
+    const finished = course.lessons.filter(lesson => isFinished(statuses[lesson.id]))
+    if (!finished.length || finished.length === course.lessons.length) continue
+    const latest = finished
+      .map(lesson => (statuses[lesson.id] === 'done' ? progress.lessons?.[lesson.id]?.completedAt : undefined) ?? '')
+      .reduce((a, b) => (b > a ? b : a), '')
+    if (latest > startedAt) {
+      started = course
+      startedAt = latest
+    }
+  }
+
+  const next = (started && eligible(started.lessons)) ??
+    eligible(order.flatMap(id => byId.get(id)?.lessons ?? []))
 
   const current = progress.current && statuses[progress.current] !== undefined &&
     !isFinished(statuses[progress.current])

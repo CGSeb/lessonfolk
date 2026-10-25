@@ -88,6 +88,27 @@ describe('load', () => {
     expect(view.next?.id).toBe('basics/01-one')
   })
 
+  test('the course just worked on comes before an untouched earlier course', async () => {
+    const course = (id: string, ids: string[]) => ({
+      id,
+      title: id,
+      lessons: ids.map(lesson => ({ id: lesson, title: lesson, prerequisites: [] as string[] })),
+    })
+    const call: Caller = async tool =>
+      tool === 'get_progress'
+        ? JSON.stringify({
+            profile: { level: 'beginner' },
+            current: null,
+            lessons: { 'b/1': { status: 'done', completedAt: '2026-10-25' } },
+          })
+        : tool === 'list_courses'
+          ? JSON.stringify([course('a', ['a/1']), course('b', ['b/1', 'b/2'])])
+          : undefined
+    const { view } = await load(call)
+    expect(view.courseTitle).toBe('b')
+    expect(view.next?.id).toBe('b/2')
+  })
+
   test('lessons skipped after the level check count as finished', async () => {
     const { view } = await load(caller(progress(null, {
       'basics/01-one': 'skipped_after_level_check',
