@@ -60,5 +60,5 @@ L’apprenant répond correctement aux vérifications et produit un modèle réu
 tâche qu’il fait réellement.
 
 ## Going further
-- Leçon suivante : tout rassembler dans votre propre routine d’IA.
+- Leçon suivante : tout rassembler dans votre propre routine d’IA. C’est la dernière leçon ; celle-ci ne l’est pas, ne concluez pas le cours ici.
 - Comment fonctionnent les applications d’IA, pour des automatisations qui relient des outils par le code.

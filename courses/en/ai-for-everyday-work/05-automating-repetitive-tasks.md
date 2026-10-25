@@ -56,5 +56,5 @@ The learner answers the checks correctly and produces one reusable template with
 task they really do.
 
 ## Going further
-- Next lesson: putting it all together into your own AI routine.
+- Next lesson: putting it all together into your own AI routine. That one is the last lesson; this one is not, so do not wrap up the course here.
 - How AI Apps Work, for automations that connect tools using code.

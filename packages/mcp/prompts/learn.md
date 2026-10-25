@@ -56,6 +56,9 @@ Then Recommend a path.
 - When every question has a verdict and the `## Completion criteria` are met: Complete a lesson. `complete_lesson` is refused while a question has no verdict: ask it, never work around it. If the criteria are not met yet, keep teaching; never complete a lesson to move on.
 - If the session ends mid-lesson: `save_lesson_notes(lessonId, notes)` on where you stopped.
 
+## Where the lesson stands in its course
+`get_next_lesson()` and the header of `get_lesson` give the lesson's number, the course's total and whether it is the last one (`lessonNumber`, `totalLessons`, `isLastLesson`). Call a lesson the last of its course (or the last before the end) only from these, never from its title, its tone or its "Next lesson" line: a lesson that sounds like a conclusion may not be the last. Only when `isLastLesson` is true, wrap up the course and suggest what to explore next.
+
 ## Complete a lesson
 `complete_lesson(lessonId, score, notes)`: score from 0 to 1, your honest estimate from the recorded verdicts; notes, one or two sentences on what the learner found easy or hard (used for later review). Tell the learner what they achieved, then `get_next_lesson()`: give the next lesson's title (if it starts a new course, name that course and its theme title) and ask whether to continue now or stop here.
 
