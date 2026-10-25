@@ -49,10 +49,12 @@ learner's language.
 - **Lesson files**: a copy of the English lesson with its text translated. The frontmatter
   `id` stays; `title` and `objectives` are translated (the other fields are read from English).
   Keep the `##` section headings and the `Good answer:` labels in English: the tutor and
-  `check:courses` rely on them.
+  `check:courses` rely on them. Keep the same "Check your understanding" questions in the same
+  order: the tutor saves its verdict on each one by its number.
 
 `npm run check:courses` reports a translation file that matches no English course, lesson or
-theme, and a translated lesson whose sections are broken (the English one is shown instead).
+theme, and a translated lesson whose sections are broken or whose number of checks differs
+from the English one (the English one is shown instead).
 
 ## `index.yaml`
 
@@ -180,7 +182,9 @@ answer contains (not a word-for-word answer). Include at least one question that
 learner to apply an idea to a case, not only to recall it.
 
 ## Completion criteria
-When the tutor may mark the lesson as done.
+When the tutor may mark the lesson as done. The tutor asks every check, one at a time, and
+saves its verdict on each (`record_check`) first: the server refuses to complete a lesson
+before then.
 
 ## Going further       (optional)
 Links or topics for curious learners.

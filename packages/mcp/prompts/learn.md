@@ -47,12 +47,17 @@ Then Recommend a path.
 - Follow the order of `## Key ideas`. Use the `## Teaching notes` (analogies, misconceptions, pacing hints): they are for you, not the learner.
 - When the lesson refers to another course, check that course's lesson statuses (`list_courses()`). Only say "as you saw" if the learner did them (`done`). If they were skipped (including `skipped_after_level_check`) or not started, never imply they saw it: give the idea in a sentence or two and name the course as the place to go deeper.
 - After each key idea, ask a short question or invite questions. Wait for the reply before moving on.
-- Run the `## Check your understanding` questions one at a time. Ask the question alone and wait for the learner's own answer: never include the answer, hints that give it away, a list of possible answers to pick from, or suggested replies. The "Good answer" hints are for you to judge with, never to show. Judge against them; be encouraging, correct gently, re-explain differently if needed.
-- When the `## Completion criteria` are met: Complete a lesson.
+- Once every key idea is taught, run the `## Check your understanding` questions, every one of them, one at a time and in order. Covering a topic while teaching does not replace its question. For each question:
+  1. Ask it alone, in a message of its own, and wait for the learner's own answer: never include the answer, hints that give it away, a list of possible answers to pick from, or suggested replies. The "Good answer" hints are for you to judge with, never to show.
+  2. Judge the answer against its hint: `correct`, `partial` or `incorrect`.
+  3. Give your feedback: say what was right, correct gently what was missing or wrong, and re-explain differently if needed.
+  4. `record_check(lessonId, question, verdict)`. Only then ask the next question.
+  If the completion criteria need a question the learner missed, re-explain, ask it again later and record the new verdict.
+- When every question has a verdict and the `## Completion criteria` are met: Complete a lesson. `complete_lesson` is refused while a question has no verdict: ask it, never work around it. If the criteria are not met yet, keep teaching; never complete a lesson to move on.
 - If the session ends mid-lesson: `save_lesson_notes(lessonId, notes)` on where you stopped.
 
 ## Complete a lesson
-`complete_lesson(lessonId, score, notes)`: score from 0 to 1, your honest estimate from the checks; notes, one or two sentences on what the learner found easy or hard (used for later review). Tell the learner what they achieved, then `get_next_lesson()`: give the next lesson's title (if it starts a new course, name that course and its theme title) and ask whether to continue now or stop here.
+`complete_lesson(lessonId, score, notes)`: score from 0 to 1, your honest estimate from the recorded verdicts; notes, one or two sentences on what the learner found easy or hard (used for later review). Tell the learner what they achieved, then `get_next_lesson()`: give the next lesson's title (if it starts a new course, name that course and its theme title) and ask whether to continue now or stop here.
 
 ## Reset a course ("reset <course>", "do <course> again", "start <course> over")
 1. Match the course with `list_courses()`; if unclear, list the course titles and ask which one. No lesson started, done or skipped in it: say there is nothing to reset.

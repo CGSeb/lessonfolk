@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { type LessonStatus, type Progress, emptyProgress, isPlacementSkip } from './progress.ts';
+import { type CheckVerdict, type LessonStatus, type Progress, emptyProgress, isPlacementSkip } from './progress.ts';
 import type { Level } from './schemas.ts';
 import {
   type TutorCourseRef,
@@ -12,6 +12,7 @@ import {
   nextLesson,
   placementSkip,
   recommendPath,
+  recordCheck,
   resetCourse,
   setPath,
   skipLesson,
@@ -494,6 +495,110 @@ describe('completeLesson', () => {
     okProgress(completeLesson(p, courses, 'basics/01-lesson', done));
     expect(p.lessons['basics/01-lesson'].status).toBe('in_progress');
     expect(p.current).toBe('basics/01-lesson');
+  });
+});
+
+// A lesson with three "Check your understanding" questions, as loaded from its file.
+const checked: Course[] = [{ ...course('checked', 'beginner', 'understanding', 2), lessons: [] }];
+checked[0].lessons = [
+  { id: 'checked/01-lesson', prerequisites: [], checks: 3 },
+  { id: 'checked/02-lesson', prerequisites: ['checked/01-lesson'], checks: 2 },
+];
+const L = 'checked/01-lesson';
+
+describe('recordCheck', () => {
+  const started = () => okProgress(startLesson(null, checked, L, { today: '2026-10-01' }));
+  const record = (p: Progress | null, ...verdicts: CheckVerdict[]) =>
+    verdicts.reduce<Progress>((acc, verdict, i) => okProgress(recordCheck(acc, checked, L, i + 1, verdict)), p ?? started());
+
+  it('saves the verdict of each question, by number, and keeps the lesson in progress', () => {
+    const next = record(null, 'correct', 'partial');
+    expect(next.lessons[L]).toEqual({ status: 'in_progress', startedAt: '2026-10-01', checks: { '1': 'correct', '2': 'partial' } });
+    expect(next.current).toBe(L);
+  });
+
+  it('asks the questions in order: one cannot be recorded before those that come before it', () => {
+    const result = recordCheck(started(), checked, L, 3, 'correct');
+    expect(result).toMatchObject({ ok: false, error: { code: 'checks_out_of_order', missingChecks: [1, 2] } });
+    expect(errorCode(recordCheck(record(null, 'correct'), checked, L, 3, 'correct'))).toBe('checks_out_of_order');
+  });
+
+  it('replaces the verdict of a question asked again', () => {
+    const again = okProgress(recordCheck(record(null, 'incorrect', 'correct'), checked, L, 1, 'correct'));
+    expect(again.lessons[L].checks).toEqual({ '1': 'correct', '2': 'correct' });
+  });
+
+  it('rejects a question the lesson does not have, or an unknown verdict', () => {
+    for (const question of [0, 4, 1.5, -1, Number.NaN]) {
+      expect(errorCode(recordCheck(started(), checked, L, question, 'correct')), String(question)).toBe('invalid_check');
+    }
+    expect(errorCode(recordCheck(started(), checked, L, 1, 'great' as CheckVerdict))).toBe('invalid_check');
+  });
+
+  it('needs a lesson in progress', () => {
+    expect(errorCode(recordCheck(null, checked, 'nope/01-lesson', 1, 'correct'))).toBe('unknown_lesson');
+    expect(errorCode(recordCheck(null, checked, L, 1, 'correct'))).toBe('not_in_progress');
+    expect(errorCode(recordCheck(progressWith({ [L]: 'done' }), checked, L, 1, 'correct'))).toBe('already_finished');
+    expect(errorCode(recordCheck(progressWith({ [L]: 'skipped' }), checked, L, 1, 'correct'))).toBe('already_finished');
+  });
+
+  it('does not mutate its input', () => {
+    const p = frozen(started());
+    record(p, 'correct');
+    expect(p.lessons[L].checks).toBeUndefined();
+  });
+});
+
+describe('completeLesson with checks', () => {
+  const done = { score: 0.8, notes: 'Good on examples.', today: TODAY };
+  const started = () => okProgress(startLesson(null, checked, L, { today: '2026-10-01' }));
+  const record = (p: Progress, ...verdicts: CheckVerdict[]) =>
+    verdicts.reduce((acc, verdict, i) => okProgress(recordCheck(acc, checked, L, i + 1, verdict)), p);
+
+  it('is refused while a question has no verdict (topics covered, checks not run)', () => {
+    expect(completeLesson(started(), checked, L, done)).toMatchObject({
+      ok: false,
+      error: { code: 'checks_incomplete', lessonId: L, missingChecks: [1, 2, 3] },
+    });
+    expect(completeLesson(record(started(), 'correct', 'correct'), checked, L, done)).toMatchObject({
+      ok: false,
+      error: { code: 'checks_incomplete', missingChecks: [3] },
+    });
+  });
+
+  it('is refused for a lesson that was never started', () => {
+    expect(errorCode(completeLesson(null, checked, L, done))).toBe('checks_incomplete');
+  });
+
+  it('completes once every question has a verdict, and keeps the verdicts for review', () => {
+    const next = okProgress(completeLesson(record(started(), 'correct', 'partial', 'correct'), checked, L, done));
+    expect(next.lessons[L]).toEqual({
+      status: 'done',
+      startedAt: '2026-10-01',
+      completedAt: TODAY,
+      score: 0.8,
+      notes: 'Good on examples.',
+      checks: { '1': 'correct', '2': 'partial', '3': 'correct' },
+    });
+    expect(next.current).toBeNull();
+  });
+
+  it('keeps lessons finished before checks were recorded as they are', () => {
+    const before = progressWith({ [L]: 'done' });
+    expect(errorCode(startLesson(before, checked, 'checked/02-lesson'))).toBe('ok');
+    expect(errorCode(completeLesson(before, checked, L, done))).toBe('already_finished');
+  });
+
+  it('asks the checks of a lesson in progress from before, then completes it', () => {
+    // Saved before checks were recorded: in progress, no `checks`.
+    const before = progressWith({ [L]: 'in_progress' }, { current: L });
+    expect(errorCode(completeLesson(before, checked, L, done))).toBe('checks_incomplete');
+    expect(errorCode(completeLesson(record(before, 'correct', 'correct', 'correct'), checked, L, done))).toBe('ok');
+  });
+
+  it('requires no check from a lesson that does not give its number of checks', () => {
+    const p = okProgress(startLesson(null, courses, 'basics/01-lesson'));
+    expect(errorCode(completeLesson(p, courses, 'basics/01-lesson', done))).toBe('ok');
   });
 });
 

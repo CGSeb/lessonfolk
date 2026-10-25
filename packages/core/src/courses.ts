@@ -57,6 +57,8 @@ export interface Lesson {
   file: string;
   /** Language of `file`, title and objectives: the catalog's, or `DEFAULT_LANG` when not translated. */
   lang: string;
+  /** Number of "Check your understanding" questions: the tutor records a verdict on each before completing. */
+  checks: number;
 }
 
 export interface Course {
@@ -364,6 +366,13 @@ function translateCourse(
     for (const message of body.errors) issues.push({ file, message });
     for (const message of body.warnings) warnings.push({ file, message });
     if (body.errors.length) return lesson;
+    if (body.checks !== lesson.checks) {
+      issues.push({
+        file,
+        message: `"## Check your understanding" has ${body.checks} questions, but the ${DEFAULT_LANG} lesson has ${lesson.checks}: keep the same questions in the same order`,
+      });
+      return lesson;
+    }
     return { ...lesson, title: front.title, objectives: front.objectives ?? lesson.objectives, file, lang };
   });
 
@@ -567,7 +576,7 @@ function loadCourseDir(
     const body = checkLessonBody(lessonText.body, front.estimatedMinutes);
     for (const message of body.errors) issues.push({ file: lessonFile, message });
     for (const message of body.warnings) warnings.push({ file: lessonFile, message });
-    lessons.push({ ...front, file: lessonFile, lang: DEFAULT_LANG });
+    lessons.push({ ...front, file: lessonFile, lang: DEFAULT_LANG, checks: body.checks });
   }
 
   // Lesson files present on disk but not listed in course.yaml are likely mistakes.

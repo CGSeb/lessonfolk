@@ -43,6 +43,13 @@
       "when": 1791650000000,
       "tag": "0005_rename_build_with_ai_course",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792929920971,
+      "tag": "0006_lesson_checks",
+      "breakpoints": true
     }
   ]
 }

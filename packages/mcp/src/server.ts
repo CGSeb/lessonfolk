@@ -12,7 +12,9 @@ import {
   type WriteOptions,
   CourseValidationError,
   ProgressStoreError,
+  checkVerdictSchema,
   formatCourseIssues,
+  missingChecks,
   nextLesson,
 } from '@lessonfolk/core';
 import { describeErrorForLog } from '@lessonfolk/db';
@@ -57,8 +59,9 @@ const fail = (text: string): CallToolResult => ({ content: [{ type: 'text', text
 export function describeError(error: unknown): string {
   if (error instanceof ProgressStoreError) {
     const lines = [`${error.message} (${error.code})`];
-    const { missing, issues, problems } = error.details;
+    const { missing, missingChecks: unchecked, issues, problems } = error.details;
     if (missing?.length) lines.push(`Unfinished prerequisites: ${missing.join(', ')}.`);
+    if (unchecked?.length) lines.push(`Questions with no recorded verdict: ${unchecked.join(', ')}.`);
     for (const issue of issues ?? []) {
       lines.push(
         'prerequisiteId' in issue
@@ -104,13 +107,13 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
   };
 
   /** A write: rate-limited, then the store applies the tutor rules and returns the new progress. */
-  const write = async (done: string, run: () => Promise<Progress>): Promise<CallToolResult> => {
+  const write = async (done: string | ((progress: Progress) => string), run: () => Promise<Progress>): Promise<CallToolResult> => {
     if (!access.write) return denied(SCOPE_WRITE);
     const wait = writeLimiter.take(userId);
     if (wait) return fail(`Too many changes in a short time: wait ${wait} seconds, then try again. Nothing was saved.`);
     try {
       const progress = await run();
-      return ok(`${done}\n\nProgress now:\n${json(progress)}`);
+      return ok(`${typeof done === 'string' ? done : done(progress)}\n\nProgress now:\n${json(progress)}`);
     } catch (error) {
       return report(error);
     }
@@ -170,7 +173,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
           unknownPathIds: next.unknownPathIds,
           nextStep:
             (next.kind === 'next' ? `Call start_lesson("${next.lesson.id}") now, then get_lesson to read it. ` : 'Call get_lesson to read it, and teach from where the notes say it stopped. ') +
-            `When the learner meets its completion criteria, call complete_lesson("${next.lesson.id}", score, notes) right away, before moving on: progress is saved only by these calls.`,
+            `Ask its ${next.lesson.checks} "Check your understanding" questions one at a time; after each answer, judge it, give your feedback and call record_check("${next.lesson.id}", question, verdict). ` +
+            `Once every question has a verdict and the learner meets its completion criteria, call complete_lesson("${next.lesson.id}", score, notes) right away, before moving on: progress is saved only by these calls.`,
         };
       }),
   );
@@ -192,7 +196,14 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         const catalog = readCatalog(coursesDir, learnerLang(progress, language));
         const found = findLesson(catalog, id);
         if (!found) throw new ProgressStoreError('unknown_lesson', `Unknown lesson "${id}". Use list_courses to see the lesson ids.`, { lessonId: id });
-        const header = `<!-- LessonFolk: lesson ${found.lesson.id} of course "${found.course.title}" (${found.course.id}), language ${found.lesson.lang}${found.lesson.lang === catalog.lang ? '' : ` (not translated into "${catalog.lang}" yet)`}; learner status: ${lessonStatus(progress, id)}. Progress is saved only by the write tools: start_lesson before teaching a lesson that is not started, complete_lesson as soon as its completion criteria are met. Ask each question of "Check your understanding" alone and wait for the learner's own answer: never give the answer, a list of answers to pick from or suggested replies, and never show the "Good answer" hints -->`;
+        const entry = progress.lessons[found.lesson.id];
+        const recorded = Object.entries(entry?.checks ?? {}).map(([question, verdict]) => `${question} ${verdict}`);
+        const unchecked = missingChecks(entry, found.lesson.checks);
+        const checks =
+          `${found.lesson.checks} "Check your understanding" questions; ` +
+          (recorded.length ? `verdicts recorded: ${recorded.join(', ')}` : 'no verdict recorded yet') +
+          (unchecked.length ? `; next to ask: question ${unchecked[0]}` : '');
+        const header = `<!-- LessonFolk: lesson ${found.lesson.id} of course "${found.course.title}" (${found.course.id}), language ${found.lesson.lang}${found.lesson.lang === catalog.lang ? '' : ` (not translated into "${catalog.lang}" yet)`}; learner status: ${lessonStatus(progress, id)}; ${checks}. Progress is saved only by the write tools: start_lesson before teaching a lesson that is not started; record_check after each check; complete_lesson once every check has a verdict and the completion criteria are met (it is refused before). Teach the key ideas first. Then ask each question of "Check your understanding" alone, in order, and wait for the learner's own answer: never give the answer, a list of answers to pick from or suggested replies, and never show the "Good answer" hints. Judge the answer against its hint, give your feedback, call record_check, and only then ask the next question -->`;
         return `${header}\n${readLessonText(found.lesson)}`;
       }),
   );
@@ -297,12 +308,44 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
   );
 
   server.registerTool(
+    'record_check',
+    {
+      title: 'Record a check',
+      description:
+        "Record your verdict on the learner's answer to one \"Check your understanding\" question of the lesson in progress (question numbers start at 1, in the lesson's order). " +
+        "Ask the questions one at a time: ask one alone, wait for the learner's own answer, judge it against its \"Good answer\" hint, give the learner your feedback, then call this, before asking the next question. " +
+        'verdict: correct, partial or incorrect. A question can only be recorded once every question before it has a verdict. ' +
+        'After re-explaining, ask a question again and record it again: the new verdict replaces the old one. complete_lesson is refused until every question has a verdict.',
+      inputSchema: z.object({
+        lessonId,
+        question: z.number().int().min(1).max(LIMITS.listItems).describe('Question number in "Check your understanding", from 1.'),
+        verdict: checkVerdictSchema.describe("Your judgement of the learner's own answer against the \"Good answer\" hint."),
+      }),
+      annotations: { ...overwrites, title: 'Record a check' },
+    },
+    ({ lessonId: id, question, verdict }) =>
+      write(
+        (progress) => {
+          const found = findLesson(readCatalog(coursesDir, learnerLang(progress)), id);
+          const unchecked = found ? missingChecks(progress.lessons[id], found.lesson.checks) : [];
+          const next = unchecked.length
+            ? `Next: question ${unchecked[0]}, asked alone, once the learner has your feedback on this one.`
+            : 'Every question has a verdict: if the completion criteria are met, call complete_lesson now; otherwise re-explain and ask the questions they missed again.';
+          const retry = verdict === 'correct' ? '' : ' If the completion criteria need this question, re-explain differently, ask it again and record the new verdict.';
+          return `Check ${question} of ${id} recorded: ${verdict}. ${next}${retry}`;
+        },
+        () => store.recordCheck(userId, id, question, verdict, writeOptions),
+      ),
+  );
+
+  server.registerTool(
     'complete_lesson',
     {
       title: 'Complete lesson',
       description:
         'Mark a lesson done once its completion criteria are met: score is the estimate from the checks (0 to 1), ' +
         'notes are one or two sentences on what the learner found easy or hard (used for later review). Clears the current lesson. ' +
+        'Refused until every "Check your understanding" question of the lesson has a verdict saved with record_check. ' +
         'Call it right when the learner meets the completion criteria, before moving on to anything else, not at the end of the session: a lesson that is not completed here does not count as done.',
       inputSchema: z.object({
         lessonId,

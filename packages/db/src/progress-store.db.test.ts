@@ -4,7 +4,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { type ProgressStore, type TutorCourseRef, ProgressStoreError, loadCatalog } from '@lessonfolk/core';
+import { type CheckVerdict, type ProgressStore, type TutorCourseRef, ProgressStoreError, loadCatalog } from '@lessonfolk/core';
 import { asc, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createPostgresProgressStore, fromTimestamp, toTimestamp } from './progress-store.ts';
@@ -50,6 +50,12 @@ async function newUser(): Promise<string> {
   const id = `user-${++userCount}`;
   await testDb.db.insert(user).values({ id, name: `User ${userCount}`, email: `${id}@example.com` });
   return id;
+}
+
+/** Record a verdict on every check of a started lesson, as the tutor does before completing it. */
+async function answerChecks(userId: string, lessonId: string, verdict: CheckVerdict = 'correct') {
+  const count = courses.flatMap((c) => c.lessons).find((l) => l.id === lessonId)!.checks!;
+  for (let question = 1; question <= count; question++) await store.recordCheck(userId, lessonId, question, verdict, at);
 }
 
 async function events(userId: string) {
@@ -116,6 +122,11 @@ describe('writes', () => {
     await store.setPath(userId, ['ai-foundations'], 'Start with how AI works.', at);
     await store.startLesson(userId, L1, at);
     await store.saveNotes(userId, L1, 'Stopped after the first key idea.', at);
+    await expectRejected(userId, () => store.completeLesson(userId, L1, { score: 0.8, notes: 'Easy.' }, at), 'checks_incomplete');
+    await store.recordCheck(userId, L1, 1, 'correct', at);
+    await store.recordCheck(userId, L1, 2, 'partial', at);
+    await expectRejected(userId, () => store.completeLesson(userId, L1, { score: 0.8, notes: 'Easy.' }, at), 'checks_incomplete');
+    await store.recordCheck(userId, L1, 3, 'correct', at);
     const progress = await store.completeLesson(userId, L1, { score: 0.8, notes: 'Easy.' }, at);
 
     expect(progress).toEqual({
@@ -125,7 +136,16 @@ describe('writes', () => {
       pathReason: 'Start with how AI works.',
       pathUpdatedAt: TODAY,
       current: null,
-      lessons: { [L1]: { status: 'done', startedAt: TODAY, completedAt: TODAY, score: 0.8, notes: 'Easy.' } },
+      lessons: {
+        [L1]: {
+          status: 'done',
+          startedAt: TODAY,
+          completedAt: TODAY,
+          score: 0.8,
+          notes: 'Easy.',
+          checks: { '1': 'correct', '2': 'partial', '3': 'correct' },
+        },
+      },
     });
     expect(await store.getProgress(userId)).toEqual(progress);
     expect((await events(userId)).map((e) => e.action)).toEqual([
@@ -133,13 +153,44 @@ describe('writes', () => {
       'path.updated',
       'lesson.started',
       'lesson.notes_saved',
+      'lesson.check_recorded',
+      'lesson.check_recorded',
+      'lesson.check_recorded',
       'lesson.completed',
     ]);
-    expect((await events(userId))[4]).toEqual({
+    expect((await events(userId))[5]).toEqual({ action: 'lesson.check_recorded', payload: { lessonId: L1, question: 2, verdict: 'partial' }, client: 'test' });
+    expect((await events(userId))[7]).toEqual({
       action: 'lesson.completed',
       payload: { lessonId: L1, score: 0.8, notes: 'Easy.' },
       client: 'test',
     });
+  });
+
+  it('keep lessons saved before checks were recorded, and finish one that was in progress', async () => {
+    // Rows as they were before the `checks` column: done and in progress, no verdicts.
+    await testDb.db.insert(learner).values({ userId, currentLessonId: L2 });
+    await testDb.db.insert(lessonProgress).values([
+      { userId, lessonId: L1, status: 'done', completedAt: new Date(`${TODAY}T00:00:00Z`), score: 0.7, notes: 'Old.' },
+      { userId, lessonId: L2, status: 'in_progress', startedAt: new Date(`${TODAY}T00:00:00Z`) },
+    ]);
+    const before = await store.getProgress(userId);
+    expect(before.lessons).toEqual({
+      [L1]: { status: 'done', completedAt: TODAY, score: 0.7, notes: 'Old.' },
+      [L2]: { status: 'in_progress', startedAt: TODAY },
+    });
+    await expectRejected(userId, () => store.completeLesson(userId, L2, { score: 0.9, notes: 'Done.' }, at), 'checks_incomplete');
+    await answerChecks(userId, L2);
+    const after = await store.completeLesson(userId, L2, { score: 0.9, notes: 'Done.' }, at);
+    expect(after.lessons[L1]).toEqual(before.lessons[L1]);
+    expect(after.lessons[L2]).toMatchObject({ status: 'done', checks: { '1': 'correct', '2': 'correct', '3': 'correct' } });
+  });
+
+  it('export and import the check verdicts with the progress', async () => {
+    await store.startLesson(userId, L1, at);
+    await store.recordCheck(userId, L1, 1, 'incorrect', at);
+    const exported = await store.exportProgress(userId);
+    const other = await newUser();
+    expect((await store.importProgress(other, exported, at)).lessons[L1]).toEqual({ status: 'in_progress', startedAt: TODAY, checks: { '1': 'incorrect' } });
   });
 
   it('create the learner row on the first write when sign-in has not', async () => {
@@ -169,6 +220,7 @@ describe('writes', () => {
 
   it('reset a course, removing its lessons and logging what was there', async () => {
     await store.startLesson(userId, L1, at);
+    await answerChecks(userId, L1);
     await store.completeLesson(userId, L1, { score: 0.6, notes: 'Hard.' }, at);
     await store.startLesson(userId, L2, at);
     const progress = await store.resetCourse(userId, 'ai-foundations', at);
@@ -186,6 +238,7 @@ describe('writes', () => {
 
   it('only raise the score in a review, logging every review', async () => {
     await store.startLesson(userId, L1, at);
+    await answerChecks(userId, L1);
     await store.completeLesson(userId, L1, { score: 0.6, notes: 'Hard.' }, at);
     expect((await store.recordReviewScore(userId, L1, 0.9, at)).lessons[L1].score).toBe(0.9);
     expect((await store.recordReviewScore(userId, L1, 0.5, at)).lessons[L1].score).toBe(0.9);
@@ -223,7 +276,10 @@ describe('rejected writes leave the data unchanged', () => {
   });
 
   it('finished lessons cannot be started, completed or skipped again', async () => {
+    await store.startLesson(userId, L1, at);
+    await answerChecks(userId, L1);
     await store.completeLesson(userId, L1, { score: 0.8, notes: 'Easy.' }, at);
+    await expectRejected(userId, () => store.recordCheck(userId, L1, 1, 'incorrect', at), 'already_finished');
     await expectRejected(userId, () => store.startLesson(userId, L1, at), 'already_finished');
     await expectRejected(userId, () => store.completeLesson(userId, L1, { score: 1, notes: 'x' }, at), 'already_finished');
     await expectRejected(userId, () => store.skipLesson(userId, L1, 'x', at), 'already_finished');
@@ -236,6 +292,13 @@ describe('rejected writes leave the data unchanged', () => {
     await expectRejected(userId, () => store.saveNotes(userId, L1, 'placement', at), 'invalid_notes');
     await expectRejected(userId, () => store.saveNotes(userId, L2, 'Not started yet.', at), 'not_started');
     await expectRejected(userId, () => store.recordReviewScore(userId, L1, 0.9, at), 'not_done');
+  });
+
+  it('checks out of order, out of range or on a lesson not started', async () => {
+    await expectRejected(userId, () => store.recordCheck(userId, L2, 1, 'correct', at), 'not_in_progress');
+    const error = await expectRejected(userId, () => store.recordCheck(userId, L1, 2, 'correct', at), 'checks_out_of_order');
+    expect(error.details).toMatchObject({ lessonId: L1, missingChecks: [1], userId });
+    await expectRejected(userId, () => store.recordCheck(userId, L1, 4, 'correct', at), 'invalid_check');
   });
 
   it('invalid paths', async () => {
@@ -338,6 +401,7 @@ describe('onChange', () => {
 
     await watched.startLesson(a, L1, at);
     expect(changed).toEqual([a]);
+    await answerChecks(a, L1); // through the unwatched store
     await watched.completeLesson(a, L1, { score: 0.8, notes: 'ok' }, at);
     await watched.setProfile(b, { name: 'Robin' }, at);
     expect(changed).toEqual([a, a, b]);
@@ -377,6 +441,7 @@ describe('learners are kept apart (security pass, ticket #107)', () => {
     await store.setProfile(alice, { name: 'Alice', level: 'beginner' }, at);
     await store.setPath(alice, ['ai-foundations'], 'alice only', at);
     await store.startLesson(alice, L1, at);
+    await answerChecks(alice, L1);
     await store.completeLesson(alice, L1, { score: 0.9, notes: 'alice secret note' }, at);
     await store.startLesson(alice, L2, at);
     await store.setProfile(bob, { name: 'Bob' }, at);
@@ -400,6 +465,7 @@ describe('learners are kept apart (security pass, ticket #107)', () => {
     await store.importProgress(bob, JSON.stringify({ version: 1, profile: { name: 'Mallory' }, current: null, lessons: {} }), at);
     await store.setProfile(bob, { name: 'Bob', goal: 'x' }, at);
     await store.startLesson(bob, L1, at);
+    await answerChecks(bob, L1);
     await store.completeLesson(bob, L1, { score: 0.1, notes: 'bob note' }, at);
     await store.saveNotes(bob, L1, 'bob overwrites?', at);
     await store.recordReviewScore(bob, L1, 1, at);

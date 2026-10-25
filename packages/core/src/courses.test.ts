@@ -57,6 +57,7 @@ describe('loadCatalog (real courses)', () => {
     expect(first.prerequisites).toEqual([]);
     expect(first.objectives.length).toBeGreaterThan(0);
     expect(first.file).toBe(join(realDir, 'en', 'ai-foundations', '01-what-is-ai.md'));
+    expect(first.checks).toBeGreaterThan(0);
     expect(second.prerequisites).toEqual(['ai-foundations/01-what-is-ai']);
   });
 
@@ -604,6 +605,20 @@ describe('translations', () => {
     const { catalog, issues } = inspectFrench(dir);
     expect(issues.some((i) => i.message.startsWith('unknown section "## Idées clés"'))).toBe(true);
     expect(catalog.courses[0].lessons[0]).toMatchObject({ title: 'What is AI?', lang: 'en' });
+  });
+
+  it('keeps the English lesson when the translation has a different number of checks', () => {
+    const dir = withFiles({});
+    const french = frenchLesson(dir, '01-what-is-ai', 'Qu’est-ce que l’IA ?').replace(
+      '## Completion criteria',
+      '4. Une question en plus ?\n   Good answer: oui.\n\n## Completion criteria',
+    );
+    writeLesson(dir, '01-what-is-ai', french);
+    const { catalog, issues } = inspectFrench(dir);
+    expect(issues.map((i) => i.message)).toContain(
+      '"## Check your understanding" has 4 questions, but the en lesson has 3: keep the same questions in the same order',
+    );
+    expect(catalog.courses[0].lessons[0]).toMatchObject({ title: 'What is AI?', lang: 'en', checks: 3 });
   });
 
   it('reports each translation problem once, without repeating the English ones', () => {

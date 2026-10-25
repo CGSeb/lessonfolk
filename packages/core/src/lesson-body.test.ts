@@ -22,10 +22,16 @@ function body(sections: Record<string, string | null> = {}): string {
 
 describe('checkLessonBody', () => {
   it('accepts a valid body, with or without optional sections', () => {
-    expect(checkLessonBody(body(), 15)).toEqual({ errors: [], warnings: [] });
+    expect(checkLessonBody(body(), 15)).toEqual({ errors: [], warnings: [], checks: 1 });
     expect(
       checkLessonBody(body({ 'Going further': 'Read more.' }), 15),
-    ).toEqual({ errors: [], warnings: [] });
+    ).toEqual({ errors: [], warnings: [], checks: 1 });
+  });
+
+  it('counts the "Check your understanding" questions', () => {
+    const checks = '1. First?\n   Good answer: yes.\n2. Second?\n   Good answer: no.\n3) Third?\n   Good answer: maybe.';
+    expect(checkLessonBody(body({ 'Check your understanding': checks }), 15).checks).toBe(3);
+    expect(checkLessonBody(body({ 'Check your understanding': null }), 15).checks).toBe(0);
   });
 
   it('accepts Windows line endings and closing hashes on headings', () => {

@@ -11,6 +11,7 @@
  * not already done it.
  */
 import {
+  type CheckVerdict,
   type CompleteLessonInput,
   type Progress,
   type ProgressStore,
@@ -24,6 +25,7 @@ import {
   isFinished,
   parseImportedProgress,
   placementSkip,
+  recordCheck,
   recordReviewScore,
   resetCourse,
   saveNotes,
@@ -107,6 +109,7 @@ async function readProgress(db: Executor, userId: string, lock = false): Promise
       ...(completedAt !== undefined && { completedAt }),
       ...(lesson.score !== null && { score: lesson.score }),
       ...(lesson.notes !== null && { notes: lesson.notes }),
+      ...(lesson.checks !== null && { checks: lesson.checks }),
     };
   }
   return progress;
@@ -121,6 +124,7 @@ function lessonRow(userId: string, lessonId: string, entry: Progress['lessons'][
     completedAt: toTimestamp(entry.completedAt, `lessons.${lessonId}.completedAt`),
     score: entry.score ?? null,
     notes: entry.notes ?? null,
+    checks: entry.checks ?? null,
   };
 }
 
@@ -244,6 +248,14 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
         progress: unwrap(startLesson(progress, courses, lessonId, dates(opts)), userId),
         action: 'lesson.started',
         payload: { lessonId },
+      }));
+    },
+
+    recordCheck(userId, lessonId, question: number, verdict: CheckVerdict, opts) {
+      return write(userId, opts, (progress, courses) => ({
+        progress: unwrap(recordCheck(progress, courses, lessonId, question, verdict), userId),
+        action: 'lesson.check_recorded',
+        payload: { lessonId, question, verdict },
       }));
     },
 

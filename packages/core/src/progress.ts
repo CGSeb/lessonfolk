@@ -8,12 +8,21 @@ import { levelSchema, type Level } from './schemas.ts';
 export const lessonStatusSchema = z.enum(['in_progress', 'done', 'skipped']);
 export type LessonStatus = z.infer<typeof lessonStatusSchema>;
 
+/** The tutor's verdict on the learner's answer to one "Check your understanding" question. */
+export const checkVerdictSchema = z.enum(['correct', 'partial', 'incorrect']);
+export type CheckVerdict = z.infer<typeof checkVerdictSchema>;
+
 export const lessonProgressSchema = z.looseObject({
   status: lessonStatusSchema,
   startedAt: z.string().optional(),
   completedAt: z.string().optional(),
   score: z.number().min(0).max(1).optional(),
   notes: z.string().optional(),
+  /**
+   * Verdicts on the lesson's "Check your understanding" questions, by question number ("1", "2"…).
+   * Absent in progress saved before the checks were recorded.
+   */
+  checks: z.record(z.string().regex(/^[1-9]\d*$/, 'question numbers start at 1'), checkVerdictSchema).optional(),
 });
 export type LessonProgress = z.infer<typeof lessonProgressSchema>;
 
@@ -92,6 +101,11 @@ export function progressOrEmpty(result: ProgressResult): Progress {
 export interface LessonRef {
   id: string;
   prerequisites: string[];
+  /**
+   * Number of "Check your understanding" questions (`Lesson.checks`). When given, a lesson is
+   * only completed once each of them has a recorded verdict; left out, no check is required.
+   */
+  checks?: number;
 }
 
 /** Courses in index.yaml order, lessons in course.yaml order. */

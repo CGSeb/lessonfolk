@@ -34,6 +34,9 @@ import {
 export const LESSON_STATUSES = ['in_progress', 'done', 'skipped'] as const;
 export type LessonStatus = (typeof LESSON_STATUSES)[number];
 
+/** Verdicts on a "Check your understanding" answer, as in progress.json. */
+export type CheckVerdict = 'correct' | 'partial' | 'incorrect';
+
 /** The learner profile, stored as-is (name, experience, goal, language, level, interests…). */
 export type LearnerProfile = Record<string, unknown>;
 
@@ -346,6 +349,8 @@ export const lessonProgress = pgTable(
     /** 0–1, the tutor's estimate from the checks. */
     score: real('score'),
     notes: text('notes'),
+    /** Verdicts on the lesson's "Check your understanding" questions, by question number. */
+    checks: jsonb('checks').$type<Record<string, CheckVerdict>>(),
     ...timestamps,
   },
   (table) => [

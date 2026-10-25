@@ -31,6 +31,8 @@ export const MINUTES_RANGE = { min: 10, max: 25 };
 export interface LessonBodyReport {
   errors: string[];
   warnings: string[];
+  /** Number of numbered questions in "## Check your understanding". */
+  checks: number;
 }
 
 const HEADING = /^##[ \t]+(.+?)[ \t]*#*[ \t]*$/;
@@ -109,9 +111,9 @@ export function checkLessonBody(body: string, estimatedMinutes: number): LessonB
 
   const linesOf = (title: string) => sections.find((s) => s.title === title)?.lines;
 
-  const checks = linesOf('Check your understanding');
-  if (checks) {
-    const questions = numberedItems(checks);
+  const checkLines = linesOf('Check your understanding');
+  const questions = checkLines ? numberedItems(checkLines) : [];
+  if (checkLines) {
     if (!questions.length) {
       errors.push(`${heading('Check your understanding')} has no numbered questions`);
     }
@@ -142,5 +144,5 @@ export function checkLessonBody(body: string, estimatedMinutes: number): LessonB
     );
   }
 
-  return { errors, warnings };
+  return { errors, warnings, checks: questions.length };
 }

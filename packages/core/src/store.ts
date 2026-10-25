@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { levelSchema } from './schemas.ts';
-import { type CourseRef, type Profile, type Progress, PLACEMENT_NOTE, emptyProgress, progressSchema } from './progress.ts';
+import { type CheckVerdict, type CourseRef, type Profile, type Progress, PLACEMENT_NOTE, emptyProgress, progressSchema } from './progress.ts';
 import type { CompleteLessonInput, TutorError, TutorErrorCode, TutorResult } from './tutor.ts';
 
 /**
@@ -230,7 +230,9 @@ export interface ProgressStore {
   setPath(userId: string, path: readonly string[], reason: string, options?: WriteOptions): Promise<Progress>;
   /** Start or resume a lesson and make it `current` (`startLesson` rules). */
   startLesson(userId: string, lessonId: string, options?: WriteOptions): Promise<Progress>;
-  /** Mark a lesson done with its score and notes (`completeLesson` rules). */
+  /** Record the verdict on one "Check your understanding" question of a lesson in progress (`recordCheck` rules). */
+  recordCheck(userId: string, lessonId: string, question: number, verdict: CheckVerdict, options?: WriteOptions): Promise<Progress>;
+  /** Mark a lesson done with its score and notes, once every check has a verdict (`completeLesson` rules). */
   completeLesson(userId: string, lessonId: string, input: Omit<CompleteLessonInput, 'today'>, options?: WriteOptions): Promise<Progress>;
   /** Skip a lesson the learner already knows (`skipLesson` rules). */
   skipLesson(userId: string, lessonId: string, notes: string, options?: WriteOptions): Promise<Progress>;
