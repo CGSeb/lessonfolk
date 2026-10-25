@@ -196,6 +196,9 @@ Links or topics for curious learners.
 - Prefer everyday examples. Avoid fast-aging claims ("the best model today is…").
 - A lesson is taught and checked in the conversation: it has no exercise section, and its
   completion criteria never require the learner to build, install or pay for something.
+- A lesson, even the last of a course, never asks the learner what to learn next or to plan
+  their next steps: the tutor closes the lesson and proposes the next one in their path. A
+  closing note may name a follow-up course in a sentence, nothing more.
 
 ## Validation
 

@@ -6,7 +6,7 @@ estimatedMinutes: 15
 objectives:
   - Savoir quoi vérifier avant de laisser d’autres utiliser une application d’IA
   - Choisir un moyen simple de la partager
-  - Planifier ce qu’il faut apprendre ensuite
+  - Savoir faire passer une première application d’IA de quelques utilisateurs de confiance à un usage plus large
 prerequisites:
   - how-ai-apps-work/06-design-a-small-chatbot
 ---
@@ -25,10 +25,9 @@ prerequisites:
 4. **Commencez avec quelques vrais utilisateurs.** Partagez avec quelques personnes de confiance, observez
    comment elles l’utilisent et collectez les conversations qui ont mal tourné (avec leur permission). Les
    vrais utilisateurs trouvent des problèmes que vos tests n’ont pas trouvés.
-5. **Des moyens simples de partager, et la suite.** Vous pouvez commencer par une application en terminal
+5. **Des moyens simples de partager.** Vous pouvez commencer par une application en terminal
    qu’un ami lance sur sa machine avec sa propre configuration, une petite page web devant votre backend,
-   ou une offre d’hébergement gratuite pour petits projets. Ensuite, le cours Agents IA et outils montre
-   comment laisser un modèle appeler des fonctions et agir.
+   ou une offre d’hébergement gratuite pour petits projets.
 
 ## Teaching notes
 - Ne nommez ni services d’hébergement, ni frameworks web, ni prix ; décrivez les options et laissez
@@ -43,9 +42,11 @@ prerequisites:
   utilisés ; les limites protègent à la fois votre budget et vos utilisateurs.
 - Ne donnez pas de conseils juridiques sur les règles de vie privée ; dites à l’apprenant que les règles
   diffèrent selon les pays et de les vérifier avant de collecter les données d’autres personnes.
-- Concluez le cours : récapitulez le chemin d’un simple appel d’API à un chatbot conçu et testé, et suggérez des
-  prochaines étapes adaptées à leurs objectifs (Agents IA et outils, évaluation plus poussée, récupération
-  dans des documents comme sujets).
+- Concluez le cours : récapitulez le chemin d’un simple appel d’API à un chatbot conçu et testé, et
+  célébrez. Ne demandez pas à l’apprenant ce qu’il veut apprendre ensuite et n’ouvrez pas de discussion
+  libre sur des sujets : l’étape habituelle de fin de leçon du tuteur propose la leçon suivante de son
+  parcours. Tout au plus, dites en une phrase que le cours Agents IA et outils montre comment un modèle
+  peut appeler des fonctions et agir.
 
 ## Check your understanding
 1. Pourquoi la clé d’API ne doit-elle pas figurer dans le code d’une page web qui appelle directement le modèle ?
@@ -56,8 +57,8 @@ prerequisites:
    Good answer: que c’est une IA et qu’elle peut se tromper, quelles données sont stockées et pour combien de temps, et si leurs messages sont envoyés à un fournisseur de modèles.
 
 ## Completion criteria
-L’apprenant répond correctement aux vérifications et rédige un plan de partage qui couvre le stockage de la
-clé, les limites, une information sur les données et ce qu’il faut apprendre ensuite.
+L’apprenant répond correctement aux trois vérifications : stockage de la clé, limites, et ce qu’il faut
+dire aux utilisateurs.
 
 ## Going further
 - Agents IA et outils : laisser les modèles appeler des fonctions et agir.

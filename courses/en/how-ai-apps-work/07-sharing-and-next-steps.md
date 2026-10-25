@@ -6,7 +6,7 @@ estimatedMinutes: 15
 objectives:
   - Know what to check before letting others use an AI app
   - Choose a simple way to share it
-  - Plan what to learn next
+  - Know how to take a first AI app from a few trusted users to wider use
 prerequisites:
   - how-ai-apps-work/06-design-a-small-chatbot
 ---
@@ -24,10 +24,9 @@ prerequisites:
 4. **Start with a few real users.** Share with a few people you trust, watch how they use it,
    and collect the conversations that went wrong (with their permission). Real users find
    problems your tests did not.
-5. **Simple ways to share, and where to go next.** You can start with a terminal app a friend
-   runs on their machine with their own setup, a small web page in front of your backend, or
-   a free hosting option for small projects. Next, the AI Agents and Tools course shows how to
-   let a model call functions and take actions.
+5. **Simple ways to share.** You can start with a terminal app a friend runs on their machine
+   with their own setup, a small web page in front of your backend, or a free hosting option
+   for small projects.
 
 ## Teaching notes
 - Do not name hosting services, web frameworks or prices; describe the options and let the
@@ -41,9 +40,11 @@ prerequisites:
   used; limits protect both your budget and your users.
 - Do not give legal advice on privacy rules; tell the learner that rules differ by country
   and to check them before collecting other people's data.
-- Close the course: recap the path from a single API call to a designed, tested chatbot, and suggest
-  next steps that fit their goals (AI Agents and Tools, deeper evaluation, retrieval over
-  documents as topics).
+- Close the course: recap the path from a single API call to a designed, tested chatbot, and
+  celebrate. Do not ask the learner what they want to learn next and do not open a free-form
+  discussion of topics: the tutor's normal end-of-lesson step proposes the next lesson of
+  their path. At most, say in one sentence that AI Agents and Tools shows how a model can call
+  functions and take actions.
 
 ## Check your understanding
 1. Why must the API key not be in the code of a web page that calls the model directly?
@@ -54,8 +55,8 @@ prerequisites:
    Good answer: that it is an AI and can be wrong, what data is stored and for how long, and whether their messages are sent to a model provider.
 
 ## Completion criteria
-The learner answers the checks correctly and writes a sharing plan that covers key storage,
-limits, a data notice and what to learn next.
+The learner answers the three checks correctly: key storage, limits, and what users must be
+told.
 
 ## Going further
 - AI Agents and Tools: letting models call functions and take actions.
