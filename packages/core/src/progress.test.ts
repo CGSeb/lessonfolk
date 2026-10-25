@@ -174,6 +174,15 @@ describe('getNextLesson', () => {
     expect(getNextLesson(custom, null)?.lesson.id).toBe('a/2');
   });
 
+  it('stays in the course just worked on, even when an earlier course in the catalog is untouched', () => {
+    const custom: CourseRef[] = [
+      { id: 'a', lessons: [{ id: 'a/1', prerequisites: [] }] },
+      { id: 'b', lessons: [{ id: 'b/1', prerequisites: [] }, { id: 'b/2', prerequisites: ['b/1'] }] },
+    ];
+    const p = progressWith({ 'b/1': { status: 'done', completedAt: '2026-10-25' } });
+    expect(getNextLesson(custom, p)?.lesson.id).toBe('b/2');
+  });
+
   it('returns null when remaining lessons are blocked by unmet prerequisites', () => {
     const blocked: CourseRef[] = [{ id: 'a', lessons: [{ id: 'a/1', prerequisites: ['missing/1'] }] }];
     expect(getNextLesson(blocked, null)).toBeNull();
