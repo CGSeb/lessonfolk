@@ -228,15 +228,44 @@ export function getNextLesson<C extends CourseRef>(courses: C[], progress: Maybe
     // `current` refers to a lesson not in the catalog: fall through to the walk.
   }
 
-  for (const course of orderCourses(courses, progress)) {
-    for (const lesson of course.lessons) {
-      if (isFinished(progress, lesson.id)) continue;
-      if (lesson.prerequisites.every((id) => isFinished(progress, id))) {
-        return { kind: 'next', course, lesson };
-      }
-    }
+  const ordered = orderCourses(courses, progress);
+  const eligible = (course: C) =>
+    course.lessons.find((l) => !isFinished(progress, l.id) && l.prerequisites.every((id) => isFinished(progress, id)));
+
+  // Stay in the course the learner is in the middle of, even when it is not in `path`.
+  const started = startedCourse(ordered, progress);
+  if (started) {
+    const lesson = eligible(started);
+    if (lesson) return { kind: 'next', course: started, lesson };
+  }
+
+  for (const course of ordered) {
+    const lesson = eligible(course);
+    if (lesson) return { kind: 'next', course, lesson };
   }
   return null;
+}
+
+/**
+ * The partly finished course whose latest lesson was finished most recently (placement skips
+ * do not count). Ties keep the order of `courses`. Undefined when no course is in progress.
+ */
+function startedCourse<C extends CourseRef>(courses: C[], progress: MaybeProgress): C | undefined {
+  let best: C | undefined;
+  let bestDate = '';
+  for (const course of courses) {
+    const finished = course.lessons.filter((l) => isFinished(progress, l.id));
+    if (!finished.length || finished.length === course.lessons.length) continue;
+    const latest = finished
+      .filter((l) => !isPlacementSkip(progress, l.id))
+      .map((l) => progress?.lessons[l.id]?.completedAt ?? '')
+      .reduce((a, b) => (b > a ? b : a), '');
+    if (latest && latest > bestDate) {
+      best = course;
+      bestDate = latest;
+    }
+  }
+  return best;
 }
 
 // ---------------------------------------------------------------------------
