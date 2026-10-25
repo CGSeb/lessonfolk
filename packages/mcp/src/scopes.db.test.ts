@@ -111,7 +111,7 @@ describe('MCP token scopes', () => {
     expect((await call(client, 'get_progress')).isError).toBeFalsy();
     const saved = await call(client, 'set_profile', { level: 'beginner' });
     expect(saved.isError).toBeFalsy();
-    expect(text(saved)).toContain('Profile saved.');
+    expect(text(saved)).toContain('Profile saved:');
   });
 
   it('keeps full access for a token without lessonfolk scopes (compatibility with clients that never request them)', async () => {

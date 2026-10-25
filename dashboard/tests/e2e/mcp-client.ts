@@ -14,7 +14,8 @@ export async function callJson(client: Client, name: string, args: Record<string
   const result = (await client.callTool({ name, arguments: args })) as CallToolResult;
   const text = (result.content[0] as { text: string }).text;
   if (result.isError) throw new Error(text);
-  return text.includes('Progress now:\n') ? JSON.parse(text.split('Progress now:\n')[1]) : JSON.parse(text);
+  // A write tool answers with a short receipt, not JSON: read the saved progress with get_progress.
+  return text.includes('Current lesson: ') ? { receipt: text } : JSON.parse(text);
 }
 
 /** Fetch with the dashboard's cookies, following no redirect by itself. */

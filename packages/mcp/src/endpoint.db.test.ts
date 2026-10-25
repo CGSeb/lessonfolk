@@ -52,11 +52,18 @@ async function connect(token: string, era: Era = 'legacy'): Promise<Client> {
 }
 
 const text = (result: unknown) => ((result as CallToolResult).content[0] as { text: string }).text;
-/** The progress JSON at the end of a write tool's answer. */
-const progressOf = (result: unknown) => JSON.parse(text(result).split('Progress now:\n')[1]);
 
 async function call(client: Client, name: string, args: Record<string, unknown> = {}) {
   return (await client.callTool({ name, arguments: args })) as CallToolResult;
+}
+
+/** Runs a write tool, checks it answered with a receipt, and returns the whole saved progress. */
+async function progressAfter(client: Client, name: string, args: Record<string, unknown> = {}) {
+  const result = await call(client, name, args);
+  expect(result.isError, text(result)).toBeFalsy();
+  expect(text(result)).toContain('Current lesson: ');
+  expect(text(result)).not.toContain('"lessons"');
+  return JSON.parse(text(await call(client, 'get_progress', { full: true })));
 }
 
 beforeAll(async () => {
@@ -123,12 +130,10 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     expect(themes[0]).toMatchObject({ id: 'understanding-ai', courseIds: ['ai-foundations'], comingSoon: false });
     expect(themes.find((t: { id: string }) => t.id === 'using-ai').comingSoon).toBe(true);
 
-    const profile = progressOf(
-      await call(client, 'set_profile', { name: 'Ada', experience: 'none', level: 'beginner', interests: ['understanding-ai'] }),
-    );
+    const profile = await progressAfter(client, 'set_profile', { name: 'Ada', experience: 'none', level: 'beginner', interests: ['understanding-ai'] });
     expect(profile.profile).toEqual({ name: 'Ada', experience: 'none', level: 'beginner', interests: ['understanding-ai'] });
 
-    const path = progressOf(await call(client, 'set_path', { path: ['ai-foundations'], reason: 'Start with the basics.' }));
+    const path = await progressAfter(client, 'set_path', { path: ['ai-foundations'], reason: 'Start with the basics.' });
     expect(path).toMatchObject({ path: ['ai-foundations'], pathReason: 'Start with the basics.' });
 
     const next = JSON.parse(text(await call(client, 'get_next_lesson')));
@@ -139,7 +144,7 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     expect(next.nextStep).toContain('3 "Check your understanding" questions one at a time');
     expect(next.nextStep).toContain(`complete_lesson("${L1}"`);
 
-    const started = progressOf(await call(client, 'start_lesson', { lessonId: L1 }));
+    const started = await progressAfter(client, 'start_lesson', { lessonId: L1 });
     expect(started.current).toBe(L1);
     expect(started.lessons[L1].status).toBe('in_progress');
 
@@ -152,7 +157,7 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     // No French translation in the fixture: the English lesson, saying so.
     expect(text(await call(client, 'get_lesson', { lessonId: L1, lang: 'fr' }))).toContain(', language en; learner status');
 
-    const notes = progressOf(await call(client, 'save_lesson_notes', { lessonId: L1, notes: 'Stopped after key idea 2.' }));
+    const notes = await progressAfter(client, 'save_lesson_notes', { lessonId: L1, notes: 'Stopped after key idea 2.' });
     expect(notes.lessons[L1].notes).toBe('Stopped after key idea 2.');
 
     // The topics were covered, but no check was asked: the lesson cannot be completed.
@@ -170,7 +175,7 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     expect(first.isError, text(first)).toBeFalsy();
     expect(text(first)).toContain('Check 1 of ai-foundations/01-what-is-ai recorded: partial. Next: question 2');
     expect(text(first)).toContain('ask it again and record the new verdict');
-    expect(progressOf(await call(client, 'record_check', { lessonId: L1, question: 2, verdict: 'correct' })).lessons[L1].checks).toEqual({
+    expect((await progressAfter(client, 'record_check', { lessonId: L1, question: 2, verdict: 'correct' })).lessons[L1].checks).toEqual({
       '1': 'partial',
       '2': 'correct',
     });
@@ -179,14 +184,14 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     const last = await call(client, 'record_check', { lessonId: L1, question: 3, verdict: 'correct' });
     expect(text(last)).toContain('Every question has a verdict');
 
-    const done = progressOf(await call(client, 'complete_lesson', { lessonId: L1, score: 0.7, notes: 'Easy analogies, unsure about narrow AI.' }));
+    const done = await progressAfter(client, 'complete_lesson', { lessonId: L1, score: 0.7, notes: 'Easy analogies, unsure about narrow AI.' });
     expect(done.lessons[L1]).toMatchObject({ status: 'done', score: 0.7, checks: { '1': 'partial', '2': 'correct', '3': 'correct' } });
     expect(done.current ?? null).toBeNull();
 
-    const reviewed = progressOf(await call(client, 'record_review_score', { lessonId: L1, score: 0.9 }));
+    const reviewed = await progressAfter(client, 'record_review_score', { lessonId: L1, score: 0.9 });
     expect(reviewed.lessons[L1].score).toBeCloseTo(0.9);
 
-    const skipped = progressOf(await call(client, 'skip_lesson', { lessonId: L2, reason: 'Knew it: answered both checks.' }));
+    const skipped = await progressAfter(client, 'skip_lesson', { lessonId: L2, reason: 'Knew it: answered both checks.' });
     expect(skipped.lessons[L2]).toMatchObject({ status: 'skipped', notes: 'Knew it: answered both checks.' });
 
     const courses = JSON.parse(text(await call(client, 'list_courses', { theme: 'understanding-ai' })));
@@ -202,22 +207,22 @@ describe.each<Era>(['legacy', 'modern'])('MCP endpoint (%s protocol)', (era) => 
     const client = await connect(await addUser(`placement-${era}`), era);
     await call(client, 'set_profile', { name: 'Grace', level: 'intermediate' });
 
-    const placed = progressOf(await call(client, 'level_check_skip_course', { courseId: 'ai-foundations' }));
+    const placed = await progressAfter(client, 'level_check_skip_course', { courseId: 'ai-foundations' });
     for (const id of [L1, L2, L3]) expect(placed.lessons[id].status).toBe('skipped');
 
     const listed = JSON.parse(text(await call(client, 'list_courses')));
     expect(listed[0].lessons.map((l: { status: string }) => l.status)).toEqual(Array(3).fill('skipped_after_level_check'));
 
-    const reset = progressOf(await call(client, 'reset_course', { courseId: 'ai-foundations' }));
+    const reset = await progressAfter(client, 'reset_course', { courseId: 'ai-foundations' });
     for (const id of [L1, L2, L3]) expect(reset.lessons[id]).toBeUndefined();
 
     await call(client, 'start_lesson', { lessonId: L1 });
     for (const question of [1, 2, 3]) await call(client, 'record_check', { lessonId: L1, question, verdict: 'correct' });
     await call(client, 'complete_lesson', { lessonId: L1, score: 0.8, notes: 'Clear.' });
-    const saved = JSON.parse(text(await call(client, 'get_progress')));
+    const saved = JSON.parse(text(await call(client, 'get_progress', { full: true })));
 
     const other = await connect(await addUser(`import-${era}`), era);
-    const imported = progressOf(await call(other, 'import_progress', { progress: saved }));
+    const imported = await progressAfter(other, 'import_progress', { progress: saved });
     expect(imported.profile).toMatchObject({ name: 'Grace', level: 'intermediate' });
     expect(imported.lessons[L1]).toMatchObject({ status: 'done', score: 0.8 });
   });

@@ -18,7 +18,7 @@ again.
 # LessonFolk: progress
 
 ## Show progress ("where am I?")
-`get_progress()` and `list_courses()`. Summarise per course: lessons finished (done or skipped) / total, the current lesson, and topics flagged as hard in the notes. Say which lessons were skipped after the level check (`skipped_after_level_check`), and mention the learner's level and path if set. Keep it short and motivating.
+`get_progress()` and `list_courses()`. Summarise per course: lessons finished (done or skipped) / total, the current lesson, and topics flagged as hard in the notes (`recentNotes` has the latest; `get_progress(courseId)` gives the notes of one course). Say which lessons were skipped after the level check (`skipped_after_level_check`), and mention the learner's level and path if set. Keep it short and motivating.
 
 ## List courses ("what can I learn?")
 `list_themes()` and `list_courses()`. Group the courses by theme, in theme order, keeping the course order within a theme. For each theme: its title and description, then each course with its level, description and the learner's status (not started / in progress / done / skipped after level check). Hide themes with no course. End by offering to explore one theme.
