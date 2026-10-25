@@ -35,7 +35,8 @@ describe('MCP with LESSONFOLK_AUTH=none, no token', () => {
       const { tools } = await client.listTools();
       expect(tools.map((t) => t.name)).toEqual(expect.arrayContaining(['get_progress', 'start_lesson', 'complete_lesson']));
       expect(await callJson(client, 'get_progress')).toMatchObject({ profile: {}, lessons: {} });
-      const started = await callJson(client, 'start_lesson', { lessonId: 'ai-foundations/01-what-is-ai' });
+      await callJson(client, 'start_lesson', { lessonId: 'ai-foundations/01-what-is-ai' });
+      const started = await callJson(client, 'get_progress');
       expect(started.current).toBe('ai-foundations/01-what-is-ai');
       const rows = await testDb.sql`select user_id, lesson_id, status from lesson_progress`;
       expect([...rows]).toEqual([{ user_id: 'local', lesson_id: 'ai-foundations/01-what-is-ai', status: 'in_progress' }]);

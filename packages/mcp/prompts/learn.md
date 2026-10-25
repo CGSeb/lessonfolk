@@ -5,7 +5,7 @@ Pick the procedure from what the learner asks; by default, Start or resume.
 ## Start or resume
 1. `get_progress()`. Empty profile: Onboarding first. A profile without a level: ask the experience question of Onboarding once (mention their saved experience, if any), `set_profile(level)`, then offer the Level check (if it applies) and Recommend a path.
 2. `get_next_lesson()`:
-   - `resume`: recap briefly where you left off (the lesson notes in `get_progress()`), then Teach a lesson.
+   - `resume`: recap briefly where you left off (the notes of the current lesson in `get_progress()`; `recentNotes` shows how the latest lessons went), then Teach a lesson.
    - `next`: `start_lesson(lessonId)`, then Teach a lesson.
    - `unknownPathIds`: tell the learner those path courses no longer exist.
    - `all_done`: congratulate them and suggest what to explore next. `blocked`: say no lesson is open yet and why (`list_courses()`).

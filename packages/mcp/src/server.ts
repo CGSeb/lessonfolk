@@ -21,6 +21,7 @@ import { describeErrorForLog } from '@lessonfolk/db';
 import { McpServer, ResourceTemplate, type CallToolResult } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { DEFAULT_LANG, courseSummary, findLesson, learnerLang, lessonStatus, readCatalog, readLessonText } from './catalog.ts';
+import { compactProgress, progressReceipt } from './progress-view.ts';
 import { INSTRUCTIONS, registerPrompts } from './prompts.ts';
 import type { RateLimiter } from './rate-limit.ts';
 import { SCOPE_READ, SCOPE_WRITE, accessFromScopes } from './scopes.ts';
@@ -106,14 +107,22 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     }
   };
 
-  /** A write: rate-limited, then the store applies the tutor rules and returns the new progress. */
-  const write = async (done: string | ((progress: Progress) => string), run: () => Promise<Progress>): Promise<CallToolResult> => {
+  /**
+   * A write: rate-limited, then the store applies the tutor rules. The answer is a short receipt
+   * (plus `echo`, what the call just set), not the whole progress: get_progress has the details.
+   */
+  const write = async (
+    done: string | ((progress: Progress) => string),
+    run: () => Promise<Progress>,
+    echo?: (progress: Progress) => unknown,
+  ): Promise<CallToolResult> => {
     if (!access.write) return denied(SCOPE_WRITE);
     const wait = writeLimiter.take(userId);
     if (wait) return fail(`Too many changes in a short time: wait ${wait} seconds, then try again. Nothing was saved.`);
     try {
       const progress = await run();
-      return ok(`${typeof done === 'string' ? done : done(progress)}\n\nProgress now:\n${json(progress)}`);
+      const said = typeof done === 'string' ? done : done(progress);
+      return ok(`${said}${echo ? ` ${json(echo(progress))}` : ''}\n\n${progressReceipt(progress)}`);
     } catch (error) {
       return report(error);
     }
@@ -135,13 +144,23 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Get progress',
       description:
         "The learner's saved progress (progress.json v1 shape): profile (name, experience, goal, language, level, interests), " +
-        'path with its reason, current lesson, and every started lesson with status, dates, score and notes. ' +
+        'path with its reason, current lesson, and every started lesson with status, dates and score. ' +
+        'To keep the answer small, notes are only given for the current lesson (to resume it) and, as a preview, for the latest finished lessons (recentNotes); ' +
+        'other lessons are flagged hasNotes. Give courseId or lessonIds to read the notes of one course or of some lessons, or full: true for the whole progress.json. ' +
         'Empty profile and lessons mean a new learner who has not been onboarded yet: onboard them and save their profile with set_profile before teaching. ' +
         'Call this first in every session. Nothing the learner does is saved unless you call the write tools (set_profile, set_path, start_lesson, complete_lesson…).',
-      inputSchema: z.object({}),
+      inputSchema: z.object({
+        courseId: z.string().min(1).max(LIMITS.id).optional().describe('Course id: also give the notes of all its lessons.'),
+        lessonIds: z.array(lessonId).max(LIMITS.listItems).optional().describe('Lesson ids: also give their notes.'),
+        full: z.boolean().optional().describe('The whole progress, notes of every lesson included. Large: only when needed.'),
+      }),
       annotations: { ...readOnly, title: 'Get progress' },
     },
-    () => read(() => store.getProgress(userId)),
+    ({ courseId, lessonIds, full }) =>
+      read(async () => {
+        const progress = await store.getProgress(userId);
+        return full ? progress : compactProgress(progress, { courseId, lessonIds });
+      }),
   );
 
   server.registerTool(
@@ -275,7 +294,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       }),
       annotations: { ...overwrites, title: 'Set profile' },
     },
-    (profile) => write('Profile saved.', () => store.setProfile(userId, profile, writeOptions)),
+    (profile) => write('Profile saved:', () => store.setProfile(userId, profile, writeOptions), (progress) => progress.profile),
   );
 
   server.registerTool(
@@ -291,7 +310,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       }),
       annotations: { ...overwrites, title: 'Set path' },
     },
-    ({ path, reason }) => write('Path saved.', () => store.setPath(userId, path, reason, writeOptions)),
+    ({ path, reason }) => write('Path saved:', () => store.setPath(userId, path, reason, writeOptions), (progress) => progress.path),
   );
 
   server.registerTool(

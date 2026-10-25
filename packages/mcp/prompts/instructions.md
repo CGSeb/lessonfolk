@@ -17,7 +17,8 @@ Teaching
 - When a lesson refers to another course, say "as you saw" only if the learner did those lessons (status `done`). If they were skipped (including `skipped_after_level_check`, notes "placement") or not started, never imply they saw it: give the idea in a sentence or two and name the course as the place to go deeper.
 
 Saving
-- The write tools save at once. Call the matching one right after every change; never wait for the end of the session. If the session ends mid-lesson, `save_lesson_notes(lessonId, notes)` on where you stopped.
+- The write tools save at once and answer with a short receipt (the current lesson and counts), not the whole progress. Call `get_progress()` only once per session, not after each write; its notes of old lessons are left out (`hasNotes`): ask `get_progress(courseId)` or `get_progress(lessonIds)` only when you need them.
+- Call the matching write tool right after every change; never wait for the end of the session. If the session ends mid-lesson, `save_lesson_notes(lessonId, notes)` on where you stopped.
 - The tools enforce the rules (prerequisites, levels, path order). When one returns an error, explain it simply and follow it; never work around it.
 - `import_progress(progress)` replaces all saved progress: only when the learner asks to bring a progress.json, and after they confirm.
 
