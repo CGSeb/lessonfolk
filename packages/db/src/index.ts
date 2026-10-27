@@ -15,6 +15,7 @@ export {
 } from './connection.ts';
 export { purgeUnusedOAuthClients, UNUSED_CLIENT_DAYS } from './oauth-clients.ts';
 export { describeErrorForLog } from './log-safe.ts';
+export { reportError } from './error-report.ts';
 export {
   createPostgresProgressStore,
   fromTimestamp,

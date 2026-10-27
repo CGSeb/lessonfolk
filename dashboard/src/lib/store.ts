@@ -6,7 +6,7 @@
  * same server). Every committed write publishes a per-user change event for live refresh.
  */
 import { inspectCatalog, type Progress, type ProgressResult, type ProgressStore } from '@lessonfolk/core';
-import { connect, createPostgresProgressStore, databaseUrl, describeErrorForLog, type Database } from '@lessonfolk/db';
+import { connect, createPostgresProgressStore, databaseUrl, describeErrorForLog, reportError, type Database } from '@lessonfolk/db';
 import type { CurrentUser } from './auth/current-user';
 import { getProgressHub } from './watch';
 
@@ -54,6 +54,7 @@ export async function loadProgress(userId: string, progressStore?: ProgressStore
   } catch (error) {
     // The log gets the error's name and code only: a failed query's message holds learners' data.
     console.error(`Could not read a learner's progress: ${describeErrorForLog(error)}`);
+    void reportError(error, 'progress read');
     // Only the error code is shown on the page.
     const code = (error as { code?: unknown }).code ?? (error as Error).name;
     return { state: 'invalid', error: `Could not read your progress from the database (${String(code)}).` };

@@ -50,6 +50,9 @@ services:
       UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
       # Token of the OpenAI plugin directory's domain check, served at /.well-known/openai-apps-challenge.
       OPENAI_APPS_CHALLENGE: ${OPENAI_APPS_CHALLENGE:-}
+      # Where unexpected errors are reported: the GlitchTip below, on the internal network (see .env.example).
+      # Without it, nothing is reported. Events hold no personal data (docs/privacy.md, "Error monitoring").
+      ERROR_REPORT_DSN: ${ERROR_REPORT_DSN:-}
     # No published port: Caddy reaches it on the internal network. Pending migrations are
     # applied by the image's start command before the server starts.
     depends_on:
@@ -70,6 +73,35 @@ services:
       DISABLE_TELEMETRY: "1"
     ports:
       - "127.0.0.1:${UMAMI_PORT:-3001}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+    restart: unless-stopped
+
+  # Error monitoring (docs/privacy.md): GlitchTip, an open-source (MIT) tracker that speaks Sentry's protocol.
+  # It has its own database and role (created by deploy.sh), which the app cannot read. Nothing is
+  # published to the internet: the app reports to it on the internal network, and its dashboard is on
+  # this server's loopback address only (open it through an SSH tunnel, see .env.example). No Valkey/Redis:
+  # Postgres holds its queue and cache (fine at this size).
+  glitchtip:
+    image: glitchtip/glitchtip:6.2.6@sha256:a3d8eb1b36c1e1603d55ab32711ea3dd8115874742a781a57391a62a16e0dff6
+    environment:
+      DATABASE_URL: postgresql://glitchtip:${GLITCHTIP_DB_PASSWORD:?Set GLITCHTIP_DB_PASSWORD in .env}@db:5432/glitchtip
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY in .env}
+      GLITCHTIP_DOMAIN: http://localhost:${GLITCHTIP_PORT:-3002}
+      VALKEY_URL: ""
+      # Alert e-mails: an SMTP URL (smtp://user:password@host:587), or leave it to write them to the log.
+      EMAIL_URL: ${GLITCHTIP_EMAIL_URL:-consolemail://}
+      DEFAULT_FROM_EMAIL: ${GLITCHTIP_FROM_EMAIL:-glitchtip@localhost}
+      # Only the first account can be created: nobody else can sign up.
+      ENABLE_USER_REGISTRATION: "False"
+      ENABLE_ORGANIZATION_CREATION: "False"
+      # Errors are kept 30 days, like the server logs (docs/privacy.md).
+      GLITCHTIP_RETENTION_DAYS: "30"
+    ports:
+      - "127.0.0.1:${GLITCHTIP_PORT:-3002}:8000"
+    mem_limit: 768m
     depends_on:
       db:
         condition: service_healthy

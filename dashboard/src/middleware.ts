@@ -3,6 +3,7 @@ import type { MiddlewareHandler } from 'astro';
 import { AUTH_BASE_PATH } from './lib/auth/auth';
 import { getAuthSettings, getCurrentUser } from './lib/auth/current-user';
 import { crossSiteFormResponse, foreignHostResponse } from './lib/auth/origin-check';
+import { reportError } from '@lessonfolk/db';
 import { createRateLimiter, limitRequest, callerAddress, type RateLimiter } from '@lessonfolk/mcp';
 import { bodySizeResponse, routeLimit } from './lib/rate-limit';
 import { isPrivatePath } from './lib/seo';
@@ -40,7 +41,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const rule = rateLimitOn() ? routeLimit(context.request.method, pathname) : undefined;
   const tooMany = rule && limitRequest(limiterFor(rule.group, rule.limit, rule.windowMs), callerAddress(context.request, { clientAddress: connectionAddress(context) }));
   const early = tooLarge ?? tooMany;
-  const response = early ?? ((await handle(context, next)) as Response);
+  const response = early ?? ((await handleReporting(context, next)) as Response);
   const settings = getAuthSettings();
   const https = settings.mode === 'oauth' && new URL(settings.baseURL).protocol === 'https:';
   const secured = withSecurityHeaders(response, https, import.meta.env.DEV);
@@ -51,6 +52,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
   return secured;
 });
+
+/** Reports an unexpected error to the error tracker (no request data, see packages/db/src/error-report.ts), then lets it through. */
+const handleReporting: MiddlewareHandler = async (context, next) => {
+  try {
+    return (await handle(context, next)) as Response;
+  } catch (error) {
+    void reportError(error, 'page');
+    throw error;
+  }
+};
 
 /**
  * Sets `locals.authMode` and `locals.user` (the current user, `null` when signed
