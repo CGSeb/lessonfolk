@@ -112,10 +112,10 @@ services:
     logging: *logging
     restart: unless-stopped
 
-  # Applies GlitchTip's database migrations (it does not do it by itself) at every deploy, then stops.
+  # Applies GlitchTip's database migrations and creates its cache table (it does neither by itself) at every deploy, then stops.
   glitchtip-migrate:
     image: glitchtip/glitchtip:6.2.6@sha256:a3d8eb1b36c1e1603d55ab32711ea3dd8115874742a781a57391a62a16e0dff6
-    command: ./manage.py migrate
+    command: sh -c "./manage.py migrate && ./manage.py createcachetable"
     environment: *glitchtip-env
     depends_on:
       db:
