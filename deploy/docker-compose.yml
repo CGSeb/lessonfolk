@@ -9,6 +9,22 @@ x-logging: &logging
     max-size: "10m"
     max-file: "3"
 
+x-glitchtip-env: &glitchtip-env
+  DATABASE_URL: postgresql://glitchtip:${GLITCHTIP_DB_PASSWORD:?Set GLITCHTIP_DB_PASSWORD in .env}@db:5432/glitchtip
+  SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY in .env}
+  GLITCHTIP_DOMAIN: http://localhost:${GLITCHTIP_PORT:-3002}
+  VALKEY_URL: ""
+  # Alert e-mails: an SMTP URL (smtp://user:password@host:587), or leave it to write them to the log.
+  EMAIL_URL: ${GLITCHTIP_EMAIL_URL:-consolemail://}
+  DEFAULT_FROM_EMAIL: ${GLITCHTIP_FROM_EMAIL:-glitchtip@localhost}
+  # Only the first account can be created: nobody else can sign up.
+  ENABLE_USER_REGISTRATION: "False"
+  ENABLE_ORGANIZATION_CREATION: "False"
+  # Errors are kept 30 days, like the server logs (docs/privacy.md).
+  GLITCHTIP_RETENTION_DAYS: "30"
+  # Hosts the dashboard answers to: its internal name (the app's reports) and the SSH tunnel.
+  ALLOWED_HOSTS: glitchtip,localhost,127.0.0.1
+
 services:
   db:
     image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
@@ -86,27 +102,26 @@ services:
   # Postgres holds its queue and cache (fine at this size).
   glitchtip:
     image: glitchtip/glitchtip:6.2.6@sha256:a3d8eb1b36c1e1603d55ab32711ea3dd8115874742a781a57391a62a16e0dff6
-    environment:
-      DATABASE_URL: postgresql://glitchtip:${GLITCHTIP_DB_PASSWORD:?Set GLITCHTIP_DB_PASSWORD in .env}@db:5432/glitchtip
-      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY in .env}
-      GLITCHTIP_DOMAIN: http://localhost:${GLITCHTIP_PORT:-3002}
-      VALKEY_URL: ""
-      # Alert e-mails: an SMTP URL (smtp://user:password@host:587), or leave it to write them to the log.
-      EMAIL_URL: ${GLITCHTIP_EMAIL_URL:-consolemail://}
-      DEFAULT_FROM_EMAIL: ${GLITCHTIP_FROM_EMAIL:-glitchtip@localhost}
-      # Only the first account can be created: nobody else can sign up.
-      ENABLE_USER_REGISTRATION: "False"
-      ENABLE_ORGANIZATION_CREATION: "False"
-      # Errors are kept 30 days, like the server logs (docs/privacy.md).
-      GLITCHTIP_RETENTION_DAYS: "30"
+    environment: *glitchtip-env
     ports:
       - "127.0.0.1:${GLITCHTIP_PORT:-3002}:8000"
     mem_limit: 768m
     depends_on:
+      glitchtip-migrate:
+        condition: service_completed_successfully
+    logging: *logging
+    restart: unless-stopped
+
+  # Applies GlitchTip's database migrations (it does not do it by itself) at every deploy, then stops.
+  glitchtip-migrate:
+    image: glitchtip/glitchtip:6.2.6@sha256:a3d8eb1b36c1e1603d55ab32711ea3dd8115874742a781a57391a62a16e0dff6
+    command: ./manage.py migrate
+    environment: *glitchtip-env
+    depends_on:
       db:
         condition: service_healthy
     logging: *logging
-    restart: unless-stopped
+    restart: "no"
 
   caddy:
     image: caddy:2-alpine@sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f
