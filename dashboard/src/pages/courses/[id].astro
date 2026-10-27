@@ -58,6 +58,15 @@ const hoursText = course
   ? t(course.estimatedHours === 1 ? 'courses.hoursOne' : 'courses.hoursOther', { hours: course.estimatedHours })
   : '';
 const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.lessonCountOther', { count: total });
+// A new issue with the "Problem in a lesson" template (.github/ISSUE_TEMPLATE/lesson-problem.yml),
+// its title and "Course and lesson" field filled in with the course.
+const suggestUrl = course
+  ? `https://github.com/CGSeb/lessonfolk/issues/new?${new URLSearchParams({
+      template: 'lesson-problem.yml',
+      title: `[Lesson] ${course.title}`,
+      lesson: course.title,
+    })}`
+  : undefined;
 ---
 
 <BaseLayout
@@ -209,6 +218,11 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
               })}
             </ol>
           </section>
+
+          <p class="course-suggest">
+            {t('course.suggestIntro')}{' '}
+            <a href={suggestUrl} target="_blank" rel="noopener noreferrer">{t('course.suggestLink')}</a>
+          </p>
         </>
       )
     }
@@ -372,6 +386,12 @@ const lessonCountText = t(total === 1 ? 'courses.lessonCountOne' : 'courses.less
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
+  }
+
+  .course-suggest {
+    max-width: 52rem;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
   }
 
   .course-issues {

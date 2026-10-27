@@ -316,6 +316,19 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expectText(page.text, fixture.course);
   });
 
+  it('links the course page to a new "Problem in a lesson" issue, in a new tab', async () => {
+    const page = await getPage(server, '/courses/ai-foundations');
+    const link = page.html.match(/<a href="(https:\/\/github\.com\/CGSeb\/lessonfolk\/issues\/new\?[^"]*)"([^>]*)>([^<]*)<\/a>/);
+    expect(link?.[3]).toBe('Suggest an improvement on GitHub');
+    expect(link?.[2]).toContain('target="_blank"');
+    const url = new URL(link![1].replaceAll('&amp;', '&'));
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      template: 'lesson-problem.yml',
+      title: '[Lesson] AI Foundations',
+      lesson: 'AI Foundations',
+    });
+  });
+
   it('shows the lesson getNextLesson picks, on home and on the course page', async () => {
     // Same rule as the tutor's "Start or resume" (AGENTS.md), computed from the seeded progress.
     const next = getNextLesson(loadCatalog('en', COURSES_DIR), progress);
