@@ -61,6 +61,31 @@ Keep the `/privacy` text (`privacy.measure` in `dashboard/src/i18n/en.ts`) in st
 The "Visit statistics" section only shows on a server where `UMAMI_WEBSITE_ID` is set, so a
 notice never says a server measures visits when it does not.
 
+## Error monitoring
+
+The hosted version reports unexpected errors to a self-hosted [GlitchTip](https://glitchtip.com) (MIT
+licence, Sentry-compatible), so a fault is noticed without waiting for a learner to complain.
+
+- **What an event holds** (`packages/db/src/error-report.ts`, built field by field, no SDK): the error's
+  type, a message with emails, URL query strings, ids and long tokens removed (a database error is
+  reduced to its name and code: its message holds learners' data), the stack (file, function and line),
+  the release tag and a fixed place name (`page`, `mcp tool`, `migration`…). Never a request, header,
+  cookie, query string, body, user id, email, IP address or note. The test in `error-report.test.ts` fails
+  if a failed query's parameters reach the event; do not add fields to it.
+- **Off by default**: nothing is sent unless `ERROR_REPORT_DSN` is set, so a LessonFolk you run yourself
+  reports nothing. Where it is on, the events go to GlitchTip on the server's internal network, never to a
+  third party.
+- **Where it lives**: its own Postgres database `glitchtip` and role (created by `deploy/deploy.sh`; the app
+  role cannot read it), not published to the internet: open it through an SSH tunnel (`deploy/.env.example`).
+  Only the first account can be created.
+- **Retention**: 30 days (`GLITCHTIP_RETENTION_DAYS`), like the server logs. Its database is in the nightly
+  backup like the others (35 days).
+- **Rate**: at most 20 events a minute per process; a down tracker never breaks the app.
+- **Logs**: `console.error` calls log the error's name and code (`describeErrorForLog`), never a result or
+  message that can hold learner data (the OAuth consent failure logs its status only).
+
+Keep the `/privacy` text (`privacy.whatTechnical` in `dashboard/src/i18n/en.ts`) in step with this list.
+
 ## Download all my data
 
 **Account** page, "Download all my data" (`/api/account/export-all`): one JSON file with every

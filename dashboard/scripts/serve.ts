@@ -10,7 +10,7 @@
  */
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { databaseUrl } from '@lessonfolk/db';
+import { databaseUrl, reportError } from '@lessonfolk/db';
 import { prepareLocalDatabase } from '../src/lib/auth/local-learner.ts';
 import { AuthConfigError, checkStartup, readAuthSettings, type AuthSettings } from '../src/lib/auth/settings.ts';
 
@@ -34,6 +34,14 @@ if (settings.mode === 'none') {
   console.log('Sign-in is off (LESSONFOLK_AUTH=none): one local learner, on this computer only.');
 } else {
   console.log(`Sign-in with OAuth (LESSONFOLK_AUTH=oauth) at ${settings.baseURL}`);
+}
+
+// An error nobody caught: report it, then stop as Node does by default (the container restarts).
+for (const event of ['uncaughtException', 'unhandledRejection'] as const) {
+  process.on(event, (error) => {
+    console.error(`LessonFolk crashed (${event}):`, error);
+    void reportError(error, event).finally(() => process.exit(1));
+  });
 }
 
 await import(pathToFileURL(entry).href);

@@ -434,7 +434,7 @@ export const en = {
       'Your progress: your profile (name, experience, goal, language, level and interests), your learning path, the status, dates and scores of your lessons, the tutor’s notes about you, and a history of every change.',
     whatApps: 'The AI apps you allowed to use LessonFolk: their name, address and permissions, and when you allowed them.',
     whatTechnical:
-      'Your sessions: the browser you signed in with, and the dates. The server also logs each request it receives, with your IP address and the page asked for.',
+      'Your sessions: the browser you signed in with, and the dates. The server also logs each request it receives, with your IP address and the page asked for. When something breaks, the server reports the fault to an error tracker that runs on this same server and shares nothing with anyone else: the type of error, a technical message with emails and addresses removed, and where in the code it happened. Never your account, progress, notes, the request or your IP address. These reports are kept for at most 30 days.',
     notCollected:
       'Not collected: passwords (there are none), your profile picture, your conversations with your AI app, analytics or advertising cookies. The only cookies are the one that keeps you signed in and the one that remembers the language you chose.',
     whereTitle: 'Where it is stored',
@@ -460,7 +460,7 @@ export const en = {
     operator: '{operator} runs this LessonFolk and decides what is done with your data.',
     ageTitle: 'Age',
     age: 'LessonFolk is not meant for children under 16. If you are younger, ask a parent or guardian before you sign in.',
-    updated: 'Last updated: 15 October 2026.',
+    updated: 'Last updated: 27 October 2026.',
     selfHostTitle: 'Prefer not to send your data?',
     selfHost:
       'LessonFolk is open source. You can run it on your own computer, with no sign-in, and nothing leaves it. The steps are in the project’s documentation on GitHub.',

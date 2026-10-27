@@ -1,6 +1,6 @@
 #!/bin/sh
-# Nightly database backup: a compressed pg_dump of each database (the app's and the audience
-# statistics') in ./backups, kept 35 days (the retention stated in docs/privacy.md), then copied
+# Nightly database backup: a compressed pg_dump of each database (the app's, the audience
+# statistics' and the error tracker's) in ./backups, kept 35 days (the retention stated in docs/privacy.md), then copied
 # off the server when BACKUP_REMOTE is set.
 # Run it from cron, e.g.: 15 3 * * * /opt/lessonfolk/backup.sh >> /opt/lessonfolk/backups/backup.log 2>&1
 set -eu
@@ -41,7 +41,12 @@ if $compose exec -T db psql -U lessonfolk -d postgres -tAc "SELECT 1 FROM pg_dat
   dump umami
 fi
 
-find backups \( -name 'lessonfolk-*.sql.gz' -o -name 'umami-*.sql.gz' \) -mtime +35 -delete
+# The error tracker's database (GlitchTip), once deploy.sh has created it.
+if $compose exec -T db psql -U lessonfolk -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'glitchtip'" | grep -q 1; then
+  dump glitchtip
+fi
+
+find backups \( -name 'lessonfolk-*.sql.gz' -o -name 'umami-*.sql.gz' -o -name 'glitchtip-*.sql.gz' \) -mtime +35 -delete
 
 if [ -n "${BACKUP_REMOTE:-}" ]; then
   for file in $files; do rclone copy "$file" "$BACKUP_REMOTE"; done

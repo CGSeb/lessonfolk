@@ -424,7 +424,7 @@ export const fr = {
       'Votre progression : votre profil (nom, expérience, objectif, langue, niveau et centres d’intérêt), votre parcours, le statut, les dates et les scores de vos leçons, les notes du tuteur à votre sujet, et l’historique de chaque modification.',
     whatApps: 'Les applications IA que vous avez autorisées à utiliser LessonFolk : leur nom, leur adresse, leurs permissions, et la date de votre autorisation.',
     whatTechnical:
-      'Vos sessions : le navigateur utilisé pour vous connecter, et les dates. Le serveur journalise aussi chaque requête reçue, avec votre adresse IP et la page demandée.',
+      'Vos sessions : le navigateur utilisé pour vous connecter, et les dates. Le serveur journalise aussi chaque requête reçue, avec votre adresse IP et la page demandée. Quand quelque chose plante, le serveur signale la panne à un outil de suivi des erreurs qui tourne sur ce même serveur et ne partage rien avec personne : le type d’erreur, un message technique dont les e-mails et adresses sont retirés, et l’endroit du code concerné. Jamais votre compte, votre progression, vos notes, la requête ni votre adresse IP. Ces signalements sont conservés 30 jours au plus.',
     notCollected:
       'Non collectés : les mots de passe (il n’y en a pas), votre photo de profil, vos conversations avec votre application IA, les cookies de mesure d’audience ou de publicité. Les seuls cookies sont celui qui vous garde connecté et celui qui retient la langue choisie.',
     whereTitle: 'Où c’est stocké',
@@ -450,7 +450,7 @@ export const fr = {
     operator: '{operator} fait tourner ce LessonFolk et décide de l’usage de vos données.',
     ageTitle: 'Âge',
     age: 'LessonFolk n’est pas destiné aux enfants de moins de 16 ans. Si vous êtes plus jeune, demandez à un parent ou à un tuteur légal avant de vous connecter.',
-    updated: 'Dernière mise à jour : 15 octobre 2026.',
+    updated: 'Dernière mise à jour : 27 octobre 2026.',
     selfHostTitle: 'Vous préférez ne pas envoyer vos données ?',
     selfHost:
       'LessonFolk est open source. Vous pouvez le faire tourner sur votre propre ordinateur, sans connexion, et rien n’en sort. Les étapes sont dans la documentation du projet sur GitHub.',

@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { reportError } from '@lessonfolk/db';
 import { AUTH_BASE_PATH, getAuth } from '../../../lib/auth/auth';
 import { getAuthSettings } from '../../../lib/auth/current-user';
 import { redirectWithCookies } from '../../../lib/auth/redirect';
@@ -35,7 +36,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const result = (await response.json().catch(() => ({}))) as { redirect_uri?: string; url?: string };
   const location = result.redirect_uri ?? result.url;
   if (!response.ok || !location) {
-    console.error(`OAuth consent failed (${response.status}):`, result);
+    // The status only: the result holds the AI app's redirect address, codes and error details.
+    console.error(`OAuth consent failed (${response.status}).`);
+    void reportError(new Error(`OAuth consent failed (${response.status})`), 'oauth consent');
     return new Response('This request has expired or is not valid. Go back to your AI app and connect again.', { status: 400 });
   }
   return redirectWithCookies(location, response);

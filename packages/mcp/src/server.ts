@@ -17,7 +17,7 @@ import {
   missingChecks,
   nextLesson,
 } from '@lessonfolk/core';
-import { describeErrorForLog } from '@lessonfolk/db';
+import { describeErrorForLog, reportError } from '@lessonfolk/db';
 import { McpServer, ResourceTemplate, type CallToolResult } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { DEFAULT_LANG, courseSummary, findLesson, learnerLang, lessonPosition, lessonStatus, readCatalog, readLessonText } from './catalog.ts';
@@ -83,6 +83,7 @@ function report(error: unknown): CallToolResult {
   if (!(error instanceof ProgressStoreError) && !(error instanceof CourseValidationError)) {
     // Name and code only: a failed query's message holds the learner's data (notes, profile).
     console.error(`LessonFolk MCP tool failed: ${describeErrorForLog(error)}`);
+    void reportError(error, 'mcp tool');
   }
   return fail(describeError(error));
 }

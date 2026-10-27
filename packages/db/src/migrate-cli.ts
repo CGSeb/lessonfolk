@@ -6,6 +6,7 @@
  */
 import { setTimeout as sleep } from 'node:timers/promises';
 import { ensureAppRole, isUnreachableError, migrationUrl, redactUrl, runMigrations } from './connection.ts';
+import { reportError } from './error-report.ts';
 
 const ATTEMPTS = Number(process.env.LESSONFOLK_MIGRATE_ATTEMPTS ?? 30);
 const DELAY_MS = 1_000;
@@ -31,6 +32,7 @@ for (let attempt = 1; ; attempt++) {
       continue;
     }
     console.error(`Database migrations failed on ${redactUrl(url)}:`, error);
+    await reportError(error, 'migration');
     process.exit(1);
   }
 }

@@ -13,8 +13,9 @@ if ! grep -q '^LESSONFOLK_APP_DB_PASSWORD=.' .env; then
   echo "Generated LESSONFOLK_APP_DB_PASSWORD in .env."
 fi
 
-# Audience measurement (Umami) has its own database role and its own app secret: generate both once.
-for name in UMAMI_DB_PASSWORD UMAMI_APP_SECRET; do
+# Audience measurement (Umami) and error monitoring (GlitchTip) each have their own database role
+# and their own secret: generate them once.
+for name in UMAMI_DB_PASSWORD UMAMI_APP_SECRET GLITCHTIP_DB_PASSWORD GLITCHTIP_SECRET_KEY; do
   if ! grep -q "^$name=." .env; then
     echo "$name=$(openssl rand -hex 24)" >> .env
     echo "Generated $name in .env."
@@ -36,6 +37,15 @@ ALTER ROLE umami PASSWORD :'umami_password';
 SELECT 'CREATE DATABASE umami OWNER umami' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'umami') \gexec
 REVOKE CONNECT ON DATABASE umami FROM PUBLIC;
 GRANT CONNECT ON DATABASE umami TO umami;
+SQL
+# Same for the error tracker: its own database and role, which only that role can connect to.
+glitchtip_password=$(grep '^GLITCHTIP_DB_PASSWORD=' .env | tail -n 1 | cut -d= -f2-)
+$compose exec -T db psql -U lessonfolk -d postgres -v ON_ERROR_STOP=1 -v "glitchtip_password=$glitchtip_password" <<'SQL'
+SELECT 'CREATE ROLE glitchtip LOGIN' WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'glitchtip') \gexec
+ALTER ROLE glitchtip PASSWORD :'glitchtip_password';
+SELECT 'CREATE DATABASE glitchtip OWNER glitchtip' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'glitchtip') \gexec
+REVOKE CONNECT ON DATABASE glitchtip FROM PUBLIC;
+GRANT CONNECT ON DATABASE glitchtip TO glitchtip;
 SQL
 
 # Pending database migrations run when the app container starts.
