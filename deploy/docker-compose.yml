@@ -14,6 +14,8 @@ x-glitchtip-env: &glitchtip-env
   SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY in .env}
   GLITCHTIP_DOMAIN: http://localhost:${GLITCHTIP_PORT:-3002}
   VALKEY_URL: ""
+  # Without Valkey the tasks wait in Postgres, and the image only starts a web server by default: run the worker inside it.
+  GLITCHTIP_EMBED_WORKER: "true"
   # Alert e-mails: an SMTP URL (smtp://user:password@host:587), or leave it to write them to the log.
   EMAIL_URL: ${GLITCHTIP_EMAIL_URL:-consolemail://}
   DEFAULT_FROM_EMAIL: ${GLITCHTIP_FROM_EMAIL:-glitchtip@localhost}
