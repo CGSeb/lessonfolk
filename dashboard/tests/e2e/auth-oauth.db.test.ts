@@ -186,6 +186,7 @@ describe('signing in and out', () => {
     const course = visibleText(await (await robin.request('/courses/ai-foundations')).text());
     expect(course).toContain('Sign in to see your progress');
     expect(course).toContain('What is AI?');
+    expect(course).toContain('Suggest an improvement on GitHub');
   });
 
   it('signs in through the provider and creates the user, account and learner', async () => {
