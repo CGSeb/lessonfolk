@@ -193,6 +193,8 @@ export const en = {
     notFoundHeading: 'We could not find this course',
     notFoundBody: 'There is no course with the id “{id}”. It may have been renamed or removed.',
     backToCourses: 'See all courses',
+    suggestIntro: 'Spotted a mistake or an unclear explanation?',
+    suggestLink: 'Suggest an improvement on GitHub',
     // Shown when the course, or some of its lessons, has no translation in the visitor's language.
     notTranslated: 'This course is not translated into your language yet, so it is shown in English. Your tutor still teaches it in the language you speak.',
     partlyTranslated: 'Some lessons of this course are not translated into your language yet, so they are shown in English. Your tutor still teaches them in the language you speak.',

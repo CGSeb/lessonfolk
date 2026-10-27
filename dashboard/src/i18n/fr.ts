@@ -185,6 +185,8 @@ export const fr = {
     notFoundHeading: 'Nous n’avons pas trouvé ce cours',
     notFoundBody: 'Il n’y a pas de cours avec l’identifiant « {id} ». Il a peut-être été renommé ou supprimé.',
     backToCourses: 'Voir tous les cours',
+    suggestIntro: 'Vous avez repéré une erreur ou une explication peu claire ?',
+    suggestLink: 'Proposer une amélioration sur GitHub',
     notTranslated: 'Ce cours n’est pas encore traduit en français : il est affiché en anglais. Votre tuteur vous l’enseigne quand même en français.',
     partlyTranslated: 'Certaines leçons de ce cours ne sont pas encore traduites en français : elles sont affichées en anglais. Votre tuteur vous les enseigne quand même en français.',
   },
