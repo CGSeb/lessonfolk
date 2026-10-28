@@ -1,0 +1,17 @@
+# Deploys the latest LessonFolk release (update.sh), started by lessonfolk-update.timer.
+# Install once on the server, as root:
+#   cp /opt/lessonfolk/lessonfolk-update.service /opt/lessonfolk/lessonfolk-update.timer /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now lessonfolk-update.timer
+# Its runs: journalctl -u lessonfolk-update
+[Unit]
+Description=Deploy the latest LessonFolk release
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+# The owner of /opt/lessonfolk, in the docker group.
+User=deploy
+WorkingDirectory=/opt/lessonfolk
+ExecStart=/opt/lessonfolk/update.sh
+TimeoutStartSec=20min
