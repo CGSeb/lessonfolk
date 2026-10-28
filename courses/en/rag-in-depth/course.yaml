@@ -1,0 +1,15 @@
+id: rag-in-depth
+title: "RAG in Depth: Retrieval You Can Trust"
+level: advanced
+theme: building-with-ai
+authors: [lessonfolk]
+description: Find out why RAG systems give wrong answers, and how each stage is made reliable — preparing documents, combining keyword and meaning search with reranking, improving queries, evaluating retrieval and answers separately, and running it safely in production. No code needed.
+estimatedHours: 2
+prerequisites: [ai-agents-and-tools, evaluating-ai-output]
+lessons:
+  - rag-in-depth/01-where-rag-goes-wrong
+  - rag-in-depth/02-preparing-documents
+  - rag-in-depth/03-hybrid-search-and-reranking
+  - rag-in-depth/04-better-queries-and-agentic-retrieval
+  - rag-in-depth/05-evaluating-retrieval-and-answers
+  - rag-in-depth/06-rag-in-production
