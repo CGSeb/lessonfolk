@@ -13,7 +13,8 @@ x-logging: &logging
 x-glitchtip-env: &glitchtip-env
   DATABASE_URL: postgresql://glitchtip:${GLITCHTIP_DB_PASSWORD:?Set GLITCHTIP_DB_PASSWORD in .env}@db:5432/glitchtip
   SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY in .env}
-  GLITCHTIP_DOMAIN: http://localhost:${GLITCHTIP_PORT:-3002}
+  # The address its dashboard is opened at (links, sign-in check): localhost through an SSH tunnel, or ADMIN_ADDRESS.
+  GLITCHTIP_DOMAIN: http://${ADMIN_ADDRESS:-localhost}:${GLITCHTIP_PORT:-3002}
   VALKEY_URL: ""
   # Without Valkey the tasks wait in Postgres, and the image only starts a web server by default: run the worker inside it.
   GLITCHTIP_EMBED_WORKER: "true"
@@ -25,8 +26,8 @@ x-glitchtip-env: &glitchtip-env
   ENABLE_ORGANIZATION_CREATION: "False"
   # Errors are kept 30 days, like the server logs (docs/privacy.md).
   GLITCHTIP_RETENTION_DAYS: "30"
-  # Hosts the dashboard answers to: its internal name (the app's reports) and the SSH tunnel.
-  ALLOWED_HOSTS: glitchtip,localhost,127.0.0.1
+  # Hosts the dashboard answers to: its internal name (the app's reports), loopback and ADMIN_ADDRESS.
+  ALLOWED_HOSTS: glitchtip,localhost,127.0.0.1,${ADMIN_ADDRESS:-localhost}
 
 services:
   db:
@@ -83,7 +84,7 @@ services:
   # Audience measurement (docs/privacy.md): no cookie, no IP address stored. It has its own
   # database and role (created by deploy.sh), which the app cannot read. Caddy forwards only the
   # tracker script and the collect endpoint to it. Its dashboard is published on this server's
-  # loopback address only: open it through an SSH tunnel (see .env.example).
+  # loopback address only, or on ADMIN_ADDRESS (see .env.example).
   umami:
     image: ghcr.io/umami-software/umami:postgresql-latest@sha256:85909afc45bdcda1917394594a087421fdbb05610fded0fa9f6fb861abb2f367
     environment:
@@ -91,7 +92,7 @@ services:
       APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET in .env}
       DISABLE_TELEMETRY: "1"
     ports:
-      - "127.0.0.1:${UMAMI_PORT:-3001}:3000"
+      - "${ADMIN_ADDRESS:-127.0.0.1}:${UMAMI_PORT:-3001}:3000"
     depends_on:
       db:
         condition: service_healthy
@@ -101,13 +102,13 @@ services:
   # Error monitoring (docs/privacy.md): GlitchTip, an open-source (MIT) tracker that speaks Sentry's protocol.
   # It has its own database and role (created by deploy.sh), which the app cannot read. Nothing is
   # published to the internet: the app reports to it on the internal network, and its dashboard is on
-  # this server's loopback address only (open it through an SSH tunnel, see .env.example). No Valkey/Redis:
+  # this server's loopback address only, or on ADMIN_ADDRESS (see .env.example). No Valkey/Redis:
   # Postgres holds its queue and cache (fine at this size).
   glitchtip:
     image: glitchtip/glitchtip:6.2.6@sha256:a3d8eb1b36c1e1603d55ab32711ea3dd8115874742a781a57391a62a16e0dff6
     environment: *glitchtip-env
     ports:
-      - "127.0.0.1:${GLITCHTIP_PORT:-3002}:8000"
+      - "${ADMIN_ADDRESS:-127.0.0.1}:${GLITCHTIP_PORT:-3002}:8000"
     mem_limit: 768m
     depends_on:
       glitchtip-migrate:
