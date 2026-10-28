@@ -7,10 +7,10 @@ set -eu
 # Backups hold personal data: readable by the owner only.
 umask 077
 cd "$(dirname "$0")"
-if [ -f .env ]; then
-  set -a
-  . ./.env
-  set +a
+# Read only what this script needs from .env: it is Docker Compose's format, not a shell script
+# (a value with spaces would stop the script). Docker Compose reads the rest itself.
+if [ -z "${BACKUP_REMOTE:-}" ] && [ -f .env ]; then
+  BACKUP_REMOTE=$(sed -n 's/^BACKUP_REMOTE=//p' .env | tail -n 1 | sed 's/^"\(.*\)"$/\1/')
 fi
 
 compose="${COMPOSE:-docker compose}"

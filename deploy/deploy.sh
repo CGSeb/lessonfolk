@@ -54,5 +54,8 @@ $compose up -d --remove-orphans
 # changed: reload it so a changed Caddyfile takes effect (no downtime; it keeps the old
 # configuration if the new one is invalid, and then this fails the deploy).
 $compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile
+# Each release leaves its image behind: keep only the one running now, then the dangling layers.
+docker images --format '{{.Repository}}:{{.Tag}}' ghcr.io/cgseb/lessonfolk |
+  grep -vx "ghcr.io/cgseb/lessonfolk:$tag" | xargs -r docker rmi > /dev/null 2>&1 || true
 docker image prune -f > /dev/null
 echo "Deployed $tag."
