@@ -126,8 +126,9 @@ Never commit `.progress/` or `.env`. Found a security problem? Report it private
 [Security](SECURITY.md).
 
 **Releases.** Publishing a GitHub release runs [`release.yml`](.github/workflows/release.yml):
-the same tests on the release's tag, then it publishes the Docker image to GHCR and deploys it
-to the hosted server (the files in [`deploy/`](deploy)). The learner plugin has its own version
+the same tests on the release's tag, then it publishes the Docker image to GHCR. The hosted
+server checks for a new release every 5 minutes and deploys it by itself
+([`deploy/update.sh`](deploy/update.sh)); the workflow waits until the site shows the new version. The learner plugin has its own version
 (`version` in `.claude/skills/lessonfolk-tutor/.claude-plugin/plugin.json`), independent of the
 release number: raise it only when the plugin changes.
 
