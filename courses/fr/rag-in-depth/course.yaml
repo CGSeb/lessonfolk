@@ -1,0 +1,15 @@
+id: rag-in-depth
+title: "Le RAG en profondeur : une recherche fiable"
+level: advanced
+theme: building-with-ai
+authors: [lessonfolk]
+description: Comprenez pourquoi un système RAG donne de mauvaises réponses, et comment fiabiliser chaque étape — préparer les documents, combiner recherche par mots-clés et par le sens avec un reranking, améliorer les requêtes, évaluer séparément la recherche et les réponses, et l’exploiter en production en toute sécurité. Sans code.
+estimatedHours: 2
+prerequisites: [ai-agents-and-tools, evaluating-ai-output]
+lessons:
+  - rag-in-depth/01-where-rag-goes-wrong
+  - rag-in-depth/02-preparing-documents
+  - rag-in-depth/03-hybrid-search-and-reranking
+  - rag-in-depth/04-better-queries-and-agentic-retrieval
+  - rag-in-depth/05-evaluating-retrieval-and-answers
+  - rag-in-depth/06-rag-in-production
