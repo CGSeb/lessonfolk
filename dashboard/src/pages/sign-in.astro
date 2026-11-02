@@ -68,6 +68,26 @@ const error = Astro.url.searchParams.get('error');
       }
     </ul>
 
+    {
+      settings.demo && (
+        <details class="sign-in__demo">
+          <summary>{t('auth.demoSummary')}</summary>
+          <form class="stack" method="post" action="/sign-in/demo" style="--stack-space: var(--space-3)">
+            <input type="hidden" name="next" value={next} />
+            <label>
+              {t('auth.demoEmail')}
+              <input type="email" name="email" autocomplete="username" required />
+            </label>
+            <label>
+              {t('auth.demoPassword')}
+              <input type="password" name="password" autocomplete="current-password" required />
+            </label>
+            <button class="sign-in__button" type="submit" data-provider="demo">{t('auth.demoSubmit')}</button>
+          </form>
+        </details>
+      )
+    }
+
     <p class="muted"><a href="/privacy">{t('auth.privacyNote')}</a></p>
   </div>
 </BaseLayout>
@@ -102,6 +122,25 @@ const error = Astro.url.searchParams.get('error');
     font: inherit;
     font-weight: var(--weight-semibold);
     cursor: pointer;
+  }
+
+  .sign-in__demo {
+    text-align: left;
+  }
+
+  .sign-in__demo summary {
+    cursor: pointer;
+    text-align: center;
+    color: var(--color-text-muted, inherit);
+  }
+
+  .sign-in__demo form {
+    margin-top: var(--space-3);
+  }
+
+  .sign-in__demo label {
+    display: grid;
+    gap: var(--space-1);
   }
 
   .sign-in__icon {

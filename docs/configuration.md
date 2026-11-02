@@ -33,6 +33,7 @@ Details in [Sign-in for developers](auth-dev.md).
 | `BETTER_AUTH_SECRET` | (none) | `oauth` only, required: a random secret of 32 characters or more that signs the session cookies. |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | (none) | `oauth`: your GitHub OAuth app. Set both or neither. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | (none) | `oauth`: your Google OAuth client. Set both or neither. |
+| `LESSONFOLK_DEMO_EMAIL`, `LESSONFOLK_DEMO_PASSWORD` | (none) | `oauth`: a demo account that signs in with an email and a password (for the plugin directory's reviewers). Set both or neither; the password has 16 characters or more. Only this account can use a password: nobody can sign up with one. |
 | `LESSONFOLK_OPERATOR` | (none) | `oauth`: who runs this LessonFolk and is responsible for the data (a name and a country, e.g. `Jane Doe, France`), shown on the `/privacy` page. Without it the page has no "Who runs" section. |
 | `LESSONFOLK_PRIVACY_CONTACT` | (none) | `oauth`: who learners write to about their data (an email address or a page), shown on the `/privacy` page. |
 | `LESSONFOLK_GOVERNING_LAW` | (none) | `oauth`: the law that governs the terms of use (e.g. `French law`), shown on the `/terms` page. Without it the page states no governing law. |

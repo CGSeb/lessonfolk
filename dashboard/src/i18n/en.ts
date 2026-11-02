@@ -318,6 +318,10 @@ export const en = {
     reauthHeading: 'Sign in again to continue',
     reauthIntro: 'To download all your data or delete your account, sign in again first. It confirms it is you.',
     signInWith: 'Sign in with {provider}',
+    demoSummary: 'Demo account (reviewers)',
+    demoEmail: 'Email',
+    demoPassword: 'Password',
+    demoSubmit: 'Sign in to the demo account',
     privacyNote: 'What we keep and why: read the privacy notice.',
     providersLabel: 'Sign-in options',
     signInError: 'Signing in did not work. Please try again.',
@@ -439,7 +443,7 @@ export const en = {
     whatTechnical:
       'Your sessions: the browser you signed in with, and the dates. The server also logs each request it receives, with your IP address and the page asked for. When something breaks, the server reports the fault to an error tracker that runs on this same server and shares nothing with anyone else: the type of error, a technical message with emails and addresses removed, and where in the code it happened. Never your account, progress, notes, the request or your IP address. These reports are kept for at most 30 days.',
     notCollected:
-      'Not collected: passwords (there are none), your profile picture, your conversations with your AI app, analytics or advertising cookies. The only cookies are the one that keeps you signed in and the one that remembers the language you chose.',
+      'Not collected: your passwords (learners have none; only the demo account used by the app directory’s reviewers has one, kept hashed), your profile picture, your conversations with your AI app, analytics or advertising cookies. The only cookies are the one that keeps you signed in and the one that remembers the language you chose.',
     whereTitle: 'Where it is stored',
     where: 'In the database of this server, located in {location}. It is not copied to other services. Backups stay with the same host.',
     whereUnknown: 'In the database of this server, run by the person who runs this LessonFolk. It is not copied to other services.',
