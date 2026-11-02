@@ -37,6 +37,13 @@ export interface OAuthSettings {
   providers: Partial<Record<RealProviderId, ProviderCredentials>>;
   /** Base URL of the fake OAuth server, only in automated tests. */
   fakeOAuthURL?: string;
+  /** The one demo account that signs in with an email and a password (for the plugin directory's reviewers). */
+  demo?: DemoAccount;
+}
+
+export interface DemoAccount {
+  email: string;
+  password: string;
 }
 
 export type AuthSettings = NoneSettings | OAuthSettings;
@@ -53,6 +60,7 @@ export const LOCAL_USER = {
 } as const;
 
 const MIN_SECRET_LENGTH = 32;
+const MIN_DEMO_PASSWORD_LENGTH = 16;
 
 /** A setting that stops the server from starting. The message says how to fix it. */
 export class AuthConfigError extends Error {
@@ -103,7 +111,23 @@ export function readAuthSettings(env: Env = process.env): AuthSettings {
     );
   }
 
-  return { mode: 'oauth', baseURL: readBaseURL(env), secret: readSecret(env), providers, fakeOAuthURL };
+  return { mode: 'oauth', baseURL: readBaseURL(env), secret: readSecret(env), providers, fakeOAuthURL, demo: readDemoAccount(env) };
+}
+
+/** The demo account, only when both its email and its password are set. */
+function readDemoAccount(env: Env): DemoAccount | undefined {
+  const email = value(env, 'LESSONFOLK_DEMO_EMAIL')?.toLowerCase();
+  const password = value(env, 'LESSONFOLK_DEMO_PASSWORD');
+  if (!email && !password) return undefined;
+  if (!email || !password) {
+    const missing = email ? 'LESSONFOLK_DEMO_PASSWORD' : 'LESSONFOLK_DEMO_EMAIL';
+    throw new AuthConfigError(`${missing} is missing: set both LESSONFOLK_DEMO_EMAIL and LESSONFOLK_DEMO_PASSWORD, or neither.`);
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new AuthConfigError(`LESSONFOLK_DEMO_EMAIL "${email}" is not an email address.`);
+  if (password.length < MIN_DEMO_PASSWORD_LENGTH) {
+    throw new AuthConfigError(`LESSONFOLK_DEMO_PASSWORD must be at least ${MIN_DEMO_PASSWORD_LENGTH} characters. Generate one with: openssl rand -base64 18`);
+  }
+  return { email, password };
 }
 
 function readBaseURL(env: Env): string {

@@ -308,6 +308,10 @@ export const fr = {
     reauthHeading: 'Reconnectez-vous pour continuer',
     reauthIntro: 'Pour télécharger toutes vos données ou supprimer votre compte, reconnectez-vous d’abord. Cela confirme que c’est bien vous.',
     signInWith: 'Se connecter avec {provider}',
+    demoSummary: 'Compte de démonstration (relecteurs)',
+    demoEmail: 'E-mail',
+    demoPassword: 'Mot de passe',
+    demoSubmit: 'Se connecter au compte de démonstration',
     privacyNote: 'Ce que nous gardons et pourquoi : lisez la politique de confidentialité.',
     providersLabel: 'Options de connexion',
     signInError: 'La connexion n’a pas fonctionné. Veuillez réessayer.',
@@ -429,7 +433,7 @@ export const fr = {
     whatTechnical:
       'Vos sessions : le navigateur utilisé pour vous connecter, et les dates. Le serveur journalise aussi chaque requête reçue, avec votre adresse IP et la page demandée. Quand quelque chose plante, le serveur signale la panne à un outil de suivi des erreurs qui tourne sur ce même serveur et ne partage rien avec personne : le type d’erreur, un message technique dont les e-mails et adresses sont retirés, et l’endroit du code concerné. Jamais votre compte, votre progression, vos notes, la requête ni votre adresse IP. Ces signalements sont conservés 30 jours au plus.',
     notCollected:
-      'Non collectés : les mots de passe (il n’y en a pas), votre photo de profil, vos conversations avec votre application IA, les cookies de mesure d’audience ou de publicité. Les seuls cookies sont celui qui vous garde connecté et celui qui retient la langue choisie.',
+      'Non collectés : vos mots de passe (les apprenants n’en ont pas ; seul le compte de démonstration des relecteurs de l’annuaire d’applications en a un, conservé haché), votre photo de profil, vos conversations avec votre application IA, les cookies de mesure d’audience ou de publicité. Les seuls cookies sont celui qui vous garde connecté et celui qui retient la langue choisie.',
     whereTitle: 'Où c’est stocké',
     where: 'Dans la base de données de ce serveur, situé en {location}. Rien n’est copié vers d’autres services. Les sauvegardes restent chez le même hébergeur.',
     whereUnknown: 'Dans la base de données de ce serveur, géré par la personne qui fait tourner ce LessonFolk. Rien n’est copié vers d’autres services.',

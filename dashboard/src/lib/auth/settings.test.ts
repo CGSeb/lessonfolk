@@ -125,3 +125,25 @@ describe('safeReturnPath', () => {
     }
   });
 });
+
+describe('the demo account', () => {
+  const demo = { LESSONFOLK_DEMO_EMAIL: ' Reviewer@Demo.example ', LESSONFOLK_DEMO_PASSWORD: 'a-long-demo-password-1234' };
+
+  it('is off by default', () => {
+    expect((oauth(github) as OAuthSettings).demo).toBeUndefined();
+  });
+
+  it('reads the email (lower case) and the password', () => {
+    expect((oauth({ ...github, ...demo }) as OAuthSettings).demo).toEqual({
+      email: 'reviewer@demo.example',
+      password: 'a-long-demo-password-1234',
+    });
+  });
+
+  it('wants both values, a real email and a long password', () => {
+    expect(() => oauth({ ...github, LESSONFOLK_DEMO_EMAIL: 'a@b.example' })).toThrow(/LESSONFOLK_DEMO_PASSWORD is missing/);
+    expect(() => oauth({ ...github, LESSONFOLK_DEMO_PASSWORD: demo.LESSONFOLK_DEMO_PASSWORD })).toThrow(/LESSONFOLK_DEMO_EMAIL is missing/);
+    expect(() => oauth({ ...github, ...demo, LESSONFOLK_DEMO_EMAIL: 'not-an-email' })).toThrow(/not an email address/);
+    expect(() => oauth({ ...github, ...demo, LESSONFOLK_DEMO_PASSWORD: 'short' })).toThrow(/at least 16 characters/);
+  });
+});
