@@ -30,6 +30,8 @@ export function createAuth(settings: OAuthSettings, db: Database) {
       ...(github && { github: { clientId: github.clientId, clientSecret: github.clientSecret } }),
       ...(google && { google: { clientId: google.clientId, clientSecret: google.clientSecret } }),
     },
+    // Password sign-in exists for the demo account only: nobody can sign up, and no other user has a password.
+    emailAndPassword: { enabled: Boolean(settings.demo), disableSignUp: true, minPasswordLength: 16 },
     plugins: [...mcpAuthPlugins(settings.baseURL, { purgeUnusedClients: () => purgeUnusedOAuthClients(db) }), ...(settings.fakeOAuthURL ? [fakeOAuthProvider(settings.fakeOAuthURL)] : [])],
     databaseHooks: {
       session: {
