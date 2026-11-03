@@ -2,6 +2,11 @@
 # (its DNS record must point at this server, ports 80 and 443 open).
 {$LESSONFOLK_DOMAIN} {
 	encode zstd gzip
+	# Do not advertise the server software.
+	header {
+		-Server
+		-Via
+	}
 	# The app limits form bodies itself; this stops anything larger before it reaches Node.
 	request_body {
 		max_size 8MB
