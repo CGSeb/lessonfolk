@@ -89,7 +89,7 @@ services:
   # tracker script and the collect endpoint to it. Its dashboard is published on this server's
   # loopback address only, or on ADMIN_ADDRESS (see .env.example).
   umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest@sha256:85909afc45bdcda1917394594a087421fdbb05610fded0fa9f6fb861abb2f367
+    image: ghcr.io/umami-software/umami:postgresql-latest@sha256:e69d1a7932e9dab0fc523edc7be1f3a53f3c261f57856fc2167ae74a8fc022e8
     environment:
       DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD:?Set UMAMI_DB_PASSWORD in .env}@db:5432/umami
       APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET in .env}
