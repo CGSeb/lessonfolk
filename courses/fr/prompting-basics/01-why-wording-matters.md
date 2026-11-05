@@ -15,8 +15,8 @@ prerequisites:
    question, une consigne ou un texte sur lequel travailler. « Faire du prompting », c’est juste bien
    rédiger ce message.
 2. **L’assistant ne sait que ce qu’on lui a donné.** C’est surtout la conversation (et les fichiers que
-   vous ajoutez) ; certains assistants gardent aussi une mémoire des conversations passées. Il ne voit ni votre écran, ni votre
-   situation, ni ce que vous avez en tête. Si une information compte pour la réponse et que vous ne
+   vous ajoutez) ; certains assistants gardent aussi une mémoire des conversations passées. Sauf si vous le partagez, il ne voit ni
+   votre écran, ni votre situation, ni ce que vous avez en tête. Si une information compte pour la réponse et que vous ne
    l’avez pas donnée, l’assistant doit deviner — et il choisira le plus souvent l’option la plus générique.
 3. **Donnez du contexte** : l’arrière-plan dont l’assistant a besoin. Qui vous êtes, dans quelle situation
    vous vous trouvez, ce que vous avez déjà essayé. « Écris un e-mail à mon propriétaire » devient

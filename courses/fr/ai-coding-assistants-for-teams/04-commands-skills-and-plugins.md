@@ -38,12 +38,13 @@ prerequisites:
    avec vos accès, traitez-le donc comme une dépendance (leçon 6).
 
 ## Teaching notes
-- Exemple en direct : ouvrez `.claude/skills/` dans le dépôt LessonFolk avec l’apprenant. Chaque dossier
-  (`learn`, `progress`, `review`, `create-course`, `edit-course`) a un court `SKILL.md` dont la description
-  dit quand l’utiliser, et dont le corps renvoie à une procédure dans `AGENTS.md`. Montrez comment cela
-  garde les procédures dans un seul fichier partagé (leçon 3) tout en donnant à Claude Code des points
-  d’entrée nommés, à la demande. `course-builder`, dans le même dossier, est un petit plugin qui ajoute un
-  panneau latéral pendant la rédaction d’un cours.
+- Exemple en direct : ouvrez `.claude/skills/` dans le dépôt LessonFolk avec l’apprenant. Les dossiers
+  de rédaction de cours (`create-course`, `edit-course`, `review-course`) ont chacun un court `SKILL.md` dont
+  la description dit quand l’utiliser, et dont le corps renvoie à une procédure dans `AGENTS.md`. Montrez
+  comment cela garde les procédures dans un seul fichier partagé (leçon 3) tout en donnant à Claude Code des
+  points d’entrée nommés, à la demande. Les procédures de tutorat (learn, review, progress) ne sont plus des
+  skills ici : le serveur du projet les fournit, ce qui montre une autre façon de livrer un workflow. Les
+  autres dossiers contiennent du code de plugin, pas des skills.
 - Si vous tournez dans un outil, montrez à l’apprenant comment lister les commandes ou skills disponibles
   dans cette session.
 - Analogie qui fonctionne : **le règlement sur le frigo contre le classeur de recettes**. Les règles sur le
@@ -53,9 +54,9 @@ prerequisites:
 - Comment les outils nomment tout cela, fin 2026 (cela change vite ; vérifiez la documentation, et ne
   présentez pas les manques comme définitifs) :
 
-  | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI |
+  | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI (comptes professionnels et clés d’API uniquement) |
   |---|---|---|---|---|---|
-  | Prompts enregistrés | commandes slash (intégrées aux skills) | remplacés par les skills (les prompts personnalisés ont été supprimés en 2026) | `.github/prompts/*.prompt.md` | `.cursor/commands/`, désormais converties en skills par `/migrate-to-skills` | `.gemini/commands/*.toml` |
+  | Prompts enregistrés | commandes slash (intégrées aux skills) | remplacés par les skills (les prompts personnalisés ont été supprimés en 2026) | `.github/prompts/*.prompt.md`, désormais converties en skills (VS Code ne les charge plus) | `.cursor/commands/`, désormais converties en skills par `/migrate-to-skills` | `.gemini/commands/*.toml` |
   | Skills (`SKILL.md`) | `.claude/skills/` | pris en charge | pris en charge | pris en charge (`.cursor/skills/`) | voir la doc |
   | Sous-agents | `.claude/agents/` | voir la doc | agents personnalisés (`.github/agents/`) | voir la doc | voir la doc |
   | Lots | plugins et marketplaces | voir la doc | voir la doc | voir la doc | extensions |

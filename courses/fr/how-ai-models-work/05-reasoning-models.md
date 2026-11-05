@@ -37,8 +37,9 @@ prerequisites:
    mauvaise réponse avec des étapes convaincantes. Vérifiez le résultat, surtout quand l’enjeu
    est élevé.
 6. **Souvent, vous pouvez choisir l’effort.** Beaucoup d’outils permettent de régler combien le
-   modèle réfléchit, ou de l’activer seulement pour les questions difficiles. Adaptez l’effort
-   à la difficulté.
+   modèle réfléchit (un effort faible, moyen ou élevé), et certains permettent d’activer ou de couper la
+   réflexion. Sur beaucoup de modèles récents, elle est active par défaut et ne peut pas être coupée : le
+   réglage est un niveau d’effort, pas un interrupteur. Adaptez l’effort à la difficulté.
 
 ## Teaching notes
 - Analogie : répondre à « 17 fois 24 » d’un coup, ou sur une feuille de papier. Même personne,

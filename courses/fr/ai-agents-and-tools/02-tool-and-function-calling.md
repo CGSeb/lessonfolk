@@ -39,8 +39,8 @@ prerequisites:
 - Quand vous montrez un exemple, suivez le format courant chat-completions pour les outils (`tools`,
   `tool_calls`, `role: "tool"` avec `tool_call_id`). Ce format est largement repris par d’autres fournisseurs et
   serveurs locaux, ce qui explique son choix ici. Certains fournisseurs recommandent désormais une
-  interface plus récente pour les nouveaux projets (OpenAI recommande son API Responses, qui utilise
-  d’autres noms d’éléments). Si l’API de l’apprenant diffère, dites-le ; le concept est identique.
+  interface plus récente pour les nouveaux projets, avec d’autres noms d’éléments : l’API de l’apprenant
+  peut donc différer de ce format. Si l’API de l’apprenant diffère, dites-le ; le concept est identique.
 - Analogie qui fonctionne : **un responsable et son assistant**. Le responsable (le modèle) dit « merci de
   vérifier le stock de mugs bleus » ; l’assistant (votre code) va à l’entrepôt et fait son rapport. Le
   responsable ne touche jamais aux étagères.
