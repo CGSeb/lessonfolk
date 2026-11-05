@@ -34,8 +34,10 @@ prerequisites:
    model's work, not the raw text) can be useful to read and to check, but they are not a
    guaranteed record of how the model really reached the answer, and a reasoning model can still reach a wrong answer with convincing steps.
    Check the result, especially when stakes are high.
-6. **Often you can choose the effort.** Many tools let you pick how much to think, or
-   switch it on only for hard questions. Match effort to difficulty.
+6. **Often you can choose the effort.** Many tools let you set how much the model
+   thinks (a low, medium or high effort), and some let you switch thinking on or off. On many recent
+   models thinking is on by default and cannot be turned off, so the setting is an effort level, not
+   a switch. Match effort to difficulty.
 
 ## Teaching notes
 - Analogy: answering "17 times 24" instantly versus on a sheet of paper. Same person,

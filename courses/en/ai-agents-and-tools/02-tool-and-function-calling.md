@@ -39,8 +39,8 @@ prerequisites:
 - When you show an example, follow the common chat-completions format for tools (`tools`,
   `tool_calls`, `role: "tool"` with `tool_call_id`). It is widely copied by other providers
   and local servers, which is why it is used here. Some providers now recommend a newer
-  interface for new projects (OpenAI recommends its Responses API, which uses different item
-  names). If the learner's API differs, say so; the concept is identical.
+  interface for new projects, with different item names, so the learner's API may not match
+  this format. If the learner's API differs, say so; the concept is identical.
 - Analogy that works: **a manager and an assistant**. The manager (the model) says "please
   check the stock of blue mugs"; the assistant (your code) goes to the warehouse and reports
   back. The manager never touches the shelves.

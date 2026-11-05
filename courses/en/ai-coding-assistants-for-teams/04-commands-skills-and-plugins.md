@@ -37,12 +37,13 @@ prerequisites:
    runs with your access, so treat it like a dependency (lesson 6).
 
 ## Teaching notes
-- Live example: open `.claude/skills/` in the LessonFolk repository with the learner. Each
-  folder (`learn`, `progress`, `review`, `create-course`, `edit-course`) has a short
+- Live example: open `.claude/skills/` in the LessonFolk repository with the learner. The
+  course-authoring folders (`create-course`, `edit-course`, `review-course`) each have a short
   `SKILL.md` whose description says when to use it, and whose body points to a procedure in
   `AGENTS.md`. Show how this keeps the procedures in one shared file (lesson 3) while giving
-  Claude Code named, on-demand entry points. `course-builder` in the same folder is a small
-  plugin that adds a side pane while a course is being written.
+  Claude Code named, on-demand entry points. The tutoring procedures (learn, review, progress)
+  are no longer skills here: the project's server provides them, which shows another way to
+  ship a workflow. Other folders there hold plugin code, not skills.
 - If you are running inside a tool, show the learner how to list the commands or skills
   available in this session.
 - Analogy that works: **the house rules on the fridge versus the binder of recipes**. Rules
@@ -52,9 +53,9 @@ prerequisites:
 - How tools name these, as of late 2026 (they change fast; check the documentation, and do
   not present gaps as permanent):
 
-  | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI |
+  | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI (work accounts and API keys only) |
   |---|---|---|---|---|---|
-  | Saved prompts | slash commands (part of skills) | replaced by skills (custom prompts were removed in 2026) | `.github/prompts/*.prompt.md` | `.cursor/commands/`, now converted to skills by `/migrate-to-skills` | `.gemini/commands/*.toml` |
+  | Saved prompts | slash commands (part of skills) | replaced by skills (custom prompts were removed in 2026) | `.github/prompts/*.prompt.md`, now converted to skills (VS Code no longer loads them) | `.cursor/commands/`, now converted to skills by `/migrate-to-skills` | `.gemini/commands/*.toml` |
   | Skills (`SKILL.md`) | `.claude/skills/` | supported | supported | supported (`.cursor/skills/`) | check docs |
   | Subagents | `.claude/agents/` | check docs | custom agents (`.github/agents/`) | check docs | check docs |
   | Bundles | plugins and marketplaces | check docs | check docs | check docs | extensions |

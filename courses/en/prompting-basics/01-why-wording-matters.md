@@ -15,8 +15,8 @@ prerequisites:
    an instruction, or a piece of text to work on. "Prompting" just means writing that
    message well.
 2. **The assistant only knows what it has been given.** That is mostly the conversation (and
-   any files you add); some assistants also keep a memory of past chats. It cannot see your
-   screen, your situation or what you have in mind. If something matters for the answer and you
+   any files you add); some assistants also keep a memory of past chats. Unless you share it,
+   it cannot see your screen, your situation or what you have in mind. If something matters for the answer and you
    did not say it, the assistant has to guess — and it will usually guess the most generic
    option.
 3. **Give context**: the background the assistant needs. Who you are, what situation you
