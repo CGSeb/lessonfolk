@@ -1,0 +1,14 @@
+id: adapting-models
+title: "Adapting a Model: Prompting, RAG, Fine-Tuning or Distillation?"
+level: advanced
+theme: building-with-ai
+authors: [lessonfolk]
+description: Decide how to make a model fit your task — when a better prompt or retrieval is enough, what fine-tuning really changes, what makes good training data, when a smaller distilled model pays off, and how to prove that the gain is worth the cost. No code needed.
+estimatedHours: 1.75
+prerequisites: [how-ai-models-work, rag-in-depth]
+lessons:
+  - adapting-models/01-the-adaptation-ladder
+  - adapting-models/02-what-fine-tuning-changes
+  - adapting-models/03-data-for-fine-tuning
+  - adapting-models/04-distillation-and-smaller-models
+  - adapting-models/05-deciding-and-maintaining

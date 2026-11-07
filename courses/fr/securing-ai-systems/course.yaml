@@ -1,0 +1,15 @@
+id: securing-ai-systems
+title: "Sécuriser les systèmes d’IA : menaces, red teaming et défense en profondeur"
+level: advanced
+theme: building-with-ai
+authors: [lessonfolk]
+description: Allez au-delà des garde-fous — modélisez les menaces qui pèsent sur une application ou un agent d’IA, comprenez pourquoi l’injection de prompt n’a pas de remède complet, empêchez les données de fuiter, concevez le système pour qu’un modèle trompé ne puisse pas faire grand mal, attaquez votre propre système avant les autres, et réagissez quand quelque chose tourne mal. Sans code.
+estimatedHours: 2
+prerequisites: [connecting-ai-with-mcp, evaluating-ai-output]
+lessons:
+  - securing-ai-systems/01-threat-modelling-an-ai-system
+  - securing-ai-systems/02-prompt-injection-in-depth
+  - securing-ai-systems/03-data-leaks-and-exfiltration
+  - securing-ai-systems/04-designing-for-containment
+  - securing-ai-systems/05-red-teaming-your-own-system
+  - securing-ai-systems/06-monitoring-and-incident-response

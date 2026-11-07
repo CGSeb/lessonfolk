@@ -1,0 +1,15 @@
+id: securing-ai-systems
+title: "Securing AI Systems: Threats, Red Teaming and Defence in Depth"
+level: advanced
+theme: building-with-ai
+authors: [lessonfolk]
+description: Go beyond guardrails — model the threats to an AI app or agent, understand why prompt injection has no complete fix, stop data from leaking out, design so that a fooled model can do little harm, attack your own system before others do, and respond when something goes wrong. No code needed.
+estimatedHours: 2
+prerequisites: [connecting-ai-with-mcp, evaluating-ai-output]
+lessons:
+  - securing-ai-systems/01-threat-modelling-an-ai-system
+  - securing-ai-systems/02-prompt-injection-in-depth
+  - securing-ai-systems/03-data-leaks-and-exfiltration
+  - securing-ai-systems/04-designing-for-containment
+  - securing-ai-systems/05-red-teaming-your-own-system
+  - securing-ai-systems/06-monitoring-and-incident-response
