@@ -15,18 +15,18 @@
     "plugin:openai": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/build-openai-plugin.ts"
   },
   "dependencies": {
-    "@better-auth/mcp": "1.7.14",
-    "@better-auth/oauth-provider": "1.7.14",
+    "@better-auth/mcp": "1.7.16",
+    "@better-auth/oauth-provider": "1.7.16",
     "@lessonfolk/core": "*",
     "@lessonfolk/db": "*",
     "@modelcontextprotocol/server": "2.4.0",
-    "better-auth": "^1.7.14",
+    "better-auth": "^1.7.16",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.4.0",
     "@types/node": "^22.20.5",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
