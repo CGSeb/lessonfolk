@@ -38,7 +38,7 @@ const buildsOn = view.buildsOn.filter((b) => b.course);
   <CourseAuthors authors={authors} />
 
   <div class="cluster" style="--cluster-space: var(--space-2)">
-    <ThemeBadge theme={theme} />
+    <ThemeBadge theme={theme} base="/projects" />
     <LevelBadge level={project.level} />
     {showProgress && status !== 'not_started' && <StatusBadge status={status} />}
   </div>

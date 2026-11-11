@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  catalogHref,
+  catalogListing,
   coursesHref,
+  projectsHref,
   filterCourses,
   getThemeFilters,
   OTHER_THEME,
@@ -63,6 +66,41 @@ describe('coursesHref', () => {
 
   it('encodes theme, search and page', () => {
     expect(coursesHref({ theme: 'using', q: 'a & b', page: 2 })).toBe('/courses?theme=using&q=a+%26+b&page=2');
+  });
+
+  it('links the project catalog the same way', () => {
+    expect(projectsHref()).toBe('/projects');
+    expect(projectsHref({ theme: 'using', q: 'prompt' })).toBe('/projects?theme=using&q=prompt');
+    expect(catalogHref('/projects', { page: 3 })).toBe(catalogHref('/projects', {}) + '?page=3');
+  });
+});
+
+describe('catalogListing', () => {
+  it('gives the badges, matches and page of a search, with links to the same catalog', () => {
+    const listing = catalogListing('/projects', courses, themes, new URLSearchParams('theme=using&q=prompt'));
+    expect(listing.query).toMatchObject({ theme: 'using', q: 'prompt', page: 1 });
+    expect(ids(listing.matches)).toEqual(['prompting']);
+    expect(ids(listing.shown.items)).toEqual(['prompting']);
+    // Badge counts follow the search, not the theme; every link stays in /projects.
+    expect(listing.badges.map(({ id, count, current }) => [id, count, current])).toEqual([
+      [undefined, 1, false],
+      ['understanding', 0, false],
+      ['using', 1, true],
+      [OTHER_THEME, 0, false],
+    ]);
+    expect(listing.badges[0].href).toBe('/projects?q=prompt');
+    expect(listing.badges.every((badge) => badge.href.startsWith('/projects'))).toBe(true);
+  });
+
+  it('pages the matches and links each page', () => {
+    const many = Array.from({ length: 20 }, (_, i) => course(`c${i}`, 'using'));
+    const listing = catalogListing('/courses', many, themes, new URLSearchParams('page=2'));
+    expect(listing.shown).toMatchObject({ page: 2, pageCount: 3, from: 10, to: 18, total: 20 });
+    expect(listing.pages).toEqual([
+      { page: 1, href: '/courses', current: false },
+      { page: 2, href: '/courses?page=2', current: true },
+      { page: 3, href: '/courses?page=3', current: false },
+    ]);
   });
 });
 

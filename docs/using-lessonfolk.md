@@ -221,7 +221,7 @@ the **Account** page (import, export, erase).
 | **Home** | `/` | Before you start: how to start. Afterwards: a greeting with your level and interests, your overall progress, the next lesson with the phrase to say to your tutor (its objectives open on a click), and your path: the current course and the next ones, with why the tutor chose it on demand. |
 | **Courses** | `/courses` | The catalog: every course grouped by theme, with its level, length and your status. Filter by theme or search by title or topic. Courses in your path are marked "Recommended for you". |
 | **A course** | `/courses/<course-id>` | The course's lessons with your status, scores, finish dates and the tutor's notes, what the course builds on, the next lesson, the projects that put it to work, and a link to report a mistake or an unclear explanation on GitHub. |
-| **Projects** | `/projects` | Real projects to practise what the courses teach, with your status and milestones reached. |
+| **Projects** | `/projects` | Real projects to practise what the courses teach, with your status and milestones reached. Filter by theme or search by title or topic, as on the Courses page. |
 | **A project** | `/projects/<project-id>` | The brief, what you need, the courses it builds on, the milestones (each with what "done" means), how your result is reviewed, and your progress with the tutor's notes. The tutor's coaching notes are never shown. |
 | **Authors** | `/authors` | The people and projects who write the courses, and the courses of each author. |
 | **Connect** | `/connect` | The setup steps for each AI app, with this LessonFolk's address in them (see [Connect your AI chat](#connect-your-ai-chat)). |

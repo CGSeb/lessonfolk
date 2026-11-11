@@ -369,7 +369,7 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     expect(page.status).toBe(200);
     expect(page.text).not.toContain('Coming soon');
     expect(page.text).toContain('No project is open yet');
-    expect(page.text).toContain('How projects work');
+    expect(page.text).not.toContain('How projects work');
     expect(page.html).toMatch(/<a[^>]*class="nav-link[^"]*"[^>]*href="\/projects"[^>]*aria-current="page"/);
     expect(page.html).toMatch(/<a[^>]*href="\/courses"[^>]*>\s*Browse the courses\s*<\/a>/);
     // Every page links to it from the nav, with no "Soon" tag any more.
