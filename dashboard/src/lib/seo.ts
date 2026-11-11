@@ -222,6 +222,72 @@ export function courseJsonLd(origin: string, course: SeoCourse, authors: SeoAuth
   ];
 }
 
+/** A project as its JSON-LD needs it (`Project` of @lessonfolk/core fits). */
+export interface SeoJsonLdProject {
+  id: string;
+  title: string;
+  level: string;
+  description: string;
+  estimatedHours: number;
+  /** The text's language (`en`, or the translation shown). */
+  lang: string;
+}
+
+/**
+ * JSON-LD of a project page: a `LearningResource` of type "Project" (level, time, free, authors,
+ * the courses it builds on) and its breadcrumb.
+ */
+export function projectJsonLd(
+  origin: string,
+  project: SeoJsonLdProject,
+  authors: SeoAuthor[],
+  buildsOn: { id: string; title: string }[],
+  projectsLabel: string,
+): object[] {
+  const url = absoluteUrl(origin, `/projects/${encodeURIComponent(project.id)}`);
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'LearningResource',
+      learningResourceType: 'Project',
+      name: project.title,
+      description: project.description,
+      url,
+      inLanguage: project.lang,
+      isAccessibleForFree: true,
+      educationalLevel: LEVEL_LABEL[project.level] ?? project.level,
+      timeRequired: `PT${Math.round(project.estimatedHours * 60)}M`,
+      provider: { '@type': 'Organization', name: SITE_NAME, url: absoluteUrl(origin, '/') },
+      ...(authors.length
+        ? {
+            author: authors.map((a) => ({
+              '@type': 'Person',
+              name: a.name,
+              url: absoluteUrl(origin, `/authors/${encodeURIComponent(a.slug)}`),
+            })),
+          }
+        : {}),
+      ...(buildsOn.length
+        ? {
+            isBasedOn: buildsOn.map((course) => ({
+              '@type': 'Course',
+              name: course.title,
+              url: absoluteUrl(origin, `/courses/${encodeURIComponent(course.id)}`),
+            })),
+          }
+        : {}),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: projectsLabel, item: absoluteUrl(origin, '/projects') },
+        { '@type': 'ListItem', position: 2, name: project.title, item: url },
+      ],
+    },
+  ];
+}
+
 /** Serialize JSON-LD for a `<script type="application/ld+json">`, safe against `</script>` in the data. */
 export function serializeJsonLd(data: object | object[]): string {
   return JSON.stringify(data).replace(/</g, '\\u003c');
