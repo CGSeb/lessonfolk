@@ -32,6 +32,8 @@ export interface McpEndpointOptions {
   gate: McpGate;
   /** The courses folder (`getCoursesDir()`). */
   coursesDir: string;
+  /** The practice projects folder (`getProjectsDir()`); left out, there is no project. */
+  projectsDir?: string;
   /** Write tools per user (default 60 per minute). */
   writeLimit?: RateLimitOptions;
   /** All requests per caller address, signed in or not (default 300 per minute). */
@@ -54,6 +56,7 @@ export function createMcpEndpoint({
   store,
   gate,
   coursesDir,
+  projectsDir,
   writeLimit = DEFAULT_WRITE_LIMIT,
   addressLimit = DEFAULT_ADDRESS_LIMIT,
   userLimit = DEFAULT_USER_LIMIT,
@@ -67,7 +70,7 @@ export function createMcpEndpoint({
       const identity = authInfo?.extra?.identity as McpIdentity | undefined;
       // Unreachable through the endpoint: every request passes the gate first.
       if (!identity) throw new Error('MCP request without an identity.');
-      return createLessonfolkServer({ userId: identity.userId, client: identity.client, scopes: identity.scopes, store, coursesDir, writeLimiter });
+      return createLessonfolkServer({ userId: identity.userId, client: identity.client, scopes: identity.scopes, store, coursesDir, projectsDir, writeLimiter });
     },
     { onerror: (error) => console.error('LessonFolk MCP:', error.message) },
   );
