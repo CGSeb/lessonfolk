@@ -83,10 +83,10 @@ describe('the OpenAI plugin upload', () => {
     }
   });
 
-  it('gives five positive and three negative review cases, on tools the server really has', () => {
-    expect(POSITIVE_CASES).toHaveLength(5);
+  it('gives six positive and three negative review cases, on tools the server really has', () => {
+    expect(POSITIVE_CASES).toHaveLength(6);
     expect(NEGATIVE_CASES).toHaveLength(3);
-    expect(review.test_cases.positive).toHaveLength(5);
+    expect(review.test_cases.positive).toHaveLength(6);
     expect(review.test_cases.negative).toHaveLength(3);
     expect(serverTools.length).toBeGreaterThan(10);
     for (const test of POSITIVE_CASES) {
