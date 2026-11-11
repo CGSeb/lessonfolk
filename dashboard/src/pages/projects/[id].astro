@@ -78,7 +78,7 @@ const courseStatus = (courseId: string) => {
             <h1 lang={otherLang}>{project.title}</h1>
             <CourseAuthors authors={authors} />
             <div class="cluster" style="--cluster-space: var(--space-2)">
-              <ThemeBadge theme={view.theme} />
+              <ThemeBadge theme={view.theme} base="/projects" />
               <LevelBadge level={project.level} />
               {showProgress && <StatusBadge status={view.status} />}
             </div>

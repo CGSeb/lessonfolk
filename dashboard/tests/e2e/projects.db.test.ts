@@ -118,6 +118,27 @@ describe('projects pages', () => {
     expect(page.text).toContain('Builds on: AI Foundations');
     expect(page.text).toContain('3 milestones');
     expect(page.text).not.toContain('No project is open yet');
+    expect(page.text).not.toContain('How projects work');
+  });
+
+  it('search and filter the projects like the courses', async () => {
+    // The same listing as the course catalog: search form, theme badges with counts, result count.
+    const page = await get('/projects');
+    expect(page.html).toMatch(/<form class="catalog-search[^"]*" role="search" method="get" action="\/projects"/);
+    expect(page.html).toMatch(/<a class="theme-filter theme-filter--all[^"]*" href="\/projects" aria-current="true"/);
+    expect(page.html).toMatch(/href="\/projects\?theme=understanding-ai"/);
+    expect(page.text).toContain('1 project');
+
+    const found = await get('/projects?q=foundations');
+    expect(found.text).toContain('1 project');
+    expect(found.html).toContain('href="/projects/demo-project"');
+
+    const none = await get('/projects?q=nothing-matches-this');
+    expect(none.text).toContain('No project matches your search.');
+    expect(none.html).not.toContain('href="/projects/demo-project"');
+
+    // The theme badge of a project card filters the projects, not the courses.
+    expect(page.html).toMatch(/class="badge theme-badge[^"]*"[^>]*href="\/projects\?theme=understanding-ai"/);
   });
 
   it('show a project page with its brief, milestones and review, never the coaching notes', async () => {

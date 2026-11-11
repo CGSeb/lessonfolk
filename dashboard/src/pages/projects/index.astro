@@ -1,7 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CatalogListing from '../../components/catalog/CatalogListing.astro';
 import ProjectCard from '../../components/project/ProjectCard.astro';
+import SignInPrompt from '../../components/SignInPrompt.astro';
 import { courseAuthors } from '../../components/authors/authorView';
+import { catalogListing } from '../../components/catalog/catalogFilter';
 import { projectCard } from '../../components/project/projectView';
 import { inspectCatalog, inspectProjects, progressOrEmpty } from '@lessonfolk/core';
 import { loadProgressFor } from '../../lib/store';
@@ -15,93 +18,40 @@ const { projects } = inspectProjects(lang);
 const progressResult = await loadProgressFor(Astro.locals.user);
 const showProgress = progressResult !== null;
 const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
-const cards = projects.map((project) => projectCard(project, catalog, progress));
 
-// How projects work: the four promises of the section.
-const points = [
-  { title: t('projects.realTitle'), body: t('projects.realBody'), tint: 'sky' },
-  { title: t('projects.milestonesTitle'), body: t('projects.milestonesBody'), tint: 'rose' },
-  { title: t('projects.coachTitle'), body: t('projects.coachBody'), tint: 'teal' },
-  { title: t('projects.whereTitle'), body: t('projects.whereBody'), tint: 'violet' },
-];
+// Same search, theme filter and paging as the course catalog, from the URL query.
+const listing = catalogListing('/projects', projects, catalog.themes, Astro.url.searchParams);
 ---
 
 <BaseLayout title={t('projects.title')} description={t('site.projectsDescription')}>
-  <div class="stack" style="--stack-space: var(--space-6)">
-    <header class="stack" style="--stack-space: var(--space-3)">
+  <div class="stack" style="--stack-space: var(--space-5)">
+    <header class="stack" style="--stack-space: var(--space-2)">
       <h1>{t('projects.heading')}</h1>
-      <p class="muted projects-intro">{t('projects.intro')}</p>
+      <p class="muted">{t('projects.intro')}</p>
     </header>
 
-    <section class="stack" style="--stack-space: var(--space-4)" aria-labelledby="projects-list">
-      <h2 id="projects-list">{t('projects.listHeading')}</h2>
-      {
-        cards.length === 0 ? (
-          <div class="card stack" style="--stack-space: var(--space-3)">
-            <p>{t('projects.empty')}</p>
-            <p>
-              <a class="button button--primary" href="/courses">{t('projects.browseCourses')}</a>
-            </p>
-          </div>
-        ) : (
-          <ol class="grid projects-list" role="list">
-            {cards.map((view) => (
-              <li>
-                <ProjectCard view={view} authors={courseAuthors(view.project, catalog.authors)} headingLevel={3} showProgress={showProgress} />
-              </li>
-            ))}
-          </ol>
-        )
-      }
-    </section>
+    <SignInPrompt />
 
-    <section class="stack" style="--stack-space: var(--space-4)" aria-labelledby="projects-how">
-      <h2 id="projects-how">{t('projects.howHeading')}</h2>
-      <ul class="grid projects-points" role="list">
-        {
-          points.map((point) => (
-            <li class:list={['card', `card--${point.tint}`, 'stack']} style="--stack-space: var(--space-2)">
-              <h3>{point.title}</h3>
-              <p>{point.body}</p>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    {
+      projects.length > 0 ? (
+        <CatalogListing base="/projects" listing={listing} themes={catalog.themes}>
+          {listing.shown.items.map((project) => {
+            const view = projectCard(project, catalog, progress);
+            return (
+              <li>
+                <ProjectCard view={view} authors={courseAuthors(project, catalog.authors)} showProgress={showProgress} />
+              </li>
+            );
+          })}
+        </CatalogListing>
+      ) : (
+        <div class="card stack" style="--stack-space: var(--space-3)">
+          <p>{t('projects.empty')}</p>
+          <p>
+            <a class="button button--primary" href="/courses">{t('projects.browseCourses')}</a>
+          </p>
+        </div>
+      )
+    }
   </div>
 </BaseLayout>
-
-<style>
-  .projects-intro {
-    max-width: 44rem;
-    font-size: var(--text-lg);
-  }
-
-  .projects-list {
-    --grid-min: 20rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .projects-list > li {
-    display: flex;
-  }
-
-  .projects-list > li > :global(*) {
-    flex: 1;
-  }
-
-  .projects-points {
-    --grid-min: 16rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .projects-points > li {
-    max-width: none;
-  }
-
-  .projects-points h3 {
-    font-size: var(--text-lg);
-  }
-</style>
