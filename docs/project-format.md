@@ -8,6 +8,11 @@ Lessons teach and check understanding in the conversation (see [Course format](c
 Projects are the hands-on part: unlike a lesson, a project may ask the learner to make
 something, with the tools listed in its `needs`.
 
+You can write a project by hand from this spec, or let your agent do it with you: say *"create
+a project about…"* or *"improve the project…"* (the `create-project` and `edit-project` skills
+in Claude Code; the "Create a project" and "Edit a project" procedures in `AGENTS.md` for other
+agents).
+
 ## Layout
 
 Projects have their own folder at the repository root, next to `courses/`. They use the
