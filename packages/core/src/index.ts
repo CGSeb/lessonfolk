@@ -8,3 +8,4 @@ export * from './tutor.ts';
 export * from './store.ts';
 export * from './project-body.ts';
 export * from './projects.ts';
+export * from './project-progress.ts';

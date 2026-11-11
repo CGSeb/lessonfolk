@@ -204,6 +204,22 @@ progress) and run `npm run dashboard` instead of Docker, which cannot see the fi
 - [ ] Accept the path: home shows "Your path" and stops suggesting "recommend a path". *Continue*
       again does not ask your level a second time.
 
+**A practice project, as a new learner.** From an erased progress, start with a project, not
+a course.
+
+- [ ] *I want to do a project*: the tutor asks only your name and language (no experience,
+      interests, level check or path), saves them, suggests a project and says which courses it
+      builds on without requiring them. `/projects` shows the project in progress.
+- [ ] The tutor presents the brief and coaches milestone 1 without writing the result for you,
+      even when you ask it to. Show it what the milestone's "Done when" asks: it records the
+      milestone, and the project page marks it reached and the next one.
+- [ ] Ask it to record milestone 3 before milestone 2: it refuses and explains why.
+- [ ] After the last milestone it reviews the result one criterion at a time, then completes the
+      project; the page shows "Project completed" and the verdicts.
+- [ ] Then say *let's start learning AI*: the tutor finishes the onboarding (experience, goal,
+      interests, without asking your name or language again), offers the level check if it
+      applies, and recommends a path.
+
 **Outside the LessonFolk folder.** Open the client in another folder, so it cannot read
 `AGENTS.md`, and add the server
 (`claude mcp add --transport http lessonfolk http://localhost:4321/mcp`).

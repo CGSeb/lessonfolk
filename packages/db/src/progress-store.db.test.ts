@@ -8,7 +8,7 @@ import { type CheckVerdict, type ProgressStore, type TutorCourseRef, ProgressSto
 import { asc, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createPostgresProgressStore, fromTimestamp, toTimestamp } from './progress-store.ts';
-import { learner, lessonProgress, progressEvent, user } from './schema.ts';
+import { learner, lessonProgress, progressEvent, projectProgress, user } from './schema.ts';
 import { createTestDatabase, type TestDatabase } from './testing.ts';
 
 const fixtureCourses = fileURLToPath(new URL('../../core/tests/fixtures/courses-valid', import.meta.url));
@@ -36,9 +36,11 @@ let testDb: TestDatabase;
 let store: ProgressStore;
 let userCount = 0;
 
+const projects = [{ id: 'demo', milestones: 2, reviewCriteria: 1 }];
+
 beforeAll(async () => {
   testDb = await createTestDatabase();
-  store = createPostgresProgressStore(testDb.db, { courses });
+  store = createPostgresProgressStore(testDb.db, { courses, projects });
 });
 
 afterAll(async () => {
@@ -70,7 +72,8 @@ async function events(userId: string) {
 async function snapshot(userId: string) {
   const learners = await testDb.db.select().from(learner).where(eq(learner.userId, userId));
   const lessons = await testDb.db.select().from(lessonProgress).where(eq(lessonProgress.userId, userId)).orderBy(asc(lessonProgress.lessonId));
-  return { learners, lessons, events: await events(userId) };
+  const projectRows = await testDb.db.select().from(projectProgress).where(eq(projectProgress.userId, userId));
+  return { learners, lessons, projects: projectRows, events: await events(userId) };
 }
 
 async function expectRejected(userId: string, write: () => Promise<unknown>, code: string) {
@@ -329,6 +332,65 @@ describe('rejected writes leave the data unchanged', () => {
   });
 });
 
+describe('projects', () => {
+  it('walk a project from start to done, logging every change', async () => {
+    const userId = await newUser();
+    await store.startProject(userId, 'demo', at);
+    await store.recordMilestone(userId, 'demo', 1, at);
+    await store.saveProjectNotes(userId, 'demo', 'Stopped before milestone 2.', at);
+    await store.recordMilestone(userId, 'demo', 2, at);
+    await store.recordProjectReview(userId, 'demo', 1, 'partly', at);
+    await store.recordProjectReview(userId, 'demo', 1, 'met', at);
+    const done = await store.completeProject(userId, 'demo', 'Clear result.', at);
+    expect(done.projects).toEqual({
+      demo: { status: 'done', startedAt: TODAY, completedAt: TODAY, milestones: [1, 2], review: { 1: 'met' }, notes: 'Clear result.' },
+    });
+    expect(await store.getProgress(userId)).toEqual(done);
+    expect((await events(userId)).map((e) => e.action)).toEqual([
+      'project.started',
+      'project.milestone_reached',
+      'project.notes_saved',
+      'project.milestone_reached',
+      'project.review_recorded',
+      'project.review_recorded',
+      'project.completed',
+    ]);
+  });
+
+  it('reset a project, and export and import projects with the progress', async () => {
+    const userId = await newUser();
+    await store.startProject(userId, 'demo', at);
+    await store.recordMilestone(userId, 'demo', 1, at);
+    const exported = await store.exportProgress(userId);
+    expect(JSON.parse(exported).projects).toEqual({ demo: { status: 'in_progress', startedAt: TODAY, milestones: [1] } });
+
+    const reset = await store.resetProject(userId, 'demo', at);
+    expect(reset.projects).toBeUndefined();
+    expect(await testDb.db.select().from(projectProgress).where(eq(projectProgress.userId, userId))).toEqual([]);
+
+    const imported = await store.importProgress(userId, exported, at);
+    expect(imported.projects?.demo.milestones).toEqual([1]);
+    expect(await store.exportProgress(userId)).toBe(exported);
+  });
+
+  it('refuse project writes outside the rules and change nothing', async () => {
+    const userId = await newUser();
+    await expectRejected(userId, () => store.startProject(userId, 'ghost', at), 'unknown_project');
+    await expectRejected(userId, () => store.recordMilestone(userId, 'demo', 1, at), 'project_not_started');
+    await store.startProject(userId, 'demo', at);
+    await expectRejected(userId, () => store.recordMilestone(userId, 'demo', 2, at), 'milestones_out_of_order');
+    await expectRejected(userId, () => store.recordProjectReview(userId, 'demo', 1, 'met', at), 'milestones_incomplete');
+    await expectRejected(userId, () => store.completeProject(userId, 'demo', 'x', at), 'milestones_incomplete');
+    await expectRejected(userId, () => store.resetProject(userId, 'other', at), 'nothing_to_reset');
+  });
+
+  it('refuse every project write when the store has no projects', async () => {
+    const userId = await newUser();
+    const bare = createPostgresProgressStore(testDb.db, { courses });
+    await expectRejected(userId, () => bare.startProject(userId, 'demo', at), 'unknown_project');
+  });
+});
+
 describe('import and export', () => {
   const exampleText = readFileSync(exampleFile, 'utf8');
 
@@ -340,7 +402,7 @@ describe('import and export', () => {
     expect(imported).toEqual(JSON.parse(exampleText));
     expect(exported).toBe(`${JSON.stringify(JSON.parse(exampleText), null, 2)}\n`);
     expect(await events(userId)).toEqual([
-      { action: 'progress.imported', payload: { mode: 'replace', lessons: 2, replacedLessons: 0 }, client: 'test' },
+      { action: 'progress.imported', payload: { mode: 'replace', lessons: 2, replacedLessons: 0, projects: 1 }, client: 'test' },
     ]);
   });
 
@@ -385,7 +447,7 @@ describe('deleteLearner', () => {
     const userId = await newUser();
     await store.startLesson(userId, L1, at);
     expect(await store.deleteLearner(userId)).toBe(true);
-    expect(await snapshot(userId)).toEqual({ learners: [], lessons: [], events: [] });
+    expect(await snapshot(userId)).toEqual({ learners: [], lessons: [], projects: [], events: [] });
     expect(await testDb.db.select().from(user).where(eq(user.id, userId))).toHaveLength(1);
     expect(await store.getProgress(userId)).toEqual({ version: 1, profile: {}, current: null, lessons: {} });
     expect(await store.deleteLearner(userId)).toBe(false);
@@ -486,11 +548,11 @@ describe('learners are kept apart (security pass, ticket #107)', () => {
     await testDb.db.delete(user).where(eq(user.id, bob));
     expect(await snapshot(alice)).toEqual(before);
     await testDb.db.delete(user).where(eq(user.id, alice));
-    expect(await snapshot(alice)).toEqual({ learners: [], lessons: [], events: [] });
+    expect(await snapshot(alice)).toEqual({ learners: [], lessons: [], projects: [], events: [] });
   });
 
   it('a write for an invented user id creates nothing', async () => {
     await expect(store.setProfile('not-a-user', { name: 'Ghost' }, at)).rejects.toMatchObject({ code: 'unknown_user' });
-    expect(await snapshot('not-a-user')).toEqual({ learners: [], lessons: [], events: [] });
+    expect(await snapshot('not-a-user')).toEqual({ learners: [], lessons: [], projects: [], events: [] });
   });
 });

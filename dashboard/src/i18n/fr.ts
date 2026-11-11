@@ -375,14 +375,14 @@ export const fr = {
     },
     plugin: {
       claudeCode:
-        'Installez le plugin LessonFolk (recommandé). Il connecte Claude Code à ce LessonFolk et ajoute les skills learn, progress et review, ainsi que le Course companion, un panneau latéral qui affiche votre cours et vos leçons. Dans un terminal, lancez :',
+        'Installez le plugin LessonFolk (recommandé). Il connecte Claude Code à ce LessonFolk et ajoute les skills learn, progress, review et project, ainsi que le Course companion, un panneau latéral qui affiche votre cours et vos leçons. Dans un terminal, lancez :',
       install: 'Puis :',
       claudeCodeCheck:
         'Lancez Claude Code (claude), tapez /mcp, choisissez le serveur LessonFolk et authentifiez-vous. Votre navigateur s’ouvre : connectez-vous, puis autorisez.',
       manualTitle: 'Ou configurez le serveur à la main',
       manualNote: 'Le tuteur fonctionne de la même façon dans le chat, sans les skills ni le panneau latéral.',
       claudeDesktop:
-        'Pour l’onglet Code, installez le plugin LessonFolk (recommandé). Claude Desktop utilise les plugins de Claude Code : celui-ci le connecte à ce LessonFolk et ajoute les skills learn, progress et review, ainsi que le Course companion, un panneau latéral qui affiche votre cours et vos leçons. Dans un terminal, lancez :',
+        'Pour l’onglet Code, installez le plugin LessonFolk (recommandé). Claude Desktop utilise les plugins de Claude Code : celui-ci le connecte à ce LessonFolk et ajoute les skills learn, progress, review et project, ainsi que le Course companion, un panneau latéral qui affiche votre cours et vos leçons. Dans un terminal, lancez :',
       claudeDesktopCheck:
         'Ouvrez une nouvelle session dans l’onglet Code, tapez /mcp, choisissez le serveur LessonFolk et authentifiez-vous. Votre navigateur s’ouvre : connectez-vous, puis autorisez.',
       connectorTitle: 'Ou ajoutez le connecteur (il fonctionne aussi dans les chats classiques)',

@@ -26,6 +26,7 @@ by an `on delete cascade` key, so deleting the user row deletes it all.
 | `oauth_access_token`, `oauth_refresh_token` | which app, scopes, dates | yes (metadata) | token values |
 | `learner` | profile (name, experience, goal, language, level, interests), path | yes | |
 | `lesson_progress` | status, dates, score, the tutor's notes | yes | |
+| `project_progress` | practice projects: status, dates, milestones reached, review verdicts, the tutor's notes | yes | |
 | `progress_event` | history of every change to the progress | yes | |
 | `jwks`, `oauth_resource`, `oauth_client_assertion` | server keys and settings, no personal data | no | |
 

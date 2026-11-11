@@ -98,6 +98,16 @@ the rest comes from English. Keep the `##` headings and the `Done when:` labels 
 keep the same milestones and review criteria in the same order: the tutor records milestones
 by their number. A project without a translation is shown in English.
 
+## How the tutor uses a project
+
+The tutor follows the `project` prompt ([`packages/mcp/prompts/project.md`](../packages/mcp/prompts/project.md)):
+it reads the project with `get_project`, presents the brief, then coaches one milestone at a
+time. It calls `record_milestone` when the learner shows what a `Done when:` line asks
+(milestones are reached in order), `record_project_review` on each review criterion (`met`,
+`partly` or `not_met`), then `complete_project`. The progress is saved under `projects` in
+progress.json (see [`progress.example.json`](progress.example.json)) and in the
+`project_progress` table.
+
 ## Validation
 
 `npm run check:courses` checks the projects with the courses. It fails on:

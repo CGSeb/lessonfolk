@@ -96,7 +96,7 @@ claude plugin install lessonfolk-tutor@lessonfolk
 ```
 
 The plugin connects Claude Code (and the Code tab of Claude Desktop) to https://lessonfolk.com
-and adds the `learn`, `progress` and `review` skills and the
+and adds the `learn`, `progress`, `review` and `project` skills and the
 [Course companion](#the-course-companion-claude-code). Then start Claude Code, run `/mcp`, pick
 the LessonFolk server and authenticate. The plugin only connects to the hosted LessonFolk: for
 your own instance, use the steps below. If you had already added the hosted server by hand, you
@@ -157,6 +157,7 @@ Talk naturally. These are the phrases the tutor recognises:
 | *"what can I learn?"*, *"list courses"* | Every course, grouped by theme, with your status. |
 | *"what can I learn about <theme>?"* | The courses of one theme, and where to start. |
 | *"quiz me"*, *"review"* | A few questions on lessons you found harder. |
+| *"I want to do a project"*, *"continue my project"* | Suggests a practice project, then coaches you through its milestones and reviews your result. It never does the work for you. |
 | *"skip this"*, *"I already know this"* | One or two questions; if you answer well, the lesson is skipped. |
 | *"reset <course>"*, *"do <course> again"* | Shows what will be reset, asks you to confirm, then removes the progress and scores of that course so you can take it again from its first lesson. Other courses are not changed. |
 | *"recommend a path"*, *"recommend a path again"* | A new personal path. |
