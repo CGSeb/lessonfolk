@@ -63,3 +63,6 @@ jobs:
       - run: claude plugin validate .
       - run: claude plugin validate "$PLUGIN"
       - run: claude plugin test "$PLUGIN"
+      # The authors' builder pane (create-course, create-project): in a clone only, never in the plugin.
+      - run: claude plugin validate .claude/skills/course-builder
+      - run: claude plugin test .claude/skills/course-builder
