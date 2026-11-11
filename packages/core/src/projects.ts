@@ -1,14 +1,8 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { isDir, readMarkdownFile, readYaml, validate, type ContentIssue } from './content-files.ts';
-import {
-  CourseValidationError,
-  DEFAULT_LANG,
-  inspectCatalog,
-  PROJECTS_DIR,
-  type Catalog,
-} from './courses.ts';
-import { getCoursesDir } from './paths.ts';
+import { CourseValidationError, DEFAULT_LANG, inspectCatalog, type Catalog } from './courses.ts';
+import { getCoursesDir, getProjectsDir } from './paths.ts';
 import { checkProjectBody } from './project-body.ts';
 import {
   projectFrontmatterSchema,
@@ -19,8 +13,9 @@ import {
 
 /**
  * Practice projects: a real result for the learner to reach, in milestones, with the tutor as
- * a coach. They live in `<coursesDir>/projects/<lang>/<project-id>.md`, ordered by
- * `projects/en/index.yaml`, and use the themes, authors and courses of the course catalog.
+ * a coach. They live in `projects/<lang>/<project-id>.md` at the repository root (next to
+ * `courses/`), ordered by `projects/en/index.yaml`, and use the themes, authors and courses of
+ * the course catalog.
  * See docs/project-format.md.
  */
 export interface Project {
@@ -49,9 +44,15 @@ export interface Project {
 
 type ProjectInspection = { projects: Project[]; issues: ContentIssue[]; warnings: ContentIssue[] };
 
-/** `<coursesDir>/projects/`. */
-export function projectsDirPath(coursesDir: string = getCoursesDir()): string {
-  return join(coursesDir, PROJECTS_DIR);
+/** How the projects folder is named in messages. */
+const PROJECTS_DIR = 'projects';
+
+/** Language codes that have a folder in the projects directory. */
+export function listProjectLanguages(projectsDir: string = getProjectsDir()): string[] {
+  if (!isDir(projectsDir)) return [];
+  return readdirSync(projectsDir)
+    .filter((name) => isDir(join(projectsDir, name)))
+    .sort();
 }
 
 /** Language folder names: an ISO 639-1 code, optionally with a region (`pt-br`). */
@@ -61,11 +62,10 @@ const LANG_FOLDER = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/;
  * The English projects, checked against `catalog` (the English course catalog) for their
  * theme, authors and the courses they build on. No `projects/` folder means no projects.
  */
-export function inspectBaseProjects(catalog: Catalog, coursesDir: string): ProjectInspection {
+export function inspectBaseProjects(catalog: Catalog, projectsDir: string): ProjectInspection {
   const issues: ContentIssue[] = [];
   const warnings: ContentIssue[] = [];
   const projects: Project[] = [];
-  const projectsDir = projectsDirPath(coursesDir);
   if (!isDir(projectsDir)) return { projects, issues, warnings };
 
   const langDir = join(projectsDir, DEFAULT_LANG);
@@ -141,10 +141,10 @@ export function inspectBaseProjects(catalog: Catalog, coursesDir: string): Proje
  * Replace the text of `base` with what `projects/<lang>/` translates. Only reports problems of
  * the translation's own files; a file that cannot be used keeps the English text.
  */
-export function translateProjects(base: Project[], lang: string, coursesDir: string): ProjectInspection {
+export function translateProjects(base: Project[], lang: string, projectsDir: string): ProjectInspection {
   const issues: ContentIssue[] = [];
   const warnings: ContentIssue[] = [];
-  const langDir = join(projectsDirPath(coursesDir), lang);
+  const langDir = join(projectsDir, lang);
   if (!isDir(langDir)) return { projects: base, issues, warnings };
   if (!LANG_FOLDER.test(lang)) {
     issues.push({ file: langDir, message: `"${lang}" is not a language code: ${PROJECTS_DIR}/ holds one folder per language` });
@@ -210,14 +210,19 @@ export function translateProjects(base: Project[], lang: string, coursesDir: str
 }
 
 /**
- * Load and check the projects in one language. Never throws for content problems: they are
- * returned in `issues` (with the course catalog's own) and `projects` holds what could be loaded.
+ * Load and check the projects in one language, against the English course catalog of
+ * `coursesDir`. Never throws for content problems: they are returned in `issues` (the course
+ * catalog's own are left out) and `projects` holds what could be loaded.
  */
-export function inspectProjects(lang = DEFAULT_LANG, coursesDir: string = getCoursesDir()): ProjectInspection {
+export function inspectProjects(
+  lang = DEFAULT_LANG,
+  projectsDir: string = getProjectsDir(),
+  coursesDir: string = getCoursesDir(),
+): ProjectInspection {
   const catalog = inspectCatalog(DEFAULT_LANG, coursesDir);
-  const base = inspectBaseProjects(catalog.catalog, coursesDir);
+  const base = inspectBaseProjects(catalog.catalog, projectsDir);
   if (lang === DEFAULT_LANG) return base;
-  const translation = translateProjects(base.projects, lang, coursesDir);
+  const translation = translateProjects(base.projects, lang, projectsDir);
   return {
     projects: translation.projects,
     issues: [...base.issues, ...translation.issues],
@@ -229,9 +234,13 @@ export function inspectProjects(lang = DEFAULT_LANG, coursesDir: string = getCou
  * Load the projects of a language in `projects/en/index.yaml` order. Files are read on every
  * call, like the courses. Throws CourseValidationError naming each faulty file.
  */
-export function loadProjects(lang = DEFAULT_LANG, coursesDir: string = getCoursesDir()): Project[] {
-  const { projects, issues } = inspectProjects(lang, coursesDir);
-  if (issues.length) throw new CourseValidationError(issues, coursesDir);
+export function loadProjects(
+  lang = DEFAULT_LANG,
+  projectsDir: string = getProjectsDir(),
+  coursesDir: string = getCoursesDir(),
+): Project[] {
+  const { projects, issues } = inspectProjects(lang, projectsDir, coursesDir);
+  if (issues.length) throw new CourseValidationError(issues, projectsDir);
   return projects;
 }
 
@@ -239,7 +248,8 @@ export function loadProjects(lang = DEFAULT_LANG, coursesDir: string = getCourse
 export function findProject(
   projectId: string,
   lang = DEFAULT_LANG,
+  projectsDir: string = getProjectsDir(),
   coursesDir: string = getCoursesDir(),
 ): Project | undefined {
-  return loadProjects(lang, coursesDir).find((project) => project.id === projectId);
+  return loadProjects(lang, projectsDir, coursesDir).find((project) => project.id === projectId);
 }
