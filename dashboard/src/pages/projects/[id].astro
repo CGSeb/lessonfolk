@@ -14,6 +14,8 @@ import { themeToneClass } from '../../components/theme-tone';
 import { DEFAULT_LANG, getStats, inspectCatalog, inspectProjects, progressOrEmpty, type ReviewVerdict } from '@lessonfolk/core';
 import { getCourseStatus } from '../../components/course-status';
 import { loadProgressFor } from '../../lib/store';
+import { projectJsonLd } from '../../lib/seo';
+import { siteOrigin } from '../../lib/site-url';
 
 const { t, lang } = Astro.locals;
 
@@ -48,7 +50,21 @@ const courseStatus = (courseId: string) => {
 };
 ---
 
-<BaseLayout title={project ? project.title : t('projects.notFoundTitle')} description={project?.description}>
+<BaseLayout
+  title={project ? project.title : t('projects.notFoundTitle')}
+  description={project?.description}
+  jsonLd={
+    view
+      ? projectJsonLd(
+          siteOrigin(Astro.url),
+          view.project,
+          authors,
+          view.buildsOn.flatMap((b) => (b.course ? [{ id: b.id, title: b.course.title }] : [])),
+          t('nav.projects'),
+        )
+      : undefined
+  }
+>
   <div class="stack" style="--stack-space: var(--space-5)">
     <nav aria-label={t('projects.breadcrumbLabel')}>
       <ol class="breadcrumb" role="list">

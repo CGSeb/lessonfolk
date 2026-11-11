@@ -179,6 +179,23 @@ describe('projects pages', () => {
     expect(page.text).not.toContain('SECRET-COACHING');
   });
 
+  it('give a project page its title, canonical URL, one h1 and JSON-LD, and keep unknown projects out of search', async () => {
+    const { html } = await get('/projects/demo-project?utm_source=x');
+    expect(html).toContain('<title>Demo project · LessonFolk</title>');
+    expect(html).toContain('<meta name="description" content="Put AI Foundations to work.">');
+    expect(html).toContain(`<link rel="canonical" href="${server.url}/projects/demo-project"`);
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(html).toContain('index, follow');
+    const data = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap((m) => JSON.parse(m[1]));
+    expect(data.map((item) => item['@type'])).toEqual(['LearningResource', 'BreadcrumbList']);
+    expect(data[0]).toMatchObject({ name: 'Demo project', learningResourceType: 'Project', isBasedOn: [{ name: 'AI Foundations' }] });
+
+    const unknown = await get('/projects/does-not-exist');
+    expect(unknown.status).toBe(404);
+    expect(unknown.html).toContain('content="noindex, nofollow"');
+    expect(unknown.html).not.toContain('application/ld+json');
+  });
+
   it('list the project pages in the sitemap and llms.txt', async () => {
     const sitemap = await (await fetch(`${server.url}/sitemap.xml`)).text();
     expect(sitemap).toContain('/projects/demo-project</loc>');
