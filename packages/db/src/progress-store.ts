@@ -15,29 +15,45 @@ import {
   type CompleteLessonInput,
   type Progress,
   type ProgressStore,
+  type ProjectRef,
   type TutorCourseRef,
   type WriteOptions,
   MAX_IMPORT_BYTES,
   ProgressStoreError,
   completeLesson,
+  completeProject,
   emptyProgress,
   formatProgress,
   isFinished,
   parseImportedProgress,
   placementSkip,
   recordCheck,
+  recordMilestone,
+  recordProjectReview,
   recordReviewScore,
   resetCourse,
+  resetProject,
   saveNotes,
+  saveProjectNotes,
   setPath,
   skipLesson,
   startLesson,
+  startProject,
   unwrapTutorResult,
   updateProfile,
 } from '@lessonfolk/core';
 import { and, eq, inArray } from 'drizzle-orm';
 import type { Database } from './connection.ts';
-import { type LearnerProfile, type NewLessonProgress, learner, lessonProgress, progressEvent, user } from './schema.ts';
+import {
+  type LearnerProfile,
+  type NewLessonProgress,
+  type NewProjectProgress,
+  learner,
+  lessonProgress,
+  progressEvent,
+  projectProgress,
+  user,
+} from './schema.ts';
 
 type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
 type Executor = Database | Transaction;
@@ -48,6 +64,11 @@ export interface PostgresProgressStoreOptions {
    * function is called on every write, so a reloaded catalog is picked up.
    */
   courses: readonly TutorCourseRef[] | (() => readonly TutorCourseRef[]);
+  /**
+   * The practice projects the project rules check against (e.g. `loadProjects()`), read on every
+   * project write like `courses`. Left out: no project, so every project write is refused.
+   */
+  projects?: readonly ProjectRef[] | (() => readonly ProjectRef[]);
   /**
    * Called with the user id after a write has been committed (never for a write that rolled
    * back, never for a read). The dashboard uses it to refresh that learner's open pages.
@@ -112,7 +133,41 @@ async function readProgress(db: Executor, userId: string, lock = false): Promise
       ...(lesson.checks !== null && { checks: lesson.checks }),
     };
   }
+
+  const projects = await db
+    .select()
+    .from(projectProgress)
+    .where(eq(projectProgress.userId, userId))
+    .orderBy(projectProgress.projectId);
+  if (projects.length) progress.projects = {};
+  for (const project of projects) {
+    const startedAt = fromTimestamp(project.startedAt);
+    const completedAt = fromTimestamp(project.completedAt);
+    progress.projects![project.projectId] = {
+      status: project.status,
+      ...(startedAt !== undefined && { startedAt }),
+      ...(completedAt !== undefined && { completedAt }),
+      milestones: project.milestones,
+      ...(project.review !== null && { review: project.review }),
+      ...(project.notes !== null && { notes: project.notes }),
+    };
+  }
   return progress;
+}
+
+type ProjectEntry = NonNullable<Progress['projects']>[string];
+
+function projectRow(userId: string, projectId: string, entry: ProjectEntry): NewProjectProgress {
+  return {
+    userId,
+    projectId,
+    status: entry.status,
+    startedAt: toTimestamp(entry.startedAt, `projects.${projectId}.startedAt`),
+    completedAt: toTimestamp(entry.completedAt, `projects.${projectId}.completedAt`),
+    milestones: [...(entry.milestones ?? [])],
+    review: entry.review ?? null,
+    notes: entry.notes ?? null,
+  };
 }
 
 function lessonRow(userId: string, lessonId: string, entry: Progress['lessons'][string]): NewLessonProgress {
@@ -137,6 +192,12 @@ async function writeProgress(tx: Transaction, userId: string, before: Progress, 
     .filter(([id, entry]) => !sameEntry(before.lessons[id], entry))
     .map(([id, entry]) => lessonRow(userId, id, entry));
   const removed = Object.keys(before.lessons).filter((id) => !(id in after.lessons));
+  const beforeProjects = before.projects ?? {};
+  const afterProjects = after.projects ?? {};
+  const changedProjects = Object.entries(afterProjects)
+    .filter(([id, entry]) => !sameEntry(beforeProjects[id], entry))
+    .map(([id, entry]) => projectRow(userId, id, entry));
+  const removedProjects = Object.keys(beforeProjects).filter((id) => !(id in afterProjects));
   const now = new Date();
 
   await tx
@@ -160,6 +221,18 @@ async function writeProgress(tx: Transaction, userId: string, before: Progress, 
       .values(row)
       .onConflictDoUpdate({ target: [lessonProgress.userId, lessonProgress.lessonId], set: { ...values, updatedAt: now } });
   }
+  if (removedProjects.length) {
+    await tx
+      .delete(projectProgress)
+      .where(and(eq(projectProgress.userId, userId), inArray(projectProgress.projectId, removedProjects)));
+  }
+  for (const row of changedProjects) {
+    const { userId: _user, projectId: _project, ...values } = row;
+    await tx
+      .insert(projectProgress)
+      .values(row)
+      .onConflictDoUpdate({ target: [projectProgress.userId, projectProgress.projectId], set: { ...values, updatedAt: now } });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -175,6 +248,7 @@ interface Change {
 
 export function createPostgresProgressStore(db: Database, options: PostgresProgressStoreOptions): ProgressStore {
   const catalog = () => (typeof options.courses === 'function' ? options.courses() : options.courses);
+  const projectCatalog = () => (typeof options.projects === 'function' ? options.projects() : (options.projects ?? []));
   const notify = (userId: string) => {
     try {
       options.onChange?.(userId);
@@ -312,6 +386,52 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
       });
     },
 
+    startProject(userId, projectId, opts) {
+      return write(userId, opts, (progress) => ({
+        progress: startProject(progress, projectCatalog(), projectId, dates(opts)),
+        action: 'project.started',
+        payload: { projectId },
+      }));
+    },
+
+    recordMilestone(userId, projectId, milestone, opts) {
+      return write(userId, opts, (progress) => ({
+        progress: recordMilestone(progress, projectCatalog(), projectId, milestone),
+        action: 'project.milestone_reached',
+        payload: { projectId, milestone },
+      }));
+    },
+
+    recordProjectReview(userId, projectId, criterion, verdict, opts) {
+      return write(userId, opts, (progress) => ({
+        progress: recordProjectReview(progress, projectCatalog(), projectId, criterion, verdict),
+        action: 'project.review_recorded',
+        payload: { projectId, criterion, verdict },
+      }));
+    },
+
+    completeProject(userId, projectId, notes, opts) {
+      return write(userId, opts, (progress) => {
+        const next = completeProject(progress, projectCatalog(), projectId, notes, dates(opts));
+        return { progress: next, action: 'project.completed', payload: { projectId, notes: next.projects![projectId].notes } };
+      });
+    },
+
+    saveProjectNotes(userId, projectId, notes, opts) {
+      return write(userId, opts, (progress) => {
+        const next = saveProjectNotes(progress, projectCatalog(), projectId, notes);
+        return { progress: next, action: 'project.notes_saved', payload: { projectId, notes: next.projects![projectId].notes } };
+      });
+    },
+
+    resetProject(userId, projectId, opts) {
+      return write(userId, opts, (progress) => ({
+        progress: resetProject(progress, projectId),
+        action: 'project.reset',
+        payload: { projectId, previous: progress.projects?.[projectId] },
+      }));
+    },
+
     async importProgress(userId, json, opts) {
       // Validate before opening the transaction: a bad file never touches the database.
       const imported = parseImportedProgress(json);
@@ -322,6 +442,7 @@ export function createPostgresProgressStore(db: Database, options: PostgresProgr
           mode: 'replace',
           lessons: Object.keys(imported.lessons).length,
           replacedLessons: Object.keys(previous.lessons).length,
+          projects: Object.keys(imported.projects ?? {}).length,
         },
       }));
     },

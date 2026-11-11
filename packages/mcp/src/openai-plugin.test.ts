@@ -39,14 +39,14 @@ describe('the OpenAI plugin upload', () => {
   const listing = manifest.extensions['com.openai'].interface;
   const review = manifest.extensions['com.openai'].review;
 
-  it('holds the manifests, the icons and the three skills, and nothing else', () => {
+  it('holds the manifests, the icons and the skills, and nothing else', () => {
     expect([...files.keys()].sort()).toEqual([
       'assets/icon.png',
       'assets/logo.png',
       'mcp.json',
       'plugin.json',
       ...SKILLS.map((name) => `skills/${name}/SKILL.md`),
-    ]);
+    ].sort());
   });
 
   it('declares exactly one remote server, with OAuth and no secret or header', () => {

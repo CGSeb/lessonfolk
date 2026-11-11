@@ -22,7 +22,7 @@ parts work. To get a working checkout first, follow
 | [`packages/core/`](../packages/core) | `@lessonfolk/core`: loading and validating courses, the progress format (progress.json v1), the tutor's rules (next lesson, path, level check) as code, and the `ProgressStore` interface every progress backend follows. |
 | [`packages/db/`](../packages/db) | `@lessonfolk/db`: the Postgres schema ([Drizzle](https://orm.drizzle.team)), the migrations in `drizzle/`, the Postgres progress store (`createPostgresProgressStore`) and the database test helpers. |
 | [`packages/mcp/`](../packages/mcp) | `@lessonfolk/mcp`: the MCP server (course and progress tools, course resources, tutor prompts) the dashboard serves at `/mcp`, and its OAuth setup for `LESSONFOLK_AUTH=oauth`. The tutor's instructions and the `learn`, `review` and `progress` prompts are `packages/mcp/prompts/*.md`: the source of the tutoring procedures (`npm run plugin:sync` copies them into the plugin's skills). |
-| [`.claude/skills/lessonfolk-tutor/`](../.claude/skills/lessonfolk-tutor) | The learner plugin for Claude Code: the `learn`, `progress` and `review` skills and the Course companion mod. It loads on its own in a clone and is published by the marketplace file below. See [The learner plugin](#the-learner-plugin). |
+| [`.claude/skills/lessonfolk-tutor/`](../.claude/skills/lessonfolk-tutor) | The learner plugin for Claude Code: the `learn`, `progress`, `review` and `project` skills and the Course companion mod. It loads on its own in a clone and is published by the marketplace file below. See [The learner plugin](#the-learner-plugin). |
 | [`.claude/skills/`](../.claude/skills) (the rest) | For course authors, in a clone only: the `create-course`, `edit-course` and `review-course` skills and the `course-builder` mod. Never part of the plugin. |
 | [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json) | Makes this repository a Claude Code plugin marketplace with one plugin, `lessonfolk-tutor`, and gives it its MCP server (the hosted LessonFolk). |
 | [`docs/`](.) | Documentation: see the [index](README.md). |
@@ -77,7 +77,8 @@ The dashboard workspace also has `dev`, `build` and `start`: the root `dashboard
 The schema lives in [`packages/db/src/schema.ts`](../packages/db/src/schema.ts) (Drizzle). It
 holds the sign-in tables of [Better Auth](https://www.better-auth.com) (`user`, `session`,
 `account`, `verification`) and those of the MCP authorization server (`jwks`, `oauth_*`), then
-`learner` (one per user), `lesson_progress` and the append-only `progress_event` log.
+`learner` (one per user), `lesson_progress`, `project_progress` (practice projects) and the
+append-only `progress_event` log.
 
 To change it:
 

@@ -2,6 +2,9 @@
  * The LessonFolk MCP server: course and progress tools, course resources and the tutor
  * prompts (instructions, `learn`, `review`, `progress`) for one user.
  *
+ * Practice projects have their own tools (list_projects, get_project, start_project…) and the
+ * `project` prompt: the tutor coaches the learner through the milestones of a project.
+ *
  * A fresh server is built for every request (stateless serving), bound to the user id the
  * endpoint got from the access token or the auth mode. No tool takes a user id: a client can
  * only ever read and change the progress of the user it signed in as.
@@ -15,12 +18,28 @@ import {
   checkVerdictSchema,
   formatCourseIssues,
   missingChecks,
+  missingCriteria,
+  missingMilestones,
   nextLesson,
+  reviewVerdictSchema,
 } from '@lessonfolk/core';
 import { describeErrorForLog, reportError } from '@lessonfolk/db';
 import { McpServer, ResourceTemplate, type CallToolResult } from '@modelcontextprotocol/server';
 import { z } from 'zod';
-import { DEFAULT_LANG, courseSummary, findLesson, learnerLang, lessonPosition, lessonStatus, readCatalog, readLessonText } from './catalog.ts';
+import {
+  DEFAULT_LANG,
+  courseSummary,
+  findLesson,
+  learnerLang,
+  lessonPosition,
+  lessonStatus,
+  projectState,
+  projectSummary,
+  readCatalog,
+  readLessonText,
+  readProjectText,
+  readProjects,
+} from './catalog.ts';
 import { compactProgress, progressReceipt } from './progress-view.ts';
 import { INSTRUCTIONS, registerPrompts } from './prompts.ts';
 import type { RateLimiter } from './rate-limit.ts';
@@ -45,6 +64,7 @@ export interface LessonfolkServerOptions {
 export const LIMITS = { id: 200, lang: 35, short: 200, text: 4000, listItems: 100, json: 1_000_000 } as const;
 
 const lessonId = z.string().min(1).max(LIMITS.id).describe('Lesson id: "<course-id>/<lesson file name>", e.g. "ai-foundations/01-what-is-ai".');
+const projectId = z.string().min(1).max(LIMITS.id).describe('Project id, e.g. "reusable-prompt" (see list_projects).');
 const lang = z
   .string()
   .min(2)
@@ -63,6 +83,8 @@ export function describeError(error: unknown): string {
     const { missing, missingChecks: unchecked, issues, problems } = error.details;
     if (missing?.length) lines.push(`Unfinished prerequisites: ${missing.join(', ')}.`);
     if (unchecked?.length) lines.push(`Questions with no recorded verdict: ${unchecked.join(', ')}.`);
+    if (error.details.missingMilestones?.length) lines.push(`Milestones not reached yet: ${error.details.missingMilestones.join(', ')}.`);
+    if (error.details.missingCriteria?.length) lines.push(`Review criteria with no verdict yet: ${error.details.missingCriteria.join(', ')}.`);
     for (const issue of issues ?? []) {
       lines.push(
         'prerequisiteId' in issue
@@ -145,7 +167,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       title: 'Get progress',
       description:
         "The learner's saved progress (progress.json v1 shape): profile (name, experience, goal, language, level, interests), " +
-        'path with its reason, current lesson, and every started lesson with status, dates and score. ' +
+        'path with its reason, current lesson, every started lesson with status, dates and score, and every started practice project (projects) with its milestones reached. ' +
         'To keep the answer small, notes are only given for the current lesson (to resume it) and, as a preview, for the latest finished lessons (recentNotes); ' +
         'other lessons are flagged hasNotes. Give courseId or lessonIds to read the notes of one course or of some lessons, or full: true for the whole progress.json. ' +
         'Empty profile and lessons mean a new learner who has not been onboarded yet: onboard them and save their profile with set_profile before teaching. ' +
@@ -153,14 +175,15 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       inputSchema: z.object({
         courseId: z.string().min(1).max(LIMITS.id).optional().describe('Course id: also give the notes of all its lessons.'),
         lessonIds: z.array(lessonId).max(LIMITS.listItems).optional().describe('Lesson ids: also give their notes.'),
+        projectIds: z.array(projectId).max(LIMITS.listItems).optional().describe('Project ids: also give their notes.'),
         full: z.boolean().optional().describe('The whole progress, notes of every lesson included. Large: only when needed.'),
       }),
       annotations: { ...readOnly, title: 'Get progress' },
     },
-    ({ courseId, lessonIds, full }) =>
+    ({ courseId, lessonIds, projectIds, full }) =>
       read(async () => {
         const progress = await store.getProgress(userId);
-        return full ? progress : compactProgress(progress, { courseId, lessonIds });
+        return full ? progress : compactProgress(progress, { courseId, lessonIds, projectIds });
       }),
   );
 
@@ -273,6 +296,58 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
           courseIds: theme.courses.map((c) => c.id),
           comingSoon: theme.courses.length === 0,
         }));
+      }),
+  );
+
+  server.registerTool(
+    'list_projects',
+    {
+      title: 'List projects',
+      description:
+        'The practice projects, in catalog order: a real result for the learner to reach in a few milestones, with you as a coach. ' +
+        "Each has level, theme, description, estimated hours, what the learner needs, the courses it builds on (with the learner's status for each), " +
+        "its number of milestones and review criteria, and the learner's status (not_started, in_progress, done) with the milestones reached. Give a theme id to list only that theme.",
+      inputSchema: z.object({ theme: z.string().min(1).max(LIMITS.id).optional().describe('Theme id (see list_themes).'), lang }),
+      annotations: { ...readOnly, title: 'List projects' },
+    },
+    ({ theme, lang: language }) =>
+      read(async () => {
+        const progress = await store.getProgress(userId);
+        const chosen = learnerLang(progress, language);
+        const catalog = readCatalog(coursesDir, chosen);
+        return readProjects(coursesDir, chosen)
+          .filter((project) => !theme || project.theme === theme)
+          .map((project) => projectSummary(catalog, project, progress));
+      }),
+  );
+
+  server.registerTool(
+    'get_project',
+    {
+      title: 'Get project',
+      description:
+        'The full project file: frontmatter, brief (for the learner), milestones each with its "Done when:" line, coaching notes (for you, not the learner) and review criteria. ' +
+        "Starts with a short header giving the learner's status: milestones reached, the next one, review verdicts.",
+      inputSchema: z.object({ projectId, lang }),
+      annotations: { ...readOnly, title: 'Get project' },
+    },
+    ({ projectId: id, lang: language }) =>
+      read(async () => {
+        const progress = await store.getProgress(userId);
+        const chosen = learnerLang(progress, language);
+        const project = readProjects(coursesDir, chosen).find((p) => p.id === id);
+        if (!project) throw new ProgressStoreError('unknown_project', `Unknown project "${id}". Use list_projects to see the project ids.`, { projectId: id });
+        const state = projectState(progress, project);
+        const where =
+          state.status === 'not_started'
+            ? 'not started: call start_project once the learner wants to do it'
+            : state.status === 'done'
+              ? 'done'
+              : state.nextMilestone
+                ? `in progress, milestones reached: ${state.milestonesReached.join(', ') || 'none'}; working on milestone ${state.nextMilestone} of ${project.milestones}`
+                : `in progress, every milestone reached; review criteria with no verdict: ${state.criteriaToReview?.join(', ') || 'none, call complete_project'}`;
+        const header = `<!-- LessonFolk: project ${project.id} ("${project.title}"), ${project.milestones} milestones and ${project.reviewCriteria} review criteria, language ${project.lang}${project.lang === chosen ? '' : ` (not translated into "${chosen}" yet)`}; learner status: ${where}. You are a coach, not a solution: never do the work, write the deliverable or give the answer to paste; ask questions, and give hints that go from a question to a pointer to a short example on a different case. Work on one milestone at a time. When the learner shows what its "Done when:" line asks, call record_milestone. Once every milestone is reached, review the result with the learner one criterion of "## Review" at a time and call record_project_review for each; then complete_project. Never show the coaching notes or the "Done when:" lines as a checklist to fill. -->`;
+        return `${header}\n${readProjectText(project)}`;
       }),
   );
 
@@ -441,6 +516,106 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       annotations: { ...overwrites, title: 'Record review score' },
     },
     ({ lessonId: id, score }) => write(`Review score recorded for ${id}.`, () => store.recordReviewScore(userId, id, score, writeOptions)),
+  );
+
+  server.registerTool(
+    'start_project',
+    {
+      title: 'Start project',
+      description:
+        'Start (or resume) a practice project the learner chose: status in_progress. Call it before coaching a project that is not started yet. ' +
+        'Refused for a project already done (reset_project first to do it again). Unfinished courses do not block it: tell the learner which courses it builds on instead.',
+      inputSchema: z.object({ projectId }),
+      annotations: { ...writes, title: 'Start project' },
+    },
+    ({ projectId: id }) => write(`Project ${id} started. Call get_project to read it, then coach milestone 1.`, () => store.startProject(userId, id, writeOptions)),
+  );
+
+  server.registerTool(
+    'record_milestone',
+    {
+      title: 'Record a milestone',
+      description:
+        'Record that the learner reached one milestone of the project in progress (numbers start at 1, in the order of "## Milestones"), once they showed what its "Done when:" line asks. ' +
+        'Milestones are reached in order. Recording one again changes nothing.',
+      inputSchema: z.object({ projectId, milestone: z.number().int().min(1).max(LIMITS.listItems).describe('Milestone number, from 1.') }),
+      annotations: { ...writes, title: 'Record a milestone' },
+    },
+    ({ projectId: id, milestone }) =>
+      write(
+        (progress) => {
+          const project = readProjects(coursesDir).find((p) => p.id === id);
+          const left = project ? missingMilestones(progress.projects?.[id], project.milestones) : [];
+          const next = left.length
+            ? `Next: milestone ${left[0]}.`
+            : 'Every milestone is reached: review the result with the learner, one criterion of "## Review" at a time, and call record_project_review for each; then complete_project.';
+          return `Milestone ${milestone} of ${id} reached. ${next}`;
+        },
+        () => store.recordMilestone(userId, id, milestone, writeOptions),
+      ),
+  );
+
+  server.registerTool(
+    'record_project_review',
+    {
+      title: 'Record a project review',
+      description:
+        'Once every milestone is reached, record your verdict on one "## Review" criterion of the project (numbers start at 1): met, partly or not_met. ' +
+        'Discuss each criterion with the learner first. If they improve the result, review the criterion again: the new verdict replaces the old one.',
+      inputSchema: z.object({
+        projectId,
+        criterion: z.number().int().min(1).max(LIMITS.listItems).describe('Criterion number in "## Review", from 1.'),
+        verdict: reviewVerdictSchema.describe('met, partly or not_met.'),
+      }),
+      annotations: { ...overwrites, title: 'Record a project review' },
+    },
+    ({ projectId: id, criterion, verdict }) =>
+      write(
+        (progress) => {
+          const project = readProjects(coursesDir).find((p) => p.id === id);
+          const left = project ? missingCriteria(progress.projects?.[id], project.reviewCriteria) : [];
+          return `Criterion ${criterion} of ${id} recorded: ${verdict}. ${left.length ? `Next: criterion ${left[0]}.` : 'Every criterion has a verdict: call complete_project with your notes.'}`;
+        },
+        () => store.recordProjectReview(userId, id, criterion, verdict, writeOptions),
+      ),
+  );
+
+  server.registerTool(
+    'complete_project',
+    {
+      title: 'Complete project',
+      description:
+        'Mark a project done once every milestone is reached and every review criterion has a verdict. notes: one or two sentences on what went well and what to work on next. ' +
+        'Refused before the review is complete.',
+      inputSchema: z.object({ projectId, notes: z.string().min(1).max(LIMITS.text).describe('What went well and what to work on.') }),
+      annotations: { ...writes, title: 'Complete project' },
+    },
+    ({ projectId: id, notes }) => write(`Project ${id} completed.`, () => store.completeProject(userId, id, notes, writeOptions)),
+  );
+
+  server.registerTool(
+    'save_project_notes',
+    {
+      title: 'Save project notes',
+      description:
+        'Save short notes on a started project: what the learner chose (their topic), where the session stopped, what they are stuck on. Replaces the previous notes. ' +
+        'Save them at the end of every session on a project, so the next one resumes where this one stopped.',
+      inputSchema: z.object({ projectId, notes: z.string().min(1).max(LIMITS.text) }),
+      annotations: { ...overwrites, title: 'Save project notes' },
+    },
+    ({ projectId: id, notes }) => write(`Notes saved on project ${id}.`, () => store.saveProjectNotes(userId, id, notes, writeOptions)),
+  );
+
+  server.registerTool(
+    'reset_project',
+    {
+      title: 'Reset a project',
+      description:
+        "Remove the learner's progress on a project (milestones, review, notes) so they can do it again from the start. Requires explicit confirmation from the learner.",
+      inputSchema: z.object({ projectId }),
+      annotations: { ...overwrites, title: 'Reset a project' },
+    },
+    ({ projectId: id }) => write(`Project ${id} reset.`, () => store.resetProject(userId, id, writeOptions)),
   );
 
   server.registerTool(

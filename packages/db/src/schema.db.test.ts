@@ -36,6 +36,7 @@ describe('migrations', () => {
       'oauth_refresh_token',
       'oauth_resource',
       'progress_event',
+      'project_progress',
       'session',
       'user',
       'verification',

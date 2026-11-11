@@ -29,7 +29,7 @@ const SCOPES = ['openid', 'email', 'lessonfolk:read', 'lessonfolk:write'];
 export const CATEGORY = 'Education & Research';
 
 const DESCRIPTION =
-  'Learn AI with LessonFolk: the learn, progress and review skills of an AI tutor, with the courses and your progress kept on the LessonFolk server.';
+  'Learn AI with LessonFolk: the learn, progress, review and project skills of an AI tutor, with the courses and your progress kept on the LessonFolk server.';
 // The portal limits displayName and shortDescription to 30 characters, defaultPrompt to 3 of 128.
 const SHORT_DESCRIPTION = 'Learn AI with an AI tutor';
 const LONG_DESCRIPTION =

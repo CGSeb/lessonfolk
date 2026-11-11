@@ -15,7 +15,7 @@ const promptsDir = fileURLToPath(new URL('../prompts/', import.meta.url));
 const coursesDir = fileURLToPath(new URL('../../core/tests/fixtures/courses-valid', import.meta.url));
 const promptFiles = readdirSync(promptsDir).filter((f) => f.endsWith('.md'));
 /** Statuses and kinds the tools return (list_courses, get_next_lesson). */
-const STATUS_WORDS = ['not_started', 'in_progress', 'skipped_after_level_check', 'all_done'];
+const STATUS_WORDS = ['not_started', 'in_progress', 'skipped_after_level_check', 'all_done', 'not_met'];
 const fileText =(name: string) => readFileSync(`${promptsDir}${name}`, 'utf8').replace(/\r\n/g, '\n').trim();
 
 const endpoint: McpEndpoint = createMcpEndpoint({
@@ -48,17 +48,17 @@ describe.each<Era>(['legacy', 'modern'])('tutor prompts over MCP (%s protocol)',
     expect(client.getInstructions()).toBe(fileText('instructions.md'));
   });
 
-  it('lists the learn, review and progress prompts, each with an optional request', async () => {
+  it('lists the learn, review, progress and project prompts, each with an optional request', async () => {
     const client = await connect(era);
     const { prompts } = await client.listPrompts();
-    expect(prompts.map((p) => p.name)).toEqual(['learn', 'review', 'progress']);
+    expect(prompts.map((p) => p.name)).toEqual(['learn', 'review', 'progress', 'project']);
     for (const prompt of prompts) {
       expect(prompt.description?.length).toBeGreaterThan(20);
       expect(prompt.arguments).toEqual([expect.objectContaining({ name: 'request', required: false })]);
     }
   });
 
-  it.each(['learn', 'review', 'progress'])('returns the %s procedure followed by the tutor rules', async (name) => {
+  it.each(['learn', 'review', 'progress', 'project'])('returns the %s procedure followed by the tutor rules', async (name) => {
     const client = await connect(era);
     const plain = await client.getPrompt({ name });
     expect(plain.messages).toHaveLength(1);

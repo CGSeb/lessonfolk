@@ -49,7 +49,8 @@ let server: string | undefined
 const SERVER_TOOLS = new Set([
   'get_progress', 'list_courses', 'list_themes', 'get_next_lesson', 'get_lesson', 'start_lesson',
   'complete_lesson', 'skip_lesson', 'save_lesson_notes', 'set_path', 'set_profile', 'reset_course',
-  'level_check_skip_course', 'record_review_score', 'import_progress',
+  'level_check_skip_course', 'record_review_score', 'import_progress', 'list_projects', 'get_project',
+  'start_project', 'record_milestone', 'record_project_review', 'complete_project', 'save_project_notes', 'reset_project',
 ])
 
 const isLessonfolkTool = (tool: string) =>
