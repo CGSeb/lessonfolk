@@ -178,7 +178,9 @@ when Claude Code is opened in the LessonFolk folder (self-hosted). It starts onc
 learning:
 
 - **A side pane** shows your course, its lessons (done, current, to do) and the key ideas of the
-  current lesson, ticked off as the tutor covers them, then the next lesson.
+  current lesson, ticked off as the tutor covers them, then the next lesson. During a practice
+  project it shows the project instead: its milestones (reached, in progress, to do) and, once
+  they are all reached, the review. It goes back to your course when the tutor does.
 - **Buttons above the prompt** send the usual commands: **Continue**, **Quiz me**, **Skip** and
   **My progress**. When the tutor asks a question with fixed answers (during onboarding, for
   example), the buttons show those answers instead.
