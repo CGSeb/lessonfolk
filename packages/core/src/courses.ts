@@ -2,7 +2,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { isDir, readMarkdownFile, readYaml, validate } from './content-files.ts';
 import { checkLessonBody } from './lesson-body.ts';
-import { inspectBaseProjects, translateProjects } from './projects.ts';
+import { inspectBaseProjects, listProjectLanguages, translateProjects } from './projects.ts';
 import { getCoursesDir } from './paths.ts';
 import {
   authorsSchema,
@@ -344,8 +344,6 @@ function translateCourse(
 
 /** Folder of author avatar images, next to `authors.yaml`; never a language. */
 export const AUTHORS_DIR = 'authors';
-/** Folder of practice projects (`projects/<lang>/`), next to the languages; never a language. */
-export const PROJECTS_DIR = 'projects';
 /** Largest avatar image accepted, so a huge file never slows the dashboard down. */
 export const MAX_AVATAR_BYTES = 512 * 1024;
 
@@ -631,12 +629,15 @@ export function findLesson(
 export function listLanguages(coursesDir: string = getCoursesDir()): string[] {
   if (!isDir(coursesDir)) return [];
   return readdirSync(coursesDir)
-    .filter((name) => name !== AUTHORS_DIR && name !== PROJECTS_DIR && isDir(join(coursesDir, name)))
+    .filter((name) => name !== AUTHORS_DIR && isDir(join(coursesDir, name)))
     .sort();
 }
 
-/** Check every language; `issues` are errors, `warnings` are drift from the writing guidelines. */
-export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
+/**
+ * Check every language; `issues` are errors, `warnings` are drift from the writing guidelines.
+ * With `projectsDir`, the practice projects there are checked too, against these courses.
+ */
+export function inspectAllCourses(coursesDir: string = getCoursesDir(), projectsDir?: string): {
   issues: CourseIssue[];
   warnings: CourseIssue[];
 } {
@@ -659,12 +660,12 @@ export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
       .map((lang) => translateCatalog(base.catalog, lang, coursesDir)),
   ];
   // Projects are checked against the English catalog, then each translation on its own.
-  const projects = inspectBaseProjects(base.catalog, coursesDir);
+  const projects = projectsDir ? inspectBaseProjects(base.catalog, projectsDir) : { projects: [], issues: [], warnings: [] };
   const projectResults = [
     projects,
-    ...listProjectLanguages(coursesDir)
+    ...(projectsDir ? listProjectLanguages(projectsDir) : [])
       .filter((lang) => lang !== DEFAULT_LANG)
-      .map((lang) => translateProjects(projects.projects, lang, coursesDir)),
+      .map((lang) => translateProjects(projects.projects, lang, projectsDir!)),
   ];
   const warnings = [...results, ...projectResults].flatMap((r) => r.warnings);
 
@@ -685,15 +686,6 @@ export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
     issues: uniqueIssues([...results, ...projectResults].flatMap((r) => r.issues)),
     warnings,
   };
-}
-
-/** Language codes that have a folder under `<coursesDir>/projects/`. */
-export function listProjectLanguages(coursesDir: string = getCoursesDir()): string[] {
-  const dir = join(coursesDir, PROJECTS_DIR);
-  if (!isDir(dir)) return [];
-  return readdirSync(dir)
-    .filter((name) => isDir(join(dir, name)))
-    .sort();
 }
 
 function uniqueIssues(issues: CourseIssue[]): CourseIssue[] {
