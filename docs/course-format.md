@@ -28,6 +28,9 @@ courses/
       01-what-is-ai.md        # each lesson is optional too
 ```
 
+Practice projects live in `courses/projects/` (never a language): see
+[Project format](project-format.md).
+
 Translations reuse the same course, lesson and theme ids, so progress is shared across
 languages. `en` holds the courses; other languages are layered on top of it: see
 [Translations](#translations).

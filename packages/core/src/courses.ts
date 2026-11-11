@@ -1,8 +1,8 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { parse as parseYaml } from 'yaml';
-import type { z } from 'zod';
+import { isDir, readMarkdownFile, readYaml, validate } from './content-files.ts';
 import { checkLessonBody } from './lesson-body.ts';
+import { inspectBaseProjects, translateProjects } from './projects.ts';
 import { getCoursesDir } from './paths.ts';
 import {
   authorsSchema,
@@ -143,52 +143,7 @@ export function formatCourseIssues(issues: CourseIssue[], root?: string): string
     .join('\n');
 }
 
-const FRONTMATTER = /^﻿?---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/;
-
-function readYaml(file: string, issues: CourseIssue[]): unknown {
-  try {
-    return parseYaml(readFileSync(file, 'utf8'));
-  } catch (err) {
-    issues.push({ file, message: `cannot parse YAML: ${(err as Error).message.split('\n')[0]}` });
-    return undefined;
-  }
-}
-
-/** Frontmatter data and the Markdown body that follows it. */
-function readLessonFile(file: string, issues: CourseIssue[]): { front: unknown; body: string } {
-  const text = readFileSync(file, 'utf8');
-  const match = FRONTMATTER.exec(text);
-  if (!match) {
-    issues.push({ file, message: 'missing YAML frontmatter (--- … ---) at the top of the file' });
-    return { front: undefined, body: text };
-  }
-  const body = text.slice(match[0].length);
-  try {
-    return { front: parseYaml(match[1]), body };
-  } catch (err) {
-    issues.push({
-      file,
-      message: `cannot parse frontmatter: ${(err as Error).message.split('\n')[0]}`,
-    });
-    return { front: undefined, body };
-  }
-}
-
-function validate<S extends z.ZodType>(
-  schema: S,
-  data: unknown,
-  file: string,
-  issues: CourseIssue[],
-): z.output<S> | undefined {
-  const result = schema.safeParse(data);
-  if (result.success) return result.data;
-  for (const message of formatIssues(result.error)) issues.push({ file, message });
-  return undefined;
-}
-
-function isDir(path: string): boolean {
-  return existsSync(path) && statSync(path).isDirectory();
-}
+const readLessonFile = readMarkdownFile;
 
 type Inspection = { catalog: Catalog; issues: CourseIssue[]; warnings: CourseIssue[] };
 
@@ -389,6 +344,8 @@ function translateCourse(
 
 /** Folder of author avatar images, next to `authors.yaml`; never a language. */
 export const AUTHORS_DIR = 'authors';
+/** Folder of practice projects (`projects/<lang>/`), next to the languages; never a language. */
+export const PROJECTS_DIR = 'projects';
 /** Largest avatar image accepted, so a huge file never slows the dashboard down. */
 export const MAX_AVATAR_BYTES = 512 * 1024;
 
@@ -674,7 +631,7 @@ export function findLesson(
 export function listLanguages(coursesDir: string = getCoursesDir()): string[] {
   if (!isDir(coursesDir)) return [];
   return readdirSync(coursesDir)
-    .filter((name) => name !== AUTHORS_DIR && isDir(join(coursesDir, name)))
+    .filter((name) => name !== AUTHORS_DIR && name !== PROJECTS_DIR && isDir(join(coursesDir, name)))
     .sort();
 }
 
@@ -701,13 +658,22 @@ export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
       .filter((lang) => lang !== DEFAULT_LANG)
       .map((lang) => translateCatalog(base.catalog, lang, coursesDir)),
   ];
-  const warnings = results.flatMap((r) => r.warnings);
+  // Projects are checked against the English catalog, then each translation on its own.
+  const projects = inspectBaseProjects(base.catalog, coursesDir);
+  const projectResults = [
+    projects,
+    ...listProjectLanguages(coursesDir)
+      .filter((lang) => lang !== DEFAULT_LANG)
+      .map((lang) => translateProjects(projects.projects, lang, coursesDir)),
+  ];
+  const warnings = [...results, ...projectResults].flatMap((r) => r.warnings);
 
-  // authors.yaml is shared: an author needs a course in at least one language.
+  // authors.yaml is shared: an author needs a course in at least one language, or a project.
   const authorsFile = authorsFilePath(coursesDir);
-  const withCourses = new Set(
-    results.flatMap((r) => r.catalog.authors.filter((a) => a.courses.length).map((a) => a.slug)),
-  );
+  const withCourses = new Set([
+    ...results.flatMap((r) => r.catalog.authors.filter((a) => a.courses.length).map((a) => a.slug)),
+    ...projects.projects.flatMap((p) => p.authors),
+  ]);
   for (const author of base.catalog.authors) {
     if (!withCourses.has(author.slug)) {
       warnings.push({ file: authorsFile, message: `author "${author.slug}" has no course yet` });
@@ -716,9 +682,18 @@ export function inspectAllCourses(coursesDir: string = getCoursesDir()): {
 
   return {
     // Each language reads the shared authors.yaml: report its problems once.
-    issues: uniqueIssues(results.flatMap((r) => r.issues)),
+    issues: uniqueIssues([...results, ...projectResults].flatMap((r) => r.issues)),
     warnings,
   };
+}
+
+/** Language codes that have a folder under `<coursesDir>/projects/`. */
+export function listProjectLanguages(coursesDir: string = getCoursesDir()): string[] {
+  const dir = join(coursesDir, PROJECTS_DIR);
+  if (!isDir(dir)) return [];
+  return readdirSync(dir)
+    .filter((name) => isDir(join(dir, name)))
+    .sort();
 }
 
 function uniqueIssues(issues: CourseIssue[]): CourseIssue[] {

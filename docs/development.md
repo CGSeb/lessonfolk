@@ -17,7 +17,7 @@ parts work. To get a working checkout first, follow
 | Path | What it holds |
 |---|---|
 | [`AGENTS.md`](../AGENTS.md) | Instructions for AI agents opened in this folder: the course authoring procedures, and for learners a pointer to the MCP server. [`CLAUDE.md`](../CLAUDE.md) points Claude Code to it. |
-| [`courses/`](../courses) | The courses: `courses/<lang>/index.yaml` (the recommended order), `themes.yaml`, one folder per course, and `courses/authors.yaml`. Format: [Course format](course-format.md). |
+| [`courses/`](../courses) | The courses: `courses/<lang>/index.yaml` (the recommended order), `themes.yaml`, one folder per course, `courses/authors.yaml`, and the practice projects in `courses/projects/<lang>/`. Formats: [Course format](course-format.md), [Project format](project-format.md). |
 | [`dashboard/`](../dashboard) | The web dashboard (an [Astro](https://astro.build) server), its sign-in code, its end-to-end tests, and the scripts `scripts/serve.ts` (starts the built server after checking its settings) and `scripts/check-courses.ts`. Its interface text is in `src/i18n/` (see [Interface languages](#interface-languages)). |
 | [`packages/core/`](../packages/core) | `@lessonfolk/core`: loading and validating courses, the progress format (progress.json v1), the tutor's rules (next lesson, path, level check) as code, and the `ProgressStore` interface every progress backend follows. |
 | [`packages/db/`](../packages/db) | `@lessonfolk/db`: the Postgres schema ([Drizzle](https://orm.drizzle.team)), the migrations in `drizzle/`, the Postgres progress store (`createPostgresProgressStore`) and the database test helpers. |
