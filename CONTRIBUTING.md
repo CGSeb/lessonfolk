@@ -36,11 +36,26 @@ procedures from [`AGENTS.md`](AGENTS.md). While `/create-course` runs, Claude Co
 **Course builder** pane beside the chat (the steps done so far and the lessons written);
 `/course-builder` reopens it.
 
+## Contributing a project
+
+A practice project gives learners a real result to reach in a few milestones, with the tutor as
+a coach. It is one Markdown file in `projects/en/` (and its translation in `projects/fr/`): a
+brief, milestones with what "done" means, coaching notes for the tutor and review criteria.
+Your agent writes it with you, the same way as a course:
+
+| You say | What the agent does |
+|---|---|
+| *"Create a project where learners build a reusable prompt."* | Asks a few questions, one at a time, then proposes an outline. After you approve it, writes the project in English and French and adds it to the catalog. |
+| *"Improve the project …"*, *"Add a milestone to …"* | Proposes the changes first, and warns you before a change that would shift learners' saved progress. |
+
+In Claude Code these are the `/create-project` and `/edit-project` skills. The format is in
+[Project format](docs/project-format.md).
+
 Before you open a pull request, whether you wrote by hand or with the agent:
 
 ```bash
 npm install            # once
-npm run check:courses  # validates every course and lesson
+npm run check:courses  # validates every course, lesson and project
 npm run dashboard      # optional: see your course as a learner would (needs Postgres, see below)
 ```
 
