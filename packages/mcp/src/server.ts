@@ -172,7 +172,8 @@ export function createLessonfolkServer({ userId, store, coursesDir, projectsDir,
         'path with its reason, current lesson, every started lesson with status, dates and score, and every started practice project (projects) with its milestones reached. ' +
         'To keep the answer small, notes are only given for the current lesson (to resume it) and, as a preview, for the latest finished lessons (recentNotes); ' +
         'other lessons are flagged hasNotes. Give courseId or lessonIds to read the notes of one course or of some lessons, or full: true for the whole progress.json. ' +
-        'Empty profile and lessons mean a new learner who has not been onboarded yet: onboard them and save their profile with set_profile before teaching. ' +
+        'Empty profile and lessons mean a new learner who has not been onboarded yet: onboard them and save their profile with set_profile before teaching ' +
+        '(a new learner who asks for a project first gives only their name and language; a profile without a level finishes its onboarding at the first course). ' +
         'Call this first in every session. Nothing the learner does is saved unless you call the write tools (set_profile, set_path, start_lesson, complete_lesson…).',
       inputSchema: z.object({
         courseId: z.string().min(1).max(LIMITS.id).optional().describe('Course id: also give the notes of all its lessons.'),
