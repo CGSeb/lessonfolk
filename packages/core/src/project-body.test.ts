@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkProjectBody } from './project-body.ts';
+import { checkProjectBody, parseProjectContent } from './project-body.ts';
 
 const milestone = (n: number, doneWhen = true) =>
   `${n}. **Step ${n}.** Reach something.\n${doneWhen ? '   Done when: the learner shows it.\n' : ''}`;
@@ -63,5 +63,46 @@ describe('checkProjectBody', () => {
       'estimatedHours is 12; guidelines suggest 1–10 hours',
     ]);
     expect(checkProjectBody(body({ milestones: 7 }), 0.5).warnings).toHaveLength(2);
+  });
+});
+
+describe('parseProjectContent', () => {
+  it('returns the learner-facing parts and never the coaching notes', () => {
+    const content = parseProjectContent(
+      [
+        '## Brief',
+        'Pick a task you do',
+        'again and again.',
+        '',
+        'Your tutor is a **coach**.',
+        '## Milestones',
+        '1. **Choose the task.** Pick one real task.',
+        '   Done when: the learner names the task',
+        '   and who reads it.',
+        '2. Write it. Done when: it is written.',
+        '3. No line for this one.',
+        '## Coaching notes',
+        '- SECRET coaching advice.',
+        '## Review',
+        '1. The prompt gives',
+        '   the context.',
+        '2. Placeholders are marked.',
+        '## Going further',
+        '- Do it again',
+        '  for a second task.',
+        '- Add an example.',
+      ].join('\n'),
+    );
+    expect(content).toEqual({
+      brief: ['Pick a task you do again and again.', 'Your tutor is a **coach**.'],
+      milestones: [
+        { title: 'Choose the task', body: 'Pick one real task.', doneWhen: 'the learner names the task and who reads it.' },
+        { title: '', body: 'Write it.', doneWhen: 'it is written.' },
+        { title: '', body: 'No line for this one.', doneWhen: '' },
+      ],
+      review: ['The prompt gives the context.', 'Placeholders are marked.'],
+      goingFurther: ['Do it again for a second task.', 'Add an example.'],
+    });
+    expect(JSON.stringify(content)).not.toContain('SECRET');
   });
 });

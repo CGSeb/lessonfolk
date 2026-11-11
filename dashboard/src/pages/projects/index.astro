@@ -1,9 +1,23 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/project/ProjectCard.astro';
+import { courseAuthors } from '../../components/authors/authorView';
+import { projectCard } from '../../components/project/projectView';
+import { inspectCatalog, inspectProjects, progressOrEmpty } from '@lessonfolk/core';
+import { loadProgressFor } from '../../lib/store';
 
-const { t } = Astro.locals;
+const { t, lang } = Astro.locals;
 
-// Projects are announced before they open: this page only says what to expect.
+// Read on every request so new projects and the tutor's latest writes show up. Public page:
+// signed out (`progressResult` null), the projects are shown without progress.
+const { catalog } = inspectCatalog(lang);
+const { projects } = inspectProjects(lang);
+const progressResult = await loadProgressFor(Astro.locals.user);
+const showProgress = progressResult !== null;
+const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
+const cards = projects.map((project) => projectCard(project, catalog, progress));
+
+// How projects work: the four promises of the section.
 const points = [
   { title: t('projects.realTitle'), body: t('projects.realBody'), tint: 'sky' },
   { title: t('projects.milestonesTitle'), body: t('projects.milestonesBody'), tint: 'rose' },
@@ -15,15 +29,34 @@ const points = [
 <BaseLayout title={t('projects.title')} description={t('site.projectsDescription')}>
   <div class="stack" style="--stack-space: var(--space-6)">
     <header class="stack" style="--stack-space: var(--space-3)">
-      <div class="cluster projects-title">
-        <h1>{t('projects.heading')}</h1>
-        <span class="badge badge--info">{t('projects.comingSoon')}</span>
-      </div>
+      <h1>{t('projects.heading')}</h1>
       <p class="muted projects-intro">{t('projects.intro')}</p>
     </header>
 
-    <section class="stack" style="--stack-space: var(--space-4)" aria-labelledby="projects-what">
-      <h2 id="projects-what">{t('projects.whatHeading')}</h2>
+    <section class="stack" style="--stack-space: var(--space-4)" aria-labelledby="projects-list">
+      <h2 id="projects-list">{t('projects.listHeading')}</h2>
+      {
+        cards.length === 0 ? (
+          <div class="card stack" style="--stack-space: var(--space-3)">
+            <p>{t('projects.empty')}</p>
+            <p>
+              <a class="button button--primary" href="/courses">{t('projects.browseCourses')}</a>
+            </p>
+          </div>
+        ) : (
+          <ol class="grid projects-list" role="list">
+            {cards.map((view) => (
+              <li>
+                <ProjectCard view={view} authors={courseAuthors(view.project, catalog.authors)} headingLevel={3} showProgress={showProgress} />
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </section>
+
+    <section class="stack" style="--stack-space: var(--space-4)" aria-labelledby="projects-how">
+      <h2 id="projects-how">{t('projects.howHeading')}</h2>
       <ul class="grid projects-points" role="list">
         {
           points.map((point) => (
@@ -35,26 +68,27 @@ const points = [
         }
       </ul>
     </section>
-
-    <section class="card stack" style="--stack-space: var(--space-3)" aria-labelledby="projects-meanwhile">
-      <h2 id="projects-meanwhile">{t('projects.meanwhileHeading')}</h2>
-      <p>{t('projects.meanwhileBody')}</p>
-      <div class="cluster">
-        <a class="button button--primary" href="/courses">{t('projects.browseCourses')}</a>
-        <a href="https://github.com/CGSeb/lessonfolk" target="_blank" rel="noopener noreferrer">{t('projects.follow')}</a>
-      </div>
-    </section>
   </div>
 </BaseLayout>
 
 <style>
-  .projects-title {
-    align-items: center;
-  }
-
   .projects-intro {
     max-width: 44rem;
     font-size: var(--text-lg);
+  }
+
+  .projects-list {
+    --grid-min: 20rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .projects-list > li {
+    display: flex;
+  }
+
+  .projects-list > li > :global(*) {
+    flex: 1;
   }
 
   .projects-points {

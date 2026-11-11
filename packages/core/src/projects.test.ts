@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CourseValidationError, inspectAllCourses, listLanguages, listProjectLanguages } from './courses.ts';
-import { findProject, inspectProjects, loadProjects } from './projects.ts';
+import { findProject, inspectProjects, loadProjects, readProjectContent } from './projects.ts';
 
 /** Pinned copy of the catalog (AI Foundations only). */
 const validDir = resolve(__dirname, '../tests/fixtures/courses-valid');
@@ -236,5 +236,17 @@ describe('project translations', () => {
     const { issues: found, warnings } = inspectAllCourses(dir);
     expect(found).toEqual([]);
     expect(warnings.map((w) => w.message)).not.toContain('author "solo" has no course yet');
+  });
+});
+
+describe('readProjectContent', () => {
+  it('reads the real project in both languages, with the same milestones', () => {
+    const en = readProjectContent(findProject('reusable-prompt')!);
+    const fr = readProjectContent(findProject('reusable-prompt', 'fr')!);
+    expect(en.milestones).toHaveLength(5);
+    expect(en.milestones[0].title).toBe('Choose the task and what "good" means');
+    expect(fr.milestones).toHaveLength(5);
+    expect(fr.review).toHaveLength(en.review.length);
+    expect(en.brief.length).toBeGreaterThan(0);
   });
 });

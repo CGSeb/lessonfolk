@@ -64,6 +64,11 @@ describe('buildSitemap', () => {
     expect(xml).toContain('<loc>https://learn.example.com/authors/a%26b</loc>');
     expect(xml).not.toContain('/account');
   });
+
+  it('lists every project page after the projects catalog', () => {
+    const paths = publicPaths([], [], ['reusable-prompt']);
+    expect(paths.slice(paths.indexOf('/projects'), paths.indexOf('/projects') + 2)).toEqual(['/projects', '/projects/reusable-prompt']);
+  });
 });
 
 describe('buildLlmsTxt', () => {
@@ -76,6 +81,22 @@ describe('buildLlmsTxt', () => {
 
   it('adds level, duration and prerequisites in the full version', () => {
     expect(buildLlmsTxt(origin, [course], 'x', true)).toContain('(beginner, about 1.5 h, 3 lessons; builds on intro)');
+  });
+
+  it('lists the projects when there are some', () => {
+    const project = {
+      id: 'reusable-prompt',
+      title: 'A reusable prompt',
+      level: 'beginner',
+      description: 'Make a prompt you reuse.',
+      estimatedHours: 2,
+      buildsOn: ['prompting-basics'],
+      milestones: 5,
+    };
+    expect(buildLlmsTxt(origin, [course], 'x')).not.toContain('## Projects');
+    const text = buildLlmsTxt(origin, [course], 'x', false, [project]);
+    expect(text).toContain('## Projects\n\n- [A reusable prompt](https://learn.example.com/projects/reusable-prompt): Make a prompt you reuse.');
+    expect(buildLlmsTxt(origin, [course], 'x', true, [project])).toContain('(beginner, about 2 h, 5 milestones; builds on prompting-basics)');
   });
 });
 

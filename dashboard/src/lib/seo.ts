@@ -58,13 +58,14 @@ export function buildRobotsTxt(origin: string): string {
 const escapeXml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Paths of the public pages: the fixed ones, then every course and author. */
-export function publicPaths(courseIds: string[], authorSlugs: string[]): string[] {
+/** Paths of the public pages: the fixed ones, then every course, project and author. */
+export function publicPaths(courseIds: string[], authorSlugs: string[], projectIds: string[] = []): string[] {
   return [
     '/',
     '/courses',
     ...courseIds.map((id) => `/courses/${encodeURIComponent(id)}`),
     '/projects',
+    ...projectIds.map((id) => `/projects/${encodeURIComponent(id)}`),
     '/authors',
     ...authorSlugs.map((slug) => `/authors/${encodeURIComponent(slug)}`),
     '/connect',
@@ -89,6 +90,16 @@ export interface SeoCourse {
   lessons: unknown[];
 }
 
+export interface SeoProject {
+  id: string;
+  title: string;
+  level: string;
+  description: string;
+  estimatedHours: number;
+  buildsOn: string[];
+  milestones: number;
+}
+
 export interface SeoAuthor {
   slug: string;
   name: string;
@@ -98,7 +109,13 @@ export interface SeoAuthor {
  * Plain-text description of the site for AI assistants, in the llms.txt format
  * (https://llmstxt.org). `full` adds each course's level, duration and prerequisites.
  */
-export function buildLlmsTxt(origin: string, courses: SeoCourse[], siteDescription: string, full = false): string {
+export function buildLlmsTxt(
+  origin: string,
+  courses: SeoCourse[],
+  siteDescription: string,
+  full = false,
+  projects: SeoProject[] = [],
+): string {
   const lines = [
     '# LessonFolk',
     '',
@@ -111,7 +128,7 @@ export function buildLlmsTxt(origin: string, courses: SeoCourse[], siteDescripti
     '## Main pages',
     '',
     `- [Courses](${absoluteUrl(origin, '/courses')}): every course, in the recommended learning order`,
-    `- [Projects](${absoluteUrl(origin, '/projects')}): real projects to practise the courses (coming soon)`,
+    `- [Projects](${absoluteUrl(origin, '/projects')}): real projects to practise the courses, with the tutor as a coach`,
     `- [Connect your AI chat](${absoluteUrl(origin, '/connect')}): how to connect a chat app to the LessonFolk tutor (MCP server: ${absoluteUrl(origin, '/mcp')})`,
     `- [Authors](${absoluteUrl(origin, '/authors')}): who writes the courses`,
     `- [Privacy](${absoluteUrl(origin, '/privacy')}): what is stored and how to delete it`,
@@ -127,6 +144,19 @@ export function buildLlmsTxt(origin: string, courses: SeoCourse[], siteDescripti
       return `- ${link} (${course.level}, about ${course.estimatedHours} h, ${course.lessons.length} lessons${needs}): ${course.description}`;
     }),
     '',
+    ...(projects.length
+      ? [
+          '## Projects',
+          '',
+          ...projects.map((project) => {
+            const link = `[${project.title}](${absoluteUrl(origin, `/projects/${encodeURIComponent(project.id)}`)})`;
+            if (!full) return `- ${link}: ${project.description}`;
+            const needs = project.buildsOn.length ? `; builds on ${project.buildsOn.join(', ')}` : '';
+            return `- ${link} (${project.level}, about ${project.estimatedHours} h, ${project.milestones} milestones${needs}): ${project.description}`;
+          }),
+          '',
+        ]
+      : []),
   ];
   return lines.join('\n');
 }

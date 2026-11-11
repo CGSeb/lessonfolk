@@ -9,7 +9,7 @@ import {
   type Catalog,
 } from './courses.ts';
 import { getCoursesDir } from './paths.ts';
-import { checkProjectBody } from './project-body.ts';
+import { checkProjectBody, parseProjectContent, type ProjectContent } from './project-body.ts';
 import {
   projectFrontmatterSchema,
   projectIndexSchema,
@@ -242,4 +242,9 @@ export function findProject(
   coursesDir: string = getCoursesDir(),
 ): Project | undefined {
   return loadProjects(lang, coursesDir).find((project) => project.id === projectId);
+}
+
+/** The learner-facing content of a project file (brief, milestones, review, going further). */
+export function readProjectContent(project: Pick<Project, 'file'>): ProjectContent {
+  return parseProjectContent(readMarkdownFile(project.file, []).body);
 }

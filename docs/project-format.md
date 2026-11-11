@@ -105,6 +105,14 @@ time. It calls `record_milestone` when the learner shows what a `Done when:` lin
 progress.json (see [`progress.example.json`](progress.example.json)) and in the
 `project_progress` table.
 
+## On the dashboard
+
+`/projects` lists the projects and `/projects/<project-id>` shows one: the brief, `needs`, the
+`buildsOn` courses, the milestones with their `Done when:` lines, the review criteria and
+"Going further", with the learner's progress. The coaching notes are never shown. A course page
+lists the projects that build on it. Inline `**bold**` and `` `code` `` are rendered; other
+Markdown is shown as plain text, so keep the brief, milestones and criteria to short paragraphs.
+
 ## Validation
 
 `npm run check:courses` checks the projects with the courses. It fails on:
