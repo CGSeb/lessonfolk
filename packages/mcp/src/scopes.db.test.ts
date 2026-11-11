@@ -68,6 +68,7 @@ const READ_TOOLS: [string, Record<string, unknown>][] = [
   ['get_lesson', { lessonId: L1 }],
   ['list_courses', {}],
   ['list_themes', {}],
+  ['list_projects', {}],
 ];
 
 const WRITE_TOOLS: [string, Record<string, unknown>][] = [
@@ -82,6 +83,12 @@ const WRITE_TOOLS: [string, Record<string, unknown>][] = [
   ['save_lesson_notes', { lessonId: L1, notes: 'Stopped here.' }],
   ['record_review_score', { lessonId: L1, score: 0.5 }],
   ['import_progress', { progress: { version: 1 } }],
+  ['start_project', { projectId: 'reusable-prompt' }],
+  ['record_milestone', { projectId: 'reusable-prompt', milestone: 1 }],
+  ['record_project_review', { projectId: 'reusable-prompt', criterion: 1, verdict: 'met' }],
+  ['complete_project', { projectId: 'reusable-prompt', notes: 'Fine.' }],
+  ['save_project_notes', { projectId: 'reusable-prompt', notes: 'Stopped here.' }],
+  ['reset_project', { projectId: 'reusable-prompt' }],
 ];
 
 describe('MCP token scopes', () => {
