@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { isDir, readMarkdownFile, readYaml, validate, type ContentIssue } from './content-files.ts';
 import { CourseValidationError, DEFAULT_LANG, inspectCatalog, type Catalog } from './courses.ts';
 import { getCoursesDir, getProjectsDir } from './paths.ts';
-import { checkProjectBody } from './project-body.ts';
+import { checkProjectBody, parseProjectContent, type ProjectContent } from './project-body.ts';
 import {
   projectFrontmatterSchema,
   projectIndexSchema,
@@ -252,4 +252,9 @@ export function findProject(
   coursesDir: string = getCoursesDir(),
 ): Project | undefined {
   return loadProjects(lang, projectsDir, coursesDir).find((project) => project.id === projectId);
+}
+
+/** The learner-facing content of a project file (brief, milestones, review, going further). */
+export function readProjectContent(project: Pick<Project, 'file'>): ProjectContent {
+  return parseProjectContent(readMarkdownFile(project.file, []).body);
 }

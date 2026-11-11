@@ -116,6 +116,17 @@ describe('watchLessonFolk', () => {
     writeFileSync(join(coursesDir, 'en', 'index.yaml'), 'courses: []');
     await vi.waitFor(() => expect(areas).toEqual(['courses']), { timeout: 3000 });
   });
+  it('reports changes to the project files as course changes', async () => {
+    const coursesDir = tempDir();
+    const projectsDir = tempDir();
+    mkdirSync(join(projectsDir, 'en'));
+    const areas: ChangeArea[] = [];
+    stops.push(watchLessonFolk({ coursesDir, projectsDir, debounceMs: DEBOUNCE, pollMs: POLL }, (a) => areas.push(a)));
+    await sleep(POLL * 2);
+
+    writeFileSync(join(projectsDir, 'en', 'index.yaml'), 'projects: []');
+    await vi.waitFor(() => expect(areas).toEqual(['courses']), { timeout: 3000 });
+  });
 });
 
 describe('createChangeHub', () => {

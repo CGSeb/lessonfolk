@@ -9,13 +9,16 @@ const HEARTBEAT_MS = 25_000;
 /** How long the browser waits before reconnecting after the stream drops. */
 const RETRY_MS = 2_000;
 
-const hub = createChangeHub(() => ({ coursesDir: getPaths().courses }));
+const hub = createChangeHub(() => {
+  const { courses, projects } = getPaths();
+  return { coursesDir: courses, projectsDir: projects };
+});
 
 /**
  * Server-Sent Events stream for the signed-in user (401 when signed out). Sends
  * `event: change` with `data: progress` whenever a write is saved for this user (for
  * example by the tutor through MCP; other users' writes never reach this stream), and
- * `data: courses` when the course files change on disk (development).
+ * `data: courses` when the course or project files change on disk (development).
  */
 export const GET: APIRoute = ({ request, locals }) => {
   const user = locals.user;
