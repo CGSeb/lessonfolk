@@ -521,6 +521,13 @@ describe('abuse limits', () => {
       ['set_path', { path: Array.from({ length: 101 }, (_, i) => `course-${i}`), reason: 'x' }],
       ['get_lesson', { lessonId: tooLong }],
       ['skip_lesson', { lessonId: L1, reason: tooLong }],
+      ['get_project', { projectId: tooLong }],
+      ['start_project', { projectId: tooLong }],
+      ['save_project_notes', { projectId: 'reusable-prompt', notes: tooLong }],
+      ['complete_project', { projectId: 'reusable-prompt', notes: tooLong }],
+      ['record_milestone', { projectId: 'reusable-prompt', milestone: 101 }],
+      ['record_project_review', { projectId: 'reusable-prompt', criterion: 101, verdict: 'met' }],
+      ['get_progress', { projectIds: Array.from({ length: 101 }, (_, i) => `project-${i}`) }],
     ] as const) {
       const result = await client.callTool({ name: tool, arguments: args }).catch((error: Error) => ({ isError: true, content: [{ type: 'text', text: error.message }] }));
       expect((result as CallToolResult).isError, tool).toBe(true);
