@@ -10,19 +10,22 @@ something, with the tools listed in its `needs`.
 
 ## Layout
 
-Projects live next to the courses, so they share their themes, authors and checks:
+Projects have their own folder at the repository root, next to `courses/`. They use the
+themes (`courses/<lang>/themes.yaml`), the authors (`courses/authors.yaml`) and the courses
+of the catalog, and `npm run check:courses` checks them with the courses:
 
 ```
-courses/
-  projects/
-    en/
-      index.yaml             # ordered list of project ids
-      reusable-prompt.md     # one file per project: <project-id>.md
-    fr/                      # optional translation: only the files translated so far
-      reusable-prompt.md
+courses/                   # the courses, themes and authors
+projects/
+  en/
+    index.yaml             # ordered list of project ids
+    reusable-prompt.md     # one file per project: <project-id>.md
+  fr/                      # optional translation: only the files translated so far
+    reusable-prompt.md
 ```
 
-`projects` is never a language: course languages are the other folders of `courses/`.
+`LESSONFOLK_PROJECTS_DIR` reads the projects from another folder, like
+`LESSONFOLK_COURSES_DIR` for the courses (see [Settings](configuration.md)).
 
 ## `index.yaml`
 
@@ -89,7 +92,7 @@ Ideas for learners who want more.
 
 ## Translations
 
-A translated project is a copy of the English file in `courses/projects/<lang>/`, with the
+A translated project is a copy of the English file in `projects/<lang>/`, with the
 same file name. Only `id`, `title`, `description` and `needs` are read from its frontmatter;
 the rest comes from English. Keep the `##` headings and the `Done when:` labels in English, and
 keep the same milestones and review criteria in the same order: the tutor records milestones

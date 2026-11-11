@@ -37,14 +37,18 @@ Make **something** real.
 `;
 
 function setup() {
-  const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-project-view-'));
-  cpSync(fixture, dir, { recursive: true });
-  mkdirSync(join(dir, 'projects', 'en'), { recursive: true });
-  writeFileSync(join(dir, 'projects', 'en', 'index.yaml'), 'projects:\n  - demo\n');
-  // `gone` is not a course: write the file as is, the view must not break on it.
-  writeFileSync(join(dir, 'projects', 'en', 'demo.md'), PROJECT.replace(', gone]', ']'));
-  const projects = loadProjects('en', dir).map((p) => ({ ...p, buildsOn: [...p.buildsOn, 'gone'] }));
-  return { projects, catalog: inspectCatalog('en', dir).catalog };
+  // A content root like the repository's: courses/ and projects/ side by side.
+  const root = mkdtempSync(join(tmpdir(), 'lessonfolk-project-view-'));
+  const coursesDir = join(root, 'courses');
+  const projectsDir = join(root, 'projects');
+  cpSync(fixture, coursesDir, { recursive: true });
+  mkdirSync(join(projectsDir, 'en'), { recursive: true });
+  writeFileSync(join(projectsDir, 'en', 'index.yaml'), 'projects:\n  - demo\n');
+  // `gone` is not a course: the file builds on real courses only, `gone` is added after loading
+  // so the view is shown a course id that is not in the catalog.
+  writeFileSync(join(projectsDir, 'en', 'demo.md'), PROJECT.replace(', gone]', ']'));
+  const projects = loadProjects('en', projectsDir, coursesDir).map((p) => ({ ...p, buildsOn: [...p.buildsOn, 'gone'] }));
+  return { projects, catalog: inspectCatalog('en', coursesDir).catalog };
 }
 
 describe('project views', () => {

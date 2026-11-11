@@ -8,6 +8,8 @@ import { inject } from 'vitest';
 
 /** Pinned copy of the catalog (AI Foundations only), so new courses do not change test expectations. */
 export const COURSES_DIR = fileURLToPath(new URL('../../../packages/core/tests/fixtures/courses-valid', import.meta.url));
+/** No practice project by default (the folder does not exist); a test that needs some sets LESSONFOLK_PROJECTS_DIR. */
+export const NO_PROJECTS_DIR = fileURLToPath(new URL('../fixtures/no-projects', import.meta.url));
 /** Progress fixtures (progress.json files), one folder per learner state, imported into Postgres by the tests. */
 export const PROGRESS_FIXTURES = fileURLToPath(new URL('../fixtures/progress', import.meta.url));
 /**
@@ -32,6 +34,7 @@ const CONTROLLED_ENV = [
   'LESSONFOLK_TEST_OAUTH_URL',
   'LESSONFOLK_MCP_TOKEN',
   'LESSONFOLK_ROOT',
+  'LESSONFOLK_PROJECTS_DIR',
   'LESSONFOLK_VERSION',
   'UMAMI_WEBSITE_ID',
   'BETTER_AUTH_SECRET',
@@ -56,6 +59,7 @@ function serverProcess(env: ServerEnv): ChildProcess {
         PORT: '0',
         NODE_ENV: 'test',
         LESSONFOLK_COURSES_DIR: COURSES_DIR,
+        LESSONFOLK_PROJECTS_DIR: NO_PROJECTS_DIR,
         LESSONFOLK_ROOT: ROOT_WITHOUT_PROGRESS,
         NO_COLOR: '1',
         FORCE_COLOR: '0',

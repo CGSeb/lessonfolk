@@ -107,12 +107,14 @@ export function readLessonText(lesson: Lesson): string {
 }
 
 /**
- * The practice projects in `lang` (translated text where `courses/projects/<lang>/` has it,
- * English for the rest), in `projects/en/index.yaml` order. Throws on broken project files.
+ * The practice projects in `lang` (translated text where `projects/<lang>/` has it, English for
+ * the rest), in `projects/en/index.yaml` order, checked against the courses of `coursesDir`.
+ * No `projectsDir` means no projects. Throws on broken project files.
  */
-export function readProjects(coursesDir: string, lang = DEFAULT_LANG): Project[] {
-  const { projects, issues } = inspectProjects(lang, coursesDir);
-  if (issues.length) throw new CourseValidationError(issues, coursesDir);
+export function readProjects(projectsDir: string | undefined, coursesDir: string, lang = DEFAULT_LANG): Project[] {
+  if (!projectsDir) return [];
+  const { projects, issues } = inspectProjects(lang, projectsDir, coursesDir);
+  if (issues.length) throw new CourseValidationError(issues, projectsDir);
   return projects;
 }
 

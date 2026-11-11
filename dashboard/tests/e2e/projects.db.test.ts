@@ -72,23 +72,26 @@ Expliquez l’IA à un **ami**.
 
 let testDb: TestDatabase;
 let server: DashboardServer;
-let coursesDir: string;
+let root: string;
 
 beforeAll(async () => {
-  coursesDir = mkdtempSync(join(tmpdir(), 'lessonfolk-projects-'));
+  // A content root like the repository's: the pinned courses, and projects/ next to them.
+  root = mkdtempSync(join(tmpdir(), 'lessonfolk-projects-'));
+  const coursesDir = join(root, 'courses');
+  const projectsDir = join(root, 'projects');
   cpSync(COURSES_DIR, coursesDir, { recursive: true });
-  for (const lang of ['en', 'fr']) mkdirSync(join(coursesDir, 'projects', lang), { recursive: true });
-  writeFileSync(join(coursesDir, 'projects', 'en', 'index.yaml'), 'projects:\n  - demo-project\n');
-  writeFileSync(join(coursesDir, 'projects', 'en', 'demo-project.md'), PROJECT);
-  writeFileSync(join(coursesDir, 'projects', 'fr', 'demo-project.md'), FRENCH);
+  for (const lang of ['en', 'fr']) mkdirSync(join(projectsDir, lang), { recursive: true });
+  writeFileSync(join(projectsDir, 'en', 'index.yaml'), 'projects:\n  - demo-project\n');
+  writeFileSync(join(projectsDir, 'en', 'demo-project.md'), PROJECT);
+  writeFileSync(join(projectsDir, 'fr', 'demo-project.md'), FRENCH);
 
   testDb = await createTestDatabase();
-  server = await startDashboard({ DATABASE_URL: testDb.url, LESSONFOLK_COURSES_DIR: coursesDir });
+  server = await startDashboard({ DATABASE_URL: testDb.url, LESSONFOLK_COURSES_DIR: coursesDir, LESSONFOLK_PROJECTS_DIR: projectsDir });
 });
 afterAll(async () => {
   await server?.stop();
   await testDb?.drop();
-  rmSync(coursesDir, { recursive: true, force: true });
+  rmSync(root, { recursive: true, force: true });
 });
 
 const get = async (path: string, headers: Record<string, string> = {}) => {

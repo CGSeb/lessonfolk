@@ -375,7 +375,7 @@ export const projectProgress = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => learner.userId, { onDelete: 'cascade' }),
-    /** Project id: the file name in `courses/projects/<lang>/`. */
+    /** Project id: the file name in `projects/<lang>/`. */
     projectId: text('project_id').notNull(),
     status: text('status').$type<ProjectStatus>().notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }),

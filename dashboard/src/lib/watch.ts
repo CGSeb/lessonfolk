@@ -164,12 +164,19 @@ export function watchDirectory(dir: string, onChange: () => void, options: Watch
 
 export interface LessonFolkWatchOptions extends Pick<WatchDirOptions, 'debounceMs' | 'pollMs' | 'forcePolling'> {
   coursesDir: string;
+  /** The practice projects folder, watched too: a project change refreshes pages like a course change. */
+  projectsDir?: string;
 }
 
-/** Watch the courses tree; `onChange` gets the area that changed. */
+/** Watch the courses tree (and the projects tree); `onChange` gets the area that changed. */
 export function watchLessonFolk(options: LessonFolkWatchOptions, onChange: (area: ChangeArea) => void): () => void {
-  const { coursesDir, ...rest } = options;
-  return watchDirectory(coursesDir, () => onChange('courses'), { ...rest, recursive: true });
+  const { coursesDir, projectsDir, ...rest } = options;
+  const stops = [coursesDir, ...(projectsDir ? [projectsDir] : [])].map((dir) =>
+    watchDirectory(dir, () => onChange('courses'), { ...rest, recursive: true }),
+  );
+  return () => {
+    for (const stop of stops) stop();
+  };
 }
 
 type Listener = (area: ChangeArea) => void;

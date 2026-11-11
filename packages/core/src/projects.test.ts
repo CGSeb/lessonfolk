@@ -2,8 +2,8 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { CourseValidationError, inspectAllCourses, listLanguages, listProjectLanguages } from './courses.ts';
-import { findProject, inspectProjects, loadProjects, readProjectContent } from './projects.ts';
+import { CourseValidationError, inspectAllCourses, listLanguages } from './courses.ts';
+import { findProject, inspectProjects, listProjectLanguages, loadProjects, readProjectContent } from './projects.ts';
 
 /** Pinned copy of the catalog (AI Foundations only). */
 const validDir = resolve(__dirname, '../tests/fixtures/courses-valid');
@@ -40,10 +40,17 @@ const BODY = [
   '',
 ].join('\n');
 
-/** A copy of the valid catalog with the given project files (path under projects/ → text). */
+/** The courses and projects folders of a content root made by `withProjects`. */
+const C = (root: string) => join(root, 'courses');
+const P = (root: string) => join(root, 'projects');
+
+/**
+ * A content root like the repository's: a copy of the valid catalog in courses/, and the given
+ * project files in projects/ (path under projects/ → text).
+ */
 function withProjects(files: Record<string, string>): string {
   const dir = mkdtempSync(join(tmpdir(), 'lessonfolk-projects-'));
-  cpSync(validDir, dir, { recursive: true });
+  cpSync(validDir, C(dir), { recursive: true });
   for (const [path, text] of Object.entries(files)) {
     const file = join(dir, 'projects', path);
     mkdirSync(join(file, '..'), { recursive: true });
@@ -56,7 +63,7 @@ const project = (fields: Record<string, string> = {}, body = BODY) => front({ ..
 const INDEX = 'projects:\n  - demo\n';
 
 function issues(dir: string, lang = 'en') {
-  return inspectProjects(lang, dir).issues.map((i) => ({
+  return inspectProjects(lang, P(dir), C(dir)).issues.map((i) => ({
     file: i.file.slice(dir.length + 1).replaceAll('\\', '/'),
     message: i.message,
   }));
@@ -74,13 +81,14 @@ describe('projects (real content)', () => {
 
 describe('inspectProjects', () => {
   it('means no projects when there is no projects folder', () => {
-    expect(inspectProjects('en', validDir)).toEqual({ projects: [], issues: [], warnings: [] });
-    expect(listProjectLanguages(validDir)).toEqual([]);
+    const none = join(validDir, 'no-projects-here');
+    expect(inspectProjects('en', none, validDir)).toEqual({ projects: [], issues: [], warnings: [] });
+    expect(listProjectLanguages(none)).toEqual([]);
   });
 
   it('loads a valid project with its counts', () => {
     const dir = withProjects({ 'en/index.yaml': INDEX, 'en/demo.md': project() });
-    expect(loadProjects('en', dir)).toEqual([
+    expect(loadProjects('en', P(dir), C(dir))).toEqual([
       {
         id: 'demo',
         title: 'Demo project',
@@ -97,14 +105,14 @@ describe('inspectProjects', () => {
         lang: 'en',
       },
     ]);
-    expect(findProject('nope', 'en', dir)).toBeUndefined();
+    expect(findProject('nope', 'en', P(dir), C(dir))).toBeUndefined();
   });
 
-  it('never treats the projects folder as a course language', () => {
+  it('keeps the projects folder apart from the course languages', () => {
     const dir = withProjects({ 'en/index.yaml': INDEX, 'en/demo.md': project() });
-    expect(listLanguages(dir)).toEqual(['en']);
-    expect(listProjectLanguages(dir)).toEqual(['en']);
-    expect(inspectAllCourses(dir).issues).toEqual([]);
+    expect(listLanguages(C(dir))).toEqual(['en']);
+    expect(listProjectLanguages(P(dir))).toEqual(['en']);
+    expect(inspectAllCourses(C(dir), P(dir)).issues).toEqual([]);
   });
 
   it('reports a missing index', () => {
@@ -125,7 +133,7 @@ describe('inspectProjects', () => {
       { file: 'projects/en/index.yaml', message: 'project "ghost" is listed but ghost.md does not exist' },
       { file: 'projects/en/stray.md', message: 'project file is not listed in projects/en/index.yaml' },
     ]);
-    expect(() => loadProjects('en', dir)).toThrow(CourseValidationError);
+    expect(() => loadProjects('en', P(dir), C(dir))).toThrow(CourseValidationError);
   });
 
   it('reports bad frontmatter and broken references', () => {
@@ -162,7 +170,7 @@ describe('inspectProjects', () => {
 
   it('reports body errors and leaves the project out', () => {
     const dir = withProjects({ 'en/index.yaml': INDEX, 'en/demo.md': project({}, BODY.replace('## Review', '## Reviews')) });
-    const result = inspectProjects('en', dir);
+    const result = inspectProjects('en', P(dir), C(dir));
     expect(result.projects).toEqual([]);
     expect(result.issues.map((i) => i.message)).toEqual([
       'unknown section "## Reviews"; did you mean "## Review"?',
@@ -181,7 +189,7 @@ describe('project translations', () => {
       'en/demo.md': project(),
       'fr/demo.md': fr({ needs: '[Une application de chat IA]', level: 'advanced' }),
     });
-    const [demo] = loadProjects('fr', dir);
+    const [demo] = loadProjects('fr', P(dir), C(dir));
     expect(demo).toMatchObject({
       title: 'Projet démo',
       description: 'Une démo.',
@@ -194,8 +202,8 @@ describe('project translations', () => {
 
   it('falls back to English for a project not translated', () => {
     const dir = withProjects({ 'en/index.yaml': INDEX, 'en/demo.md': project(), 'fr/.keep': '' });
-    expect(loadProjects('fr', dir)[0]).toMatchObject({ title: 'Demo project', lang: 'en' });
-    expect(loadProjects('de', dir)[0]).toMatchObject({ lang: 'en' });
+    expect(loadProjects('fr', P(dir), C(dir))[0]).toMatchObject({ title: 'Demo project', lang: 'en' });
+    expect(loadProjects('de', P(dir), C(dir))[0]).toMatchObject({ lang: 'en' });
   });
 
   it('reports translations that do not match the English project', () => {
@@ -206,7 +214,7 @@ describe('project translations', () => {
       'fr/demo.md': fr({}, BODY.replace('3. Third.\n   Done when: three.\n', '').replace('2. Clear.\n', '')),
       'fr/ghost.md': fr({ id: 'ghost' }),
     });
-    const result = inspectProjects('fr', dir);
+    const result = inspectProjects('fr', P(dir), C(dir));
     expect(result.issues.map((i) => i.message)).toEqual([
       'project "ghost" is not in projects/en/index.yaml: translate an existing project',
       '"## Milestones" has 2 milestones, but the en project has 3: keep the same milestones in the same order',
@@ -217,23 +225,23 @@ describe('project translations', () => {
     ]);
     expect(result.projects[0]).toMatchObject({ title: 'Demo project', lang: 'en' });
     // inspectAllCourses reports them too.
-    expect(inspectAllCourses(dir).issues.map((i) => i.message)).toContain(
+    expect(inspectAllCourses(C(dir), P(dir)).issues.map((i) => i.message)).toContain(
       'project "ghost" is not in projects/en/index.yaml: translate an existing project',
     );
   });
 
   it('reports a folder that is not a language', () => {
     const dir = withProjects({ 'en/index.yaml': INDEX, 'en/demo.md': project(), 'drafts/demo.md': project() });
-    expect(inspectAllCourses(dir).issues.map((i) => i.message)).toEqual([
+    expect(inspectAllCourses(C(dir), P(dir)).issues.map((i) => i.message)).toEqual([
       '"drafts" is not a language code: projects/ holds one folder per language',
     ]);
   });
 
   it('counts an author with only a project as having content', () => {
     const dir = withProjects({ 'en/index.yaml': INDEX, 'en/demo.md': project({ authors: '[solo]' }) });
-    const authorsFile = join(dir, 'authors.yaml');
+    const authorsFile = join(C(dir), 'authors.yaml');
     writeFileSync(authorsFile, `${readFileSync(authorsFile, 'utf8')}  - slug: solo\n    name: Solo\n`);
-    const { issues: found, warnings } = inspectAllCourses(dir);
+    const { issues: found, warnings } = inspectAllCourses(C(dir), P(dir));
     expect(found).toEqual([]);
     expect(warnings.map((w) => w.message)).not.toContain('author "solo" has no course yet');
   });

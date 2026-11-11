@@ -50,21 +50,25 @@ const FRENCH = PROJECT.replace('title: Demo project', 'title: Projet démo').rep
 let testDb: TestDatabase;
 let endpoint: McpEndpoint;
 let coursesDir: string;
+let projectsDir: string;
 const clients: Client[] = [];
 
 beforeAll(async () => {
-  coursesDir = mkdtempSync(join(tmpdir(), 'lessonfolk-mcp-projects-'));
+  // A content root like the repository's: courses/ (the pinned catalog) and projects/.
+  const root = mkdtempSync(join(tmpdir(), 'lessonfolk-mcp-projects-'));
+  coursesDir = join(root, 'courses');
+  projectsDir = join(root, 'projects');
   cpSync(fixture, coursesDir, { recursive: true });
-  mkdirSync(join(coursesDir, 'projects', 'en'), { recursive: true });
-  mkdirSync(join(coursesDir, 'projects', 'fr'), { recursive: true });
-  writeFileSync(join(coursesDir, 'projects', 'en', 'index.yaml'), 'projects:\n  - demo\n');
-  writeFileSync(join(coursesDir, 'projects', 'en', 'demo.md'), PROJECT);
-  writeFileSync(join(coursesDir, 'projects', 'fr', 'demo.md'), FRENCH);
+  mkdirSync(join(projectsDir, 'en'), { recursive: true });
+  mkdirSync(join(projectsDir, 'fr'), { recursive: true });
+  writeFileSync(join(projectsDir, 'en', 'index.yaml'), 'projects:\n  - demo\n');
+  writeFileSync(join(projectsDir, 'en', 'demo.md'), PROJECT);
+  writeFileSync(join(projectsDir, 'fr', 'demo.md'), FRENCH);
 
   testDb = await createTestDatabase();
   const store = createPostgresProgressStore(testDb.db, {
     courses: () => readCourses(coursesDir),
-    projects: () => inspectProjects('en', coursesDir).projects,
+    projects: () => inspectProjects('en', projectsDir, coursesDir).projects,
   });
   endpoint = createMcpEndpoint({
     store,
@@ -73,6 +77,7 @@ beforeAll(async () => {
       return userId ? next({ userId, client: 'test' }) : Promise.resolve(Response.json({ error: 'invalid_token' }, { status: 401 }));
     },
     coursesDir,
+    projectsDir,
     writeLimit: { limit: 1000, windowMs: 60_000 },
     addressLimit: { limit: 100_000, windowMs: 60_000 },
     userLimit: { limit: 100_000, windowMs: 60_000 },

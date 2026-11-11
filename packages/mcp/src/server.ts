@@ -52,6 +52,8 @@ export interface LessonfolkServerOptions {
   userId: string;
   store: ProgressStore;
   coursesDir: string;
+  /** The practice projects folder (`getProjectsDir()`); left out, there is no project. */
+  projectsDir?: string;
   /** Limits the write tools per user. */
   writeLimiter: RateLimiter;
   /** Kept in the progress change log, e.g. `mcp` or `mcp:<oauth client id>`. */
@@ -110,7 +112,7 @@ function report(error: unknown): CallToolResult {
   return fail(describeError(error));
 }
 
-export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter, client = 'mcp', scopes }: LessonfolkServerOptions): McpServer {
+export function createLessonfolkServer({ userId, store, coursesDir, projectsDir, writeLimiter, client = 'mcp', scopes }: LessonfolkServerOptions): McpServer {
   const server = new McpServer(SERVER_INFO, { instructions: INSTRUCTIONS });
   const writeOptions: WriteOptions = { client };
   const access = accessFromScopes(scopes);
@@ -315,7 +317,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
         const progress = await store.getProgress(userId);
         const chosen = learnerLang(progress, language);
         const catalog = readCatalog(coursesDir, chosen);
-        return readProjects(coursesDir, chosen)
+        return readProjects(projectsDir, coursesDir, chosen)
           .filter((project) => !theme || project.theme === theme)
           .map((project) => projectSummary(catalog, project, progress));
       }),
@@ -335,7 +337,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
       read(async () => {
         const progress = await store.getProgress(userId);
         const chosen = learnerLang(progress, language);
-        const project = readProjects(coursesDir, chosen).find((p) => p.id === id);
+        const project = readProjects(projectsDir, coursesDir, chosen).find((p) => p.id === id);
         if (!project) throw new ProgressStoreError('unknown_project', `Unknown project "${id}". Use list_projects to see the project ids.`, { projectId: id });
         const state = projectState(progress, project);
         const where =
@@ -544,7 +546,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     ({ projectId: id, milestone }) =>
       write(
         (progress) => {
-          const project = readProjects(coursesDir).find((p) => p.id === id);
+          const project = readProjects(projectsDir, coursesDir).find((p) => p.id === id);
           const left = project ? missingMilestones(progress.projects?.[id], project.milestones) : [];
           const next = left.length
             ? `Next: milestone ${left[0]}.`
@@ -572,7 +574,7 @@ export function createLessonfolkServer({ userId, store, coursesDir, writeLimiter
     ({ projectId: id, criterion, verdict }) =>
       write(
         (progress) => {
-          const project = readProjects(coursesDir).find((p) => p.id === id);
+          const project = readProjects(projectsDir, coursesDir).find((p) => p.id === id);
           const left = project ? missingCriteria(progress.projects?.[id], project.reviewCriteria) : [];
           return `Criterion ${criterion} of ${id} recorded: ${verdict}. ${left.length ? `Next: criterion ${left[0]}.` : 'Every criterion has a verdict: call complete_project with your notes.'}`;
         },

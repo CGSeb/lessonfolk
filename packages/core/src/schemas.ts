@@ -110,13 +110,13 @@ export const lessonTranslationSchema = z.object({
 
 export const projectIdSchema = z.string().regex(kebab, 'must be a kebab-case project id');
 
-/** `courses/projects/<lang>/index.yaml`: the order of projects in the catalog. */
+/** `projects/<lang>/index.yaml`: the order of projects in the catalog. */
 export const projectIndexSchema = z.strictObject({
   projects: z.array(projectIdSchema),
 });
 export type ProjectIndexFile = z.infer<typeof projectIndexSchema>;
 
-/** Frontmatter of `courses/projects/<lang>/<project>.md`, matching docs/project-format.md. */
+/** Frontmatter of `projects/<lang>/<project>.md`, matching docs/project-format.md. */
 export const projectFrontmatterSchema = z.strictObject({
   id: projectIdSchema,
   title: z.string().min(1),

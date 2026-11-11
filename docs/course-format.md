@@ -28,7 +28,7 @@ courses/
       01-what-is-ai.md        # each lesson is optional too
 ```
 
-Practice projects live in `courses/projects/` (never a language): see
+Practice projects live in their own `projects/` folder, next to `courses/`: see
 [Project format](project-format.md).
 
 Translations reuse the same course, lesson and theme ids, so progress is shared across
