@@ -84,6 +84,19 @@ describe('prompt files', () => {
     expect(promptFiles.sort()).toEqual([...PROMPTS.map((p) => `${p.name}.md`), 'instructions.md'].sort());
   });
 
+  it('lets a new learner start with a project, and finishes the onboarding at their first course', () => {
+    // A project asks only the name and language, and must not save a level: a level would make
+    // the first course skip the rest of the onboarding and the level check.
+    const project = fileText('project.md');
+    expect(project).toContain('`set_profile(name, language)`');
+    expect(project).toContain('never save a level');
+    expect(project).toContain('A project needs no course and no order');
+    // learn.md finishes the onboarding for a profile without a level, instead of asking only the experience.
+    const learn = fileText('learn.md');
+    expect(learn).toMatch(/A profile without a level means the onboarding is not finished[^\n]*finish Onboarding[^\n]*Level check[^\n]*Recommend a path/);
+    expect(fileText('instructions.md')).toContain('A new learner who asks for a project first gives only their name and language');
+  });
+
   it.each(promptFiles)('%s only calls tools that exist, with their own arguments', (file) => {
     const text = fileText(file);
     const calls = [...text.matchAll(/`([a-z]+(?:_[a-z]+)+)\(([^)`]*)\)`/g)];
