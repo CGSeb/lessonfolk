@@ -79,6 +79,13 @@ export const POSITIVE_CASES: PositiveCase[] = [
     tools_triggered: 'get_progress, record_review_score',
     expected_behavior: 'Asks questions on finished lessons, then saves a review score.',
   },
+  {
+    description: 'Practise with a project',
+    prompt: 'I want to practise with a LessonFolk project.',
+    tools_triggered: 'get_progress, list_projects, start_project, get_project',
+    expected_behavior:
+      'Suggests a project that fits the learner, starts the one they pick, presents its brief and coaches the first milestone with questions, without doing the work for them.',
+  },
 ];
 
 export const NEGATIVE_CASES = [
