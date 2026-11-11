@@ -45,7 +45,8 @@ npm run dashboard      # optional: see your course as a learner would (needs Pos
 ```
 
 The format, what `check:courses` checks and the review criteria are in
-[Course format](docs/course-format.md). Course text is published under
+[Course format](docs/course-format.md); practice projects follow
+[Project format](docs/project-format.md). Course text is published under
 [CC BY 4.0](courses/LICENSE), and authors are credited from `courses/authors.yaml`.
 
 ## Development setup
