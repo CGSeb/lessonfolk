@@ -14,5 +14,5 @@
 | [Search engines and AI search](seo.md) | What the public pages send to crawlers: robots.txt, sitemap, llms.txt, meta tags, structured data, the AI crawler policy, and how to check it. |
 | [Brand](brand.md) | Logo, colours, type, shape and the do's and don'ts of the LessonFolk look. |
 
-The tutor's own instructions are in [`packages/mcp/prompts/`](../packages/mcp/prompts); [`AGENTS.md`](../AGENTS.md) has the course authoring procedures.
+The tutor's own instructions are in [`packages/mcp/prompts/`](../packages/mcp/prompts); the course authoring procedures are in [`authoring/`](authoring).
 The progress import/export format is [`progress.example.json`](progress.example.json).

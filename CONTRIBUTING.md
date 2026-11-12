@@ -32,7 +32,7 @@ writes the course with you. Open it in the LessonFolk folder and say what you wa
 
 **Nothing is written until you approve the outline or the changes.** In Claude Code these are
 the `/create-course`, `/edit-course` and `/review-course` skills; other agents follow the same
-procedures from [`AGENTS.md`](AGENTS.md). While `/create-course` runs, Claude Code shows the
+procedures from [`docs/authoring/`](docs/authoring). While `/create-course` runs, Claude Code shows the
 **Course builder** pane beside the chat (the steps done so far and the lessons written);
 `/course-builder` reopens it.
 
@@ -132,7 +132,7 @@ For anything larger:
 3. **One commit per change**, with a message in the format
    `<type>: <gitmoji> <imperative summary>`, for example
    `feat: :sparkles: Add prompting basics course`. The types and their gitmoji are listed in
-   [`AGENTS.md`](AGENTS.md#commit-messages).
+   [`docs/authoring/commit-messages.md`](docs/authoring/commit-messages.md).
 4. **Pull request** to `main`. Say what changed and why, how you tested it, and close the issue
    with `Closes #<number>`. If the change affects tutoring, say whether you tried it in Claude
    Code, Codex or both.
