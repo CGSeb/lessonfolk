@@ -48,7 +48,9 @@ Your agent writes it with you, the same way as a course:
 | *"Create a project where learners build a reusable prompt."* | Asks a few questions, one at a time, then proposes an outline. After you approve it, writes the project in English and French and adds it to the catalog. |
 | *"Improve the project …"*, *"Add a milestone to …"* | Proposes the changes first, and warns you before a change that would shift learners' saved progress. |
 
-In Claude Code these are the `/create-project` and `/edit-project` skills. The format is in
+In Claude Code these are the `/create-project` and `/edit-project` skills; while `/create-project`
+runs, the same pane shows a **Project builder** (the steps done so far, the milestones and the
+English and French files written). The format is in
 [Project format](docs/project-format.md).
 
 Before you open a pull request, whether you wrote by hand or with the agent:

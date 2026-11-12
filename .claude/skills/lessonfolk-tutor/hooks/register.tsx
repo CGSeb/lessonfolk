@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Choices, IdeaMarks, LessonState, View } from '../types'
+import type { Choices, Focus, IdeaMarks, LessonState, MilestoneState, View } from '../types'
 import {
   changes,
   DEFAULT_INSTANCE,
@@ -52,6 +52,30 @@ const SERVER_TOOLS = new Set([
   'level_check_skip_course', 'record_review_score', 'import_progress', 'list_projects', 'get_project',
   'start_project', 'record_milestone', 'record_project_review', 'complete_project', 'save_project_notes', 'reset_project',
 ])
+
+// The server's tools that mean the tutor is on a project, or on the lessons: the pane follows.
+const PROJECT_TOOLS = new Set([
+  'list_projects', 'get_project', 'start_project', 'record_milestone', 'record_project_review',
+  'complete_project', 'save_project_notes', 'reset_project',
+])
+const LESSON_TOOLS = new Set([
+  'get_next_lesson', 'get_lesson', 'start_lesson', 'record_check', 'complete_lesson', 'skip_lesson',
+  'save_lesson_notes', 'level_check_skip_course', 'reset_course', 'set_path',
+])
+
+// What the tutor worked on last in this run, so the pane shows that project or the lessons.
+let focus: Focus | undefined
+
+// The focus after a call of `tool` with `args`: unchanged for the tools that read the progress.
+export const focusAfter = (before: Focus | undefined, tool: string, args: Record<string, unknown>): Focus | undefined => {
+  if (PROJECT_TOOLS.has(tool)) {
+    const id = typeof args.projectId === 'string' ? args.projectId : before?.kind === 'project' ? before.id : undefined
+    return { kind: 'project', id }
+  }
+  if (LESSON_TOOLS.has(tool)) return { kind: 'lesson' }
+
+  return before
+}
 
 const isLessonfolkTool = (tool: string) =>
   tool.startsWith(TOOL_PREFIX) ||
@@ -105,7 +129,7 @@ async function refresh($: EngineInterface, isQuiet = false) {
 
   const failures: string[] = []
   const picked = (await read($, langChoice)) ?? undefined
-  const loaded = await load(callServer($, failures), picked)
+  const loaded = await load(callServer($, failures), picked, focus)
   if (loaded.view.state === 'offline') loaded.view = { ...loaded.view, reason: [...new Set(failures)].slice(0, 3) }
   const before = await read($, snapshot)
   // Offline, the language of the last read is kept.
@@ -298,6 +322,10 @@ export const register: Register = on => {
     const ran = await next(e)
     if (isRefreshing || ran.deny !== undefined || ran.isError) return ran
 
+    // The project or the lessons the tutor is on: the pane follows it.
+    const args = (e as unknown as { input?: Record<string, unknown> }).input ?? (e as unknown as Record<string, unknown>)
+    focus = focusAfter(focus, e.tool.split('__')[2] ?? '', args)
+
     // A tool's name spells the server with `:` and `.` replaced by `_`: the plugin's real name has colons.
     const spelled = e.tool.split('__')[1]
     server = spelled === PLUGIN_SERVER.replace(/[:.]/g, '_') ? PLUGIN_SERVER : spelled ?? server
@@ -433,6 +461,68 @@ export const register: Register = on => {
                 $.ui.toast(isCopied ? text.copied : text.copyFailed)
               }}
             />
+          )}
+        </Box>
+      )
+    }
+
+    if (v.state === 'project' && v.project) {
+      const p = v.project
+      const reached = p.milestones.filter(m => m.status === 'done').length
+      const total = p.milestones.length
+      const milestoneMark = (s: MilestoneState['status']) => ({ done: '✓', current: '●', todo: '○' })[s]
+      const isReviewing = p.status === 'in_progress' && total > 0 && reached === total
+
+      return (
+        <Box flexDirection="column">
+          {header}
+          <Text> </Text>
+          <Text dimColor>{text.project}</Text>
+          <Text bold>{p.title}</Text>
+          {(v.themeTitle || v.level) && (
+            <Text dimColor>{[v.themeTitle, v.level && (text.levels[v.level] ?? v.level)].filter(Boolean).join(' · ')}</Text>
+          )}
+          <Text> </Text>
+          <Box flexDirection="column" gap={hasSvg ? 1 : 0}>
+            <Text bold>
+              {text.milestones} {reached}/{total}
+            </Text>
+            {hasSvg && total > 0 && (
+              <Svg source={progressBar(reached, total)} alt={text.milestonesAlt(reached, total)} width={PROGRESS_WIDTH} height={8} />
+            )}
+            <Box flexDirection="column" gap={hasSvg ? 1 : 0}>
+              {p.milestones.map((m, i) => {
+                const isCurrent = m.status === 'current'
+
+                // The same cards as the lessons: the milestone being worked on is filled with indigo.
+                return (
+                  <Box
+                    flexDirection="row"
+                    gap={1}
+                    paddingX={1}
+                    borderStyle="round"
+                    borderColor={isCurrent ? BRAND.indigo : BRAND.border}
+                    borderDimColor={!isCurrent}
+                    backgroundColor={isCurrent ? BRAND.indigo : undefined}
+                  >
+                    <Text bold color={isCurrent ? BRAND.amber : m.status === 'done' ? BRAND.success : undefined} dimColor={m.status === 'todo'}>
+                      {milestoneMark(m.status)}
+                    </Text>
+                    <Text bold={isCurrent} color={isCurrent ? BRAND.amber : undefined} dimColor={m.status === 'done'}>
+                      {i + 1}. {m.title}
+                    </Text>
+                    {isCurrent && <Text bold color={BRAND.amber}>· {text.inProgress}</Text>}
+                  </Box>
+                )
+              })}
+            </Box>
+          </Box>
+          {(isReviewing || p.status === 'done') && <Text> </Text>}
+          {isReviewing && <Text bold>{text.review(p.reviewed, p.reviewTotal)}</Text>}
+          {p.status === 'done' && (
+            <Box paddingX={1} borderStyle="round" borderColor={BRAND.surface} backgroundColor={BRAND.surface}>
+              <Text color={BRAND.ink}>{text.projectDone}</Text>
+            </Box>
           )}
         </Box>
       )

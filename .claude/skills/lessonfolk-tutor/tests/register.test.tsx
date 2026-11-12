@@ -2,7 +2,7 @@ import type { On, RenderPropsOf } from 'claude-code'
 import type { Engine } from 'claude-code/testing'
 import { describe, expect, test } from 'claude-code/testing'
 
-import { answer, progress, type Saved } from './server'
+import { answer, onProject, progress, type Saved } from './server'
 
 const PLUGIN = 'lessonfolk-tutor'
 const PANE_ID = 'course-companion'
@@ -116,6 +116,42 @@ describe('course companion', () => {
     expect(server.asked).toContain('lessonfolk:get_progress')
     expect(server.asked).toContain('lessonfolk:list_courses')
     expect(server.asked).toContain('lessonfolk:get_lesson')
+  })
+
+  test('coaching a project shows its milestones, and a reached milestone toasts', async ($, on) => {
+    const server = newServer(onProject({ profile: { name: 'Alex' }, current: null, lessons: {} }, []))
+    const seen = engine(on, server)
+    await save($, server, onProject(server.saved, [1]), 't-project', 'mcp__lessonfolk__start_project')
+    expect(seen.opened).toEqual([PANE_ID])
+    for (const surface of ['terminal', 'desktop'] as const) {
+      const ui = await $.ui.mount({ plugin: PLUGIN, surface, ...PANE })
+      expect(await ui.find({ type: 'Text', text: 'Project' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: 'Demo project' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: 'Milestones 1/3' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: '1. Pick the task' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: '2. Write the prompt' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: '· In progress' })).toBeDefined()
+      await ui.unmount()
+    }
+    expect(server.asked).toContain('lessonfolk:get_project')
+
+    await save($, server, onProject(server.saved, [1, 2]), 't-milestone', 'mcp__lessonfolk__record_milestone')
+    expect(seen.toasts).toContain('Milestone reached: Write the prompt')
+  })
+
+  test('back to a lesson, the pane leaves the project for the course', async ($, on) => {
+    const server = newServer(onProject(STARTED, [1]))
+    engine(on, server)
+    await save($, server, server.saved, 't-p', 'mcp__lessonfolk__record_milestone')
+    let ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await ui.find({ type: 'Text', text: 'Demo project' })).toBeDefined()
+    await ui.unmount()
+
+    await save($, server, server.saved, 't-l', 'mcp__lessonfolk__get_lesson')
+    ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', ...PANE })
+    expect(await ui.find({ type: 'Text', text: 'Basics' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Demo project' })).toBeUndefined()
+    await ui.unmount()
   })
 
   test('the server the installed plugin brought is asked by its plugin name', async ($, on) => {

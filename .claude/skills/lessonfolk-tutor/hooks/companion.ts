@@ -2,7 +2,7 @@
 // LessonFolk MCP server through a `call` function, so it runs the same in the mod and in its
 // tests, with a local or a hosted instance.
 
-import type { Choices, IdeaMarks, LessonState, Snapshot, View } from '../types'
+import type { Choices, Focus, IdeaMarks, LessonState, MilestoneState, ProjectView, Snapshot, View } from '../types'
 import { type Lang, langOf, words } from './i18n'
 
 // Calls a tool of the LessonFolk MCP server: the tool's text result, or undefined when it
@@ -20,7 +20,10 @@ type Progress = {
   path?: string[]
   current?: string | null
   lessons?: Record<string, { status?: string; completedAt?: string }>
+  projects?: Record<string, { status?: string; startedAt?: string; milestones?: number[]; review?: Record<string, string> }>
 }
+
+type ProjectSummary = { id: string; title: string; level?: string; themeTitle?: string; milestones?: number; reviewCriteria?: number }
 
 type CourseSummary = {
   id: string
@@ -30,9 +33,9 @@ type CourseSummary = {
   lessons: { id: string; title: string; prerequisites?: string[]; status?: string }[]
 }
 
-// The `## Key ideas` items: their bold lead when they have one, else their first words.
-export const keyIdeas = (lesson: string): string[] => {
-  const section = /^## Key ideas\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(lesson)?.[1] ?? ''
+// The numbered items of a `## <heading>` section: their bold lead when they have one, else their first words.
+const leads = (text: string, heading: string): string[] => {
+  const section = new RegExp(`^## ${heading}\\s*$([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, 'm').exec(text)?.[1] ?? ''
 
   return [...section.matchAll(/^\d+\.\s+(.+)$/gm)].map(m => {
     const text = m[1] ?? ''
@@ -42,6 +45,12 @@ export const keyIdeas = (lesson: string): string[] => {
     return label.length > 70 ? `${label.slice(0, 67).trimEnd()}…` : label
   })
 }
+
+// The `## Key ideas` items of a lesson.
+export const keyIdeas = (lesson: string): string[] => leads(lesson, 'Key ideas')
+
+// The `## Milestones` titles of a project file (`get_project`).
+export const milestoneTitles = (project: string): string[] => leads(project, 'Milestones')
 
 // `list_courses` statuses: not_started, in_progress, done, skipped, skipped_after_level_check.
 const isFinished = (status?: string) =>
@@ -65,21 +74,76 @@ export const statusesOf = (progress?: Progress): Snapshot['statuses'] =>
     Object.entries(progress?.lessons ?? {}).map(([id, l]) => [id, l?.status ?? 'in_progress']),
   )
 
+const projectsOf = (progress?: Progress): NonNullable<Snapshot['projects']> =>
+  Object.fromEntries(
+    Object.entries(progress?.projects ?? {}).map(([id, p]) => [id, { status: p?.status ?? 'in_progress', reached: p?.milestones?.length ?? 0 }]),
+  )
+
+// The project the pane follows: the one the tutor just worked on, else, with no lesson under
+// way, a project in progress (the latest started). Never one when the tutor is on the lessons.
+const projectInFocus = (progress: Progress, focus: Focus | undefined, hasLesson: boolean): string | undefined => {
+  const projects = progress.projects ?? {}
+  if (focus?.kind === 'lesson') return undefined
+  if (focus?.kind === 'project' && focus.id && projects[focus.id]) return focus.id
+  if (hasLesson && focus?.kind !== 'project') return undefined
+
+  return Object.entries(projects)
+    .filter(([, p]) => p?.status !== 'done')
+    .sort(([, a], [, b]) => (b?.startedAt ?? '').localeCompare(a?.startedAt ?? ''))[0]?.[0]
+}
+
+// The project in focus: its title and theme from `list_projects`, its milestone titles from
+// `get_project`, and where the learner stands from the saved progress.
+const loadProject = async (call: Caller, progress: Progress, id: string, asked?: { lang: Lang }): Promise<ProjectView & { level?: string; themeTitle?: string }> => {
+  const entry = progress.projects?.[id] ?? {}
+  const summary = parseJson<ProjectSummary[]>(await call('list_projects', asked))?.find(p => p?.id === id)
+  const file = (await call('get_project', { projectId: id, ...asked })) ?? ''
+  const titles = milestoneTitles(file)
+  const reached = new Set(entry.milestones ?? [])
+  const isDone = entry.status === 'done'
+  const nextIndex = isDone ? -1 : titles.findIndex((_, i) => !reached.has(i + 1))
+  const milestones: MilestoneState[] = titles.map((title, i) => ({
+    title,
+    status: reached.has(i + 1) || isDone ? 'done' : i === nextIndex ? 'current' : 'todo',
+  }))
+
+  return {
+    id,
+    title: summary?.title ?? /^title:\s*(.+)$/m.exec(file)?.[1]?.trim() ?? id,
+    status: isDone ? 'done' : 'in_progress',
+    milestones,
+    reviewed: Object.keys(entry.review ?? {}).length,
+    reviewTotal: summary?.reviewCriteria ?? 0,
+    level: summary?.level,
+    themeTitle: summary?.themeTitle,
+  }
+}
+
 export type Loaded = { view: View; snapshot: Snapshot }
 
-// Builds the pane's view: the course in focus (the current lesson's, else the next lesson's),
-// its lessons, the current lesson's key ideas and the next lesson, following the order of
-// "Start or resume" (the learner's path first, then the catalog order of list_courses).
-export const load = async (call: Caller, picked?: Lang): Promise<Loaded> => {
+// Builds the pane's view: the project the tutor is coaching (see `projectInFocus`), else the
+// course in focus (the current lesson's, else the next lesson's), its lessons, the current
+// lesson's key ideas and the next lesson, following the order of "Start or resume" (the
+// learner's path first, then the catalog order of list_courses).
+export const load = async (call: Caller, picked?: Lang, following?: Focus): Promise<Loaded> => {
   const progress = parseJson<Progress>(await call('get_progress'))
   // The language the learner picked in the pane: the course titles follow it, not the profile's.
   const asked = picked ? { lang: picked } : undefined
   const catalog = parseJson<CourseSummary[]>(await call('list_courses', asked))
   const statuses = statusesOf(progress)
-  const snapshot: Snapshot = { current: progress?.current ?? undefined, statuses }
+  const snapshot: Snapshot = { current: progress?.current ?? undefined, statuses, projects: projectsOf(progress) }
   const lang = progress ? langOf(progress.profile?.language) : undefined
 
   if (!progress || !Array.isArray(catalog)) return { view: { state: 'offline', lang }, snapshot }
+
+  const hasLesson = Boolean(progress.current && statuses[progress.current] !== undefined && !isFinished(statuses[progress.current]))
+  const projectId = projectInFocus(progress, following, hasLesson)
+  if (projectId) {
+    const { level, themeTitle, ...project } = await loadProject(call, progress, projectId, asked ?? (lang ? { lang } : undefined))
+
+    return { view: { state: 'project', lang, courseTitle: project.title, themeTitle, level, project }, snapshot }
+  }
+
   if (!progress.profile?.level && Object.keys(statuses).length === 0) {
     return { view: { state: 'no-progress', lang }, snapshot }
   }
@@ -185,6 +249,18 @@ export const changes = (previous: Loaded | undefined, loaded: Loaded): string[] 
 
   for (const [id, status] of Object.entries(after.statuses)) {
     if (status === 'done' && before.statuses[id] !== 'done') toasts.push(text.lessonComplete(titleOf(id)))
+  }
+
+  // A milestone reached or a project completed, named when it is the project in view.
+  for (const [id, project] of Object.entries(after.projects ?? {})) {
+    const was = before.projects?.[id]
+    const shown = view.project?.id === id ? view.project : undefined
+    const title = shown?.title ?? id
+    if (project.status === 'done' && was?.status !== 'done') {
+      toasts.push(text.projectComplete(title))
+    } else if (project.reached > (was?.reached ?? 0)) {
+      toasts.push(text.milestoneReached(shown?.milestones[project.reached - 1]?.title ?? String(project.reached)))
+    }
   }
 
   const course = after.current ? courseOf(after.current) : undefined
