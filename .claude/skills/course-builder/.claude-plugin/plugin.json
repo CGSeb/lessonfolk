@@ -2,5 +2,6 @@
   "name": "course-builder",
   "version": "0.1.0",
   "description": "Side pane summarising a LessonFolk create-course or create-project session: title, workflow steps done so far, lessons or milestones",
-  "author": { "name": "LessonFolk" }
+  "author": { "name": "LessonFolk" },
+  "types": "./types/index.d.ts"
 }
