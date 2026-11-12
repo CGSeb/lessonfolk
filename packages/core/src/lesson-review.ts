@@ -1,6 +1,6 @@
 /**
  * The rubric a coding agent scores each lesson against, and the brief built from it
- * (`npm run review:courses`, the "Review a course" procedure of AGENTS.md). The review
+ * (`npm run review:courses`, the review-course procedure in docs/authoring). The review
  * is advice for the author, never a pass/fail gate like `check:courses`.
  */
 import type { Course, Lesson } from './courses.ts';

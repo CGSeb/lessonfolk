@@ -16,7 +16,7 @@ parts work. To get a working checkout first, follow
 
 | Path | What it holds |
 |---|---|
-| [`AGENTS.md`](../AGENTS.md) | Instructions for AI agents opened in this folder: the course authoring procedures, and for learners a pointer to the MCP server. [`CLAUDE.md`](../CLAUDE.md) points Claude Code to it. |
+| [`AGENTS.md`](../AGENTS.md) | Instructions for AI agents opened in this folder: a short map, a pointer to the MCP server for learners, and an index of the course authoring procedures in [`docs/authoring/`](authoring). [`CLAUDE.md`](../CLAUDE.md) points Claude Code to it. |
 | [`courses/`](../courses) | The courses: `courses/<lang>/index.yaml` (the recommended order), `themes.yaml`, one folder per course, and `courses/authors.yaml`. Format: [Course format](course-format.md). |
 | [`projects/`](../projects) | The practice projects: `projects/<lang>/index.yaml` (the catalog order) and one `<project-id>.md` per project. Format: [Project format](project-format.md). |
 | [`dashboard/`](../dashboard) | The web dashboard (an [Astro](https://astro.build) server), its sign-in code, its end-to-end tests, and the scripts `scripts/serve.ts` (starts the built server after checking its settings) and `scripts/check-courses.ts`. Its interface text is in `src/i18n/` (see [Interface languages](#interface-languages)). |
