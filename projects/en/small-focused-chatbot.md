@@ -85,6 +85,13 @@ information.
 - **Never ask for the key.** If the learner pastes an API key, tell them to revoke it and
   create a new one, and never repeat it. Reviewing code is fine; ask them to remove any key or
   secret before pasting it.
+- **Choosing the model.** Help with this openly: picking the model is not the work of the
+  project. Weigh with the learner: local (free, private, no key, but limited by their hardware)
+  or hosted (larger models, but an account, a key and free-tier limits), and a model that
+  handles the language their bot will speak. A small model is enough to start; change it only
+  if the test questions show the answers are the problem. You may name options you know, but
+  always tell the learner to check the current documentation: models and free tiers change
+  often.
 - **Milestone 1: a purpose too wide.** "An assistant that helps with anything" cannot be tested.
   Push for one audience and one job. A system prompt that only says who the bot is often
   misses the format and the off-topic behaviour.

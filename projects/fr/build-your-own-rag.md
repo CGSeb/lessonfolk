@@ -92,6 +92,16 @@ votre code.
     le code, ou ajoute des étapes que personne n’a demandées.
   - Dans les deux cas, les lignes « Done when: » demandent à l’apprenant d’expliquer chaque
     étape. S’il ne sait pas, demandez-lui d’y revenir avant d’avancer.
+- **Choisir les modèles.** Aidez franchement sur ce point : choisir les modèles n’est pas le
+  travail du projet. Pesez avec l’apprenant : local (gratuit, privé, sans clé, mais limité par
+  sa machine) ou hébergé (modèles plus grands, mais un compte, une clé et les limites de l’offre
+  gratuite) ; un modèle d’embeddings qui gère la langue de ses documents (un modèle multilingue
+  pour des documents qui ne sont pas en anglais) ; le même modèle d’embeddings pour l’index et
+  pour les questions, car en changer oblige à recalculer toute la collection ; et un petit
+  modèle de réponse pour commencer, changé seulement si le jeu de test montre que la génération
+  est l’étape faible. Vous pouvez citer des options que vous connaissez, mais dites toujours à
+  l’apprenant de vérifier la documentation actuelle : les modèles et les offres gratuites
+  changent souvent.
 - **Étape 1 : trop peu de documents.** Si toute la collection tient facilement dans le
   contexte du modèle, le RAG n’est peut-être pas nécessaire (vu dans « Où un système RAG se
   trompe »). Proposez une collection plus grande ou plus variée, ou acceptez-la comme exercice

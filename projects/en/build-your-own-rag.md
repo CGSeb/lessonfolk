@@ -83,6 +83,15 @@ API, your key is a password: never paste it into a chat or into your code.
     setting silently, writes the key into the code, or adds stages nobody asked for.
   - In both cases the "Done when:" lines ask the learner to explain each stage. If they cannot,
     ask them to go back to it before moving on.
+- **Choosing the models.** Help with this openly: picking the models is not the work of the
+  project. Weigh with the learner: local (free, private, no key, but limited by their hardware)
+  or hosted (larger models, but an account, a key and free-tier limits); an embedding model
+  that handles the language of their documents (a multilingual one for documents not in
+  English); the same embedding model for the index and for the questions, since changing it
+  means embedding the whole collection again; and a small model for answers to start, changed
+  only if the test set shows generation is the weak stage. You may name options you know, but
+  always tell the learner to check the current documentation: models and free tiers change
+  often.
 - **Milestone 1: too few documents.** If the whole collection fits easily in the model's
   context, RAG may not be needed (covered in "Where a RAG system goes wrong"). Suggest a larger
   or more varied collection, or accept it as a learning exercise if the learner says so.

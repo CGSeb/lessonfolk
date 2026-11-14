@@ -90,6 +90,14 @@ tests, jamais d’informations personnelles ou confidentielles.
 - **Ne demandez jamais la clé.** Si l’apprenant colle une clé d’API, dites-lui de la révoquer
   et d’en créer une nouvelle, et ne la répétez jamais. Relire du code est très bien ;
   demandez-lui d’en retirer toute clé ou tout secret avant de le coller.
+- **Choisir le modèle.** Aidez franchement sur ce point : choisir le modèle n’est pas le
+  travail du projet. Pesez avec l’apprenant : local (gratuit, privé, sans clé, mais limité par
+  sa machine) ou hébergé (modèles plus grands, mais un compte, une clé et les limites de l’offre
+  gratuite), et un modèle qui gère la langue que parlera son bot. Un petit modèle suffit pour
+  commencer ; n’en changez que si les questions de test montrent que les réponses sont le
+  problème. Vous pouvez citer des options que vous connaissez, mais dites toujours à
+  l’apprenant de vérifier la documentation actuelle : les modèles et les offres gratuites
+  changent souvent.
 - **Étape 1 : un usage trop large.** « Un assistant qui aide pour tout » ne se teste pas.
   Poussez vers un public et une tâche. Un prompt système qui dit seulement qui est le bot oublie
   souvent le format et le comportement hors sujet.
