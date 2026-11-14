@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-export const SKILLS = ['learn', 'progress', 'review'] as const;
+export const SKILLS = ['learn', 'progress', 'review', 'project'] as const;
 
 /** Everything below this line of a SKILL.md is the copied procedure. */
 export const MARKER = '<!-- The procedure below is copied by `npm run plugin:sync`: do not edit it here. -->';

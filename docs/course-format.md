@@ -6,7 +6,7 @@ it gives the content, how to teach it, and how to check understanding.
 
 You can write courses by hand from this spec, or let your agent do it with you: say *"create a
 course about…"* or *"add a lesson to…"* (the `create-course` and `edit-course` skills in Claude
-Code; the "Create a course" and "Edit a course" procedures in `AGENTS.md` for other agents).
+Code; the procedures in `docs/authoring/` for other agents).
 
 ## Layout
 
@@ -27,6 +27,9 @@ courses/
       course.yaml             # optional
       01-what-is-ai.md        # each lesson is optional too
 ```
+
+Practice projects live in their own `projects/` folder, next to `courses/`: see
+[Project format](project-format.md).
 
 Translations reuse the same course, lesson and theme ids, so progress is shared across
 languages. `en` holds the courses; other languages are layered on top of it: see
@@ -226,8 +229,8 @@ files says how long a learner really takes.
 ## Review
 
 `check:courses` cannot tell whether a lesson is any good. For that, ask your agent to
-*"review the course …"* (`/review-course` in Claude Code, the "Review a course" procedure in
-`AGENTS.md` for other agents). It reads each lesson and answers six questions:
+*"review the course …"* (`/review-course` in Claude Code, the procedure in
+`docs/authoring/review-course.md` for other agents). It reads each lesson and answers six questions:
 
 | Criterion | The lesson… |
 |---|---|

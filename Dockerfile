@@ -60,6 +60,7 @@ COPY packages/mcp/src packages/mcp/src
 # The tutor prompts (also bundled in dashboard/dist by the build), kept next to their loader.
 COPY packages/mcp/prompts packages/mcp/prompts
 COPY courses courses
+COPY projects projects
 # The release tag, shown in the dashboard footer (release.yml passes it; empty for other builds).
 ARG LESSONFOLK_VERSION=
 ENV LESSONFOLK_VERSION=$LESSONFOLK_VERSION

@@ -7,11 +7,12 @@
 | [Developing LessonFolk](development.md) | For code contributors: repository map, every npm script, database changes, adding a tutor action, live refresh, Content Security Policy, Docker images. |
 | [Settings](configuration.md) | Every environment variable: database and Docker Compose, sign-in, dashboard server. |
 | [Course format](course-format.md) | The specification of courses, themes, authors and lesson files, what `npm run check:courses` checks, and the rubric of a course review. |
+| [Project format](project-format.md) | The specification of practice projects (brief, milestones, coaching notes, review), their translations and what `npm run check:courses` checks. |
 | [Testing](testing.md) | How the automated tests work, and the manual checks with a real tutor and with real sign-in. |
 | [Sign-in for developers](auth-dev.md) | The `LESSONFOLK_AUTH` modes, and how to try GitHub and Google sign-in on your machine. |
 | [Privacy and personal data](privacy.md) | Data map (what is stored where), download-all and delete-account, retention of logs and backups. |
 | [Search engines and AI search](seo.md) | What the public pages send to crawlers: robots.txt, sitemap, llms.txt, meta tags, structured data, the AI crawler policy, and how to check it. |
 | [Brand](brand.md) | Logo, colours, type, shape and the do's and don'ts of the LessonFolk look. |
 
-The tutor's own instructions are in [`packages/mcp/prompts/`](../packages/mcp/prompts); [`AGENTS.md`](../AGENTS.md) has the course authoring procedures.
+The tutor's own instructions are in [`packages/mcp/prompts/`](../packages/mcp/prompts); the course authoring procedures are in [`authoring/`](authoring).
 The progress import/export format is [`progress.example.json`](progress.example.json).

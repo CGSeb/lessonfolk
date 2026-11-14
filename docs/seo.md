@@ -4,7 +4,7 @@ How LessonFolk makes its public pages easy to find in search engines (Google, Bi
 
 ## What is public and what is private
 
-- **Public** (open to every crawler, listed in the sitemap): `/` (the landing page), `/courses`, `/courses/<id>`, `/authors`, `/authors/<slug>`, `/connect`, `/privacy`.
+- **Public** (open to every crawler, listed in the sitemap): `/` (the landing page), `/courses`, `/courses/<id>`, `/projects`, `/projects/<id>`, `/authors`, `/authors/<slug>`, `/connect`, `/privacy`, `/terms`.
 - **Private** (`PRIVATE_PATHS` in `seo.ts`): `/account`, `/api`, `/mcp`, `/oauth`, `/sign-in`, `/sign-out`. They are disallowed in `robots.txt`, send an `X-Robots-Tag: noindex, nofollow` header (`src/middleware.ts`), and the pages also carry `<meta name="robots" content="noindex">` (`noindex` prop of `BaseLayout`). "Not found" pages are `noindex` too.
 
 When you add a page, decide which one it is: a public page goes in `publicPaths()` (the sitemap); a private one goes in `PRIVATE_PATHS`.
@@ -26,9 +26,9 @@ The site address comes from `LESSONFOLK_BASE_URL` when people sign in, and from 
 | URL | What it is |
 |---|---|
 | `/robots.txt` | Public pages open, private paths disallowed, link to the sitemap. |
-| `/sitemap.xml` | The public pages, courses and authors read from `courses/` on every request. |
-| `/llms.txt` | A plain Markdown summary of LessonFolk and its courses for AI assistants ([llms.txt format](https://llmstxt.org)). |
-| `/llms-full.txt` | The same, with each course's level, duration, lesson count and prerequisites. |
+| `/sitemap.xml` | The public pages, courses, projects and authors, read from `courses/` and `projects/` on every request. |
+| `/llms.txt` | A plain Markdown summary of LessonFolk, its courses and its practice projects for AI assistants ([llms.txt format](https://llmstxt.org)). |
+| `/llms-full.txt` | The same, with each course's level, duration, lesson count and prerequisites, and each project's level, duration, milestone count and the courses it builds on. |
 
 ## Policy for AI crawlers
 
@@ -38,15 +38,16 @@ LessonFolk is open source and wants to be recommended, so public pages are open 
 
 - Landing page (signed out): `WebSite` and `Organization`.
 - Course page: `Course` (provider, authors, level, free, workload) and `BreadcrumbList`.
+- Project page: `LearningResource` with `learningResourceType: "Project"` (provider, authors, level, free, time required, and the courses it builds on as `isBasedOn`) and `BreadcrumbList`.
 
 ## Content rules for crawlers
 
-Pages are rendered on the server, so their text is in the HTML without JavaScript. Keep one `<h1>` per page and a clear heading order. Give images a descriptive `alt` (decorative images get `alt=""`). Write course descriptions as one or two plain sentences that say what you will learn and for whom: AI assistants quote them.
+Pages are rendered on the server, so their text is in the HTML without JavaScript. Keep one `<h1>` per page and a clear heading order. Give images a descriptive `alt` (decorative images get `alt=""`). Write course and project descriptions as one or two plain sentences that say what you will learn or make, and for whom: AI assistants quote them.
 
 ## Checking it
 
 - Automated: `dashboard/tests/e2e/seo.db.test.ts` and `dashboard/src/lib/seo.test.ts` (part of `npm test`).
-- By hand, on a running dashboard: open `/robots.txt`, `/sitemap.xml` and `/llms.txt`; run Lighthouse (Chrome DevTools) on `/` and a course page and check the SEO score is 100; paste a course page in the [Rich Results Test](https://search.google.com/test/rich-results) or the [Schema.org validator](https://validator.schema.org).
+- By hand, on a running dashboard: open `/robots.txt`, `/sitemap.xml` and `/llms.txt`; run Lighthouse (Chrome DevTools) on `/`, a course page and a project page and check the SEO score is 100; paste a course or project page in the [Rich Results Test](https://search.google.com/test/rich-results) or the [Schema.org validator](https://validator.schema.org).
 
 ## For the site owner (needs your accounts)
 

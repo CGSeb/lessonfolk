@@ -7,6 +7,7 @@ import {
   buildRobotsTxt,
   buildSitemap,
   courseJsonLd,
+  projectJsonLd,
   isPrivatePath,
   publicPaths,
   serializeJsonLd,
@@ -64,6 +65,11 @@ describe('buildSitemap', () => {
     expect(xml).toContain('<loc>https://learn.example.com/authors/a%26b</loc>');
     expect(xml).not.toContain('/account');
   });
+
+  it('lists every project page after the projects catalog', () => {
+    const paths = publicPaths([], [], ['reusable-prompt']);
+    expect(paths.slice(paths.indexOf('/projects'), paths.indexOf('/projects') + 2)).toEqual(['/projects', '/projects/reusable-prompt']);
+  });
 });
 
 describe('buildLlmsTxt', () => {
@@ -76,6 +82,22 @@ describe('buildLlmsTxt', () => {
 
   it('adds level, duration and prerequisites in the full version', () => {
     expect(buildLlmsTxt(origin, [course], 'x', true)).toContain('(beginner, about 1.5 h, 3 lessons; builds on intro)');
+  });
+
+  it('lists the projects when there are some', () => {
+    const project = {
+      id: 'reusable-prompt',
+      title: 'A reusable prompt',
+      level: 'beginner',
+      description: 'Make a prompt you reuse.',
+      estimatedHours: 2,
+      buildsOn: ['prompting-basics'],
+      milestones: 5,
+    };
+    expect(buildLlmsTxt(origin, [course], 'x')).not.toContain('## Projects');
+    const text = buildLlmsTxt(origin, [course], 'x', false, [project]);
+    expect(text).toContain('## Projects\n\n- [A reusable prompt](https://learn.example.com/projects/reusable-prompt): Make a prompt you reuse.');
+    expect(buildLlmsTxt(origin, [course], 'x', true, [project])).toContain('(beginner, about 2 h, 5 milestones; builds on prompting-basics)');
   });
 });
 
@@ -101,6 +123,35 @@ describe('JSON-LD', () => {
     expect(data.hasCourseInstance.courseWorkload).toBe('PT90M');
     expect(data.author[0].url).toBe('https://learn.example.com/authors/lessonfolk');
     expect(breadcrumb.itemListElement.map((item: { name: string }) => item.name)).toEqual(['Courses', 'AI Foundations']);
+  });
+
+  it('describes a project as a learning resource with the courses it builds on, and its breadcrumb', () => {
+    const project = { id: 'reusable-prompt', title: 'A reusable prompt', level: 'beginner', description: 'Make a prompt.', estimatedHours: 2, lang: 'fr' };
+    const [data, breadcrumb] = projectJsonLd(
+      origin,
+      project,
+      [{ slug: 'lessonfolk', name: 'LessonFolk' }],
+      [{ id: 'prompting-basics', title: 'Prompting Basics' }],
+      'Projects',
+    ) as Record<string, any>[];
+    expect(data).toMatchObject({
+      '@type': 'LearningResource',
+      learningResourceType: 'Project',
+      name: 'A reusable prompt',
+      url: 'https://learn.example.com/projects/reusable-prompt',
+      inLanguage: 'fr',
+      isAccessibleForFree: true,
+      educationalLevel: 'Beginner',
+      timeRequired: 'PT120M',
+    });
+    expect(data.author[0].url).toBe('https://learn.example.com/authors/lessonfolk');
+    expect(data.isBasedOn).toEqual([{ '@type': 'Course', name: 'Prompting Basics', url: 'https://learn.example.com/courses/prompting-basics' }]);
+    expect(breadcrumb.itemListElement.map((item: { item: string }) => item.item)).toEqual([
+      'https://learn.example.com/projects',
+      'https://learn.example.com/projects/reusable-prompt',
+    ]);
+    // A project that builds on no course says nothing about it.
+    expect(projectJsonLd(origin, project, [], [], 'Projects')[0]).not.toHaveProperty('isBasedOn');
   });
 
   it('cannot close the script tag it is written in', () => {

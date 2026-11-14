@@ -35,6 +35,13 @@ type Words = {
   copyFailed: string
   lessonComplete: (title: string) => string
   newCourse: (course: string, theme?: string) => string
+  project: string
+  milestones: string
+  milestonesAlt: (reached: number, total: number) => string
+  review: (reviewed: number, total: number) => string
+  projectDone: string
+  milestoneReached: (title: string) => string
+  projectComplete: (title: string) => string
   waits: (reason: string) => string
 }
 
@@ -73,6 +80,13 @@ const en: Words = {
   copyFailed: 'Could not copy to the clipboard',
   lessonComplete: title => `Lesson complete: ${title}`,
   newCourse: (course, theme) => `New course: ${course}${theme ? ` (${theme})` : ''}`,
+  project: 'Project',
+  milestones: 'Milestones',
+  milestonesAlt: (reached, total) => `${reached} of ${total} milestones reached`,
+  review: (reviewed, total) => `Review: ${reviewed} of ${total} criteria`,
+  projectDone: 'Project complete. Well done!',
+  milestoneReached: title => `Milestone reached: ${title}`,
+  projectComplete: title => `Project complete: ${title}`,
   waits: reason => `Course companion waits: ${reason}`,
 }
 
@@ -111,6 +125,13 @@ const fr: Words = {
   copyFailed: 'Impossible de copier dans le presse-papiers',
   lessonComplete: title => `Leçon terminée : ${title}`,
   newCourse: (course, theme) => `Nouveau cours : ${course}${theme ? ` (${theme})` : ''}`,
+  project: 'Projet',
+  milestones: 'Étapes',
+  milestonesAlt: (reached, total) => `${reached} étape(s) atteinte(s) sur ${total}`,
+  review: (reviewed, total) => `Relecture : ${reviewed} critère(s) sur ${total}`,
+  projectDone: 'Projet terminé. Bravo !',
+  milestoneReached: title => `Étape atteinte : ${title}`,
+  projectComplete: title => `Projet terminé : ${title}`,
   waits: reason => `Le compagnon de cours attend : ${reason}`,
 }
 

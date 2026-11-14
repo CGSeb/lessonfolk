@@ -1,0 +1,141 @@
+---
+import CourseAuthors from '../CourseAuthors.astro';
+import LevelBadge from '../LevelBadge.astro';
+import StatusBadge from '../StatusBadge.astro';
+import ThemeBadge from '../ThemeBadge.astro';
+import type { AuthorLink } from '../authors/authorView';
+import { themeToneClass } from '../theme-tone';
+import type { ProjectCardView } from './projectView';
+
+const { t, lang } = Astro.locals;
+
+interface Props {
+  view: ProjectCardView;
+  authors?: AuthorLink[];
+  /** Heading level of the project title, to fit the page outline. */
+  headingLevel?: 2 | 3;
+  /** Show the learner's status and milestones reached (false when signed out). */
+  showProgress?: boolean;
+}
+
+const { view, authors = [], headingLevel = 2, showProgress = true } = Astro.props;
+const { project, theme, status, reached } = view;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const hours = project.estimatedHours;
+const hoursText = t(hours === 1 ? 'courses.hoursOne' : 'courses.hoursOther', { hours });
+const milestonesText = t(project.milestones === 1 ? 'projects.milestoneCountOne' : 'projects.milestoneCountOther', { count: project.milestones });
+const progressText = t('projects.milestonesProgress', { done: reached, total: project.milestones });
+const progressId = `project-progress-${project.id}`;
+const otherLang = project.lang === lang ? undefined : project.lang;
+const buildsOn = view.buildsOn.filter((b) => b.course);
+---
+
+<article class:list={['card', 'stack', 'project-card', themeToneClass(theme?.position)]} style="--stack-space: var(--space-3)">
+  <Heading class="project-card__title" lang={otherLang}>
+    <a href={`/projects/${encodeURIComponent(project.id)}`}>{project.title}</a>
+  </Heading>
+
+  <CourseAuthors authors={authors} />
+
+  <div class="cluster" style="--cluster-space: var(--space-2)">
+    <ThemeBadge theme={theme} base="/projects" />
+    <LevelBadge level={project.level} />
+    {showProgress && status !== 'not_started' && <StatusBadge status={status} />}
+  </div>
+
+  <p lang={otherLang}>{project.description}</p>
+
+  <p class="project-card__meta">
+    {hoursText} <span aria-hidden="true">·</span> {milestonesText}
+  </p>
+
+  {
+    buildsOn.length > 0 && (
+      <p class="project-card__builds">
+        {t('projects.buildsOn')}: {buildsOn.map((b, i) => (
+          <>
+            {i > 0 && ', '}
+            {b.course!.title}
+          </>
+        ))}
+      </p>
+    )
+  }
+
+  {
+    showProgress && status === 'in_progress' && (
+      <div class="stack project-card__progress" style="--stack-space: var(--space-1)">
+        <progress class="progress-bar" value={reached} max={Math.max(project.milestones, 1)} aria-labelledby={progressId}>
+          {progressText}
+        </progress>
+        <p class="project-card__meta" id={progressId}>{progressText}</p>
+      </div>
+    )
+  }
+</article>
+
+<style>
+  /* Same bubble as a course card, in the colour of the project's theme. */
+  .project-card {
+    --color-accent: var(--color-accent-strong);
+    --color-progress-track: var(--color-surface-sunken);
+    position: relative;
+    padding: var(--space-5);
+    background: var(--color-theme-bubble);
+    outline: 3px solid transparent;
+    outline-offset: -3px;
+    transition: outline-color 0.15s ease;
+  }
+
+  .project-card:hover {
+    outline-color: var(--color-ink);
+  }
+
+  .project-card__title {
+    font-size: 1.75rem;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+
+  .project-card__title a {
+    color: var(--color-text);
+    font-weight: inherit;
+    text-decoration: none;
+  }
+
+  /* The whole card is clickable through the title link. */
+  .project-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--bubble-lg);
+  }
+
+  .project-card__title a:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .project-card__title a:focus-visible::after {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+    box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
+  }
+
+  .project-card :global(.course-authors) {
+    color: var(--color-text);
+  }
+
+  .project-card__meta {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .project-card__builds {
+    font-size: var(--text-sm);
+  }
+
+  .project-card__progress {
+    margin-top: auto;
+  }
+</style>

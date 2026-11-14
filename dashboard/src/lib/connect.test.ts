@@ -128,7 +128,7 @@ describe('the learner plugin', () => {
     const [entry] = JSON.parse(read('.claude-plugin/marketplace.json')).plugins;
     expect(entry.source).toBe('./.claude/skills/lessonfolk-tutor');
     expect(manifest.name).toBe(entry.name);
-    for (const authoring of ['create-course', 'edit-course', 'review-course', 'course-builder']) {
+    for (const authoring of ['create-course', 'edit-course', 'review-course', 'create-project', 'edit-project', 'course-builder']) {
       expect(() => read(`.claude/skills/lessonfolk-tutor/skills/${authoring}/SKILL.md`)).toThrow();
       expect(JSON.stringify([manifest, entry])).not.toContain(authoring);
     }

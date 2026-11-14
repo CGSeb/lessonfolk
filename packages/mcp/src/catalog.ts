@@ -8,10 +8,15 @@ import {
   type Course,
   type Lesson,
   type Progress,
+  type Project,
   CourseValidationError,
   DEFAULT_LANG,
   getLessonStatus,
+  getProjectStatus,
   inspectCatalog,
+  inspectProjects,
+  missingCriteria,
+  missingMilestones,
   isPlacementSkip,
   languageCode,
   listLanguages,
@@ -99,4 +104,56 @@ export function courseSummary(catalog: Catalog, course: Course, progress?: Progr
 /** The lesson file (frontmatter and Markdown: content, teaching notes, checks). */
 export function readLessonText(lesson: Lesson): string {
   return readFileSync(lesson.file, 'utf8').replace(/^﻿/, '');
+}
+
+/**
+ * The practice projects in `lang` (translated text where `projects/<lang>/` has it, English for
+ * the rest), in `projects/en/index.yaml` order, checked against the courses of `coursesDir`.
+ * No `projectsDir` means no projects. Throws on broken project files.
+ */
+export function readProjects(projectsDir: string | undefined, coursesDir: string, lang = DEFAULT_LANG): Project[] {
+  if (!projectsDir) return [];
+  const { projects, issues } = inspectProjects(lang, projectsDir, coursesDir);
+  if (issues.length) throw new CourseValidationError(issues, projectsDir);
+  return projects;
+}
+
+/** Where the learner stands in a project: status, milestones reached, the next one, review verdicts. */
+export function projectState(progress: Progress, project: Project) {
+  const entry = progress.projects?.[project.id];
+  const left = missingMilestones(entry, project.milestones);
+  return {
+    status: getProjectStatus(progress, project.id),
+    milestonesReached: entry?.milestones ?? [],
+    ...(entry?.status === 'in_progress' && left.length && { nextMilestone: left[0] }),
+    ...(entry?.review && { review: entry.review }),
+    ...(entry?.status === 'in_progress' && !left.length && { criteriaToReview: missingCriteria(entry, project.reviewCriteria) }),
+  };
+}
+
+/** A project as the tools return it: metadata, the courses it builds on, and the learner's status. */
+export function projectSummary(catalog: Catalog, project: Project, progress?: Progress) {
+  return {
+    id: project.id,
+    title: project.title,
+    level: project.level,
+    theme: project.theme,
+    themeTitle: catalog.themes.find((t) => t.id === project.theme)?.title,
+    description: project.description,
+    estimatedHours: project.estimatedHours,
+    needs: project.needs,
+    buildsOn: project.buildsOn.map((id) => {
+      const course = catalog.courses.find((c) => c.id === id);
+      return { id, title: course?.title ?? id, ...(progress && course && { status: courseStatus(progress, course) }) };
+    }),
+    milestones: project.milestones,
+    reviewCriteria: project.reviewCriteria,
+    authors: project.authors,
+    ...(progress && projectState(progress, project)),
+  };
+}
+
+/** The project file (frontmatter and Markdown: brief, milestones, coaching notes, review). */
+export function readProjectText(project: Project): string {
+  return readFileSync(project.file, 'utf8').replace(/^﻿/, '');
 }

@@ -1,0 +1,7 @@
+# Practice projects, in the order the catalog shows them. Format: docs/project-format.md.
+projects:
+  - reusable-prompt
+  - evidence-based-ai-choice
+  - small-focused-chatbot
+  - group-ai-guide
+  - build-your-own-rag

@@ -58,13 +58,14 @@ export function buildRobotsTxt(origin: string): string {
 const escapeXml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Paths of the public pages: the fixed ones, then every course and author. */
-export function publicPaths(courseIds: string[], authorSlugs: string[]): string[] {
+/** Paths of the public pages: the fixed ones, then every course, project and author. */
+export function publicPaths(courseIds: string[], authorSlugs: string[], projectIds: string[] = []): string[] {
   return [
     '/',
     '/courses',
     ...courseIds.map((id) => `/courses/${encodeURIComponent(id)}`),
     '/projects',
+    ...projectIds.map((id) => `/projects/${encodeURIComponent(id)}`),
     '/authors',
     ...authorSlugs.map((slug) => `/authors/${encodeURIComponent(slug)}`),
     '/connect',
@@ -89,6 +90,16 @@ export interface SeoCourse {
   lessons: unknown[];
 }
 
+export interface SeoProject {
+  id: string;
+  title: string;
+  level: string;
+  description: string;
+  estimatedHours: number;
+  buildsOn: string[];
+  milestones: number;
+}
+
 export interface SeoAuthor {
   slug: string;
   name: string;
@@ -98,7 +109,13 @@ export interface SeoAuthor {
  * Plain-text description of the site for AI assistants, in the llms.txt format
  * (https://llmstxt.org). `full` adds each course's level, duration and prerequisites.
  */
-export function buildLlmsTxt(origin: string, courses: SeoCourse[], siteDescription: string, full = false): string {
+export function buildLlmsTxt(
+  origin: string,
+  courses: SeoCourse[],
+  siteDescription: string,
+  full = false,
+  projects: SeoProject[] = [],
+): string {
   const lines = [
     '# LessonFolk',
     '',
@@ -111,7 +128,7 @@ export function buildLlmsTxt(origin: string, courses: SeoCourse[], siteDescripti
     '## Main pages',
     '',
     `- [Courses](${absoluteUrl(origin, '/courses')}): every course, in the recommended learning order`,
-    `- [Projects](${absoluteUrl(origin, '/projects')}): real projects to practise the courses (coming soon)`,
+    `- [Projects](${absoluteUrl(origin, '/projects')}): real projects to practise the courses, with the tutor as a coach`,
     `- [Connect your AI chat](${absoluteUrl(origin, '/connect')}): how to connect a chat app to the LessonFolk tutor (MCP server: ${absoluteUrl(origin, '/mcp')})`,
     `- [Authors](${absoluteUrl(origin, '/authors')}): who writes the courses`,
     `- [Privacy](${absoluteUrl(origin, '/privacy')}): what is stored and how to delete it`,
@@ -127,6 +144,19 @@ export function buildLlmsTxt(origin: string, courses: SeoCourse[], siteDescripti
       return `- ${link} (${course.level}, about ${course.estimatedHours} h, ${course.lessons.length} lessons${needs}): ${course.description}`;
     }),
     '',
+    ...(projects.length
+      ? [
+          '## Projects',
+          '',
+          ...projects.map((project) => {
+            const link = `[${project.title}](${absoluteUrl(origin, `/projects/${encodeURIComponent(project.id)}`)})`;
+            if (!full) return `- ${link}: ${project.description}`;
+            const needs = project.buildsOn.length ? `; builds on ${project.buildsOn.join(', ')}` : '';
+            return `- ${link} (${project.level}, about ${project.estimatedHours} h, ${project.milestones} milestones${needs}): ${project.description}`;
+          }),
+          '',
+        ]
+      : []),
   ];
   return lines.join('\n');
 }
@@ -187,6 +217,72 @@ export function courseJsonLd(origin: string, course: SeoCourse, authors: SeoAuth
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: coursesLabel, item: absoluteUrl(origin, '/courses') },
         { '@type': 'ListItem', position: 2, name: course.title, item: url },
+      ],
+    },
+  ];
+}
+
+/** A project as its JSON-LD needs it (`Project` of @lessonfolk/core fits). */
+export interface SeoJsonLdProject {
+  id: string;
+  title: string;
+  level: string;
+  description: string;
+  estimatedHours: number;
+  /** The text's language (`en`, or the translation shown). */
+  lang: string;
+}
+
+/**
+ * JSON-LD of a project page: a `LearningResource` of type "Project" (level, time, free, authors,
+ * the courses it builds on) and its breadcrumb.
+ */
+export function projectJsonLd(
+  origin: string,
+  project: SeoJsonLdProject,
+  authors: SeoAuthor[],
+  buildsOn: { id: string; title: string }[],
+  projectsLabel: string,
+): object[] {
+  const url = absoluteUrl(origin, `/projects/${encodeURIComponent(project.id)}`);
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'LearningResource',
+      learningResourceType: 'Project',
+      name: project.title,
+      description: project.description,
+      url,
+      inLanguage: project.lang,
+      isAccessibleForFree: true,
+      educationalLevel: LEVEL_LABEL[project.level] ?? project.level,
+      timeRequired: `PT${Math.round(project.estimatedHours * 60)}M`,
+      provider: { '@type': 'Organization', name: SITE_NAME, url: absoluteUrl(origin, '/') },
+      ...(authors.length
+        ? {
+            author: authors.map((a) => ({
+              '@type': 'Person',
+              name: a.name,
+              url: absoluteUrl(origin, `/authors/${encodeURIComponent(a.slug)}`),
+            })),
+          }
+        : {}),
+      ...(buildsOn.length
+        ? {
+            isBasedOn: buildsOn.map((course) => ({
+              '@type': 'Course',
+              name: course.title,
+              url: absoluteUrl(origin, `/courses/${encodeURIComponent(course.id)}`),
+            })),
+          }
+        : {}),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: projectsLabel, item: absoluteUrl(origin, '/projects') },
+        { '@type': 'ListItem', position: 2, name: project.title, item: url },
       ],
     },
   ];

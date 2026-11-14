@@ -1,0 +1,360 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CourseAuthors from '../../components/CourseAuthors.astro';
+import LevelBadge from '../../components/LevelBadge.astro';
+import Notice from '../../components/Notice.astro';
+import SignInPrompt from '../../components/SignInPrompt.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import ThemeBadge from '../../components/ThemeBadge.astro';
+import SayPhrase from '../../components/home/SayPhrase.astro';
+import InlineText from '../../components/project/InlineText.astro';
+import { courseAuthors } from '../../components/authors/authorView';
+import { getProjectView } from '../../components/project/projectView';
+import { themeToneClass } from '../../components/theme-tone';
+import { DEFAULT_LANG, getStats, inspectCatalog, inspectProjects, progressOrEmpty } from '@lessonfolk/core';
+import { getCourseStatus } from '../../components/course-status';
+import { loadProgressFor } from '../../lib/store';
+import { projectJsonLd } from '../../lib/seo';
+import { siteOrigin } from '../../lib/site-url';
+
+const { t, lang } = Astro.locals;
+
+// Read on every request so the page reflects the tutor's latest writes. Public page:
+// signed out (`progressResult` null), the project is shown without progress.
+const id = Astro.params.id ?? '';
+const { catalog } = inspectCatalog(lang);
+const { projects } = inspectProjects(lang);
+const progressResult = await loadProgressFor(Astro.locals.user);
+const showProgress = progressResult !== null;
+const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
+const view = getProjectView(projects, id, catalog, progress, lang);
+
+if (!view) Astro.response.status = 404;
+
+const project = view?.project;
+const authors = project ? courseAuthors(project, catalog.authors) : [];
+const otherLang = project && project.lang !== lang ? project.lang : undefined;
+const translationNote = project && lang !== DEFAULT_LANG && project.lang !== lang ? t('projects.notTranslated') : undefined;
+const hoursText = project ? t(project.estimatedHours === 1 ? 'courses.hoursOne' : 'courses.hoursOther', { hours: project.estimatedHours }) : '';
+const milestonesText = project
+  ? t(project.milestones === 1 ? 'projects.milestoneCountOne' : 'projects.milestoneCountOther', { count: project.milestones })
+  : '';
+const progressText = project ? t('projects.milestonesProgress', { done: view.reached, total: project.milestones }) : '';
+// The status of each course the project builds on, as on the course cards.
+const courseStatus = (courseId: string) => {
+  const course = catalog.courses.find((c) => c.id === courseId);
+  if (!course) return undefined;
+  return getCourseStatus(getStats([course], progress).courses[0]);
+};
+---
+
+<BaseLayout
+  title={project ? project.title : t('projects.notFoundTitle')}
+  description={project?.description}
+  jsonLd={
+    view
+      ? projectJsonLd(
+          siteOrigin(Astro.url),
+          view.project,
+          authors,
+          view.buildsOn.flatMap((b) => (b.course ? [{ id: b.id, title: b.course.title }] : [])),
+          t('nav.projects'),
+        )
+      : undefined
+  }
+>
+  <div class="stack" style="--stack-space: var(--space-5)">
+    <nav aria-label={t('projects.breadcrumbLabel')}>
+      <ol class="breadcrumb" role="list">
+        <li><a href="/projects">{t('nav.projects')}</a></li>
+        {project && <li aria-current="page">{project.title}</li>}
+      </ol>
+    </nav>
+
+    {
+      !view || !project ? (
+        <section class="card stack" aria-labelledby="not-found-heading">
+          <h1 id="not-found-heading">{t('projects.notFoundHeading')}</h1>
+          <p>{t('projects.notFoundBody', { id })}</p>
+          <p>
+            <a href="/projects">{t('projects.backToProjects')}</a>
+          </p>
+        </section>
+      ) : (
+        <>
+          {progressResult?.state === 'invalid' && (
+            <Notice tone="warning" title={t('course.invalidProgressTitle')}>
+              <p>{t('course.invalidProgressBody')}</p>
+            </Notice>
+          )}
+
+          <header class:list={['card', 'stack', 'project-head', themeToneClass(view.theme?.position)]} style="--stack-space: var(--space-3)">
+            <h1 lang={otherLang}>{project.title}</h1>
+            <CourseAuthors authors={authors} />
+            <div class="cluster" style="--cluster-space: var(--space-2)">
+              <ThemeBadge theme={view.theme} base="/projects" />
+              <LevelBadge level={project.level} />
+              {showProgress && <StatusBadge status={view.status} />}
+            </div>
+            <p class="project-lead" lang={otherLang}>{project.description}</p>
+            <p class="project-meta">
+              {hoursText} <span aria-hidden="true">·</span> {milestonesText}
+            </p>
+            {translationNote && <p class="project-translation">{translationNote}</p>}
+          </header>
+
+          <div class="project-columns">
+            {showProgress ? (
+              <section class="card stack" aria-labelledby="progress-heading" style="--stack-space: var(--space-3)">
+                <h2 class="project-card-title" id="progress-heading">{t('projects.progressTitle')}</h2>
+                <progress class="progress-bar" value={view.reached} max={Math.max(project.milestones, 1)} aria-labelledby="progress-heading">
+                  {progressText}
+                </progress>
+                <p>{progressText}</p>
+                {(view.startedOn || view.completedOn) && (
+                  <p class="cluster project-dates" style="--cluster-space: var(--space-1) var(--space-3)">
+                    {view.startedOn && <span>{t('projects.startedOn', { date: view.startedOn })}</span>}
+                    {view.completedOn && <span>{t('projects.completedOn', { date: view.completedOn })}</span>}
+                  </p>
+                )}
+                {view.status === 'done' && <p class="project-done">{t('projects.completedMessage')}</p>}
+                {view.notes && (
+                  <details class="project-notes">
+                    <summary class="project-notes__label">{t('projects.tutorNotes')}</summary>
+                    <p class="project-notes__body">{view.notes}</p>
+                  </details>
+                )}
+                {view.status === 'not_started' && (
+                  <SayPhrase instruction={t('projects.startHint')} phrase={t('projects.startPhrase', { title: project.title })} />
+                )}
+                {view.status === 'in_progress' && (
+                  <SayPhrase instruction={t('projects.continueHint')} phrase={t('projects.continuePhrase', { title: project.title })} />
+                )}
+                {view.status === 'done' && (
+                  <SayPhrase instruction={t('projects.resetHint')} phrase={t('projects.resetPhrase', { title: project.title })} />
+                )}
+              </section>
+            ) : (
+              <SignInPrompt />
+            )}
+
+            <section class="card stack" aria-labelledby="needs-heading" style="--stack-space: var(--space-3)">
+              <h2 class="project-card-title" id="needs-heading">{t('projects.needsHeading')}</h2>
+              <ul lang={otherLang}>
+                {project.needs.map((need) => <li>{need}</li>)}
+              </ul>
+              <h2 class="project-card-title" id="builds-heading">{t('projects.buildsOnHeading')}</h2>
+              {view.buildsOn.length === 0 ? (
+                <p class="muted">{t('projects.buildsOnNone')}</p>
+              ) : (
+                <>
+                  <p>{t('projects.buildsOnIntro')}</p>
+                  <ul class="project-builds">
+                    {view.buildsOn.map((b) => {
+                      const status = showProgress ? courseStatus(b.id) : undefined;
+                      return (
+                        <li class="cluster" style="--cluster-space: var(--space-2)">
+                          {b.course ? <a href={`/courses/${encodeURIComponent(b.id)}`}>{b.course.title}</a> : <code>{b.id}</code>}
+                          {status && status !== 'not_started' && <StatusBadge status={status} />}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
+              )}
+            </section>
+          </div>
+
+          <section class="card stack project-section" aria-labelledby="brief-heading" style="--stack-space: var(--space-3)" lang={otherLang}>
+            <h2 id="brief-heading">{t('projects.briefHeading')}</h2>
+            {view.brief.map((paragraph) => (
+              <p><InlineText text={paragraph} /></p>
+            ))}
+          </section>
+
+          <section class="stack" aria-labelledby="milestones-heading" style="--stack-space: var(--space-4)">
+            <div class="stack" style="--stack-space: var(--space-2)">
+              <h2 id="milestones-heading">{t('projects.milestonesHeading')}</h2>
+              <p class="muted">{t('projects.milestonesIntro')}</p>
+            </div>
+            <ol class="milestone-list stack" role="list" style="--stack-space: var(--space-3)" lang={otherLang}>
+              {view.milestones.map((milestone) => {
+                const state = showProgress ? milestone.state : 'todo';
+                return (
+                  <li
+                    class:list={['card', 'stack', 'milestone', `milestone--${state}`, state === 'next' && 'card--spark']}
+                    style="--stack-space: var(--space-2)"
+                    aria-current={state === 'next' ? 'step' : undefined}
+                  >
+                    <div class="milestone__head">
+                      {milestone.title && <h3 class="milestone__title"><InlineText text={milestone.title} /></h3>}
+                      {state === 'reached' && <span class="badge badge--success" lang={lang}>{t('projects.milestoneReached')}</span>}
+                      {state === 'next' && <span class="badge badge--info" lang={lang}>{t('projects.milestoneNext')}</span>}
+                    </div>
+                    {milestone.body && <p><InlineText text={milestone.body} /></p>}
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .breadcrumb li + li::before {
+    content: '/';
+    margin-right: var(--space-2);
+    color: var(--color-border-strong);
+  }
+
+  .breadcrumb [aria-current='page'] {
+    color: var(--color-text);
+    font-weight: var(--weight-medium);
+  }
+
+  /* The project's own bubble, in the colour of its theme. */
+  .project-head {
+    --color-accent: var(--color-accent-strong);
+    align-items: flex-start;
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    border-radius: var(--bubble-xl);
+    background: var(--color-theme-bubble);
+  }
+
+  .project-head :global(.course-authors) {
+    color: var(--color-text);
+  }
+
+  .project-lead {
+    font-size: var(--text-lg);
+  }
+
+  .project-meta {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .project-translation,
+  .project-dates {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .project-columns {
+    display: grid;
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  @media (min-width: 48rem) {
+    .project-columns {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .project-card-title {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .project-builds {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .project-section {
+    max-width: 52rem;
+  }
+
+  /* Achievement: the "project completed" message is a small spark bubble. */
+  .project-done {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--bubble-md);
+    background: var(--color-spark);
+    color: var(--color-on-spark);
+    font-weight: var(--weight-extrabold);
+  }
+
+  .project-notes {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--bubble-md);
+    background: var(--color-surface-sunken);
+  }
+
+  .project-notes__body {
+    margin-top: var(--space-2);
+  }
+
+  .project-notes__label {
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .milestone-list {
+    max-width: 52rem;
+    padding-left: 0;
+    list-style: none;
+    counter-reset: milestone;
+  }
+
+  /* One bubble per milestone, with its number in big type. Reached milestones turn green. */
+  .milestone {
+    position: relative;
+    max-width: none;
+    padding-left: calc(var(--space-6) + 2.75rem);
+    counter-increment: milestone;
+  }
+
+  .milestone::before {
+    content: counter(milestone);
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-5);
+    font-size: 2.25rem;
+    font-weight: var(--weight-extrabold);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .milestone--reached {
+    background: var(--color-success-bg);
+  }
+
+  .milestone__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .milestone__title {
+    font-size: var(--text-xl);
+  }
+
+
+
+</style>
