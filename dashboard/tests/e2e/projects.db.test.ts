@@ -141,13 +141,17 @@ describe('projects pages', () => {
     expect(page.html).toMatch(/class="badge theme-badge[^"]*"[^>]*href="\/projects\?theme=understanding-ai"/);
   });
 
-  it('show a project page with its brief, milestones and review, never the coaching notes', async () => {
+  it('show a project page with its brief and milestones, never the tutor-only parts', async () => {
     const page = await get('/projects/demo-project');
     expect(page.status).toBe(200);
     expect(page.html).toMatch(/<h1[^>]*>Demo project<\/h1>/);
     expect(page.html).toContain('Explain AI to a <strong>friend</strong>, in your own words.');
-    for (const text of ['What you need', 'An AI chat app', 'The brief', 'Pick the friend', 'Done when', 'the learner names the person', 'How your result is reviewed', 'It avoids jargon.', 'Explain it to a second person.']) {
+    for (const text of ['What you need', 'An AI chat app', 'The brief', 'Pick the friend']) {
       expect(page.text).toContain(text);
+    }
+    // "Done when:", the review criteria and "Going further" are instructions for the tutor.
+    for (const text of ['Done when', 'the learner names the person', 'How your result is reviewed', 'It avoids jargon.', 'Explain it to a second person.']) {
+      expect(page.text).not.toContain(text);
     }
     expect(page.html).toMatch(/<a href="\/courses\/ai-foundations"[^>]*>AI Foundations<\/a>/);
     expect(page.text).not.toContain('SECRET-COACHING');

@@ -116,10 +116,11 @@ progress.json (see [`progress.example.json`](progress.example.json)) and in the
 ## On the dashboard
 
 `/projects` lists the projects and `/projects/<project-id>` shows one: the brief, `needs`, the
-`buildsOn` courses, the milestones with their `Done when:` lines, the review criteria and
-"Going further", with the learner's progress. The coaching notes are never shown. A course page
-lists the projects that build on it. Inline `**bold**` and `` `code` `` are rendered; other
-Markdown is shown as plain text, so keep the brief, milestones and criteria to short paragraphs.
+`buildsOn` courses and the milestones (title and what to reach), with the learner's progress.
+The `Done when:` lines, the review criteria, "Going further" and the coaching notes are for the
+tutor and are never shown. A course page lists the projects that build on it. Inline `**bold**`
+and `` `code` `` are rendered; other Markdown is shown as plain text, so keep the brief and
+milestones to short paragraphs.
 
 ## Validation
 

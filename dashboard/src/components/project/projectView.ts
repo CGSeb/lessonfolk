@@ -4,8 +4,6 @@ import {
   type Course,
   type Progress,
   type Project,
-  type ProjectContent,
-  type ReviewVerdict,
   type Theme,
 } from '@lessonfolk/core';
 import { formatDate } from '../course/courseView';
@@ -27,10 +25,10 @@ export interface ProjectCardView {
 export type MilestoneState = 'reached' | 'next' | 'todo';
 
 export interface ProjectPageView extends ProjectCardView {
-  content: ProjectContent;
-  milestones: (ProjectContent['milestones'][number] & { state: MilestoneState })[];
-  /** Verdicts on the review criteria, in criterion order; null where there is none yet. */
-  review: { text: string; verdict: ReviewVerdict | null }[];
+  /** The brief, one entry per paragraph. */
+  brief: string[];
+  /** Each milestone's title and what to reach, without its "Done when:" line (for the tutor). */
+  milestones: { title: string; body: string; state: MilestoneState }[];
   startedOn: string | null;
   completedOn: string | null;
   /** The tutor's notes, or null when there are none. */
@@ -50,7 +48,8 @@ export function projectCard(project: Project, catalog: { courses: Course[]; them
 
 /**
  * Everything the project page shows, or undefined when `projectId` is not a project. Only the
- * learner-facing parts of the file are read: the coaching notes stay with the tutor.
+ * brief and the milestones are shown: the "Done when:" lines, the review criteria, "Going
+ * further" and the coaching notes are instructions for the tutor.
  */
 export function getProjectView(
   projects: Project[],
@@ -68,12 +67,12 @@ export function getProjectView(
   const next = entry?.status === 'in_progress' ? content.milestones.findIndex((_, i) => !reached.has(i + 1)) : -1;
   return {
     ...card,
-    content,
+    brief: content.brief,
     milestones: content.milestones.map((milestone, i) => ({
-      ...milestone,
+      title: milestone.title,
+      body: milestone.body,
       state: reached.has(i + 1) ? 'reached' : i === next ? 'next' : 'todo',
     })),
-    review: content.review.map((text, i) => ({ text, verdict: entry?.review?.[String(i + 1)] ?? null })),
     startedOn: entry?.startedAt ? formatDate(entry.startedAt, locale) : null,
     completedOn: entry?.completedAt ? formatDate(entry.completedAt, locale) : null,
     notes: entry?.notes?.trim() || null,
