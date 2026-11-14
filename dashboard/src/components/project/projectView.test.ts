@@ -34,6 +34,9 @@ Make **something** real.
 ## Review
 1. It works.
 2. It is clear.
+
+## Going further
+- Keep going.
 `;
 
 function setup() {
@@ -64,7 +67,7 @@ describe('project views', () => {
     expect(projectsForCourse(projects, 'other')).toEqual([]);
   });
 
-  it('marks milestones reached and the next one, and keeps the review verdicts', () => {
+  it('marks milestones reached and the next one, and leaves the tutor-only parts out', () => {
     const { projects, catalog } = setup();
     const progress: Progress = {
       ...emptyProgress(),
@@ -77,18 +80,17 @@ describe('project views', () => {
       ['Third', 'todo'],
     ]);
     expect(view).toMatchObject({ status: 'in_progress', reached: 1, startedOn: 'Nov 1, 2026', completedOn: null, notes: 'Weekly update.' });
-    expect(view.review).toEqual([
-      { text: 'It works.', verdict: null },
-      { text: 'It is clear.', verdict: null },
-    ]);
-    expect(JSON.stringify(view.content)).not.toContain('Tutor only');
+    expect(view.brief).toEqual(['Make **something** real.']);
+    expect(view.milestones[0]).toEqual({ title: 'First', body: 'Do it.', state: 'reached' });
+    // "Done when:", the review criteria, "Going further" and the coaching notes are for the tutor.
+    const shown = JSON.stringify({ brief: view.brief, milestones: view.milestones });
+    for (const hidden of ['Done when', 'It works.', 'Keep going.', 'Tutor only']) expect(shown).not.toContain(hidden);
 
     const done = getProjectView(projects, 'demo', catalog, {
       ...emptyProgress(),
       projects: { demo: { status: 'done', milestones: [1, 2, 3], review: { 1: 'met', 2: 'partly' }, completedAt: '2026-11-05' } },
     })!;
     expect(done.milestones.every((m) => m.state === 'reached')).toBe(true);
-    expect(done.review.map((r) => r.verdict)).toEqual(['met', 'partly']);
     expect(getProjectView(projects, 'ghost', catalog, emptyProgress())).toBeUndefined();
   });
 

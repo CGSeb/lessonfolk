@@ -11,7 +11,7 @@ import InlineText from '../../components/project/InlineText.astro';
 import { courseAuthors } from '../../components/authors/authorView';
 import { getProjectView } from '../../components/project/projectView';
 import { themeToneClass } from '../../components/theme-tone';
-import { DEFAULT_LANG, getStats, inspectCatalog, inspectProjects, progressOrEmpty, type ReviewVerdict } from '@lessonfolk/core';
+import { DEFAULT_LANG, getStats, inspectCatalog, inspectProjects, progressOrEmpty } from '@lessonfolk/core';
 import { getCourseStatus } from '../../components/course-status';
 import { loadProgressFor } from '../../lib/store';
 import { projectJsonLd } from '../../lib/seo';
@@ -40,8 +40,6 @@ const milestonesText = project
   ? t(project.milestones === 1 ? 'projects.milestoneCountOne' : 'projects.milestoneCountOther', { count: project.milestones })
   : '';
 const progressText = project ? t('projects.milestonesProgress', { done: view.reached, total: project.milestones }) : '';
-const verdictKey = { met: 'projects.verdictMet', partly: 'projects.verdictPartly', not_met: 'projects.verdictNotMet' } as const;
-const verdictVariant: Record<ReviewVerdict, string> = { met: 'success', partly: 'info', not_met: 'warning' };
 // The status of each course the project builds on, as on the course cards.
 const courseStatus = (courseId: string) => {
   const course = catalog.courses.find((c) => c.id === courseId);
@@ -169,7 +167,7 @@ const courseStatus = (courseId: string) => {
 
           <section class="card stack project-section" aria-labelledby="brief-heading" style="--stack-space: var(--space-3)" lang={otherLang}>
             <h2 id="brief-heading">{t('projects.briefHeading')}</h2>
-            {view.content.brief.map((paragraph) => (
+            {view.brief.map((paragraph) => (
               <p><InlineText text={paragraph} /></p>
             ))}
           </section>
@@ -194,42 +192,11 @@ const courseStatus = (courseId: string) => {
                       {state === 'next' && <span class="badge badge--info" lang={lang}>{t('projects.milestoneNext')}</span>}
                     </div>
                     {milestone.body && <p><InlineText text={milestone.body} /></p>}
-                    {milestone.doneWhen && (
-                      <p class="milestone__done">
-                        <span class="milestone__done-label" lang={lang}>{t('projects.doneWhen')}</span> <InlineText text={milestone.doneWhen} />
-                      </p>
-                    )}
                   </li>
                 );
               })}
             </ol>
           </section>
-
-          <section class="card stack project-section" aria-labelledby="review-heading" style="--stack-space: var(--space-3)">
-            <h2 id="review-heading">{t('projects.reviewHeading')}</h2>
-            <p class="muted">{t('projects.reviewIntro')}</p>
-            <ol class="project-review stack" style="--stack-space: var(--space-2)">
-              {view.review.map((criterion) => (
-                <li>
-                  <span lang={otherLang}><InlineText text={criterion.text} /></span>
-                  {showProgress && criterion.verdict && (
-                    <span class:list={['badge', `badge--${verdictVariant[criterion.verdict]}`]}>{t(verdictKey[criterion.verdict])}</span>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          {view.content.goingFurther.length > 0 && (
-            <section class="card stack project-section" aria-labelledby="further-heading" style="--stack-space: var(--space-3)">
-              <h2 id="further-heading">{t('projects.goingFurtherHeading')}</h2>
-              <ul lang={otherLang}>
-                {view.content.goingFurther.map((item) => (
-                  <li><InlineText text={item} /></li>
-                ))}
-              </ul>
-            </section>
-          )}
         </>
       )
     }
@@ -388,26 +355,6 @@ const courseStatus = (courseId: string) => {
     font-size: var(--text-xl);
   }
 
-  .milestone__done {
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--bubble-md);
-    background: var(--color-surface-sunken);
-    font-size: var(--text-sm);
-  }
 
-  .milestone__done-label {
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-  }
 
-  .project-review > li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-1) var(--space-3);
-  }
 </style>
