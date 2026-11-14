@@ -5,7 +5,7 @@ level: intermediate
 theme: using-ai
 authors: [lessonfolk]
 description: Comparez deux options d’IA pour une tâche que vous faites vraiment, sur un petit jeu de test réel noté selon des critères écrits, et faites un choix que vous savez expliquer.
-estimatedHours: 3
+estimatedHours: 2
 buildsOn: [evaluating-ai-output, prompting-basics]
 needs:
   - Deux applications de chat IA ou deux modèles à comparer, ou une application et deux versions d’un prompt (les offres gratuites suffisent)
@@ -105,7 +105,7 @@ noms, les chiffres et tout ce qui est privé.
   de route : une courte explication par étape, puis retour à leur tâche. **Les apprenants
   expérimentés** peuvent ajouter des cas, passer chaque option deux fois, ou comparer leurs
   notes avec celles d’une autre personne.
-- **Rythme.** Le projet tient en deux ou trois séances ; l’étape 4 est la plus longue.
+- **Rythme.** Le projet tient en une ou deux séances ; l’étape 4 est la plus longue.
   Enregistrez des notes après chaque étape pour que la séance suivante reparte de là. Vous ne
   voyez que ce que l’apprenant colle : demandez les critères, les cas et le tableau au lieu de
   supposer.

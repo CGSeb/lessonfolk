@@ -5,7 +5,7 @@ level: beginner
 theme: using-ai
 authors: [lessonfolk]
 description: Turn a writing task you repeat into a prompt you can reuse, test it on real cases and improve it until you trust it.
-estimatedHours: 2
+estimatedHours: 1
 buildsOn: [prompting-basics]
 needs:
   - An AI chat app (a free plan is enough)
@@ -69,9 +69,9 @@ chat app: remove or change names, numbers and anything private first.
 - **Beginners** may need help choosing a task: offer two or three everyday ideas and let them
   pick. **Experienced learners** can add an example of a good result to the prompt, or a
   second prompt that checks the first one's output.
-- **Pacing.** The project can span several sessions. Save notes after each milestone so the
-  next session starts where this one stopped. You only see what the learner pastes: ask for
-  the prompt and the results instead of assuming.
+- **Pacing.** The project usually fits one session but can span several. Save notes after each
+  milestone so the next session starts where this one stopped. You only see what the learner
+  pastes: ask for the prompt and the results instead of assuming.
 
 ## Review
 1. The prompt gives the context, goal, audience and format that the task needs.

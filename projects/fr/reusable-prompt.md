@@ -69,9 +69,10 @@ est privé.
   trois idées du quotidien et laissez-les choisir. **Les apprenants expérimentés** peuvent
   ajouter au prompt un exemple de bon résultat, ou un second prompt qui vérifie la sortie du
   premier.
-- **Rythme.** Le projet peut s’étaler sur plusieurs séances. Enregistrez des notes après chaque
-  jalon pour que la séance suivante reprenne là où celle-ci s’est arrêtée. Vous ne voyez que
-  ce que l’apprenant colle : demandez le prompt et les résultats plutôt que de supposer.
+- **Rythme.** Le projet tient en général en une séance, mais peut s’étaler sur plusieurs.
+  Enregistrez des notes après chaque jalon pour que la séance suivante reprenne là où celle-ci
+  s’est arrêtée. Vous ne voyez que ce que l’apprenant colle : demandez le prompt et les
+  résultats plutôt que de supposer.
 
 ## Review
 1. Le prompt donne le contexte, l’objectif, le public et le format dont la tâche a besoin.

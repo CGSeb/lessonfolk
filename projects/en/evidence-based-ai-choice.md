@@ -5,7 +5,7 @@ level: intermediate
 theme: using-ai
 authors: [lessonfolk]
 description: Compare two AI options for a task you really do, on a small set of real test cases scored against written criteria, and make a choice you can explain.
-estimatedHours: 3
+estimatedHours: 2
 buildsOn: [evaluating-ai-output, prompting-basics]
 needs:
   - Two AI chat apps or two models to compare, or one app and two versions of a prompt (free plans are enough)
@@ -90,7 +90,7 @@ information into an AI app: remove or change names, numbers and anything private
 - **Learners who have not done the course** may need the core ideas as they go: one short
   explanation per milestone, then back to their task. **Experienced learners** can add more
   cases, run each option twice, or compare their own scores with a second person's.
-- **Pacing.** The project fits two or three sessions; milestone 4 takes the longest. Save notes
+- **Pacing.** The project fits one or two sessions; milestone 4 takes the longest. Save notes
   after each milestone so the next session starts where this one stopped. You only see what
   the learner pastes: ask for the criteria, the cases and the table instead of assuming.
 
