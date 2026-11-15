@@ -19,7 +19,9 @@
     "check:courses": "npm run check:courses --workspace dashboard --",
     "review:courses": "npm run review:courses --workspace dashboard --",
     "plugin:sync": "npm run plugin:sync --workspace @lessonfolk/mcp",
-    "plugin:openai": "npm run plugin:openai --workspace @lessonfolk/mcp"
+    "plugin:openai": "npm run plugin:openai --workspace @lessonfolk/mcp",
+    "features": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/feature-map/cli.ts",
+    "features:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test scripts/feature-map/feature-map.test.ts"
   },
   "overrides": {
     "esbuild": "^0.28.1"

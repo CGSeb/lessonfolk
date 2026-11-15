@@ -1,0 +1,70 @@
+id: home-learning-path
+name: Home and learning path
+summary: The learner's home page (next lesson, path, progress) and its live refresh when the tutor saves progress.
+status: stable
+owner: dashboard
+entry_points:
+  routes:
+    - GET /
+    - GET /api/events
+  ui:
+    - page: /
+      components:
+        - dashboard/src/components/NextLessonCard.astro
+        - dashboard/src/components/home/YourPath.astro
+        - dashboard/src/components/home/OverallProgress.astro
+        - dashboard/src/components/home/ProfileSummary.astro
+        - dashboard/src/components/home/Landing.astro
+        - dashboard/src/components/LiveRefresh.astro
+      selectors: []   # no stable test ids today; tests match the visible text
+code:
+  paths:
+    - dashboard/src/pages/index.astro
+    - dashboard/src/pages/api/events.ts
+    - dashboard/src/components/home/**
+    - dashboard/src/components/NextLessonCard.astro
+    - dashboard/src/components/LiveRefresh.astro
+    - dashboard/src/lib/watch.ts
+    - dashboard/src/lib/store.ts
+    - packages/core/src/progress.ts
+    - packages/core/src/paths.ts
+    - packages/core/src/tutor.ts
+  models: [learner, lesson_progress, progress_event]
+depends_on: [authentication]
+impacts: []
+rules:
+  - Signed out (oauth mode) the home page is a landing page and the learner's progress is never shown.
+  - Progress is read on every request, never cached, so the tutor's latest write shows.
+  - /api/events streams only the signed-in user's own progress changes; signed out it answers 401.
+  - The next lesson shown is the one getNextLesson picks (same on home and on the course page).
+acceptance:
+  - given: a signed-in learner with a lesson in progress
+    when: they open /
+    then: the next-lesson card shows the lesson getNextLesson returns
+  - given: a signed-out visitor in oauth mode
+    when: they open /
+    then: the page is the landing page and contains no progress
+  - given: a signed-out visitor
+    when: they GET /api/events
+    then: the status is 401 and Cache-Control is no-store
+  - given: a signed-in learner holding /api/events open
+    when: the tutor saves progress for that learner through MCP
+    then: a change event with data progress arrives, and another learner's write sends nothing
+tests:
+  harness: [dashboard/tests/e2e/server.ts]   # startDashboard(), visibleText(); needs Postgres (docs/testing.md)
+  run: npx vitest run --root dashboard <test file>
+  e2e:
+    - dashboard/tests/e2e/pages.db.test.ts
+    - dashboard/tests/e2e/progress-updates.db.test.ts
+    - dashboard/tests/e2e/learner-isolation.db.test.ts
+  unit:
+    - dashboard/src/components/home/homeView.test.ts
+    - dashboard/src/components/home/pathView.test.ts
+    - dashboard/src/lib/watch.test.ts
+    - packages/core/src/progress.test.ts
+    - packages/core/src/paths.test.ts
+  coverage_gaps:
+    - The heartbeat comment sent every 25 s on /api/events is not asserted.
+    - The invalid-progress warning notice on the home page has no e2e test.
+risks:
+  - Reading progress for the wrong user id would leak another learner's data (see the learner-isolation test).

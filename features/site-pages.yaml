@@ -1,0 +1,55 @@
+id: site-pages
+name: Crawler files, legal pages, analytics and 404
+summary: robots.txt, sitemap.xml, llms.txt, privacy and terms pages, and the custom 404.
+status: stable
+owner: dashboard
+entry_points:
+  routes:
+    - GET /robots.txt
+    - GET /sitemap.xml
+    - GET /llms.txt
+    - GET /llms-full.txt
+    - GET /privacy
+    - GET /terms
+    - GET /404
+  ui:
+    - page: /privacy
+      components: []
+      selectors: []
+code:
+  paths:
+    - dashboard/src/pages/robots.txt.ts
+    - dashboard/src/pages/sitemap.xml.ts
+    - dashboard/src/pages/llms*.ts
+    - dashboard/src/pages/privacy.astro
+    - dashboard/src/pages/terms.astro
+    - dashboard/src/pages/404.astro
+    - dashboard/src/lib/seo.ts
+    - dashboard/src/lib/site-url.ts
+    - dashboard/src/lib/security-headers.ts
+    - dashboard/src/lib/analytics.ts
+  models: []
+depends_on: [course-catalog]
+impacts: []
+rules:
+  - The sitemap and llms.txt list every public course, author, read on each request.
+  - Private pages (account, sign-in, /api) are kept out of search (noindex or robots Disallow).
+  - Every response carries the security headers.
+acceptance:
+  - given: a course and an author exist
+    when: GET /sitemap.xml
+    then: it lists /courses/<id>, and /authors/<slug> and no private path
+tests:
+  harness: [dashboard/tests/e2e/server.ts]   # startDashboard(), visibleText(); needs Postgres (docs/testing.md)
+  run: npx vitest run --root dashboard <test file>
+  e2e:
+    - dashboard/tests/e2e/seo.db.test.ts
+    - dashboard/tests/e2e/security.db.test.ts
+    - dashboard/tests/e2e/analytics.db.test.ts
+  unit:
+    - dashboard/src/lib/seo.test.ts
+    - dashboard/src/lib/security-headers.test.ts
+    - dashboard/src/lib/analytics.test.ts
+  coverage_gaps: []
+risks:
+  - A private page indexed by search engines.

@@ -1,0 +1,55 @@
+id: interface-language
+name: Interface language
+summary: English or French UI chosen from the browser or the footer switcher, saved in a cookie.
+status: stable
+owner: dashboard
+entry_points:
+  routes:
+    - POST /api/language
+  ui:
+    - page: every page (footer)
+      components: [dashboard/src/components/LanguageSwitcher.astro]
+      selectors: ['form.language-switcher', 'button.language-switcher__button[name=lang]']
+code:
+  paths:
+    - dashboard/src/pages/api/language.ts
+    - dashboard/src/i18n/**
+    - dashboard/src/components/LanguageSwitcher.astro
+    - dashboard/src/middleware.ts          # picks the locale, sets Content-Language and Vary
+    - dashboard/src/lib/auth/redirect.ts   # safeReturnPath
+  models: []
+depends_on: []
+impacts: [course-catalog, home-learning-path, site-pages]
+rules:
+  - Preference order is the lessonfolk-lang cookie, then Accept-Language by q-value, then English.
+  - The cookie is HttpOnly, SameSite=Lax, Path=/, valid one year, and Secure only over https in oauth mode.
+  - An unknown language sets no cookie; a return address outside the site becomes "/".
+  - Every HTML response carries a Content-Language header and a Vary header naming Cookie and Accept-Language.
+  - A missing French string falls back to English; en.ts and fr.ts keys stay in step.
+acceptance:
+  - given: a request with Accept-Language fr and no cookie
+    when: GET /courses
+    then: the page is French
+  - given: the cookie lessonfolk-lang=en and Accept-Language fr
+    when: GET /courses
+    then: the page is English because the cookie wins
+  - given: a POST /api/language with lang=fr and next=/courses?q=ia from the same site
+    when: the request is sent
+    then: 303 to /courses?q=ia and a lessonfolk-lang=fr cookie with Max-Age 31536000, Path=/, HttpOnly and SameSite=Lax
+  - given: a POST /api/language with lang=xx and next=//evil.example/
+    when: the request is sent
+    then: 303 to "/" and no lessonfolk-lang cookie
+  - given: any HTML page fetched with the French cookie
+    when: the response arrives
+    then: Content-Language is fr and Vary contains Cookie and Accept-Language
+tests:
+  harness: [dashboard/tests/e2e/server.ts]   # startDashboard(), visibleText(); needs Postgres (docs/testing.md)
+  run: npx vitest run --root dashboard <test file>
+  e2e:
+    - dashboard/tests/e2e/language.db.test.ts
+  unit:
+    - dashboard/src/i18n/i18n.test.ts
+    - dashboard/src/lib/auth/settings.test.ts
+  coverage_gaps: []
+risks:
+  - An open redirect if safeReturnPath is loosened.

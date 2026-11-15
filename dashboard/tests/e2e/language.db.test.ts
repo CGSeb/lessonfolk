@@ -88,6 +88,39 @@ describe('interface language', () => {
     expect(response.headers.getSetCookie().some((c) => c.startsWith('lessonfolk-lang='))).toBe(false);
   });
 
+  // The next four tests close the coverage_gaps of features/interface-language.yaml.
+  it('keeps the chosen language for a year, on every path', async () => {
+    const response = await choose('fr', '/');
+    const cookie = response.headers.getSetCookie().find((c) => c.startsWith('lessonfolk-lang=fr')) ?? '';
+    expect(cookie).toMatch(/Max-Age=31536000/i);
+    expect(cookie).toMatch(/Path=\//i);
+    // The test server runs over http without sign-in, so the cookie is not Secure.
+    expect(cookie).not.toMatch(/Secure/i);
+  });
+
+  it('says the page language and what it varies on, on every HTML response', async () => {
+    const french = await get('/courses', { Cookie: 'lessonfolk-lang=fr' });
+    expect(french.response.headers.get('content-language')).toBe('fr');
+    const vary = french.response.headers.get('vary') ?? '';
+    expect(vary).toMatch(/Cookie/i);
+    expect(vary).toMatch(/Accept-Language/i);
+    const english = await get('/courses');
+    expect(english.response.headers.get('content-language')).toBe('en');
+  });
+
+  it('prefers the cookie over the browser, and the highest q-value over the order', async () => {
+    const browser = await get('/courses', { 'Accept-Language': 'de;q=0.9, en;q=0.5, fr;q=0.8' });
+    expect(browser.response.headers.get('content-language')).toBe('fr');
+    const cookie = await get('/courses', { Cookie: 'lessonfolk-lang=en', 'Accept-Language': 'fr' });
+    expect(cookie.response.headers.get('content-language')).toBe('en');
+  });
+
+  it('only changes the language with a POST', async () => {
+    const response = await fetch(`${server.url}/api/language?lang=fr&next=/`, { redirect: 'manual' });
+    expect(response.status).not.toBe(303);
+    expect(response.headers.getSetCookie().some((c) => c.startsWith('lessonfolk-lang='))).toBe(false);
+  });
+
   it('shows the untranslated lessons of a course in English, and says so', async () => {
     const page = await get('/courses/ai-foundations', { Cookie: 'lessonfolk-lang=fr' });
     expect(page.response.status).toBe(200);

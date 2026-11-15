@@ -1,0 +1,60 @@
+id: authentication
+name: Sign-in modes
+summary: No sign-in (one local learner) or OAuth sign-in and sign-out (GitHub, Google, demo), and the current-user endpoint.
+status: stable
+owner: dashboard
+entry_points:
+  routes:
+    - GET /sign-in
+    - GET /sign-in/[provider]
+    - POST /sign-in/demo
+    - POST /sign-out
+    - ALL /api/auth/[...all]
+    - GET /api/me
+  ui:
+    - page: /sign-in
+      components: [dashboard/src/components/SignInPrompt.astro]
+      selectors: []
+code:
+  paths:
+    - dashboard/src/pages/sign-in.astro
+    - dashboard/src/pages/sign-in/**
+    - dashboard/src/pages/sign-out.ts
+    - dashboard/src/pages/api/auth/**
+    - dashboard/src/pages/api/me.ts
+    - dashboard/src/lib/auth/**
+    - dashboard/src/middleware.ts
+    - dashboard/scripts/serve.ts
+  models: [user, session, account, verification]
+depends_on: []
+impacts: [home-learning-path, account-data, mcp-connection]
+rules:
+  - LESSONFOLK_AUTH=none works only on 127.0.0.1 or localhost and has no sign-in routes.
+  - LESSONFOLK_AUTH=oauth needs BETTER_AUTH_SECRET and at least one provider, else the server refuses to start.
+  - Cross-site form posts are refused (origin check) and the return path after sign-in is same-site only.
+  - /api/me answers authMode and user with Cache-Control no-store; user is null when signed out.
+acceptance:
+  - given: LESSONFOLK_AUTH=none
+    when: GET /sign-in
+    then: there is no sign-in page
+  - given: oauth mode and a signed-out visitor
+    when: GET /api/me
+    then: the JSON has authMode oauth and user null
+  - given: a cross-site POST to /sign-out
+    when: it is sent with a foreign Origin
+    then: the status is 403
+tests:
+  harness: [dashboard/tests/e2e/server.ts]   # startDashboard(), visibleText(); needs Postgres (docs/testing.md)
+  run: npx vitest run --root dashboard <test file>
+  e2e:
+    - dashboard/tests/e2e/auth-none.db.test.ts
+    - dashboard/tests/e2e/auth-oauth.db.test.ts
+    - dashboard/tests/e2e/auth-demo.db.test.ts
+    - dashboard/tests/e2e/auth-startup.test.ts
+  unit:
+    - dashboard/src/lib/auth/settings.test.ts
+    - dashboard/src/lib/auth/origin-check.test.ts
+    - dashboard/src/lib/auth/sessions.test.ts
+  coverage_gaps: []
+risks:
+  - Open redirect through the sign-in return path; session fixation.

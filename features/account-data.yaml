@@ -1,0 +1,59 @@
+id: account-data
+name: Account and personal data
+summary: Account page to export, import and delete progress, list browser sessions and connected apps.
+status: stable
+owner: dashboard
+entry_points:
+  routes:
+    - GET /account
+    - GET /account/import
+    - POST /api/account/import
+    - GET /api/account/export
+    - GET /api/account/export-all
+    - POST /api/account/delete
+    - ALL /api/account/sessions
+  ui:
+    - page: /account
+      components:
+        - dashboard/src/components/account/BrowserSessions.astro
+        - dashboard/src/components/account/LocalImportOffer.astro
+      selectors: ['#export-heading', '#import-heading', '#delete-heading']
+code:
+  paths:
+    - dashboard/src/pages/account.astro
+    - dashboard/src/pages/account/**
+    - dashboard/src/pages/api/account/**
+    - dashboard/src/components/account/**
+    - dashboard/src/lib/account.ts
+    - dashboard/src/lib/personal-data.ts
+    - docs/progress.example.json
+    - packages/db/src/progress-store.ts
+  models: [learner, lesson_progress, progress_event, user, session]
+depends_on: [authentication]
+impacts: [home-learning-path, mcp-connection]
+rules:
+  - A learner only ever sees and changes their own data.
+  - Import replaces all progress; the format is progress.json v1 (docs/progress.example.json).
+  - Deleting an account removes its data and revokes its MCP tokens at once.
+  - Form posts are limited to 4 MiB and rate-limited per route group.
+acceptance:
+  - given: a signed-in learner with progress
+    when: they GET /api/account/export
+    then: they receive a progress.json v1 download with their own progress
+  - given: two learners
+    when: the first exports or imports
+    then: the second learner's data is never read or changed
+tests:
+  harness: [dashboard/tests/e2e/server.ts]   # startDashboard(), visibleText(); needs Postgres (docs/testing.md)
+  run: npx vitest run --root dashboard <test file>
+  e2e:
+    - dashboard/tests/e2e/account-none.db.test.ts
+    - dashboard/tests/e2e/account-oauth.db.test.ts
+    - dashboard/tests/e2e/sessions-oauth.db.test.ts
+    - dashboard/tests/e2e/learner-isolation.db.test.ts
+  unit:
+    - dashboard/src/lib/account.test.ts
+    - dashboard/src/lib/personal-data.test.ts
+  coverage_gaps: []
+risks:
+  - Data loss on delete or import; cross-learner leaks.
