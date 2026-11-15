@@ -7,10 +7,9 @@
 
 <p align="center"><strong>Learn AI from zero to advanced, with an AI as your tutor.</strong></p>
 
-<p align="center"><a href="https://lessonfolk.com"><strong>lessonfolk.com</strong></a></p>
+<p align="center"><a href="https://lessonfolk.com"><strong>lessonfolk.com</strong></a> - <a href="https://claude.ai/directory/lessonfolk">Available on Claude Directory</a></p>
 
-[![M8ven Score](https://m8ven.ai/badge/mcp/cgseb-lessonfolk-9h289l)](https://m8ven.ai/mcp/cgseb-lessonfolk-9h289l?variant=verified) <a href="https://www.claudemarket.ai/plugins/cgseb-lessonfolk/lessonfolk-tutor"><img src="https://www.claudemarket.ai/badge-claudemarket.svg" alt="Listed on Claude Market" width="190" height="44" /></a>
-
+[![M8ven Score](https://m8ven.ai/badge/mcp/cgseb-lessonfolk-9h289l)](https://m8ven.ai/mcp/cgseb-lessonfolk-9h289l?variant=verified) 
 
 https://github.com/user-attachments/assets/bc8eccbd-1f95-4d20-92f5-15d528b05d47
 
