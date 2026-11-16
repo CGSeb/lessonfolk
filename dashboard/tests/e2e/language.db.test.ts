@@ -88,7 +88,7 @@ describe('interface language', () => {
     expect(response.headers.getSetCookie().some((c) => c.startsWith('lessonfolk-lang='))).toBe(false);
   });
 
-  // The next four tests close the coverage_gaps of features/interface-language.yaml.
+  // Cookie lifetime, response headers, browser preference order and POST-only switching.
   it('keeps the chosen language for a year, on every path', async () => {
     const response = await choose('fr', '/');
     const cookie = response.headers.getSetCookie().find((c) => c.startsWith('lessonfolk-lang=fr')) ?? '';

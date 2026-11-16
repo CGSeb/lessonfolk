@@ -1,16 +1,16 @@
 ---
 name: verify-lessonfolk
-description: Drive the real LessonFolk dashboard in a browser (Playwright) from an empty database and prove a feature works, with evidence. Use to verify a change or a feature end to end, to reproduce a UI bug, or when asked to "verify", "prove" or "drive" LessonFolk. Also holds the maintenance procedure for its own feature map (`features/`).
+description: Drive the real LessonFolk dashboard in a browser (Playwright) from an empty database and prove a feature works, with evidence. Use to verify a change or a feature end to end, to reproduce a UI bug, or when asked to "verify", "prove" or "drive" LessonFolk. Holds the project's feature map (`features/`, one sheet per user-facing feature) and its maintenance procedure.
 ---
 
 # Verify LessonFolk
 
 The dashboard (Astro, `dashboard/`) with no sign-in (`LESSONFOLK_AUTH=none`): one local learner, a fresh
 Postgres database per run, the production build, a real Chrome driven through ARIA roles and
-accessible names. This skill answers "does this feature work for a user?" with proof. The
-other layer, `features/*.yaml` at the repository root, answers "what does this feature touch?"
-(see `features/README.md`). **Both use the same feature id**, and `npm run features -- validate`
-fails when one has a feature the other lacks.
+accessible names. This skill answers "does this feature work for a user?" with proof. Its
+`features/` folder is the project's only feature map: one sheet per user-facing feature, written
+from the user's point of view. It deliberately holds no file paths, routes-to-code mapping or
+data model: those change often and are read from the source when needed.
 
 `verify` below is `npm run -s verify --` (it runs `helpers/verify.mjs`).
 
@@ -113,21 +113,25 @@ and stops the compose `db` service only if this run started it. It never kills b
 | `verify evidence` | list proof files |
 | `verify teardown` | stop what the run started, keep proof |
 
-`helpers/verify.mjs` is the only script; run it with no arguments for the usage text. It needs Node 22+, Docker for Postgres, and a Chrome, Edge or Playwright Chromium.
+`helpers/verify.mjs` drives the app; run it with no arguments for the usage text. It needs Node 22+, Docker for Postgres, and a Chrome, Edge or Playwright Chromium.
+`helpers/check-map.mjs` (`npm run verify:check`, tested by `npm run verify:test`, both run in CI) checks the sheets
+without launching anything: README index and sheets in step, the four sections, `Preconditions:` and
+`States to exercise:`, unique sub-feature ids, and every `verify` command or browser action a sheet uses exists in `verify.mjs`.
 
 ## The feature map of this skill
 
 `features/README.md` holds the baseline preconditions, driving conventions, proof rules and the contract every
 sheet follows, and indexes one sheet per feature (`features/<id>.md`). Read the README, then only the sheet you need.
+A new user-facing feature gets its sheet (and its README line) in the same change that adds it.
 
 ## Maintain it (`features/` honest as the app changes)
 
 Run this when features change, before a release, or when a sheet failed in a real run. Outcomes: **clean** (every feature covered from
 source and live, nothing to ship), **changed** (one PR of proven corrections), **blocked** (say what blocked it).
 
-1. **Locate and index hygiene.** Compare `features/index.yaml` (root), the sheets in `features/*.yaml` and `.claude/skills/verify-lessonfolk/features/*.md`; `npm run features -- validate` lists features missing from either layer and malformed sheets. Fix dead or duplicate entries.
+1. **Index hygiene.** Read `features/README.md` and list its sibling sheets; `npm run verify:check` reports missing, extra or malformed sheets and commands the harness lacks. Fix dead or duplicate entries.
 2. **Source wave.** One **read-only sub-agent per feature**, in parallel. Each reads the source of its feature and returns: summary, entry points, likely doc drift with file citations, and one live recipe. Sub-agents never drive the app and never edit.
 3. **Reconcile.** Merge overlapping recipes into as few app states as possible. Spot-check cited drift. Look at recent churn (`git log` on `dashboard/src/pages`) for user-facing surfaces missing from the map; require a concrete source path before calling one missing.
 4. **Live pass (required even if source looks clean).** You drive, serially: `launch`, `doctor`, then every feature at least once through its sheet. Keep three invariants: doctor before the first drive and after any failed drive; evidence survives every cleanup (check the folder); nothing a drive started outlives it. A feature that cannot be reached is `verified-unreachable` only with the concrete unmet precondition and the route tried; if the sheet omitted that precondition, that is drift. Teardown once, after the last drive.
 5. **Triage.** Wrong or missing user description → **doc drift**, fix the sheet. Working behavior the harness cannot drive → **harness gap**, fix `verify.mjs` and re-drive the fix live. App behavior that is broken → **product gap**: record it for the user, keep it out of the PR.
-6. **Ship or stop.** Edit only this skill's folder and `features/*.yaml`; never product code during a maintenance run. Re-run `npm run features -- validate` and `npm run features:test`. Changed → one PR of corrections. Clean or blocked → no PR, report coverage honestly. Keep run notes in a scratch location, not in the repository.
+6. **Ship or stop.** Edit only this skill's folder; never product code during a maintenance run. Re-run `npm run verify:check` and `npm run verify:test`. Changed → one PR of corrections. Clean or blocked → no PR, report coverage honestly. Keep run notes in a scratch location, not in the repository.

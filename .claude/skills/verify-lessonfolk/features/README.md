@@ -1,6 +1,6 @@
 # LessonFolk verification map
 
-This directory is the maintained source for verifying the user-facing behavior of the LessonFolk dashboard. Read this index before driving the app, then use the matching feature sheet as the recipe. Feature ids are the same as in `features/index.yaml` at the repository root (the code and test map): `npm run features -- validate` fails when a feature exists in one layer and not in the other.
+This directory is the maintained source for verifying the user-facing behavior of the LessonFolk dashboard. Read this index before driving the app, then use the matching feature sheet as the recipe. It is the project's only feature map: sheets describe what a user sees and does, never file paths or internals (read those from the source when you need them). `npm run verify:check` checks the sheets against the contract below and against the harness.
 
 `verify` stands for `npm run -s verify --` (the helper in `../helpers/verify.mjs`, see `../SKILL.md`).
 

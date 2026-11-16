@@ -44,9 +44,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run check:courses
-      # The feature map (features/) still matches the code, routes and tests.
-      - run: npm run features -- validate
-      - run: npm run features:test
+      # The verification map of the verify-lessonfolk skill follows its contract and its harness.
+      - run: npm run verify:check
+      - run: npm run verify:test
 
   # The learner plugin for Claude Code (.claude-plugin/marketplace.json and
   # .claude/skills/lessonfolk-tutor): its manifests, and the Course companion's own tests.
