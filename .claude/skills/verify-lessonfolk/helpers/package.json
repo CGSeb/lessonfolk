@@ -1,0 +1,9 @@
+{
+  "name": "verify-lessonfolk-helpers",
+  "private": true,
+  "type": "module",
+  "description": "Harness of the verify-lessonfolk skill. Not a workspace of the repository: install with `npm install --prefix .claude/skills/verify-lessonfolk/helpers`.",
+  "dependencies": {
+    "playwright-core": "1.64.0"
+  }
+}

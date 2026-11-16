@@ -55,6 +55,16 @@ test('untested: lists the features with coverage gaps, and drops one once its ga
   assert.ok(!ids.includes('interface-language'), 'its gaps were closed by new e2e tests');
 });
 
+test('validate links the YAML map and the verification sheets', () => {
+  const noSheet = clone();
+  noSheet.features.push({ ...clone().features[0], id: 'ghost-feature' });
+  assert.match(validate(noSheet, files).errors.join('\n'), /ghost-feature: in the feature map but has no verification sheet/);
+  const noYaml = clone();
+  noYaml.features = noYaml.features.filter((f) => f.id !== 'site-pages');
+  noYaml.index = noYaml.index.filter((e) => e.id !== 'site-pages');
+  assert.match(validate(noYaml, files).errors.join('\n'), /site-pages\.md: verification sheet of a feature that is not in features\/index\.yaml/);
+});
+
 test('validate catches drift', () => {
   const broken = (change: (m: ReturnType<typeof clone>) => void) => {
     const m = clone();

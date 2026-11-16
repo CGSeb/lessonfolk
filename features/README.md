@@ -48,3 +48,22 @@ feature's `code.paths`; every `models` entry is a table; acceptance entries have
 
 It cannot tell whether a rule or an acceptance criterion is still true: that is why a pull request
 that changes a feature updates its sheet, and why a reviewer reads the sheet diff.
+
+## Verification layer (`.claude/skills/verify-lessonfolk/`)
+
+The YAML sheets say what a feature touches. The skill `verify-lessonfolk` proves, in a real browser and from an empty
+database, that a feature works for a user: `npm run -s verify -- launch`, `doctor`, `browser …`, `http …`, `db …`,
+`teardown`. Each feature has a sheet `.claude/skills/verify-lessonfolk/features/<id>.md` with **the same id** as
+here. `validate` fails when a feature exists in one layer and not in the other, when a sheet is not listed in the
+skill's index, or when its sections are not exactly `Sub-features`, `How to get to it (user POV)`,
+`Driving it with verify`, `Gotchas`.
+
+When you add a feature: write its YAML sheet (and index line) and its verification sheet together.
+
+### Keeping the verification sheets honest
+
+Procedure (details in the skill's `SKILL.md`, section "Maintain it"): one read-only sub-agent per feature reads
+the source and reports likely drift; then one real pass drives every feature through its sheet; each finding is
+triaged as **doc drift** (fix the sheet), **harness gap** (fix `verify.mjs` and re-drive it) or **product gap**
+(report it, do not hide it in docs). The outcome is **clean**, **changed** (one PR of proven corrections) or
+**blocked**. A missing precondition is a failed journey and a line in `Gotchas`, never a weakened journey.

@@ -42,6 +42,8 @@ export interface FeatureMap {
 
 export const PAGES_DIR = 'dashboard/src/pages';
 export const SCHEMA_FILE = 'packages/db/src/schema.ts';
+export const VERIFY_DIR = '.claude/skills/verify-lessonfolk/features';
+export const VERIFY_SECTIONS = ['Sub-features', 'How to get to it (user POV)', 'Driving it with verify', 'Gotchas'];
 export const STATUSES = ['stable', 'beta', 'experimental', 'deprecated'];
 
 export function loadMap(root: string): FeatureMap {
@@ -288,6 +290,28 @@ export function validate(map: FeatureMap, files: string[] = repoFiles(map.root))
     const tables = new Set([...readFileSync(schemaPath, 'utf8').matchAll(/pgTable\(\s*'([^']+)'/g)].map((m) => m[1]));
     for (const f of map.features) for (const model of f.code?.models ?? []) if (!tables.has(model)) errors.push(`${f.id}: model "${model}" is not a table of ${SCHEMA_FILE}`);
   }
+
+  // verification layer: the same feature ids in features/*.yaml and in the verify skill's sheets
+  const sheets = files.filter((f) => f.startsWith(`${VERIFY_DIR}/`) && f.endsWith('.md') && f !== `${VERIFY_DIR}/README.md`);
+  if (fileSet.has(`${VERIFY_DIR}/README.md`)) {
+    const readme = readFileSync(join(map.root, VERIFY_DIR, 'README.md'), 'utf8');
+    for (const f of map.features) {
+      const sheet = `${VERIFY_DIR}/${f.id}.md`;
+      if (!fileSet.has(sheet)) errors.push(`${f.id}: in the feature map but has no verification sheet (${sheet})`);
+      if (!readme.includes(`(./${f.id}.md)`)) errors.push(`${f.id}: not listed in the verification README index`);
+    }
+    for (const sheet of sheets) {
+      const id = sheet.slice(VERIFY_DIR.length + 1, -3);
+      if (!known.has(id)) errors.push(`${sheet}: verification sheet of a feature that is not in features/index.yaml`);
+      const text = readFileSync(join(map.root, sheet), 'utf8');
+      const h2 = [...text.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
+      if (JSON.stringify(h2) !== JSON.stringify(VERIFY_SECTIONS)) errors.push(`${sheet}: H2 sections must be exactly ${VERIFY_SECTIONS.join(' / ')} (found ${h2.join(' / ') || 'none'})`);
+      if (!/^# .+/m.test(text)) errors.push(`${sheet}: missing H1 title`);
+      const driving = text.split(/^## Driving it with verify$/m)[1] ?? '';
+      if (!/Preconditions:/.test(driving)) errors.push(`${sheet}: "Driving it" has no Preconditions:`);
+      if (!/States to exercise:/.test(driving)) errors.push(`${sheet}: "Driving it" has no States to exercise:`);
+    }
+  } else warnings.push(`${VERIFY_DIR}/README.md not found: verification layer not checked`);
 
   // test files claimed by no feature
   for (const file of files.filter((f) => /^dashboard\/tests\/e2e\/[^/]+\.test\.ts$/.test(f))) {
