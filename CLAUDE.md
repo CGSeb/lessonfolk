@@ -40,3 +40,21 @@ When you test, change or create a feature:
 5. **New feature: write its sheet (and its index line) before implementing**, with acceptance
    criteria concrete enough to test. A route under `dashboard/src/pages` that no sheet claims is an error.
 6. Run `npm run features -- validate` and `npm run features:test` before you commit; CI runs both.
+
+### Verification skill (`.claude/skills/verify-lessonfolk/`)
+
+The feature map has a second layer: `verify-lessonfolk` launches the dashboard from an empty
+database and proves a feature in a real browser (`npm run verify -- launch | doctor | browser … |
+teardown`), with one sheet per feature in `.claude/skills/verify-lessonfolk/features/<id>.md`.
+The ids are the same as in `features/index.yaml`, and `validate` fails if a feature is in one
+layer and not in the other.
+
+- **To prove a change works**, follow the skill: launch, doctor, drive the feature through its
+  sheet, keep the evidence (`.verify/`), teardown. Docker Desktop must already be running: never
+  start it yourself, ask the user.
+- **A new feature gets both sheets** (YAML and verification) before it is implemented.
+- **Keep the sheets honest** with the maintenance procedure in the skill's `SKILL.md` ("Maintain it"):
+  one read-only sub-agent per feature reads the source, then one real pass drives every feature,
+  and each finding is triaged as doc drift (fix the sheet), harness gap (fix `verify.mjs`) or
+  product gap (report it). Outcome: clean, changed (one PR) or blocked. Never weaken a journey to
+  make it pass: a missing precondition is a failure and a line in the sheet's `Gotchas`.
