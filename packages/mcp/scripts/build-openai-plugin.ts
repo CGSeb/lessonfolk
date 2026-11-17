@@ -36,7 +36,7 @@ const LONG_DESCRIPTION =
   'LessonFolk teaches AI to anyone, from complete beginners to advanced practitioners, through a conversation with an AI tutor. ' +
   'Pick a learning path, take one short lesson at a time, get checked on what you understood, and come back to your progress whenever you like. ' +
   'The courses and your progress are kept on the LessonFolk server, under your own account: you sign in with GitHub or Google. ' +
-  'It stores your profile (name, experience, goal, language, level, interests), your lesson status and scores, and the tutor\'s notes. ' +
+  'It stores your profile (name, experience, goal, language, level, interests), your lesson and project status, scores and milestones, and the tutor\'s notes. ' +
   'Your conversations stay with your AI app.';
 const DEFAULT_PROMPTS = ['Start my first LessonFolk lesson.', 'Show my LessonFolk progress.', 'Quiz me on what I learned.'];
 
@@ -47,19 +47,16 @@ export interface PositiveCase {
   expected_behavior: string;
 }
 
-/** The review cases: the prompts the tutor must answer with the server's tools, and ones it must not. */
+/**
+ * The review cases: the prompts the tutor must answer with the server's tools, and ones it must not.
+ * The portal requires exactly 5 positive cases.
+ */
 export const POSITIVE_CASES: PositiveCase[] = [
   {
     description: 'A new learner starts',
     prompt: 'Start learning AI with LessonFolk.',
     tools_triggered: 'get_progress, set_profile',
     expected_behavior: 'Reads the saved progress, sees a new learner and asks a first onboarding question (level or interests).',
-  },
-  {
-    description: 'Ask what to learn next',
-    prompt: 'What should I learn next on LessonFolk?',
-    tools_triggered: 'get_progress, get_next_lesson',
-    expected_behavior: 'Reads the progress and names the next lesson of the learner\'s path.',
   },
   {
     description: 'Take the next lesson',
