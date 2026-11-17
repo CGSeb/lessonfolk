@@ -21,3 +21,6 @@ Thumbs.db
 
 # Local environment (copy of .env.example)
 .env
+
+# Output of the verify-lessonfolk skill (databases, logs, proof files)
+.verify/
