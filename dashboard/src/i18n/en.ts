@@ -348,6 +348,7 @@ export const en = {
     reauthHeading: 'Sign in again to continue',
     reauthIntro: 'To download all your data or delete your account, sign in again first. It confirms it is you.',
     signInWith: 'Sign in with {provider}',
+    or: 'or',
     demoSummary: 'Demo account (reviewers)',
     demoEmail: 'Email',
     demoPassword: 'Password',

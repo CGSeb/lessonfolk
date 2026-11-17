@@ -70,8 +70,22 @@ const error = Astro.url.searchParams.get('error');
 
     {
       settings.demo && (
+        <p class="sign-in__or" aria-hidden="true">
+          <span>{t('auth.or')}</span>
+        </p>
         <details class="sign-in__demo">
-          <summary>{t('auth.demoSummary')}</summary>
+          <summary class="sign-in__button sign-in__demo-toggle">
+            <svg class="sign-in__icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="15" r="4" />
+              <path d="M10.85 12.15 19 4" />
+              <path d="m18 5 2 2" />
+              <path d="m15 8 2 2" />
+            </svg>
+            <span>{t('auth.demoSummary')}</span>
+            <svg class="sign-in__chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </summary>
           <form class="stack" method="post" action="/sign-in/demo" style="--stack-space: var(--space-3)">
             <input type="hidden" name="next" value={next} />
             <label>
@@ -82,7 +96,7 @@ const error = Astro.url.searchParams.get('error');
               {t('auth.demoPassword')}
               <input type="password" name="password" autocomplete="current-password" required />
             </label>
-            <button class="sign-in__button" type="submit" data-provider="demo">{t('auth.demoSubmit')}</button>
+            <button class="sign-in__button sign-in__demo-submit" type="submit" data-provider="demo">{t('auth.demoSubmit')}</button>
           </form>
         </details>
       )
@@ -128,10 +142,56 @@ const error = Astro.url.searchParams.get('error');
     text-align: left;
   }
 
-  .sign-in__demo summary {
-    cursor: pointer;
-    text-align: center;
-    color: var(--color-text-muted, inherit);
+  .sign-in__or {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  .sign-in__or::before,
+  .sign-in__or::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .sign-in__demo-toggle {
+    list-style: none;
+    border-style: dashed;
+    border-color: var(--color-border-strong);
+  }
+
+  .sign-in__demo-toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .sign-in__demo-toggle:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .sign-in__chevron {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.15s ease;
+  }
+
+  .sign-in__demo[open] .sign-in__chevron {
+    transform: rotate(180deg);
+  }
+
+  .sign-in__demo[open] .sign-in__demo-toggle {
+    border-style: solid;
+    border-color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sign-in__chevron {
+      transition: none;
+    }
   }
 
   .sign-in__demo form {
@@ -140,7 +200,52 @@ const error = Astro.url.searchParams.get('error');
 
   .sign-in__demo label {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
+    font-size: 0.9375rem;
+    font-weight: var(--weight-semibold);
+  }
+
+  .sign-in__demo input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--bubble-you-md);
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--weight-normal);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .sign-in__demo input:hover {
+    border-color: var(--color-accent-border);
+  }
+
+  .sign-in__demo input:focus-visible {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-focus-halo);
+  }
+
+  .sign-in__demo-submit {
+    margin-top: var(--space-2);
+    border-color: transparent;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  .sign-in__demo .sign-in__demo-submit:hover {
+    border-color: transparent;
+    background: var(--color-accent-strong);
+    color: var(--color-on-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sign-in__demo input {
+      transition: none;
+    }
   }
 
   .sign-in__icon {
