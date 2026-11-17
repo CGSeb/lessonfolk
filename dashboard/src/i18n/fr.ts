@@ -339,6 +339,7 @@ export const fr = {
     reauthHeading: 'Reconnectez-vous pour continuer',
     reauthIntro: 'Pour télécharger toutes vos données ou supprimer votre compte, reconnectez-vous d’abord. Cela confirme que c’est bien vous.',
     signInWith: 'Se connecter avec {provider}',
+    or: 'ou',
     demoSummary: 'Compte de démonstration (relecteurs)',
     demoEmail: 'E-mail',
     demoPassword: 'Mot de passe',
