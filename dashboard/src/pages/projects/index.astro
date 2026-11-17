@@ -1,73 +1,57 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CatalogListing from '../../components/catalog/CatalogListing.astro';
+import ProjectCard from '../../components/project/ProjectCard.astro';
+import SignInPrompt from '../../components/SignInPrompt.astro';
+import { courseAuthors } from '../../components/authors/authorView';
+import { catalogListing } from '../../components/catalog/catalogFilter';
+import { projectCard } from '../../components/project/projectView';
+import { inspectCatalog, inspectProjects, progressOrEmpty } from '@lessonfolk/core';
+import { loadProgressFor } from '../../lib/store';
 
-const { t } = Astro.locals;
+const { t, lang } = Astro.locals;
 
-// Projects are announced before they open: this page only says what to expect.
-const points = [
-  { title: t('projects.realTitle'), body: t('projects.realBody'), tint: 'sky' },
-  { title: t('projects.milestonesTitle'), body: t('projects.milestonesBody'), tint: 'rose' },
-  { title: t('projects.coachTitle'), body: t('projects.coachBody'), tint: 'teal' },
-  { title: t('projects.whereTitle'), body: t('projects.whereBody'), tint: 'violet' },
-];
+// Read on every request so new projects and the tutor's latest writes show up. Public page:
+// signed out (`progressResult` null), the projects are shown without progress.
+const { catalog } = inspectCatalog(lang);
+const { projects } = inspectProjects(lang);
+const progressResult = await loadProgressFor(Astro.locals.user);
+const showProgress = progressResult !== null;
+const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
+
+// Same search, theme filter and paging as the course catalog, from the URL query.
+const listing = catalogListing('/projects', projects, catalog.themes, Astro.url.searchParams);
 ---
 
 <BaseLayout title={t('projects.title')} description={t('site.projectsDescription')}>
-  <div class="stack" style="--stack-space: var(--space-6)">
-    <header class="stack" style="--stack-space: var(--space-3)">
-      <div class="cluster projects-title">
-        <h1>{t('projects.heading')}</h1>
-        <span class="badge badge--info">{t('projects.comingSoon')}</span>
-      </div>
-      <p class="muted projects-intro">{t('projects.intro')}</p>
+  <div class="stack" style="--stack-space: var(--space-5)">
+    <header class="stack" style="--stack-space: var(--space-2)">
+      <h1>{t('projects.heading')}</h1>
+      <p class="muted">{t('projects.intro')}</p>
     </header>
 
-    <section class="stack" style="--stack-space: var(--space-4)" aria-labelledby="projects-what">
-      <h2 id="projects-what">{t('projects.whatHeading')}</h2>
-      <ul class="grid projects-points" role="list">
-        {
-          points.map((point) => (
-            <li class:list={['card', `card--${point.tint}`, 'stack']} style="--stack-space: var(--space-2)">
-              <h3>{point.title}</h3>
-              <p>{point.body}</p>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    <SignInPrompt />
 
-    <section class="card stack" style="--stack-space: var(--space-3)" aria-labelledby="projects-meanwhile">
-      <h2 id="projects-meanwhile">{t('projects.meanwhileHeading')}</h2>
-      <p>{t('projects.meanwhileBody')}</p>
-      <div class="cluster">
-        <a class="button button--primary" href="/courses">{t('projects.browseCourses')}</a>
-        <a href="https://github.com/CGSeb/lessonfolk" target="_blank" rel="noopener noreferrer">{t('projects.follow')}</a>
-      </div>
-    </section>
+    {
+      projects.length > 0 ? (
+        <CatalogListing base="/projects" listing={listing} themes={catalog.themes}>
+          {listing.shown.items.map((project) => {
+            const view = projectCard(project, catalog, progress);
+            return (
+              <li>
+                <ProjectCard view={view} authors={courseAuthors(project, catalog.authors)} showProgress={showProgress} />
+              </li>
+            );
+          })}
+        </CatalogListing>
+      ) : (
+        <div class="card stack" style="--stack-space: var(--space-3)">
+          <p>{t('projects.empty')}</p>
+          <p>
+            <a class="button button--primary" href="/courses">{t('projects.browseCourses')}</a>
+          </p>
+        </div>
+      )
+    }
   </div>
 </BaseLayout>
-
-<style>
-  .projects-title {
-    align-items: center;
-  }
-
-  .projects-intro {
-    max-width: 44rem;
-    font-size: var(--text-lg);
-  }
-
-  .projects-points {
-    --grid-min: 16rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .projects-points > li {
-    max-width: none;
-  }
-
-  .projects-points h3 {
-    font-size: var(--text-lg);
-  }
-</style>

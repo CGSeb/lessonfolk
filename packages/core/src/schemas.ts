@@ -108,6 +108,38 @@ export const lessonTranslationSchema = z.object({
   objectives: z.array(z.string().min(1)).min(1).optional(),
 });
 
+export const projectIdSchema = z.string().regex(kebab, 'must be a kebab-case project id');
+
+/** `projects/<lang>/index.yaml`: the order of projects in the catalog. */
+export const projectIndexSchema = z.strictObject({
+  projects: z.array(projectIdSchema),
+});
+export type ProjectIndexFile = z.infer<typeof projectIndexSchema>;
+
+/** Frontmatter of `projects/<lang>/<project>.md`, matching docs/project-format.md. */
+export const projectFrontmatterSchema = z.strictObject({
+  id: projectIdSchema,
+  title: z.string().min(1),
+  level: levelSchema,
+  theme: themeIdSchema,
+  authors: z.array(authorSlugSchema).min(1, 'must list at least one author slug from authors.yaml'),
+  description: z.string().min(1),
+  estimatedHours: z.number().positive(),
+  /** Courses whose ideas the project puts to work; `[]` for a project that needs none. */
+  buildsOn: z.array(courseIdSchema).default([]),
+  /** What the learner needs to do the project (an AI chat app, a spreadsheet…). */
+  needs: z.array(z.string().min(1)).min(1, 'must list what the learner needs, at least one item'),
+});
+export type ProjectFrontmatter = z.infer<typeof projectFrontmatterSchema>;
+
+/** Frontmatter of a translated project: only the text is read, like `lessonTranslationSchema`. */
+export const projectTranslationSchema = z.object({
+  id: projectIdSchema,
+  title: z.string().min(1),
+  description: z.string().min(1),
+  needs: z.array(z.string().min(1)).min(1).optional(),
+});
+
 /** Render zod issues as `field: message` lines. */
 export function formatIssues(error: z.ZodError): string[] {
   return error.issues.map((issue) => {

@@ -50,6 +50,7 @@ Details in [Sign-in for developers](auth-dev.md).
 | `PORT` | `4321` | The port `npm run dashboard:start` listens on. (For `npm run dashboard`, see the [learner guide](using-lessonfolk.md#troubleshooting).) |
 | `LESSONFOLK_ROOT` | the nearest folder above the working directory that holds `AGENTS.md` | The repository root, where `courses/` (and an old `.progress/progress.json` to import) are found. The Docker image sets `/app`. |
 | `LESSONFOLK_COURSES_DIR` | `<root>/courses` | Read the courses from another folder, e.g. a test fixture. |
+| `LESSONFOLK_PROJECTS_DIR` | `<root>/projects` | Read the practice projects from another folder, e.g. a test fixture. |
 
 ## Set by the tooling
 

@@ -83,6 +83,7 @@ lessons with you and checks them. You are credited as the author on the dashboar
 - [Developing LessonFolk](docs/development.md): repository map, scripts, database changes
 - [Settings](docs/configuration.md): every environment variable
 - [Course format](docs/course-format.md): how courses and lessons are written
+- [Project format](docs/project-format.md): how practice projects are written
 - [Testing](docs/testing.md): automated tests and manual checks
 - [Sign-in for developers](docs/auth-dev.md): GitHub and Google sign-in
 - [Privacy and personal data](docs/privacy.md): what is stored, export and deletion

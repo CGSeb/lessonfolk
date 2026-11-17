@@ -8,7 +8,8 @@
  *
  * Learner progress mirrors a progress.json v1 file (see
  * docs/progress.example.json): one `learner` row per user, one
- * `lesson_progress` row per lesson they started, and an append-only
+ * `lesson_progress` row per lesson they started, one `project_progress` row per
+ * practice project they started, and an append-only
  * `progress_event` log of every change.
  *
  * After changing this file, run `npm run generate -w @lessonfolk/db` and commit
@@ -360,6 +361,38 @@ export const lessonProgress = pgTable(
   ],
 );
 
+/** Project statuses, as in progress.json. */
+export const PROJECT_STATUSES = ['in_progress', 'done'] as const;
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+
+/** Verdicts on a project's "## Review" criteria, as in progress.json. */
+export type ReviewVerdict = 'met' | 'partly' | 'not_met';
+
+/** One row per practice project a learner started (`projects` in progress.json). */
+export const projectProgress = pgTable(
+  'project_progress',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => learner.userId, { onDelete: 'cascade' }),
+    /** Project id: the file name in `projects/<lang>/`. */
+    projectId: text('project_id').notNull(),
+    status: text('status').$type<ProjectStatus>().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    /** Numbers of the milestones reached, in order. */
+    milestones: jsonb('milestones').$type<number[]>().notNull().default([]),
+    /** Verdicts on the project's review criteria, by criterion number. */
+    review: jsonb('review').$type<Record<string, ReviewVerdict>>(),
+    notes: text('notes'),
+    ...timestamps,
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.projectId] }),
+    check('project_progress_status_check', sql`${table.status} in ('in_progress', 'done')`),
+  ],
+);
+
 /** Append-only: rows are inserted, never updated or deleted (except with their learner). */
 export const progressEvent = pgTable(
   'progress_event',
@@ -384,5 +417,7 @@ export type Learner = typeof learner.$inferSelect;
 export type NewLearner = typeof learner.$inferInsert;
 export type LessonProgress = typeof lessonProgress.$inferSelect;
 export type NewLessonProgress = typeof lessonProgress.$inferInsert;
+export type ProjectProgressRow = typeof projectProgress.$inferSelect;
+export type NewProjectProgress = typeof projectProgress.$inferInsert;
 export type ProgressEvent = typeof progressEvent.$inferSelect;
 export type NewProgressEvent = typeof progressEvent.$inferInsert;

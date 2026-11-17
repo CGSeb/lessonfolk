@@ -25,5 +25,13 @@
       "startedAt": "2026-10-05",
       "notes": "Stopped after the 'training data' key idea."
     }
+  },
+  "projects": {
+    "reusable-prompt": {
+      "status": "in_progress",
+      "startedAt": "2026-10-06",
+      "milestones": [1, 2],
+      "notes": "Weekly team update chosen; first version written, tests next."
+    }
   }
 }

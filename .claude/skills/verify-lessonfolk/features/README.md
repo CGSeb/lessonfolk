@@ -7,7 +7,7 @@ This directory is the maintained source for verifying the user-facing behavior o
 ## Baseline preconditions
 
 - Docker Desktop is running (started by the user, never by the agent) and Postgres answers.
-- `verify launch` has reached "ready": an empty database, the production build of the current checkout, `LESSONFOLK_AUTH=none`, the local learner exists, the repository's `courses/` catalog.
+- `verify launch` has reached "ready": an empty database, the production build of the current checkout, `LESSONFOLK_AUTH=none`, the local learner exists, the repository's `courses/` and `projects/` catalogs.
 - `verify doctor` reports `healthy: true` and the build revision matches `HEAD`.
 - No progress is saved: the learner is new (no profile, no path, no lessons done) unless a sheet says how to seed it through the app.
 - English is the interface language (the browser sends `en-US`, no `lessonfolk-lang` cookie).
@@ -46,9 +46,10 @@ Keep implementation details out of the sheets: only user paths, stable handles, 
 ## Features
 
 - [Home and learning path](./home-learning-path.md) covers the new-learner home page, its steps and its sign-in-free behavior.
-- [Course catalog, course pages and authors](./course-catalog.md) covers listing, search, theme filter, course page, author pages and 404s.
+- [Course catalog, course pages and authors](./course-catalog.md) covers listing, search, theme filter, course page and its projects, author pages and 404s.
+- [Practice projects](./projects.md) covers the projects list, search, theme filter, project page, project progress and 404.
 - [Interface language](./interface-language.md) covers browser language, the footer switcher, the cookie and the page language.
 - [Sign-in modes](./authentication.md) covers the no-sign-in mode, the current-user endpoint and what cannot be driven here.
 - [Account and personal data](./account-data.md) covers download, import check, and erase of progress.
 - [AI tutor connection (MCP)](./mcp-connection.md) covers the Connect page and the MCP endpoint's refusals.
-- [Crawler files, legal pages, analytics and 404](./site-pages.md) covers robots, sitemap, llms, privacy, terms and the custom 404.
+- [Crawler files, legal pages, analytics and 404](./site-pages.md) covers robots, sitemap, llms, project structured data, privacy, terms and the custom 404.

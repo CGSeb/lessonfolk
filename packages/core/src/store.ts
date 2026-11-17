@@ -1,6 +1,15 @@
 import { z } from 'zod';
 import { levelSchema } from './schemas.ts';
-import { type CheckVerdict, type CourseRef, type Profile, type Progress, PLACEMENT_NOTE, emptyProgress, progressSchema } from './progress.ts';
+import {
+  type CheckVerdict,
+  type CourseRef,
+  type Profile,
+  type Progress,
+  type ReviewVerdict,
+  PLACEMENT_NOTE,
+  emptyProgress,
+  progressSchema,
+} from './progress.ts';
 import type { CompleteLessonInput, TutorError, TutorErrorCode, TutorResult } from './tutor.ts';
 
 /**
@@ -29,12 +38,33 @@ export type ProgressStoreErrorCode =
   /** The profile change is not valid (listed in `issues`). */
   | 'invalid_profile'
   /** The imported progress is not valid progress.json v1 (listed in `issues`). */
-  | 'invalid_progress';
+  | 'invalid_progress'
+  /** The project id is not in the project catalog. */
+  | 'unknown_project'
+  /** The project has no progress entry yet (start it first). */
+  | 'project_not_started'
+  /** The project is already done (reset it to do it again). */
+  | 'project_already_done'
+  /** Not a milestone number of the project. */
+  | 'invalid_milestone'
+  /** A milestone is recorded before the ones that come before it (listed in `missingMilestones`). */
+  | 'milestones_out_of_order'
+  /** The review or completion comes before every milestone is reached (listed in `missingMilestones`). */
+  | 'milestones_incomplete'
+  /** Not a review criterion number of the project, or not a known verdict. */
+  | 'invalid_review'
+  /** The project is completed before every review criterion has a verdict (listed in `missingCriteria`). */
+  | 'review_incomplete';
 
 export interface ProgressStoreErrorDetails extends Omit<TutorError, 'code' | 'message'> {
   userId?: string;
   /** For `invalid_profile` and `invalid_progress`: one `field: problem` line per issue. */
   problems?: string[];
+  projectId?: string;
+  /** For `milestones_out_of_order` and `milestones_incomplete`: the milestone numbers not reached yet, in order. */
+  missingMilestones?: number[];
+  /** For `review_incomplete`: the review criterion numbers with no verdict yet, in order. */
+  missingCriteria?: number[];
 }
 
 /** A rejected write. Nothing was changed. */
@@ -245,6 +275,19 @@ export interface ProgressStore {
   /** Record a review score on a done lesson; the score only goes up (`recordReviewScore` rules). */
   recordReviewScore(userId: string, lessonId: string, score: number, options?: WriteOptions): Promise<Progress>;
 
+  /** Start or resume a practice project (`startProject` rules, project-progress.ts). */
+  startProject(userId: string, projectId: string, options?: WriteOptions): Promise<Progress>;
+  /** Record a milestone reached, in order (`recordMilestone` rules). */
+  recordMilestone(userId: string, projectId: string, milestone: number, options?: WriteOptions): Promise<Progress>;
+  /** Record the verdict on one review criterion, once every milestone is reached (`recordProjectReview` rules). */
+  recordProjectReview(userId: string, projectId: string, criterion: number, verdict: ReviewVerdict, options?: WriteOptions): Promise<Progress>;
+  /** Mark a project done once it is reviewed (`completeProject` rules). */
+  completeProject(userId: string, projectId: string, notes: string, options?: WriteOptions): Promise<Progress>;
+  /** Save notes on a started project (`saveProjectNotes` rules). */
+  saveProjectNotes(userId: string, projectId: string, notes: string, options?: WriteOptions): Promise<Progress>;
+  /** Remove a project's progress so it can be done again (`resetProject` rules). */
+  resetProject(userId: string, projectId: string, options?: WriteOptions): Promise<Progress>;
+
   /**
    * Replace the learner's whole progress with a progress.json v1 (parsed JSON or text),
    * validated with the v1 schema. The change log is kept.
@@ -260,7 +303,7 @@ const PROFILE_KEYS = ['name', 'experience', 'goal', 'language', 'level', 'intere
 
 /** Progress as progress.json text, keys in the order of progress.example.json (extra keys last). */
 export function formatProgress(progress: Progress): string {
-  const { version, profile: savedProfile, path, pathReason, pathUpdatedAt, current, lessons, ...rest } = progress;
+  const { version, profile: savedProfile, path, pathReason, pathUpdatedAt, current, lessons, projects, ...rest } = progress;
   const profile: Record<string, unknown> = {};
   for (const key of PROFILE_KEYS) if (savedProfile[key] !== undefined) profile[key] = savedProfile[key];
   Object.assign(profile, savedProfile);
@@ -272,6 +315,7 @@ export function formatProgress(progress: Progress): string {
     ...(pathUpdatedAt !== undefined && { pathUpdatedAt }),
     current: current ?? null,
     lessons,
+    ...(projects !== undefined && { projects }),
     ...rest,
   };
   return `${JSON.stringify(ordered, null, 2)}\n`;

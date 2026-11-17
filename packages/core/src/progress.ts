@@ -42,6 +42,27 @@ export const profileSchema = z.looseObject({
 });
 export type Profile = z.infer<typeof profileSchema>;
 
+export const projectStatusSchema = z.enum(['in_progress', 'done']);
+export type ProjectStatus = z.infer<typeof projectStatusSchema>;
+
+/** The tutor's verdict on one "## Review" criterion of a project. */
+export const reviewVerdictSchema = z.enum(['met', 'partly', 'not_met']);
+export type ReviewVerdict = z.infer<typeof reviewVerdictSchema>;
+
+const itemNumber = z.string().regex(/^[1-9]\d*$/, 'numbers start at 1');
+
+export const projectProgressSchema = z.looseObject({
+  status: projectStatusSchema,
+  startedAt: z.string().optional(),
+  completedAt: z.string().optional(),
+  /** Numbers of the milestones reached, in order ("## Milestones" of the project, from 1). */
+  milestones: z.array(z.number().int().positive()).default([]),
+  /** Verdicts on the project's "## Review" criteria, by criterion number ("1", "2"…). */
+  review: z.record(itemNumber, reviewVerdictSchema).optional(),
+  notes: z.string().optional(),
+});
+export type ProjectProgress = z.infer<typeof projectProgressSchema>;
+
 export const progressSchema = z.looseObject({
   version: z.number().int().positive().default(1),
   profile: profileSchema.default({}),
@@ -53,6 +74,8 @@ export const progressSchema = z.looseObject({
   pathReason: z.string().optional(),
   /** ISO date of the last change to `path`. */
   pathUpdatedAt: z.string().optional(),
+  /** Practice projects the learner started, by project id. Absent until the first one. */
+  projects: z.record(z.string(), projectProgressSchema).optional(),
 });
 export type Progress = z.infer<typeof progressSchema>;
 

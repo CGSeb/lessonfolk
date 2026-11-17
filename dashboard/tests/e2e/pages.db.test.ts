@@ -363,15 +363,19 @@ describe.each(Object.entries(fixtures))('dashboard with %s', (_name, fixture) =>
     }
   });
 
-  it('announces Projects as coming soon, from the nav and on its page', async () => {
+  it('links to Projects from the nav, and says when no project is open yet', async () => {
+    // The pinned catalog has no project: see projects.db.test.ts for the project pages.
     const page = await getPage(server, '/projects');
     expect(page.status).toBe(200);
-    expect(page.text).toContain('Coming soon');
+    expect(page.text).not.toContain('Coming soon');
+    expect(page.text).toContain('No project is open yet');
+    expect(page.text).not.toContain('How projects work');
     expect(page.html).toMatch(/<a[^>]*class="nav-link[^"]*"[^>]*href="\/projects"[^>]*aria-current="page"/);
     expect(page.html).toMatch(/<a[^>]*href="\/courses"[^>]*>\s*Browse the courses\s*<\/a>/);
-    // Every page links to it from the nav, tagged "Soon".
+    // Every page links to it from the nav, with no "Soon" tag any more.
     const home = await getPage(server, '/courses');
-    expect(home.html).toMatch(/href="\/projects"[^>]*>\s*Projects\s*<span class="nav-link__soon"[^>]*>Soon<\/span>/);
+    expect(home.html).toMatch(/href="\/projects"[^>]*>\s*Projects\s*<\/a>/);
+    expect(home.html).not.toContain('nav-link__soon');
   });
 
   it('renders the authors list', async () => {

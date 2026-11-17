@@ -6,7 +6,7 @@ import { createMcpEndpoint } from './endpoint.ts';
 const coursesDir = fileURLToPath(new URL('../../core/tests/fixtures/courses-valid', import.meta.url));
 
 /** The tools by what they do to the learner's data (the declared hints must match). */
-const READ_TOOLS = ['get_progress', 'get_next_lesson', 'get_lesson', 'list_courses', 'list_themes'];
+const READ_TOOLS = ['get_progress', 'get_next_lesson', 'get_lesson', 'list_courses', 'list_themes', 'list_projects', 'get_project'];
 const WRITE_TOOLS = [
   'set_profile',
   'set_path',
@@ -19,9 +19,26 @@ const WRITE_TOOLS = [
   'save_lesson_notes',
   'record_review_score',
   'import_progress',
+  'start_project',
+  'record_milestone',
+  'record_project_review',
+  'complete_project',
+  'save_project_notes',
+  'reset_project',
 ];
 /** They replace or remove what was saved (a profile field, the notes, the path, a score, a check verdict, a course, everything). */
-const DESTRUCTIVE_TOOLS = ['reset_course', 'import_progress', 'set_profile', 'save_lesson_notes', 'set_path', 'record_review_score', 'record_check'];
+const DESTRUCTIVE_TOOLS = [
+  'reset_course',
+  'import_progress',
+  'set_profile',
+  'save_lesson_notes',
+  'set_path',
+  'record_review_score',
+  'record_check',
+  'record_project_review',
+  'save_project_notes',
+  'reset_project',
+];
 
 const clients: Client[] = [];
 afterAll(() => Promise.all(clients.map((c) => c.close().catch(() => {}))));

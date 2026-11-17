@@ -15,6 +15,8 @@ const NOTE_PREVIEW = 300;
 export interface ProgressDetail {
   courseId?: string;
   lessonIds?: string[];
+  /** Projects whose notes are wanted even when they are done. */
+  projectIds?: string[];
 }
 
 const preview = (text: string) => (text.length > NOTE_PREVIEW ? `${text.slice(0, NOTE_PREVIEW).trimEnd()}…` : text);
@@ -25,6 +27,7 @@ const preview = (text: string) => (text.length > NOTE_PREVIEW ? `${text.slice(0,
  * (`recentNotes`), and the others are flagged `hasNotes`. Profile, path, scores and statuses stay.
  */
 export function compactProgress(progress: Progress, detail: ProgressDetail = {}): Record<string, unknown> {
+  const full = (projectId: string) => Boolean(detail.projectIds?.includes(projectId));
   const wanted = (id: string) =>
     id === progress.current || Boolean(detail.lessonIds?.includes(id)) || (detail.courseId !== undefined && id.startsWith(`${detail.courseId}/`));
 
@@ -46,13 +49,26 @@ export function compactProgress(progress: Progress, detail: ProgressDetail = {})
     .slice(0, RECENT_NOTES)
     .map(([lessonId, lesson]) => ({ lessonId, notes: preview(lesson.notes ?? '') }));
 
+  // Projects keep their notes while in progress (to resume); a done project's long notes are flagged.
+  let projects: Progress['projects'];
+  if (progress.projects) {
+    projects = {};
+    for (const [id, project] of Object.entries(progress.projects)) {
+      const { notes, ...rest } = project;
+      const keep = !notes || project.status === 'in_progress' || notes.length <= SHORT_NOTE || full(id);
+      projects[id] = keep ? project : { ...rest, hasNotes: true };
+      if (!keep) left = true;
+    }
+  }
+
   return {
     ...progress,
     lessons,
+    ...(projects && { projects }),
     ...(recentNotes.length && { recentNotes }),
     ...(left && {
       detail:
-        'Notes of the lessons flagged hasNotes are left out. Call get_progress with courseId (a course) or lessonIds (some lessons) to read them, or full: true for everything.',
+        'Notes of the lessons and projects flagged hasNotes are left out. Call get_progress with courseId (a course), lessonIds (some lessons) or projectIds (some projects) to read them, or full: true for everything.',
     }),
   };
 }
@@ -61,8 +77,13 @@ export function compactProgress(progress: Progress, detail: ProgressDetail = {})
 export function progressReceipt(progress: Progress): string {
   const count = { done: 0, skipped: 0, in_progress: 0 };
   for (const lesson of Object.values(progress.lessons)) count[lesson.status] += 1;
+  const projects = Object.values(progress.projects ?? {});
+  const projectCount = projects.length
+    ? `Projects: ${projects.filter((p) => p.status === 'done').length} done, ${projects.filter((p) => p.status === 'in_progress').length} in progress. `
+    : '';
   return (
     `Current lesson: ${progress.current ?? 'none'}. Lessons: ${count.done} done, ${count.skipped} skipped, ${count.in_progress} in progress. ` +
+    projectCount +
     'Call get_progress to read the details.'
   );
 }

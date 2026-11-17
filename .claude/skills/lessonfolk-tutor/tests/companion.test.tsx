@@ -7,11 +7,12 @@ import {
   keyIdeas,
   load,
   markIdea,
+  milestoneTitles,
   parseChoices,
   replyOf,
   togglePick,
 } from '../hooks/companion'
-import { answer, progress, type Saved } from './server'
+import { answer, onProject, progress, type Saved } from './server'
 
 const caller = (saved: Saved | undefined, isUp = true): Caller => async (tool, args) =>
   isUp && saved ? answer(() => saved, tool, args) : undefined
@@ -125,6 +126,63 @@ describe('load', () => {
       })
     const { view } = await load(caller(saved))
     expect(view.state).toBe('all-done')
+  })
+})
+
+describe('projects', () => {
+  const projectText = answer(() => progress(null, {}), 'get_project', { projectId: 'demo' }) ?? ''
+
+  test('milestone titles keep their bold lead and stop at the next section', () => {
+    expect(milestoneTitles(projectText)).toEqual(['Pick the task', 'Write the prompt', 'Test it'])
+  })
+
+  test('a learner who started with a project sees it, even with no level and no lesson', async () => {
+    const saved = onProject({ profile: { name: 'Alex' }, current: null, lessons: {} }, [1])
+    const { view } = await load(caller(saved))
+    expect(view.state).toBe('project')
+    expect(view.project).toMatchObject({ id: 'demo', title: 'Demo project', status: 'in_progress', reviewed: 0, reviewTotal: 2 })
+    expect(view.project?.milestones).toEqual([
+      { title: 'Pick the task', status: 'done' },
+      { title: 'Write the prompt', status: 'current' },
+      { title: 'Test it', status: 'todo' },
+    ])
+    expect(view).toMatchObject({ themeTitle: 'Using AI tools', level: 'beginner' })
+  })
+
+  test('the pane follows what the tutor works on: a lesson in progress, or the project it just used', async () => {
+    const saved = onProject(progress('basics/01-one', { 'basics/01-one': 'in_progress' }), [1])
+    expect((await load(caller(saved))).view.state).toBe('lesson')
+    expect((await load(caller(saved), undefined, { kind: 'project', id: 'demo' })).view.state).toBe('project')
+    expect((await load(caller(saved), undefined, { kind: 'project' })).view.state).toBe('project')
+    expect((await load(caller(saved), undefined, { kind: 'lesson' })).view.state).toBe('lesson')
+    // A done project is not brought back on its own, only when the tutor works on it.
+    const done = onProject(progress(null, { 'basics/01-one': 'done' }), [1, 2, 3], 'done', { 1: 'met', 2: 'met' })
+    expect((await load(caller(done))).view.state).toBe('between')
+    const shown = (await load(caller(done), undefined, { kind: 'project', id: 'demo' })).view
+    expect(shown.project?.status).toBe('done')
+    expect(shown.project?.milestones.every(m => m.status === 'done')).toBe(true)
+  })
+
+  test('every milestone reached: the review is under way', async () => {
+    const saved = onProject(progress(null, {}), [1, 2, 3], 'in_progress', { 1: 'met' })
+    const { view } = await load(caller(saved), undefined, { kind: 'project', id: 'demo' })
+    expect(view.project).toMatchObject({ reviewed: 1, reviewTotal: 2 })
+    expect(view.project?.milestones.some(m => m.status === 'current')).toBe(false)
+  })
+
+  test('a milestone reached and a project completed each make a toast', async () => {
+    const focus = { kind: 'project', id: 'demo' } as const
+    const first = await load(caller(onProject(progress(null, {}), [1])), undefined, focus)
+    const second = await load(caller(onProject(progress(null, {}), [1, 2])), undefined, focus)
+    expect(changes(first, second)).toEqual(['Milestone reached: Write the prompt'])
+    const done = await load(caller(onProject(progress(null, {}), [1, 2, 3], 'done', { 1: 'met', 2: 'met' })), undefined, focus)
+    expect(changes(second, done)).toEqual(['Project complete: Demo project'])
+    expect(changes(done, done)).toEqual([])
+  })
+
+  test('the project title follows the language picked in the pane', async () => {
+    const saved = onProject(progress(null, {}), [])
+    expect((await load(caller(saved), 'fr', { kind: 'project', id: 'demo' })).view.project?.title).toBe('Projet démo')
   })
 })
 

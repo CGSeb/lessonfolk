@@ -1,9 +1,9 @@
 /**
  * The MCP endpoint of the running app, built once per process from the app's progress store,
- * the courses folder and the gate of the auth mode. The dashboard's `/mcp` route only calls
+ * the courses and projects folders and the gate of the auth mode. The dashboard's `/mcp` route only calls
  * `getAppMcpEndpoint(...)` with its shared store.
  */
-import { getCoursesDir, type ProgressStore } from '@lessonfolk/core';
+import { getCoursesDir, getProjectsDir, type ProgressStore } from '@lessonfolk/core';
 import { createMcpEndpoint, localGate, type McpEndpoint } from './endpoint.ts';
 import { oauthGate, type McpAuthServer, type TokenCheck } from './oauth.ts';
 
@@ -24,6 +24,6 @@ export function getAppMcpEndpoint(settings: AppMcpSettings, env: NodeJS.ProcessE
     settings.mode === 'none'
       ? localGate({ userId: settings.userId, token: env[MCP_TOKEN_ENV]?.trim() || undefined })
       : oauthGate(settings.auth, settings.baseURL, settings.tokenAllowed);
-  endpoint = createMcpEndpoint({ store: settings.store, gate, coursesDir: getCoursesDir() });
+  endpoint = createMcpEndpoint({ store: settings.store, gate, coursesDir: getCoursesDir(), projectsDir: getProjectsDir() });
   return endpoint;
 }

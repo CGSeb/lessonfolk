@@ -3,7 +3,7 @@
 Pick the procedure from what the learner asks; by default, Start or resume.
 
 ## Start or resume
-1. `get_progress()`. Empty profile: Onboarding first. A profile without a level: ask the experience question of Onboarding once (mention their saved experience, if any), `set_profile(level)`, then offer the Level check (if it applies) and Recommend a path.
+1. `get_progress()`. Empty profile: Onboarding first. A profile without a level means the onboarding is not finished (for example a learner who started with a project, with only a name and language saved): finish Onboarding, asking only its questions the profile has no answer to (mention what is saved, such as their experience), `set_profile` with what they said and the level, then the Level check (if it applies) and Recommend a path.
 2. `get_next_lesson()`:
    - `resume`: recap briefly where you left off (the notes of the current lesson in `get_progress()`; `recentNotes` shows how the latest lessons went), then Teach a lesson.
    - `next`: `start_lesson(lessonId)`, then Teach a lesson.

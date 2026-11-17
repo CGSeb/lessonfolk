@@ -5,7 +5,7 @@
  * The dashboard mostly reads progress (getProgress); the tutor writes it (through MCP, in this
  * same server). Every committed write publishes a per-user change event for live refresh.
  */
-import { inspectCatalog, type Progress, type ProgressResult, type ProgressStore } from '@lessonfolk/core';
+import { inspectCatalog, inspectProjects, type Progress, type ProgressResult, type ProgressStore } from '@lessonfolk/core';
 import { connect, createPostgresProgressStore, databaseUrl, describeErrorForLog, reportError, type Database } from '@lessonfolk/db';
 import type { CurrentUser } from './auth/current-user';
 import { getProgressHub } from './watch';
@@ -23,6 +23,7 @@ export function getDatabase(): Database {
 export function getProgressStore(): ProgressStore {
   store ??= createPostgresProgressStore(getDatabase(), {
     courses: () => inspectCatalog('en').catalog.courses,
+    projects: () => inspectProjects('en').projects,
     // Open dashboard pages of this learner refresh (see pages/api/events.ts).
     onChange: (userId) => getProgressHub().publish(userId),
   });
@@ -30,13 +31,14 @@ export function getProgressStore(): ProgressStore {
 }
 
 /**
- * Nothing saved yet: no profile, lesson, current lesson or path. A new learner has a
+ * Nothing saved yet: no profile, lesson, project, current lesson or path. A new learner has a
  * learner row from sign-in but nothing in it, like a missing progress.json before.
  */
 export function isBlankProgress(progress: Progress): boolean {
   return (
     Object.keys(progress.profile ?? {}).length === 0 &&
     Object.keys(progress.lessons ?? {}).length === 0 &&
+    Object.keys(progress.projects ?? {}).length === 0 &&
     !progress.current &&
     !progress.path?.length
   );

@@ -7,7 +7,7 @@ The Connect page tells the learner how to plug their AI chat app into this Lesso
 - `connect-page` shows the setup steps with a tab per app.
 - `connect-command` gives the exact command with this server's address.
 - `mcp-endpoint-refusals` refuses requests that are not valid MCP calls.
-- `mcp-tutor-tools` lets a connected tutor read courses and save progress (not drivable here).
+- `mcp-tutor-tools` lets a connected tutor read courses and projects, save lesson progress, and record project milestones and reviews (not drivable here).
 - `mcp-oauth-consent` asks the learner to approve an app (OAuth mode, not drivable here).
 
 ## How to get to it (user POV)
@@ -22,15 +22,17 @@ Preconditions:
 
 States to exercise:
 
-- Default tab (Claude Code), another tab selected, the endpoint answering a plain GET.
+- Default tab (Claude Code), another tab selected, the endpoint refusing a plain GET, a form body and a foreign web page.
 
 - **Open the page.** Run `verify browser goto --url /connect --feature mcp-connection` then `verify browser expect-visible --role heading --name "Connect your AI chat" --feature mcp-connection`.
 - **Tabs.** Run `verify browser expect-visible --role tab --name "Claude Code" --feature mcp-connection`, then `verify browser click --role tab --name "ChatGPT" --feature mcp-connection`. The `ChatGPT` tab shows its panel.
 - **Command carries this address.** On the Claude Code tab, `verify browser expect-text --text "claude mcp add --transport http lessonfolk http://127.0.0.1" --feature mcp-connection` passes.
 - **Endpoint refuses a plain GET.** Run `verify http GET /mcp --feature mcp-connection --path mcp-get.json`. Status `405` and a JSON-RPC error body with the message `Method not allowed.`
+- **Endpoint refuses a non-MCP request.** Run `verify http POST /mcp --form "a=b" --header "Accept: application/json, text/event-stream" --feature mcp-connection --path mcp-post-form.json`: status `415`, `Unsupported Media Type: Content-Type must be application/json` (the body must be JSON; a form body gets `415` with or without that `Accept`).
+- **Endpoint refuses other sites.** Run `verify http GET /mcp --header "Origin: https://evil.example" --feature mcp-connection --path mcp-foreign-origin.json`: status `403`, `Requests from web pages on other sites are refused.`
 - **Proof.** `verify browser snapshot --path connect.aria.txt --feature mcp-connection` and `verify browser screenshot --path connect.png --feature mcp-connection`, with `mcp-get.json`.
 
 ## Gotchas
 
 - The tab list changes as apps are added: assert `Claude Code` and `ChatGPT` only.
-- Tool calls, OAuth consent and token revocation need an MCP client or OAuth mode and are unverified by this skill.
+- Tool calls, OAuth consent and token revocation need an MCP client or OAuth mode and are unverified by this skill. `verify http` sends form bodies only, so even `initialize` and `tools/list` cannot be sent (harness gap).

@@ -29,7 +29,7 @@ const SCOPES = ['openid', 'email', 'lessonfolk:read', 'lessonfolk:write'];
 export const CATEGORY = 'Education & Research';
 
 const DESCRIPTION =
-  'Learn AI with LessonFolk: the learn, progress and review skills of an AI tutor, with the courses and your progress kept on the LessonFolk server.';
+  'Learn AI with LessonFolk: the learn, progress, review and project skills of an AI tutor, with the courses and your progress kept on the LessonFolk server.';
 // The portal limits displayName and shortDescription to 30 characters, defaultPrompt to 3 of 128.
 const SHORT_DESCRIPTION = 'Learn AI with an AI tutor';
 const LONG_DESCRIPTION =
@@ -78,6 +78,13 @@ export const POSITIVE_CASES: PositiveCase[] = [
     prompt: 'Quiz me on the lessons I finished.',
     tools_triggered: 'get_progress, record_review_score',
     expected_behavior: 'Asks questions on finished lessons, then saves a review score.',
+  },
+  {
+    description: 'Practise with a project',
+    prompt: 'I want to practise with a LessonFolk project.',
+    tools_triggered: 'get_progress, list_projects, start_project, get_project',
+    expected_behavior:
+      'Suggests a project that fits the learner, starts the one they pick, presents its brief and coaches the first milestone with questions, without doing the work for them.',
   },
 ];
 

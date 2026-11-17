@@ -1,8 +1,11 @@
 /**
- * Theme filter, search and paging of the course catalog. The URL query
+ * Theme filter, search and paging of the catalogs (courses and projects). The URL query
  * (`?theme=…&q=…&recommended=1&page=…`) is the source of truth, so filters survive reloads,
  * live refreshes, the back button and shared links.
  */
+
+/** The pages that list a catalog with this search and filter. */
+export type CatalogBase = '/courses' | '/projects';
 
 /** Filter key of the courses whose theme is unknown; theme ids are kebab-case so it cannot collide. */
 export const OTHER_THEME = '_other';
@@ -49,16 +52,22 @@ export function parseCatalogQuery(params: URLSearchParams, themeIds: Iterable<st
   };
 }
 
-/** Link to the catalog with these filters; defaults (All, no search, not only recommended, page 1) are left out. */
-export function coursesHref({ theme, q, recommended, page }: Partial<CatalogQuery> = {}): string {
+/** Link to a catalog with these filters; defaults (All, no search, not only recommended, page 1) are left out. */
+export function catalogHref(base: CatalogBase, { theme, q, recommended, page }: Partial<CatalogQuery> = {}): string {
   const params = new URLSearchParams();
   if (theme) params.set('theme', theme);
   if (q) params.set('q', q);
   if (recommended) params.set('recommended', '1');
   if (page && page > 1) params.set('page', String(page));
   const query = params.toString();
-  return query ? `/courses?${query}` : '/courses';
+  return query ? `${base}?${query}` : base;
 }
+
+/** Link to the course catalog with these filters. */
+export const coursesHref = (query: Partial<CatalogQuery> = {}) => catalogHref('/courses', query);
+
+/** Link to the project catalog with these filters. */
+export const projectsHref = (query: Partial<CatalogQuery> = {}) => catalogHref('/projects', query);
 
 /**
  * One filter per theme that has courses, in `themes.yaml` order, then the
@@ -155,4 +164,55 @@ export function pageNumbers(page: number, pageCount: number): (number | null)[] 
     else if (result.at(-1) !== null) result.push(null);
   }
   return result;
+}
+
+export interface CatalogBadge {
+  /** Theme id, `OTHER_THEME`, or `undefined` for All. */
+  id: string | undefined;
+  count: number;
+  href: string;
+  current: boolean;
+}
+
+export interface CatalogListing<C> {
+  query: CatalogQuery;
+  /** All, then one badge per theme (see `getThemeFilters`). */
+  badges: CatalogBadge[];
+  /** Matches of the whole query (theme included), before paging. */
+  matches: C[];
+  shown: Page<C>;
+  /** The pager's numbers with their links (`null` for "…"). */
+  pages: ({ page: number; href: string; current: boolean } | null)[];
+}
+
+/**
+ * Everything a catalog page needs to list `items` with the search, theme filter and paging
+ * of its URL: the parsed query, the theme badges (counts follow the search and the
+ * recommended filter, not the theme), the matches and the page shown.
+ */
+export function catalogListing<C extends FilterCourse>(
+  base: CatalogBase,
+  items: C[],
+  themes: { id: string; title: string }[],
+  params: URLSearchParams,
+  recommendedIds: ReadonlySet<string> = new Set(),
+): CatalogListing<C> {
+  const allFilters = getThemeFilters(items, themes);
+  const query = parseCatalogQuery(
+    params,
+    allFilters.map((f) => f.id),
+  );
+  const searched = filterCourses(items, { ...query, theme: undefined }, themes, recommendedIds);
+  const badges = [{ id: undefined, count: searched.length }, ...getThemeFilters(items, themes, searched)].map(({ id, count }) => ({
+    id,
+    count,
+    href: catalogHref(base, { theme: id, q: query.q, recommended: query.recommended }),
+    current: id === query.theme,
+  }));
+  const matches = filterCourses(items, query, themes, recommendedIds);
+  const shown = paginate(matches, query.page);
+  const pages = pageNumbers(shown.page, shown.pageCount).map((page) =>
+    page === null ? null : { page, href: catalogHref(base, { ...query, page }), current: page === shown.page },
+  );
+  return { query, badges, matches, shown, pages };
 }

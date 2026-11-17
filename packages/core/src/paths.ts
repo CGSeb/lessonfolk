@@ -23,3 +23,11 @@ export function findRepoRoot(start: string = process.cwd()): string {
 export function getCoursesDir(root?: string): string {
   return resolve(process.env.LESSONFOLK_COURSES_DIR ?? join(root ?? findRepoRoot(), 'courses'));
 }
+
+/**
+ * Default practice projects directory (one folder per language: projects/en, …): `projects/` at
+ * the repository root, next to `courses/`, or LESSONFOLK_PROJECTS_DIR when set.
+ */
+export function getProjectsDir(root?: string): string {
+  return resolve(process.env.LESSONFOLK_PROJECTS_DIR ?? join(root ?? findRepoRoot(), 'projects'));
+}

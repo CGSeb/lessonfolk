@@ -1,0 +1,12 @@
+---
+import { inlineSegments } from './projectView';
+
+/** One line of project text with its inline Markdown (bold, code), escaped like any other text. */
+interface Props {
+  text: string;
+}
+
+const segments = inlineSegments(Astro.props.text);
+---
+
+{segments.map((segment) => (segment.kind === 'strong' ? <strong>{segment.text}</strong> : segment.kind === 'code' ? <code>{segment.text}</code> : segment.text))}

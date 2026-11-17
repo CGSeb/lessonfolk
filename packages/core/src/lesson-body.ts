@@ -4,7 +4,7 @@
  * structural problems are errors; drift from the writing guidelines is a warning.
  */
 
-interface SectionSpec {
+export interface SectionSpec {
   title: string;
   required: boolean;
 }
@@ -45,7 +45,7 @@ const heading = (title: string) => `"## ${title}"`;
 const loose = (title: string) => title.toLowerCase().replace(/\s+/g, ' ').replace(/s$/, '');
 
 /** Split the body into `##` sections, ignoring headings inside fenced code blocks. */
-function splitSections(body: string): { title: string; lines: string[] }[] {
+export function splitSections(body: string): { title: string; lines: string[] }[] {
   const sections: { title: string; lines: string[] }[] = [];
   let inFence = false;
   for (const line of body.split(/\r?\n/)) {
@@ -58,7 +58,7 @@ function splitSections(body: string): { title: string; lines: string[] }[] {
 }
 
 /** Top-level numbered items (`1. …`), each with the lines that follow it. */
-function numberedItems(lines: string[]): string[][] {
+export function numberedItems(lines: string[]): string[][] {
   const items: string[][] = [];
   for (const line of lines) {
     if (NUMBERED_ITEM.test(line)) items.push([line]);
@@ -67,25 +67,30 @@ function numberedItems(lines: string[]): string[][] {
   return items;
 }
 
-export function checkLessonBody(body: string, estimatedMinutes: number): LessonBodyReport {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  const sections = splitSections(body);
-  const known = new Map(LESSON_SECTIONS.map((s, i) => [s.title, i]));
-
-  // Unknown and duplicate headings.
+/**
+ * Check the `##` headings against `specs` (in the order they must appear): unknown, duplicate,
+ * missing and out-of-order sections are reported in `errors`. `removed` maps a heading that left
+ * the format to what to do instead.
+ */
+export function checkSectionLayout(
+  sections: { title: string }[],
+  specs: readonly SectionSpec[],
+  errors: string[],
+  removed: Readonly<Record<string, string>> = {},
+): void {
+  const known = new Map(specs.map((s, i) => [s.title, i]));
   const seen = new Set<string>();
   const ordered: { title: string; rank: number }[] = [];
   for (const { title } of sections) {
     const rank = known.get(title);
     if (rank === undefined) {
-      const near = LESSON_SECTIONS.find((s) => loose(s.title) === loose(title));
-      const removed = Object.entries(REMOVED_SECTIONS).find(([name]) => loose(name) === loose(title));
+      const near = specs.find((s) => loose(s.title) === loose(title));
+      const gone = Object.entries(removed).find(([name]) => loose(name) === loose(title));
       const hint = near
         ? `did you mean ${heading(near.title)}?`
-        : removed
-          ? removed[1]
-          : `expected one of ${LESSON_SECTIONS.map((s) => heading(s.title)).join(', ')}`;
+        : gone
+          ? gone[1]
+          : `expected one of ${specs.map((s) => heading(s.title)).join(', ')}`;
       errors.push(`unknown section ${heading(title)}; ${hint}`);
     } else if (seen.has(title)) {
       errors.push(`section ${heading(title)} appears more than once`);
@@ -95,7 +100,7 @@ export function checkLessonBody(body: string, estimatedMinutes: number): LessonB
     }
   }
 
-  for (const spec of LESSON_SECTIONS) {
+  for (const spec of specs) {
     if (spec.required && !seen.has(spec.title)) {
       errors.push(`missing section ${heading(spec.title)}`);
     }
@@ -108,6 +113,13 @@ export function checkLessonBody(body: string, estimatedMinutes: number): LessonB
       );
     }
   }
+}
+
+export function checkLessonBody(body: string, estimatedMinutes: number): LessonBodyReport {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const sections = splitSections(body);
+  checkSectionLayout(sections, LESSON_SECTIONS, errors, REMOVED_SECTIONS);
 
   const linesOf = (title: string) => sections.find((s) => s.title === title)?.lines;
 

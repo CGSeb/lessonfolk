@@ -8,10 +8,12 @@ import StatusBadge from '../../components/StatusBadge.astro';
 import ThemeBadge from '../../components/ThemeBadge.astro';
 import SayPhrase from '../../components/home/SayPhrase.astro';
 import SignInPrompt from '../../components/SignInPrompt.astro';
+import ProjectCard from '../../components/project/ProjectCard.astro';
+import { projectCard, projectsForCourse } from '../../components/project/projectView';
 import { courseAuthors } from '../../components/authors/authorView';
 import { themeToneClass } from '../../components/theme-tone';
 import { getCourseView, issuesForCourse } from '../../components/course/courseView';
-import { DEFAULT_LANG, inspectCatalog, progressOrEmpty } from '@lessonfolk/core';
+import { DEFAULT_LANG, inspectCatalog, inspectProjects, progressOrEmpty } from '@lessonfolk/core';
 import { getPaths } from '../../lib/paths';
 import { loadProgressFor } from '../../lib/store';
 import { courseJsonLd } from '../../lib/seo';
@@ -26,7 +28,10 @@ const { lang } = Astro.locals;
 const { catalog, issues } = inspectCatalog(lang);
 const progressResult = await loadProgressFor(Astro.locals.user);
 const showProgress = progressResult !== null;
-const view = getCourseView(catalog.courses, id, progressOrEmpty(progressResult ?? { state: 'missing' }), lang);
+const progress = progressOrEmpty(progressResult ?? { state: 'missing' });
+const view = getCourseView(catalog.courses, id, progress, lang);
+// The practice projects that put this course to work.
+const projectCards = projectsForCourse(inspectProjects(lang).projects, id).map((project) => projectCard(project, catalog, progress));
 
 if (!view) Astro.response.status = 404;
 
@@ -219,6 +224,20 @@ const suggestUrl = course
             </ol>
           </section>
 
+          {projectCards.length > 0 && (
+            <section class="stack course-projects" aria-labelledby="projects-heading" style="--stack-space: var(--space-3)">
+              <h2 id="projects-heading">{t('projects.courseSectionHeading')}</h2>
+              <p class="muted">{t('projects.courseSectionIntro')}</p>
+              <ul class="grid course-projects__list" role="list">
+                {projectCards.map((card) => (
+                  <li>
+                    <ProjectCard view={card} authors={courseAuthors(card.project, catalog.authors)} headingLevel={3} showProgress={showProgress} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <p class="course-suggest">
             {t('course.suggestIntro')}{' '}
             <a href={suggestUrl} target="_blank" rel="noopener noreferrer">{t('course.suggestLink')}</a>
@@ -386,6 +405,16 @@ const suggestUrl = course
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
+  }
+
+  .course-projects {
+    max-width: 52rem;
+  }
+
+  .course-projects__list {
+    --grid-min: 20rem;
+    padding: 0;
+    list-style: none;
   }
 
   .course-suggest {

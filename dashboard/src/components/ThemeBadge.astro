@@ -1,5 +1,5 @@
 ---
-import { coursesHref } from './catalog/catalogFilter';
+import { catalogHref, type CatalogBase } from './catalog/catalogFilter';
 import { themeToneClass } from './theme-tone';
 
 const { t } = Astro.locals;
@@ -7,16 +7,18 @@ const { t } = Astro.locals;
 interface Props {
   /** The course's theme; renders nothing when the theme is unknown. `position` picks its colour. */
   theme: { id: string; title: string; position?: number } | undefined;
+  /** The catalog the badge filters by theme: the courses (default) or the projects. */
+  base?: CatalogBase;
 }
 
-const { theme } = Astro.props;
+const { theme, base = '/courses' } = Astro.props;
 ---
 
 {
   theme && (
     <a
       class:list={['badge theme-badge', themeToneClass(theme.position)]}
-      href={coursesHref({ theme: theme.id })}
+      href={catalogHref(base, { theme: theme.id })}
       title={t('theme.linkTitle', { theme: theme.title })}
     >
       <span class="visually-hidden">{t('theme.label')}:</span> {theme.title}
@@ -26,7 +28,7 @@ const { theme } = Astro.props;
 
 <style>
   .theme-badge {
-    /* Above the course card's full-card link overlay, so the badge stays clickable. */
+    /* Above the card's full-card link overlay, so the badge stays clickable. */
     position: relative;
     z-index: 1;
     background: var(--color-theme-badge-bg);

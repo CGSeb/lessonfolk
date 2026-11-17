@@ -6,7 +6,7 @@
     {
       "name": "lessonfolk-tutor",
       "source": "./.claude/skills/lessonfolk-tutor",
-      "description": "Learn AI with LessonFolk: the learn, progress and review skills, the Course companion pane and the connection to lessonfolk.com"
+      "description": "Learn AI with LessonFolk: the learn, progress, review and project skills, the Course companion pane and the connection to lessonfolk.com"
     }
   ]
 }

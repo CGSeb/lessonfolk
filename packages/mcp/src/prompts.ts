@@ -1,7 +1,7 @@
 /**
- * The tutor procedures, served as the server `instructions` and the `learn`, `review` and
- * `progress` prompts. The text lives in packages/mcp/prompts/*.md, the single source of the
- * tutoring procedures (the `learn`, `progress` and `review` skills point to it too). The files are imported as text (`?raw`), so the dashboard
+ * The tutor procedures, served as the server `instructions` and the `learn`, `review`,
+ * `progress` and `project` prompts. The text lives in packages/mcp/prompts/*.md, the single source of the
+ * tutoring procedures (the `learn`, `progress`, `review` and `project` skills point to it too). The files are imported as text (`?raw`), so the dashboard
  * build bundles them: the running server never reads them from disk.
  */
 import type { McpServer } from '@modelcontextprotocol/server';
@@ -9,6 +9,7 @@ import { z } from 'zod';
 import instructionsText from '../prompts/instructions.md?raw';
 import learnText from '../prompts/learn.md?raw';
 import progressText from '../prompts/progress.md?raw';
+import projectText from '../prompts/project.md?raw';
 import reviewText from '../prompts/review.md?raw';
 
 const clean = (text: string) => text.replace(/^﻿/, '').replace(/\r\n/g, '\n').trim();
@@ -17,7 +18,7 @@ const clean = (text: string) => text.replace(/^﻿/, '').replace(/\r\n/g, '\n').
 export const INSTRUCTIONS = clean(instructionsText);
 
 export interface TutorPrompt {
-  name: 'learn' | 'review' | 'progress';
+  name: 'learn' | 'review' | 'progress' | 'project';
   title: string;
   description: string;
   /** The procedure (prompts/<name>.md). */
@@ -44,6 +45,12 @@ export const PROMPTS: readonly TutorPrompt[] = [
     title: 'Progress',
     description: 'Where am I? My progress per course, and the courses and themes I can learn.',
     text: clean(progressText),
+  },
+  {
+    name: 'project',
+    title: 'Project',
+    description: 'Practise with a real project: choose one, reach its milestones with the tutor as a coach, and get the result reviewed.',
+    text: clean(projectText),
   },
 ];
 
