@@ -19,7 +19,10 @@
     "check:courses": "npm run check:courses --workspace dashboard --",
     "review:courses": "npm run review:courses --workspace dashboard --",
     "plugin:sync": "npm run plugin:sync --workspace @lessonfolk/mcp",
-    "plugin:openai": "npm run plugin:openai --workspace @lessonfolk/mcp"
+    "plugin:openai": "npm run plugin:openai --workspace @lessonfolk/mcp",
+    "verify": "node .claude/skills/verify-lessonfolk/helpers/verify.mjs",
+    "verify:check": "node .claude/skills/verify-lessonfolk/helpers/check-map.mjs",
+    "verify:test": "node --test .claude/skills/verify-lessonfolk/helpers/check-map.test.mjs"
   },
   "overrides": {
     "esbuild": "^0.28.1"

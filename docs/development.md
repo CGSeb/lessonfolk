@@ -60,6 +60,7 @@ Run root scripts from the repository root. Run a workspace script with `-w <work
 | `npm run dashboard:start` | Run the built server, after the sign-in startup checks (`dashboard/scripts/serve.ts`). Build first. |
 | `npm test` | Run the tests of every workspace (core, db, mcp, dashboard). Needs Postgres. |
 | `npm run check:courses` | Validate every course and lesson file. Add `-- <folder>` to check another courses folder. |
+| `npm run verify -- <command>` | Drive the real dashboard in a browser from an empty database and keep proof: see the `verify-lessonfolk` skill (`.claude/skills/verify-lessonfolk/SKILL.md`). `npm run verify:check` checks its feature sheets, `npm run verify:test` tests that check. |
 | `npm run review:courses` | Print the brief your agent follows to review lessons (rubric, lessons to read, catalog outline). Add `-- <course-id or lesson-id>…` to pick lessons. Calls no AI service. |
 | `npm run plugin:sync` | Copy the tutor procedures (`packages/mcp/prompts/*.md`) into the learner plugin's skills. Run it after editing a prompt; a test fails otherwise. |
 | `npm run progress:import` | Copy a `progress.json` (default: the old `.progress/progress.json`, or `-- <file>`) into `DATABASE_URL` as the local learner's progress, replacing it. |
