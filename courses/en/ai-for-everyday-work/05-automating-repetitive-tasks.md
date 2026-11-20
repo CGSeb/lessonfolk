@@ -25,8 +25,10 @@ prerequisites:
    style". Check the batch, since one item can go wrong while the others are fine.
 5. **Use what your tool offers, carefully.** Some assistants let you save standing
    instructions, reusable setups or recurring tasks. They can save time, but anything that
-   runs without you looking still needs a check now and then. Building real automations that
-   connect tools usually takes code, which is the subject of the How AI Apps Work course.
+   runs without you looking still needs a check now and then. Many assistants can also reach the
+   apps you already use (mail, calendar, files) through built-in connectors, with no code.
+   Building your own automations between tools goes further and often takes code, which is the
+   subject of the How AI Apps Work course.
 
 ## Teaching notes
 - Analogy that works: **a recipe card**. The first time you cook a dish you improvise; once

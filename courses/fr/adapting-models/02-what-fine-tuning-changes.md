@@ -39,7 +39,8 @@ prerequisites:
    supplémentaires par-dessus ; elles sont bien moins chères, peuvent être interchangées par tâche
    sur le même modèle de base, et égalent souvent le fine-tuning complet en qualité. Avec un modèle
    fermé, c’est le service du fournisseur qui fait l’entraînement, et vous obtenez un modèle que
-   vous pouvez appeler, pas télécharger.
+   vous pouvez appeler, pas télécharger, et seulement tant que le fournisseur le propose : certains
+   ferment leur service de fine-tuning, ce qui fait des modèles à poids ouverts la base la plus sûre.
 5. **Le réglage par préférences, quand juger est plus facile qu’écrire.** Pour certaines
    qualités (un ton serviable, la bonne longueur, refuser seulement ce qui doit l’être), il est plus
    facile de dire laquelle de deux réponses est meilleure que d’écrire la réponse parfaite. Le

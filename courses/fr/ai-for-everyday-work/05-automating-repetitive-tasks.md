@@ -28,8 +28,10 @@ prerequisites:
 5. **Utilisez ce que votre outil propose, avec prudence.** Certains assistants permettent d’enregistrer des
    instructions permanentes, des configurations réutilisables ou des tâches récurrentes. Cela peut faire
    gagner du temps, mais tout ce qui tourne sans que vous regardiez demande un contrôle de temps en temps.
-   Construire de vraies automatisations qui relient des outils demande en général du code, ce qui est le
-   sujet du cours Comment fonctionnent les applications d’IA.
+   Beaucoup d’assistants savent aussi accéder aux applications que vous utilisez déjà (messagerie,
+   agenda, fichiers) grâce à des connecteurs intégrés, sans code. Construire vos propres automatisations
+   entre outils va plus loin et demande souvent du code, ce qui est le sujet du cours Comment
+   fonctionnent les applications d’IA.
 
 ## Teaching notes
 - Analogie qui fonctionne : **une fiche de recette**. La première fois que vous cuisinez un plat, vous

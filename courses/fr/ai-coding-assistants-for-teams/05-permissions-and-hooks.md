@@ -56,6 +56,7 @@ prerequisites:
   | GitHub Copilot | approbations d’outils dans l’éditeur ; l’agent cloud tourne dans un environnement restreint | fichiers JSON dans `.github/hooks/` |
   | Cursor | liste d’autorisations et réglages d’exécution automatique pour les commandes de terminal | `hooks.json` |
   | Gemini CLI (comptes professionnels et clés d’API uniquement) | dossiers de confiance, réglages d’autorisation / d’exclusion d’outils, bac à sable | voir la doc |
+  | Antigravity CLI (comptes Google personnels) | voir la doc | `.agents/hooks.json`, aussi fournis par les plugins |
 
 - Idée reçue : « l’assistant demande avant tout, donc c’est sûr ». La fatigue des permissions est réelle :
   on clique sur « autoriser » sans lire. Autorisez explicitement les actions sûres et fréquentes pour que

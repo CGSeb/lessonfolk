@@ -35,7 +35,8 @@ prerequisites:
    guaranteed record of how the model really reached the answer, and a reasoning model can still reach a wrong answer with convincing steps.
    Check the result, especially when stakes are high.
 6. **Often you can choose the effort.** Many tools let you set how much the model
-   thinks (a low, medium or high effort), and some let you switch thinking on or off. On many recent
+   thinks (an effort level, often low, medium or high, sometimes with extra steps below and
+   above), and some let you switch thinking on or off. On many recent
    models thinking is on by default and cannot be turned off, so the setting is an effort level, not
    a switch. Match effort to difficulty.
 

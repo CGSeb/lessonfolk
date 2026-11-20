@@ -43,11 +43,12 @@ prerequisites:
 
   | Tool | Nested / scoped rules | Reuse AGENTS.md |
   |---|---|---|
-  | Claude Code | `CLAUDE.md` in sub-folders; rule files in `.claude/rules/` with path patterns | `@AGENTS.md` import in `CLAUDE.md` |
-  | OpenAI Codex | nested `AGENTS.md` (closest to the edited file wins) | native |
+  | Claude Code | `CLAUDE.md` in sub-folders; rule files in `.claude/rules/` with path patterns | reads `AGENTS.md` when there is no `CLAUDE.md`; otherwise `@AGENTS.md` import in `CLAUDE.md` |
+  | OpenAI Codex | nested `AGENTS.md`, combined from the root down to the working folder (the closest one wins) | native |
   | GitHub Copilot | `.github/instructions/*.instructions.md` with `applyTo` patterns | reads `AGENTS.md` |
   | Cursor | `.cursor/rules/` files with glob patterns or "always apply" | reads `AGENTS.md` |
   | Gemini CLI (work accounts and API keys only) | `GEMINI.md` in sub-folders | `contextFileName` setting can point to `AGENTS.md` |
+  | Antigravity CLI (personal Google accounts) | files from the start folder up to the repository root (not sub-folders); rule files in `.agents/rules/` with triggers | reads `AGENTS.md` |
 
 - Misconception: "a symbolic link solves everything". It works, but symlinks behave badly on
   some systems (Windows checkouts in particular); an import line or a setting is often more

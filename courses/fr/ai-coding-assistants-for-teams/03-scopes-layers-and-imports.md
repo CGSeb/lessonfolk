@@ -44,11 +44,12 @@ prerequisites:
 
   | Outil | Règles imbriquées / à portée | Réutiliser AGENTS.md |
   |---|---|---|
-  | Claude Code | `CLAUDE.md` dans des sous-dossiers ; fichiers de règles dans `.claude/rules/` avec motifs de chemin | import `@AGENTS.md` dans `CLAUDE.md` |
-  | OpenAI Codex | `AGENTS.md` imbriqués (le plus proche du fichier modifié l’emporte) | natif |
+  | Claude Code | `CLAUDE.md` dans des sous-dossiers ; fichiers de règles dans `.claude/rules/` avec motifs de chemin | lit `AGENTS.md` en l’absence de `CLAUDE.md` ; sinon import `@AGENTS.md` dans `CLAUDE.md` |
+  | OpenAI Codex | `AGENTS.md` imbriqués, combinés de la racine jusqu’au dossier de travail (le plus proche l’emporte) | natif |
   | GitHub Copilot | `.github/instructions/*.instructions.md` avec motifs `applyTo` | lit `AGENTS.md` |
   | Cursor | fichiers `.cursor/rules/` avec motifs glob ou « toujours appliquer » | lit `AGENTS.md` |
   | Gemini CLI (comptes professionnels et clés d’API uniquement) | `GEMINI.md` dans des sous-dossiers | le réglage `contextFileName` peut pointer vers `AGENTS.md` |
+  | Antigravity CLI (comptes Google personnels) | fichiers du dossier de lancement jusqu’à la racine du dépôt (pas les sous-dossiers) ; fichiers de règles dans `.agents/rules/` avec déclencheurs | lit `AGENTS.md` |
 
 - Idée reçue : « un lien symbolique règle tout ». Cela marche, mais les liens symboliques se comportent mal
   sur certains systèmes (surtout les copies de travail sous Windows) ; une ligne d’import ou un réglage est

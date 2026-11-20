@@ -56,11 +56,14 @@ prerequisites:
 
   | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI (comptes professionnels et clés d’API uniquement) |
   |---|---|---|---|---|---|
-  | Prompts enregistrés | commandes slash (intégrées aux skills) | remplacés par les skills (les prompts personnalisés ont été supprimés en 2026) | `.github/prompts/*.prompt.md`, désormais converties en skills (VS Code ne les charge plus) | `.cursor/commands/`, désormais converties en skills par `/migrate-to-skills` | `.gemini/commands/*.toml` |
+  | Prompts enregistrés | commandes slash (intégrées aux skills) | remplacés par les skills (les prompts personnalisés ont été supprimés en 2026) | `.github/prompts/*.prompt.md`, en cours de remplacement par les skills (VS Code ne les exécute plus que dans son harness Local, déprécié et retiré en février 2027) | `.cursor/commands/`, désormais converties en skills par `/migrate-to-skills` | `.gemini/commands/*.toml` |
   | Skills (`SKILL.md`) | `.claude/skills/` | pris en charge | pris en charge | pris en charge (`.cursor/skills/`) | voir la doc |
   | Sous-agents | `.claude/agents/` | voir la doc | agents personnalisés (`.github/agents/`) | voir la doc | voir la doc |
   | Lots | plugins et marketplaces | voir la doc | voir la doc | voir la doc | extensions |
   | Serveurs MCP | oui | oui | oui | oui | oui |
+
+  Les comptes Google personnels utilisent désormais Antigravity CLI au lieu de Gemini CLI : skills dans
+  `.agents/skills/`, commandes enregistrées converties en skills, lots appelés plugins, serveurs MCP pris en charge.
 
 - Idée reçue : « mettez chaque procédure dans AGENTS.md ». Cela marche pour quelques-unes, mais un long
   fichier dilue les règles qui comptent ; déplacez les procédures vers des skills ou des commandes dès
