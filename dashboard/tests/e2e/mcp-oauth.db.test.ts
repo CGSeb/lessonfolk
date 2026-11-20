@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
 import { startFakeOAuth, type FakeOAuthServer } from './fake-oauth';
 import { Browser, callJson, connectMcp, location } from './mcp-client';
-import { freePort, startDashboard, visibleText, type DashboardServer } from './server';
+import { startDashboard, visibleText, type DashboardServer } from './server';
 
 // Like Claude Code: a localhost callback, registered without an application_type.
 const REDIRECT_URI = 'http://localhost:33418/callback';
@@ -22,17 +22,15 @@ let baseURL: string;
 beforeAll(async () => {
   testDb = await createTestDatabase();
   fake = await startFakeOAuth();
-  const port = await freePort();
-  baseURL = `http://127.0.0.1:${port}`;
-  server = await startDashboard({
-    PORT: String(port),
+  server = await startDashboard((port) => ({
     DATABASE_URL: testDb.url,
     LESSONFOLK_AUTH: 'oauth',
-    LESSONFOLK_BASE_URL: baseURL,
+    LESSONFOLK_BASE_URL: `http://127.0.0.1:${port}`,
     BETTER_AUTH_SECRET: 'test-secret-that-is-long-enough-1234567890',
     LESSONFOLK_TEST_OAUTH_URL: fake.url,
     OPENAI_APPS_CHALLENGE: 'test-challenge-token-1234',
-  });
+  }));
+  baseURL = server.url;
 });
 
 afterAll(async () => {

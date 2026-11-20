@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { account, user } from '@lessonfolk/db';
 import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
-import { freePort, startDashboard, visibleText, type DashboardServer } from './server';
+import { startDashboard, visibleText, type DashboardServer } from './server';
 
 const EMAIL = 'reviewer@demo.example';
 const PASSWORD = 'a-long-demo-password-1234';
@@ -15,8 +15,7 @@ let testDb: TestDatabase;
 let server: DashboardServer;
 let withoutDemo: DashboardServer;
 
-const env = (port: number, extra: Record<string, string> = {}) => ({
-  PORT: String(port),
+const env = (extra: Record<string, string> = {}) => (port: number) => ({
   DATABASE_URL: testDb.url,
   LESSONFOLK_AUTH: 'oauth',
   LESSONFOLK_BASE_URL: `http://127.0.0.1:${port}`,
@@ -28,8 +27,8 @@ const env = (port: number, extra: Record<string, string> = {}) => ({
 
 beforeAll(async () => {
   testDb = await createTestDatabase();
-  server = await startDashboard(env(await freePort(), { LESSONFOLK_DEMO_EMAIL: EMAIL, LESSONFOLK_DEMO_PASSWORD: PASSWORD }));
-  withoutDemo = await startDashboard(env(await freePort()));
+  server = await startDashboard(env({ LESSONFOLK_DEMO_EMAIL: EMAIL, LESSONFOLK_DEMO_PASSWORD: PASSWORD }));
+  withoutDemo = await startDashboard(env());
 });
 
 afterAll(async () => {

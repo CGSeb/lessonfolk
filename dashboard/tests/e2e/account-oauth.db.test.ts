@@ -8,7 +8,7 @@ import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
 import { leftovers, multipartForm, previewedProgress, rowCounts } from './account-helpers';
 import { startFakeOAuth, type FakeOAuthServer, type FakeProfile } from './fake-oauth';
 import { Browser, location } from './mcp-client';
-import { freePort, readProgressFixture, seedProgress, startDashboard, testProgressStore, visibleText, type DashboardServer } from './server';
+import { readProgressFixture, seedProgress, startDashboard, testProgressStore, visibleText, type DashboardServer } from './server';
 
 let testDb: TestDatabase;
 let fake: FakeOAuthServer;
@@ -18,16 +18,14 @@ let baseURL: string;
 beforeAll(async () => {
   testDb = await createTestDatabase();
   fake = await startFakeOAuth();
-  const port = await freePort();
-  baseURL = `http://127.0.0.1:${port}`;
-  server = await startDashboard({
-    PORT: String(port),
+  server = await startDashboard((port) => ({
     DATABASE_URL: testDb.url,
     LESSONFOLK_AUTH: 'oauth',
-    LESSONFOLK_BASE_URL: baseURL,
+    LESSONFOLK_BASE_URL: `http://127.0.0.1:${port}`,
     BETTER_AUTH_SECRET: 'test-secret-that-is-long-enough-1234567890',
     LESSONFOLK_TEST_OAUTH_URL: fake.url,
-  });
+  }));
+  baseURL = server.url;
 });
 afterAll(async () => {
   await server?.stop();

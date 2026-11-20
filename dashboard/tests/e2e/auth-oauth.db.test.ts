@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { account, learner, session, user } from '@lessonfolk/db';
 import { createTestDatabase, type TestDatabase } from '@lessonfolk/db/testing';
 import { startFakeOAuth, type FakeOAuthServer } from './fake-oauth';
-import { freePort, seedProgress, startDashboard, visibleText, type DashboardServer } from './server';
+import { seedProgress, startDashboard, visibleText, type DashboardServer } from './server';
 
 /** Cookies the dashboard set, sent back to the dashboard only. */
 class Browser {
@@ -67,19 +67,17 @@ let baseURL: string;
 beforeAll(async () => {
   testDb = await createTestDatabase();
   fake = await startFakeOAuth();
-  const port = await freePort();
-  baseURL = `http://127.0.0.1:${port}`;
-  server = await startDashboard({
-    PORT: String(port),
+  server = await startDashboard((port) => ({
     DATABASE_URL: testDb.url,
     LESSONFOLK_AUTH: 'oauth',
-    LESSONFOLK_BASE_URL: baseURL,
+    LESSONFOLK_BASE_URL: `http://127.0.0.1:${port}`,
     BETTER_AUTH_SECRET: 'test-secret-that-is-long-enough-1234567890',
     LESSONFOLK_TEST_OAUTH_URL: fake.url,
     // Fake GitHub credentials: enough to list GitHub and build its authorize URL.
     GITHUB_CLIENT_ID: 'test-github-client-id',
     GITHUB_CLIENT_SECRET: 'test-github-client-secret',
-  });
+  }));
+  baseURL = server.url;
 });
 
 afterAll(async () => {
