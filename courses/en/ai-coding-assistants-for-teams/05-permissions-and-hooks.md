@@ -56,6 +56,7 @@ prerequisites:
   | GitHub Copilot | tool approvals in the editor; the cloud agent runs in a restricted environment | JSON files in `.github/hooks/` |
   | Cursor | allow list and auto-run settings for terminal commands | `hooks.json` |
   | Gemini CLI (work accounts and API keys only) | trusted folders, tool allow / exclude settings, sandbox | check docs |
+  | Antigravity CLI (personal Google accounts) | check docs | `.agents/hooks.json`, also shipped by plugins |
 
 - Misconception: "the assistant asks before everything, so it is safe". Permission fatigue is
   real: people click "allow" without reading. Allow the safe, frequent actions explicitly so

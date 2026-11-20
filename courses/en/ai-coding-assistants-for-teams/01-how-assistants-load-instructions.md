@@ -56,11 +56,12 @@ prerequisites:
 
   | Tool | Shared / own project file | Personal file |
   |---|---|---|
-  | Claude Code | `CLAUDE.md` (can import `AGENTS.md`) | `~/.claude/CLAUDE.md` |
+  | Claude Code | `CLAUDE.md`, or `AGENTS.md` when there is no `CLAUDE.md` (a `CLAUDE.md` can import it) | `~/.claude/CLAUDE.md` |
   | OpenAI Codex | `AGENTS.md` | `~/.codex/AGENTS.md` |
   | GitHub Copilot | `AGENTS.md`, `.github/copilot-instructions.md` | personal instructions in settings |
   | Cursor | `AGENTS.md`, `.cursor/rules/` | user rules in settings |
   | Gemini CLI (work accounts and API keys only) | `GEMINI.md` (can be set to read `AGENTS.md`) | `~/.gemini/GEMINI.md` |
+  | Antigravity CLI (Gemini CLI's successor for personal Google accounts) | `AGENTS.md` and `GEMINI.md` | `~/.gemini/GEMINI.md` |
 
 - For learners new to agent-style tools, spend time on idea 1 and the live example. For
   learners who already have an instructions file, go faster and ask them to bring theirs: you

@@ -34,7 +34,8 @@ prerequisites:
    (LoRA), freeze the model and train a small set of extra numbers on top; they are much
    cheaper, can be swapped per task over the same base model, and often match full
    fine-tuning in quality. With a closed model, the provider's service does the training and you get a
-   model you can call, not one you can download.
+   model you can call, not one you can download, and only while the provider offers it: some
+   providers are closing their fine-tuning services, which makes open-weight models the safer base.
 5. **Preference tuning, when judging is easier than writing.** For some qualities (a helpful
    tone, the right length, refusing only what should be refused) it is easier to say which of
    two answers is better than to write the perfect one. Preference tuning trains on such pairs,

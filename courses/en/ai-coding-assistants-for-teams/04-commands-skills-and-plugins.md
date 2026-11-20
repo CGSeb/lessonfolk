@@ -55,11 +55,14 @@ prerequisites:
 
   | Concept | Claude Code | OpenAI Codex | GitHub Copilot | Cursor | Gemini CLI (work accounts and API keys only) |
   |---|---|---|---|---|---|
-  | Saved prompts | slash commands (part of skills) | replaced by skills (custom prompts were removed in 2026) | `.github/prompts/*.prompt.md`, now converted to skills (VS Code no longer loads them) | `.cursor/commands/`, now converted to skills by `/migrate-to-skills` | `.gemini/commands/*.toml` |
+  | Saved prompts | slash commands (part of skills) | replaced by skills (custom prompts were removed in 2026) | `.github/prompts/*.prompt.md`, being replaced by skills (VS Code runs them only in its deprecated Local harness, removed in February 2027) | `.cursor/commands/`, now converted to skills by `/migrate-to-skills` | `.gemini/commands/*.toml` |
   | Skills (`SKILL.md`) | `.claude/skills/` | supported | supported | supported (`.cursor/skills/`) | check docs |
   | Subagents | `.claude/agents/` | check docs | custom agents (`.github/agents/`) | check docs | check docs |
   | Bundles | plugins and marketplaces | check docs | check docs | check docs | extensions |
   | MCP servers | yes | yes | yes | yes | yes |
+
+  Personal Google accounts now use Antigravity CLI instead of Gemini CLI: skills in
+  `.agents/skills/`, saved commands turned into skills, bundles called plugins, MCP servers supported.
 
 - Misconception: "put every procedure in AGENTS.md". It works for a few, but a long file
   dilutes the rules that matter; move procedures to skills or commands once there are several.
