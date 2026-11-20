@@ -110,12 +110,30 @@ const STARTUP_TIMEOUT_MS = 15_000;
 // eslint-disable-next-line no-control-regex
 const ANSI = /\x1b\[[0-9;]*m/g;
 
+const PORT_ATTEMPTS = 5;
+
+class PortInUseError extends Error {}
+
 /**
- * Start the built dashboard on a free port (PORT=0, read back from its startup
- * log). Without other settings it runs with LESSONFOLK_AUTH=none, which needs
- * Postgres: pass the test database as DATABASE_URL.
+ * Start the built dashboard. With settings, it listens on PORT=0 and the port is read
+ * back from its startup log. With a function, it gets a port known before it starts
+ * (for settings that hold its URL, like LESSONFOLK_BASE_URL) and tries another one when
+ * that port was taken in the meantime. Without other settings it runs with
+ * LESSONFOLK_AUTH=none, which needs Postgres: pass the test database as DATABASE_URL.
  */
-export function startDashboard(env: ServerEnv = {}): Promise<DashboardServer> {
+export async function startDashboard(env: ServerEnv | ((port: number) => ServerEnv) = {}): Promise<DashboardServer> {
+  if (typeof env !== 'function') return launchDashboard(env);
+  for (let attempt = 1; ; attempt++) {
+    const port = await freePort();
+    try {
+      return await launchDashboard({ ...env(port), PORT: String(port) });
+    } catch (error) {
+      if (!(error instanceof PortInUseError) || attempt >= PORT_ATTEMPTS) throw error;
+    }
+  }
+}
+
+function launchDashboard(env: ServerEnv): Promise<DashboardServer> {
   const child = serverProcess(env);
 
   const stop = () =>
@@ -131,7 +149,8 @@ export function startDashboard(env: ServerEnv = {}): Promise<DashboardServer> {
     const fail = (message: string) => {
       if (started) return;
       clearTimeout(timer);
-      void stop().then(() => reject(new Error(`${message}\n${output}`)));
+      const ErrorType = /EADDRINUSE/.test(output) ? PortInUseError : Error;
+      void stop().then(() => reject(new ErrorType(`${message}\n${output}`)));
     };
     const timer = setTimeout(() => fail('Dashboard did not start in time'), STARTUP_TIMEOUT_MS);
     const onData = (chunk: Buffer) => {
